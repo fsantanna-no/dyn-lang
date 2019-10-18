@@ -24,7 +24,7 @@ data Expr
   | EFunc  Ann Type Expr            -- (type,body)
   | ECall  Ann Expr Expr            -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
-  | EIf    Ann Expr Expr Expr Expr  -- (p,e,t,f)    -- if 10 ~> x then t else f
+  | EIf    Ann Expr Expr Expr Expr  -- (e,p,t,f)    -- if 10 ~> x then t else f
   deriving (Eq, Show)
 
 newtype Where = Where (Ann, Expr, [Dcl])

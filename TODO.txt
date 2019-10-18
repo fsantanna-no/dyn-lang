@@ -1,4 +1,7 @@
+- verificar que Dcl atribui a todas as vars
 - MATCH!
+    - nao aceitar p=EVar em if
+        - seria reassignment
 
 - HSpec
     - pending, pendingWith

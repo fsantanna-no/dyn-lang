@@ -48,3 +48,9 @@ spec = do
     it "error" $
       (evalProg $ fromRight $ parse "error")
         `shouldBe` (EError az{pos=(1,1)})
+    it "match" $
+      (evalProg $ fromRight $ parse "if () ~> () then () else error")
+        `shouldBe` (EUnit az{pos=(1,18)})
+    it "match" $
+      (evalProg $ fromRight $ parse "if () ~> func () x then () else error")
+        `shouldBe` (EError az{pos=(1,33)})

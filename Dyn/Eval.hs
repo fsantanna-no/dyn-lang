@@ -1,6 +1,7 @@
 module Dyn.Eval where
 
 import Debug.Trace
+import Data.Bool    (bool)
 
 import Dyn.AST
 
@@ -12,6 +13,15 @@ evalExpr :: Env -> Expr -> Expr
 evalExpr env (EError z)    = EError z
 evalExpr env (EUnit  z)    = EUnit  z
 evalExpr env (EVar   z id) = snd $ head $ filter ((==id).fst) env
+
+evalExpr env (EIf z e p t f) = evalExpr env (bool f t $ match env p e') where
+                                e' = evalExpr env e
+
+-------------------------------------------------------------------------------
+
+match :: Env -> Expr -> Expr -> Bool
+match _ (EUnit _) (EUnit _) = True
+match _ _         _         = False
 
 -------------------------------------------------------------------------------
 
