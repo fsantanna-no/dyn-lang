@@ -2,17 +2,20 @@ module Dyn.Eval where
 
 import Dyn.AST
 
--------------------------------------------------------------------------------
-
-evalExpr :: Expr -> Expr
-evalExpr (EUnit z) = EUnit z
+type Env = [(ID_Var,Expr)]
 
 -------------------------------------------------------------------------------
 
-evalDcl :: Dcl -> Expr
-evalDcl (Dcl (_, id, _, w)) = evalWhere w
+evalExpr :: Env -> Expr -> Expr
+evalExpr env (EUnit z) = EUnit z
+
+-------------------------------------------------------------------------------
+
+evalDcl :: Dcl -> (ID_Var, Expr)
+evalDcl (Dcl (_, id, _, w)) = (id, evalWhere w)
 
 -------------------------------------------------------------------------------
 
 evalWhere :: Where -> Expr
-evalWhere (Where (_, e, [])) = evalExpr e
+evalWhere (Where (_, e, dcls)) = evalExpr env e where
+                                  env = map evalDcl dcls
