@@ -1,6 +1,7 @@
 module Dyn.Parser where
 
 import Control.Monad          (void, when, guard)
+import Data.Maybe             (isJust)
 import Data.Bool              (bool)
 import Data.Char              (isLower, isUpper)
 
@@ -8,7 +9,7 @@ import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
 import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
-import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option)
+import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
 import Dyn.AST
 
@@ -217,13 +218,18 @@ type_ = do
 
 dcl :: Parser Dcl
 dcl = do
-  pos  <- toPos <$> getPosition
-  str  <- tk_var
-  void <- tk_sym "::"
-  tp   <- type_
-  void <- tk_sym "="
-  w    <- where_
-  return $ Dcl (az{pos=pos}, str, Just tp, Just w)
+  pos <- toPos <$> getPosition
+  str <- tk_var
+  tp  <- optionMaybe $ do
+          void <- try $ tk_sym "::"
+          tp   <- type_
+          return tp
+  w   <- optionMaybe $ do
+          void <- tk_sym "="
+          w    <- where_
+          return w
+  guard $ isJust tp || isJust w
+  return $ Dcl (az{pos=pos}, str, tp, w)
 
 -------------------------------------------------------------------------------
 

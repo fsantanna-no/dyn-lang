@@ -28,8 +28,15 @@ spec = do
           Dcl (az, "a", Just tz, Just $ Where (az, EUnit az,[]))
         ]))
         `shouldBe` (EUnit az)
+    it "b where b::() b=()" $
+      evalWhere []
+        (Where (az, EVar az "b", [
+          Dcl (az, "b", Just tz, Nothing),
+          Dcl (az, "b", Nothing, Just $ Where (az, EUnit az,[]))
+        ]))
+        `shouldBe` (EUnit az)
 
   describe "evalDcl:" $ do
     it "a=()" $
       evalDcl [] (Dcl (az, "a", Just tz, Just $ Where (az, EUnit az,[])))
-        `shouldBe` ("a", EUnit az)
+        `shouldBe` [("a", EUnit az)]

@@ -88,9 +88,18 @@ spec = do
         `shouldBe` Right (Where (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", []))
 
   describe "dcl:" $ do
-    it "x" $
+    it "x :: () = ()" $
       parse dcl "x :: () = ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+    it "x :: ()" $
+      parse dcl "x :: ()"
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Just tz, Nothing))
+    it "x = ()" $
+      parse dcl "x = ()"
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
+    it "x" $
+      parse dcl "x"
+        `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
 
   describe "toString:" $ do
     describe "expr_*:" $ do
@@ -123,9 +132,15 @@ spec = do
         (exprToString $ fromRight $ parse expr "if x ~> y then t else f")
           `shouldBe` "if x ~> y then t else f"
     describe "prog:" $ do
-      it "x where x=()" $
+      it "x where x :: () = ()" $
         (progToString $ fromRight $ parse prog "x where x :: () = ();")
           `shouldBe` "x where\n  x :: () = ()"
+      it "x where x :: ()" $
+        (progToString $ fromRight $ parse prog "x where x :: ();")
+          `shouldBe` "x where\n  x :: ()"
+      it "x where x = ()" $
+        (progToString $ fromRight $ parse prog "x where x = ();")
+          `shouldBe` "x where\n  x = ()"
       it "x where x,y" $
         (progToString $ fromRight $ parse prog "x where (x::()=y, y::()=())")
           `shouldBe` "x where\n  x :: () = y\n  y :: () = ()"
