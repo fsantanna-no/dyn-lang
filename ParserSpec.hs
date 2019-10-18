@@ -3,6 +3,7 @@
 module ParserSpec where
 
 import Test.Hspec
+import Text.RawString.QQ
 
 import qualified Text.Parsec as P (eof, parse)
 import Text.Parsec.String (Parser)
@@ -109,3 +110,12 @@ main = hspec $ do
       it "x where x=()" $
         (progToString $ fromRight $ parse prog "x where x :: () = ()")
           `shouldBe` "x where\n  x :: () = ()"
+      it "func" $
+        (progToString $ fromRight $ parse prog
+          [r|
+v where
+  v :: () = f ()
+  f :: () = func () x where
+              x :: () = ...
+|])
+          `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n    x :: () = ..."

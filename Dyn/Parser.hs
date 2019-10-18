@@ -194,4 +194,11 @@ where_ = do
             return dcls
   return $ Where (az{pos=pos}, e, dcls)
 
-prog = where_
+-------------------------------------------------------------------------------
+
+prog :: Parser Where
+prog = do
+  void <- s
+  w    <- where_
+  void <- eof
+  return w
