@@ -1,4 +1,4 @@
-module STSpec where
+module ASTSpec where
 
 import Test.Hspec
 
