@@ -15,17 +15,40 @@ import Dyn.AST
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
 
-list :: Bool -> Parser a -> Parser [a]
-list one p = do
-    void <- tk_sym "("
-    v    <- p
-    vs   <- (bool many1 many one) $ try $ tk_sym "," *> p
-    void <- optional $ try $ tk_sym ","
-    void <- tk_sym ")"
-    return (v:vs)
+-------------------------------------------------------------------------------
 
-list1 = list True
-list2 = list False
+-- LISTS
+-- Parens with `,` separator:
+--    (a,b,c,)
+-- No-Parens with `\n` separator:
+--    a
+--    b
+--    c
+--    ;
+-- Optional separator at the end.
+
+list :: Parser a -> Parser [a]
+list p = (try $ list_comma p) <|> list_line p
+
+list_comma :: Parser a -> Parser [a]
+list_comma p = do
+  void <- tk_sym "("
+  vs   <- list_both (tk_sym ",") p
+  void <- tk_sym ")"
+  return vs
+
+list_line :: Parser a -> Parser [a]
+list_line p = do
+  vs   <- list_both (tk_sym "\n") p
+  void <- tk_sym ";"
+  return vs
+
+list_both :: Parser a -> Parser b -> Parser [b]
+list_both sep p = do
+  v    <- p
+  vs   <- many $ try $ sep *> p
+  void <- optional $ try $ sep
+  return (v:vs)
 
 -------------------------------------------------------------------------------
 
@@ -38,8 +61,16 @@ keywords = [
     "where"
   ]
 
-s :: Parser ()
-s = void $ many $ (void $ oneOf " ;\n\t") <|> tk_comm
+spc :: Parser ()
+spc  = void $ many spc'
+spc' = (void $ oneOf " \t") <|> tk_comm
+
+ln :: Parser ()
+ln  = void $ many ln'
+ln' = void $ char '\n'
+
+spcln :: Parser ()
+spcln = void $ many (spc' <|> ln')
 
 tk_comm :: Parser ()
 tk_comm = void $ ((try $ string "--") >> (manyTill anyChar (void newline<|>eof)) <?> "")
@@ -47,7 +78,7 @@ tk_comm = void $ ((try $ string "--") >> (manyTill anyChar (void newline<|>eof))
 tk_sym :: String -> Parser ()
 tk_sym str = do
     void <- string str
-    s
+    spc
     return ()
 
 tk_key :: String -> Parser String
@@ -55,7 +86,7 @@ tk_key k = do
     key  <- string k
     void <- notFollowedBy (letter <|> char '_' <|> digit)
     guard $ elem key keywords
-    s
+    spc
     return key
 
 tk_var :: Parser String     -- x, x_0       // Xx
@@ -63,14 +94,14 @@ tk_var = do
     fst <- satisfy isLower
     rst <- many $ (digit <|> letter <|> oneOf "_'?!" <?> "identifier")
     when (elem (fst:rst) keywords) $ unexpected $ "`" ++ (fst:rst) ++ "`"
-    s
+    spc
     return (fst:rst)
 
 tk_data :: Parser String    -- Int, Int_0   // I, II, int, _Int
 tk_data = do
     fst <- satisfy isUpper
     rst <- many $ (digit <|> letter <|> char '_' <?> "data identifier")
-    s
+    spc
     return (fst:rst)
 
 tk_hier :: Parser ID_Hier
@@ -114,7 +145,7 @@ expr_cons = do
 expr_tuple :: Parser Expr
 expr_tuple = do
   pos  <- toPos <$> getPosition
-  exps <- try $ list2 expr
+  exps <- list_comma expr
   return $ ETuple az{pos=pos} exps
 
 expr_func :: Parser Expr
@@ -123,6 +154,7 @@ expr_func = do
   void <- tk_key "func"
   void <- tk_sym "("
   void <- tk_sym ")"
+  spcln
   body <- expr
   return $ EFunc az{pos=pos} () body
 
@@ -134,8 +166,10 @@ expr_if = do
   void <- tk_sym "~>"
   p    <- expr
   void <- tk_key "then"
+  spcln
   t    <- expr
   void <- tk_key "else"
+  spcln
   f    <- expr
   return $ EIf az{pos=pos} e p t f
 
@@ -148,15 +182,18 @@ expr_parens = do
 
 expr_one :: Parser Expr
 expr_one =
-  try expr_error  <|>
-  try expr_var    <|>
-  try expr_unit   <|>
-  expr_cons       <|>
-  expr_tuple      <|>
-  expr_func       <|>
-  expr_arg        <|>
-  expr_if         <|>
-  expr_parens     <?> "expression"
+  try expr_error  <|>   -- error
+  try expr_func   <|>   -- func
+  try expr_if     <|>   -- if
+  expr_var        <|>   -- ID_Var
+
+  try expr_unit   <|>   -- ()
+  try expr_parens <|>   -- (1-item)
+  expr_tuple      <|>   -- (...)
+
+  expr_cons       <|>   -- ID_Data
+  expr_arg              -- ...
+                  <?> "expression"
 
 expr_call :: Parser Expr
 expr_call = do
@@ -189,7 +226,8 @@ where_ = do
   e    <- expr
   dcls <- option [] $ do
             void <- tk_key "where"
-            dcls <- many1 dcl
+            spcln
+            dcls <- list dcl
             return dcls
   return $ Where (az{pos=pos}, e, dcls)
 
@@ -197,7 +235,8 @@ where_ = do
 
 prog :: Parser Where
 prog = do
-  void <- s
+  void <- spcln
   w    <- where_
+  void <- spcln
   void <- eof
   return w

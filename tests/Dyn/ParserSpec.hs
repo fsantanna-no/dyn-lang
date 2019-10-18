@@ -38,6 +38,20 @@ spec = do
       parse tk_hier "A.B"
         `shouldBe` Right ["A","B"]
 
+  describe "list:" $ do
+    it "both: (),()" $
+      parse (list_both (tk_sym ",") (tk_sym "()")) "(),()"
+        `shouldBe` Right [(),()]
+    it "list: ((),())" $
+      parse (list (tk_sym "()")) "((),())"
+        `shouldBe` Right [(),()]
+    it "list: ()\n()" $
+      parse (list (tk_sym "()")) "()\n();"
+        `shouldBe` Right [(),()]
+    it "list" $
+      parse (list expr) "(xxx, yyy)"
+        `shouldBe` Right [EVar az{pos = (1,2)} "xxx",EVar az{pos = (1,7)} "yyy"]
+
   describe "expr_*:" $ do
     it "xxx" $
       parse expr_var "xxx"
@@ -110,8 +124,11 @@ spec = do
           `shouldBe` "if x ~> y then t else f"
     describe "prog:" $ do
       it "x where x=()" $
-        (progToString $ fromRight $ parse prog "x where x :: () = ()")
+        (progToString $ fromRight $ parse prog "x where x :: () = ();")
           `shouldBe` "x where\n  x :: () = ()"
+      it "x where x,y" $
+        (progToString $ fromRight $ parse prog "x where (x::()=y, y::()=())")
+          `shouldBe` "x where\n  x :: () = y\n  y :: () = ()"
       it "func" $
         (progToString $ fromRight $ parse prog
           [r|
@@ -119,5 +136,19 @@ v where
   v :: () = f ()
   f :: () = func () x where
               x :: () = ...
+            ;
+  ;
 |])
           `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n    x :: () = ..."
+      it "where-where" $
+        (progToString $ fromRight $ parse prog
+          [r|
+a where
+  a :: () = b d where
+    b :: () = c
+    c :: () = ()
+    ;
+  d :: () = ()
+  ;
+|])
+          `shouldBe` "a where\n  a :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  d :: () = ()"
