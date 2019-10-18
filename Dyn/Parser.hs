@@ -207,16 +207,23 @@ expr = try expr_call <|> expr_one
 
 -------------------------------------------------------------------------------
 
+type_ :: Parser Type
+type_ = do
+  void <- tk_sym "("
+  void <- tk_sym ")"
+  return TUnit
+
+-------------------------------------------------------------------------------
+
 dcl :: Parser Dcl
 dcl = do
   pos  <- toPos <$> getPosition
   str  <- tk_var
   void <- tk_sym "::"
-  void <- tk_sym "("
-  void <- tk_sym ")"
+  tp   <- type_
   void <- tk_sym "="
   w    <- where_
-  return $ Dcl (az{pos=pos}, str, Just tz, Just w)
+  return $ Dcl (az{pos=pos}, str, Just tp, Just w)
 
 -------------------------------------------------------------------------------
 
