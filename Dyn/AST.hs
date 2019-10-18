@@ -25,10 +25,12 @@ data Expr
   | EIf    Ann Expr Expr Expr Expr  -- (p,e,t,f)    -- if 10 matches x then t else f
   deriving (Eq, Show)
 
-newtype Expr' = Expr' (Expr,[Dcl])
-newtype Dcl   = Dcl   (ID_Var, Type, Expr')
+newtype Where = Where (Expr,[Dcl])
+newtype Dcl   = Dcl   (ID_Var, Type, Where)
 
-type Prog  = Expr'
+type Prog  = Where
+
+-------------------------------------------------------------------------------
 
 exprToString :: Expr -> String
 exprToString (EError _)           = "error"
@@ -38,9 +40,17 @@ exprToString (ECons  _ ["Int",n]) = n
 exprToString (ECons  _ hier)      = L.intercalate "." hier
 exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
-exprToString (EFunc  _ tp e)      = "func () " ++ exprToString e
+exprToString (EFunc  _ () e)      = "func () " ++ exprToString e
 exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
 exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " matches " ++ exprToString e
                                       ++ " then " ++ exprToString t
                                       ++ " else " ++ exprToString f
 --exprToString e                    = error $ show e
+
+-------------------------------------------------------------------------------
+
+dclToString :: Dcl -> String
+
+dclToString (Dcl (id, (), (Where (e,[]))))   = id ++ " :: () = " ++ exprToString e
+dclToString (Dcl (id, (), (Where (e,dcls)))) = id ++ " :: () = " ++ exprToString e ++ " where "
+                                                ++ L.intercalate "," (map dclToString dcls)
