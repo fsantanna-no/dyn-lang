@@ -1,4 +1,4 @@
-module EvalSpec where
+module Dyn.EvalSpec (main,spec) where
 
 import Test.Hspec
 
@@ -6,7 +6,9 @@ import Dyn.AST
 import Dyn.Eval
 
 main :: IO ()
-main = hspec $ do
+main = hspec spec
+
+spec = do
 
   describe "evalExpr:" $ do
     it "()" $

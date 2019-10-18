@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module ParserSpec where
+module Dyn.ParserSpec (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ
@@ -20,7 +20,9 @@ parse rule input =
     (Left  v) -> Left (show v)
 
 main :: IO ()
-main = hspec $ do
+main = hspec spec
+
+spec = do
 
   describe "tokens:" $ do
     it "-- xxx " $

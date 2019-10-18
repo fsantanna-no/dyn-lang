@@ -1,11 +1,13 @@
-module ASTSpec where
+module Dyn.ASTSpec (main,spec) where
 
 import Test.Hspec
 
 import Dyn.AST
 
 main :: IO ()
-main = hspec $ do
+main = hspec spec
+
+spec = do
 
   describe "exprToString:" $ do
     it "a" $
