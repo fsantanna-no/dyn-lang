@@ -13,24 +13,24 @@ main = hspec $ do
 
   describe "dclToString:" $ do
     it "a :: () = b" $
-      dclToString
+      dclToString 0
         (Dcl ("a", (),
           Where (EVar az "b", []))) `shouldBe` "a :: () = b"
-    it "a :: () = b where b=()" $
-      dclToString
+    it "a :: () = b where\n  b=()" $
+      dclToString 0
         (Dcl ("a", (),
           Where (EVar az "b",
             [Dcl ("b", (), Where (EUnit az,[]))])))
-        `shouldBe` "a :: () = b where b :: () = ()"
+        `shouldBe` "a :: () = b where\n  b :: () = ()"
 
   describe "dclToString:" $ do
     it "b where b=a, a=()" $
-      whereToString (
+      whereToString 0 (
         Where (EVar az "b", [
           Dcl ("b", (), Where (EVar az "a",[])),
           Dcl ("a", (), Where (EUnit az,[]))
         ]))
-        `shouldBe` "b where b :: () = a,a :: () = ()"
+        `shouldBe` "b where\n  b :: () = a\n  a :: () = ()"
 
   describe "progToString:" $ do
     it "v" $

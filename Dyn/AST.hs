@@ -50,18 +50,18 @@ exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " matches " ++ ex
 
 -------------------------------------------------------------------------------
 
-dclToString :: Dcl -> String
+dclToString :: Int -> Dcl -> String
 
-dclToString (Dcl (id, (), w)) = id ++ " :: () = " ++ whereToString w
-
--------------------------------------------------------------------------------
-
-whereToString :: Where -> String
-
-whereToString (Where (e,[]))   = exprToString e
-whereToString (Where (e,dcls)) = exprToString e ++ " where " ++
-                                  L.intercalate "," (map dclToString dcls)
+dclToString spc (Dcl (id, (), w)) = replicate spc ' ' ++ id ++ " :: () = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 
-progToString = whereToString
+whereToString :: Int -> Where -> String
+
+whereToString spc (Where (e,[]))   = exprToString e
+whereToString spc (Where (e,dcls)) = exprToString e ++ " where\n" ++
+                                      L.intercalate "\n" (map (dclToString (spc+2)) dcls)
+
+-------------------------------------------------------------------------------
+
+progToString = whereToString 0
