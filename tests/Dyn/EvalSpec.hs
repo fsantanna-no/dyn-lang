@@ -42,15 +42,18 @@ spec = do
   describe "evalDcl:" $ do
     it "a=()" $
       evalDcl [] (Dcl (az, EVar az "a", Just tz, Just $ Where (az, EUnit az,[])))
-        `shouldBe` [("a", EUnit az)]
+        `shouldBe` ([("a", EUnit az)], Right True)
 
   describe "parser:" $ do
     it "error" $
       (evalProg $ fromRight $ parse "error")
         `shouldBe` (EError az{pos=(1,1)})
-    it "match" $
+    it "match-true" $
       (evalProg $ fromRight $ parse "if () ~ () then () else error")
         `shouldBe` (EUnit az{pos=(1,17)})
-    it "match" $
-      (evalProg $ fromRight $ parse "if () ~ x then () else error")
-        `shouldBe` (EError az{pos=(1,24)})
+    it "match-false" $
+      (evalProg $ fromRight $ parse "if () ~ A then error else ()")
+        `shouldBe` (EUnit az{pos=(1,17)})
+    it "match-error" $
+      (evalProg $ fromRight $ parse "if error ~ () then () else error")
+        `shouldBe` (EError az{pos=(1,4)})
