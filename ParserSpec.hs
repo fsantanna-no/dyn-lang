@@ -92,3 +92,6 @@ main = hspec $ do
       it "call" $
         (exprToString $ fromRight $ parse expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
+      it "if x matches y then t else f" $
+        (exprToString $ fromRight $ parse expr "if x matches y then t else f")
+          `shouldBe` "if x matches y then t else f"

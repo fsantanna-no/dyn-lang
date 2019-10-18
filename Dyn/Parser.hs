@@ -127,6 +127,19 @@ expr_func = do
   body <- expr
   return $ EFunc az{pos=pos} () body
 
+expr_if :: Parser Expr
+expr_if = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "if"
+  e    <- expr
+  void <- tk_key "matches"
+  p    <- expr
+  void <- tk_sym "then"
+  t    <- expr
+  void <- tk_sym "else"
+  f    <- expr
+  return $ EIf az{pos=pos} e p t f
+
 expr_parens :: Parser Expr
 expr_parens = do
   void <- tk_sym "("
@@ -143,6 +156,7 @@ expr_one =
   expr_tuple      <|>
   expr_func       <|>
   expr_arg        <|>
+  expr_if         <|>
   expr_parens     <?> "expression"
 
 expr_call :: Parser Expr
