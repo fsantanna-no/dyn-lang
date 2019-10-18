@@ -55,6 +55,15 @@ main = hspec $ do
     it "a b " $
       parse expr "a b "
         `shouldBe` Right (ECall az{pos=(1,1)} (EVar az{pos=(1,1)} "a") (EVar az{pos=(1,3)} "b"))
+    it "error" $
+      parse expr "error"
+        `shouldBe` Right (EError az{pos=(1,1)})
+    it "errors" $
+      parse expr "errors"
+        `shouldBe` Right (EVar az{pos=(1,1)} "errors")
+    it "arg" $
+      parse expr "..."
+        `shouldBe` Right (EArg az{pos=(1,1)})
 
   describe "toString:" $ do
     describe "expr_*:" $ do

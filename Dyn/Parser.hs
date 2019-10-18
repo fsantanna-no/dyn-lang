@@ -81,6 +81,18 @@ tk_hier = do
 
 -------------------------------------------------------------------------------
 
+expr_error :: Parser Expr
+expr_error = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "error"
+  return $ EError az{pos=pos}
+
+expr_arg :: Parser Expr
+expr_arg = do
+  pos  <- toPos <$> getPosition
+  void <- tk_sym "..."
+  return $ EArg az{pos=pos}
+
 expr_var :: Parser Expr
 expr_var = do
   pos <- toPos <$> getPosition
@@ -124,12 +136,14 @@ expr_parens = do
 
 expr_one :: Parser Expr
 expr_one =
-  try expr_var  <|>
-  try expr_unit <|>
-  expr_cons     <|>
-  expr_tuple    <|>
-  expr_func     <|>
-  expr_parens   <?> "expression"
+  try expr_error  <|>
+  try expr_var    <|>
+  try expr_unit   <|>
+  expr_cons       <|>
+  expr_tuple      <|>
+  expr_func       <|>
+  expr_arg        <|>
+  expr_parens     <?> "expression"
 
 expr_call :: Parser Expr
 expr_call = do
