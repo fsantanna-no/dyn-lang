@@ -46,6 +46,9 @@ main = hspec $ do
     it "(())" $
       parse expr "(())"
         `shouldBe` Right (EUnit az{pos=(1,2)})
+    it "func" $
+      parse expr "func () ()"
+        `shouldBe` Right (EFunc az{pos=(1,1)} () (EUnit az{pos=(1,9)}))
 
   describe "toString:" $ do
     describe "expr_*:" $ do
@@ -68,3 +71,6 @@ main = hspec $ do
       it "A.B" $
         (exprToString 0 $ fromRight $ parse expr "A.B")
           `shouldBe` "A.B"
+      it "func" $
+        (exprToString 0 $ fromRight $ parse expr "func () xxx")
+          `shouldBe` "func () xxx"

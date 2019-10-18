@@ -1,6 +1,6 @@
 module Dyn.Parser where
 
-import Control.Monad          (void, when)
+import Control.Monad          (void, when, guard)
 import Data.Bool              (bool)
 import Data.Char              (isLower, isUpper)
 
@@ -8,7 +8,7 @@ import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
 import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
-import Text.Parsec.Combinator (manyTill, eof, optional, many1)
+import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy)
 
 import Dyn.AST                (Expr(..),ID_Hier,Ann(..),az)
 
@@ -32,6 +32,7 @@ list2 = list False
 keywords = [
     "else",
     "error",
+    "func",
     "if",
     "matches",
     "then",
@@ -49,6 +50,14 @@ tk_sym str = do
     void <- string str
     s
     return ()
+
+tk_key :: String -> Parser String
+tk_key k = do
+    key  <- string k
+    void <- notFollowedBy (letter <|> char '_' <|> digit)
+    guard $ elem key keywords
+    s
+    return key
 
 tk_var :: Parser String     -- x, x_0       // Xx
 tk_var = do
@@ -97,6 +106,15 @@ expr_tuple = do
   exps <- try $ list2 expr
   return $ ETuple az{pos=pos} exps
 
+expr_func :: Parser Expr
+expr_func = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "func"
+  void <- tk_sym "("
+  void <- tk_sym ")"
+  body <- expr
+  return $ EFunc az{pos=pos} () body
+
 expr_parens :: Parser Expr
 expr_parens = do
   void <- tk_sym "("
@@ -104,5 +122,12 @@ expr_parens = do
   void <- tk_sym ")"
   return e
 
-expr = expr_var <|> try expr_unit <|> expr_cons <|> expr_tuple <|> expr_parens
+expr :: Parser Expr
+expr =
+  try expr_var  <|>
+  try expr_unit <|>
+  expr_cons     <|>
+  expr_tuple    <|>
+  expr_func     <|>
+  expr_parens   <?> "expression"
 

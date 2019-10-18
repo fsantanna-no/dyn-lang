@@ -38,6 +38,6 @@ exprToString spc (ECons  _ ["Int",n]) = n
 exprToString spc (ECons  _ hier)      = L.intercalate "." hier
 exprToString spc (EArg   _)           = "..."
 exprToString spc (ETuple _ es)        = "(" ++ L.intercalate "," (map (exprToString spc) es) ++ ")"
---exprToString spc (EFunc  _ _ e)       = "func" ++ "\n" ++ show_stmt (spc+4) p
+exprToString spc (EFunc  _ tp e)      = "func" ++ "\n" ++ exprToString (spc+4) e
 exprToString spc (ECall  _ e1 e2)     = exprToString spc e1 ++ " " ++ exprToString spc e2
 exprToString spc e                    = error $ show e
