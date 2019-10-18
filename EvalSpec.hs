@@ -11,14 +11,16 @@ main = hspec $ do
   describe "evalExpr:" $ do
     it "()" $
       evalExpr [] (EUnit az) `shouldBe` (EUnit az)
+    it "a" $
+      evalExpr [("a",EUnit az)] (EVar az "a") `shouldBe` (EUnit az)
 
   describe "evalWhere:" $ do
     it "()" $
-      evalWhere
+      evalWhere []
         (Where (az, EUnit az, []))
         `shouldBe` (EUnit az)
     it "b where b=a, a=()" $
-      evalWhere
+      evalWhere []
         (Where (az, EVar az "b", [
           Dcl (az, "b", (), Where (az, EVar az "a",[])),
           Dcl (az, "a", (), Where (az, EUnit az,[]))
@@ -27,5 +29,5 @@ main = hspec $ do
 
   describe "evalDcl:" $ do
     it "a=()" $
-      evalDcl (Dcl (az, "a", (), Where (az, EUnit az,[])))
+      evalDcl [] (Dcl (az, "a", (), Where (az, EUnit az,[])))
         `shouldBe` ("a", EUnit az)
