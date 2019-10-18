@@ -24,12 +24,12 @@ spec = do
     it "b where b=a, a=()" $
       evalWhere []
         (Where (az, EVar az "b", [
-          Dcl (az, "b", tz, Where (az, EVar az "a",[])),
-          Dcl (az, "a", tz, Where (az, EUnit az,[]))
+          Dcl (az, "b", Just tz, Just $ Where (az, EVar az "a",[])),
+          Dcl (az, "a", Just tz, Just $ Where (az, EUnit az,[]))
         ]))
         `shouldBe` (EUnit az)
 
   describe "evalDcl:" $ do
     it "a=()" $
-      evalDcl [] (Dcl (az, "a", tz, Where (az, EUnit az,[])))
+      evalDcl [] (Dcl (az, "a", Just tz, Just $ Where (az, EUnit az,[])))
         `shouldBe` ("a", EUnit az)

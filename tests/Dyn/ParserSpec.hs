@@ -90,7 +90,7 @@ spec = do
   describe "dcl:" $ do
     it "x" $
       parse dcl "x :: () = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", tz, Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
 
   describe "toString:" $ do
     describe "expr_*:" $ do

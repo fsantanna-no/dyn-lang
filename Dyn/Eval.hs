@@ -15,7 +15,7 @@ evalExpr env (EVar  z id) = snd $ head $ filter ((==id).fst) env
 -------------------------------------------------------------------------------
 
 evalDcl :: Env -> Dcl -> (ID_Var, Expr)
-evalDcl env (Dcl (_, id, _, w)) = (id, evalWhere env w)
+evalDcl env (Dcl (_, id, _, Just w)) = (id, evalWhere env w)
 
 -------------------------------------------------------------------------------
 

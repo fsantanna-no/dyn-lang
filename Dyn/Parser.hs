@@ -216,7 +216,7 @@ dcl = do
   void <- tk_sym ")"
   void <- tk_sym "="
   w    <- where_
-  return $ Dcl (az{pos=pos}, str, tz, w)
+  return $ Dcl (az{pos=pos}, str, Just tz, Just w)
 
 -------------------------------------------------------------------------------
 

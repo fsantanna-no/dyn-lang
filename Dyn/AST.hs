@@ -27,8 +27,11 @@ data Expr
   | EIf    Ann Expr Expr Expr Expr  -- (p,e,t,f)    -- if 10 ~> x then t else f
   deriving (Eq, Show)
 
-newtype Where = Where (Ann, Expr, [Dcl])          deriving (Eq, Show)
-newtype Dcl   = Dcl   (Ann, ID_Var, Type, Where)  deriving (Eq, Show)
+newtype Where = Where (Ann, Expr, [Dcl])
+  deriving (Eq, Show)
+
+newtype Dcl = Dcl (Ann, ID_Var, Maybe Type, Maybe Where)
+  deriving (Eq, Show)
 
 type Prog  = Where
 
@@ -54,7 +57,9 @@ exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~> " ++ exprToS
 
 dclToString :: Int -> Dcl -> String
 
-dclToString spc (Dcl (_,id,TUnit,w)) = replicate spc ' ' ++ id ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_, id, Just TUnit, Just w))  = replicate spc ' ' ++ id ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_, id, Just TUnit, Nothing)) = replicate spc ' ' ++ id ++ " :: ()"
+dclToString spc (Dcl (_, id, Nothing,    Just w))  = replicate spc ' ' ++ id ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 
