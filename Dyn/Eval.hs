@@ -9,8 +9,9 @@ type Env = [(ID_Var,Expr)]
 -------------------------------------------------------------------------------
 
 evalExpr :: Env -> Expr -> Expr
-evalExpr env (EUnit z)    = EUnit z
-evalExpr env (EVar  z id) = snd $ head $ filter ((==id).fst) env
+evalExpr env (EError z)    = EError z
+evalExpr env (EUnit  z)    = EUnit  z
+evalExpr env (EVar   z id) = snd $ head $ filter ((==id).fst) env
 
 -------------------------------------------------------------------------------
 
@@ -25,3 +26,8 @@ evalWhere env (Where (_, e, dcls)) = evalExpr env' e where
                                       env' = foldr f env dcls where
                                               f :: Dcl -> Env -> Env
                                               f dcl env = evalDcl env dcl ++ env
+
+-------------------------------------------------------------------------------
+
+evalProg :: Where -> Expr
+evalProg w = evalWhere [] w
