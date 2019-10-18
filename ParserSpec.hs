@@ -42,3 +42,7 @@ main = hspec $ do
       it "xxx" $
         (exprToString 0 $ fromRight $ parse expr_var "xxx")
           `shouldBe` "xxx"
+    describe "expr_tuple:" $ do
+      it "(xxx,yyy)" $
+        (exprToString 0 $ fromRight $ parse expr_tuple "(xxx, yyy)")
+          `shouldBe` "(xxx,yyy)"
