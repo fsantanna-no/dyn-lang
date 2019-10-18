@@ -34,7 +34,6 @@ keywords = [
     "error",
     "func",
     "if",
-    "matches",
     "then",
     "where"
   ]
@@ -132,7 +131,7 @@ expr_if = do
   pos  <- toPos <$> getPosition
   void <- tk_key "if"
   e    <- expr
-  void <- tk_key "matches"
+  void <- tk_sym "~>"
   p    <- expr
   void <- tk_key "then"
   t    <- expr

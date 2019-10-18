@@ -22,7 +22,7 @@ data Expr
   | EFunc  Ann Type Expr            -- (type,body)
   | ECall  Ann Expr Expr            -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
-  | EIf    Ann Expr Expr Expr Expr  -- (p,e,t,f)    -- if 10 matches x then t else f
+  | EIf    Ann Expr Expr Expr Expr  -- (p,e,t,f)    -- if 10 ~> x then t else f
   deriving (Eq, Show)
 
 newtype Where = Where (Ann, Expr, [Dcl])          deriving (Eq, Show)
@@ -43,7 +43,7 @@ exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
 exprToString (EFunc  _ () e)      = "func () " ++ exprToString e
 exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
-exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " matches " ++ exprToString e
+exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~> " ++ exprToString e
                                       ++ " then " ++ exprToString t
                                       ++ " else " ++ exprToString f
 --exprToString e                    = error $ show e

@@ -103,9 +103,9 @@ main = hspec $ do
       it "call" $
         (exprToString $ fromRight $ parse expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
-      it "if x matches y then t else f" $
-        (exprToString $ fromRight $ parse expr "if x matches y then t else f")
-          `shouldBe` "if x matches y then t else f"
+      it "if x ~> y then t else f" $
+        (exprToString $ fromRight $ parse expr "if x ~> y then t else f")
+          `shouldBe` "if x ~> y then t else f"
     describe "prog:" $ do
       it "x where x=()" $
         (progToString $ fromRight $ parse prog "x where x :: () = ()")
