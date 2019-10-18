@@ -6,6 +6,6 @@ import Dyn.AST
 
 main :: IO ()
 main = hspec $ do
-  describe "exprToString" $ do
+  describe "exprToString:" $ do
     it "a" $
       exprToString 0 (EVar az "a") `shouldBe` "a"
