@@ -5,6 +5,7 @@ import Data.Bool    (bool)
 import Data.List    (find)
 
 import Dyn.AST
+import Dyn.Parser
 
 -------------------------------------------------------------------------------
 
@@ -83,5 +84,11 @@ evalWhere env (Where (_, e, dcls)) =
 
 -------------------------------------------------------------------------------
 
-evalProg :: Where -> Expr
+evalProg :: Prog -> Expr
 evalProg w = evalWhere [] w
+
+run :: String -> Either String Expr
+run input =
+  case parse input of
+    Left  err -> Left err
+    Right exp -> Right $ evalProg exp

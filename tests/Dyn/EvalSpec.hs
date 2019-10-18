@@ -63,3 +63,9 @@ spec = do
     it "assign-tuple" $
       (evalProg $ fromRight $ parse "(a,b) where (a,b) = (A,B);")
         `shouldBe` ETuple az{pos=(1,1)} [ECons az{pos=(1,22)} ["A"],ECons az{pos=(1,24)} ["B"]]
+
+  describe "run:"$ do
+    it "(" $
+      run "(" `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting expression"
+    it "()" $
+      run "()" `shouldBe` Right (EUnit az{pos=(1,1)})
