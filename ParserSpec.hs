@@ -22,33 +22,39 @@ main :: IO ()
 main = hspec $ do
 
   describe "tokens:" $ do
-    describe "comm:" $ do
-      it "-- xxx " $
-        parse tk_comm "-- xxx "
-          `shouldBe` Right ()
-    describe "var:" $ do
-      it "xxx" $
-        parse tk_var "xxx "
-          `shouldBe` Right "xxx"
+    it "-- xxx " $
+      parse tk_comm "-- xxx "
+        `shouldBe` Right ()
+    it "xxx" $
+      parse tk_var "xxx "
+        `shouldBe` Right "xxx"
+    it "A" $
+      parse tk_data "A"
+        `shouldBe` Right "A"
+    it "A.B" $
+      parse tk_hier "A.B"
+        `shouldBe` Right ["A","B"]
 
-  describe "expr:" $ do
+  describe "expr_*:" $ do
     it "xxx" $
       parse expr_var "xxx"
         `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
+    it "A.B" $
+      parse expr_cons "A.B"
+        `shouldBe` Right (ECons az{pos=(1,1)} ["A","B"])
+  describe "expr_*:" $ do
     it "(())" $
       parse expr "(())"
         `shouldBe` Right (EUnit az{pos=(1,2)})
 
   describe "toString:" $ do
-    describe "expr_unit:" $ do
+    describe "expr_*:" $ do
       it "()" $
         (exprToString 0 $ fromRight $ parse expr_unit "()")
           `shouldBe` "()"
-    describe "expr_var:" $ do
       it "xxx" $
         (exprToString 0 $ fromRight $ parse expr_var "xxx")
           `shouldBe` "xxx"
-    describe "expr_tuple:" $ do
       it "(xxx,yyy)" $
         (exprToString 0 $ fromRight $ parse expr_tuple "(xxx, yyy)")
           `shouldBe` "(xxx,yyy)"
@@ -56,7 +62,9 @@ main = hspec $ do
       it "()" $
         (exprToString 0 $ fromRight $ parse expr "()")
           `shouldBe` "()"
-    describe "expr:" $ do
       it "(())" $
         (exprToString 0 $ fromRight $ parse expr "(())")
           `shouldBe` "()"
+      it "A.B" $
+        (exprToString 0 $ fromRight $ parse expr "A.B")
+          `shouldBe` "A.B"

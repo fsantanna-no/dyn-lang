@@ -7,10 +7,10 @@ import Data.Char              (isLower, isUpper)
 import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
 import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
-import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter)
+import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
 import Text.Parsec.Combinator (manyTill, eof, optional, many1)
 
-import Dyn.AST                (Expr(..),Ann(..),az)
+import Dyn.AST                (Expr(..),ID_Hier,Ann(..),az)
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -58,6 +58,18 @@ tk_var = do
     s
     return (fst:rst)
 
+tk_data :: Parser String    -- Int, Int_0   // I, II, int, _Int
+tk_data = do
+    fst <- satisfy isUpper
+    rst <- many $ (digit <|> letter <|> char '_' <?> "data identifier")
+    s
+    return (fst:rst)
+
+tk_hier :: Parser ID_Hier
+tk_hier = do
+  v <- (:) <$> tk_data <*> many (try $ tk_sym "." *> tk_data)
+  return v
+
 -------------------------------------------------------------------------------
 
 expr_unit :: Parser Expr
@@ -73,6 +85,12 @@ expr_var = do
   str <- tk_var
   return $ EVar az{pos=pos} str
 
+expr_cons :: Parser Expr
+expr_cons = do
+  pos  <- toPos <$> getPosition
+  cons <- tk_hier
+  return $ ECons az{pos=pos} cons
+
 expr_tuple :: Parser Expr
 expr_tuple = do
   pos  <- toPos <$> getPosition
@@ -86,5 +104,5 @@ expr_parens = do
   void <- tk_sym ")"
   return e
 
-expr = try expr_unit <|> expr_var <|> expr_tuple <|> expr_parens
+expr = expr_var <|> try expr_unit <|> expr_cons <|> expr_tuple <|> expr_parens
 
