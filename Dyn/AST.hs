@@ -2,8 +2,10 @@ module Dyn.AST where
 
 import qualified Data.List as L
 
-type Ann = ()
-az = ()
+data Ann = Ann { pos :: (Int,Int) }
+  deriving (Eq, Show)
+
+az = Ann { pos=(0,0) }
 
 type Type = ()
 

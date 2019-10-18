@@ -3,10 +3,18 @@ module Dyn.Parser where
 import Control.Monad          (void, when)
 import Data.Char              (isLower, isUpper)
 
-import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected)
+import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
+import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter)
 import Text.Parsec.Combinator (manyTill, eof)
+
+import Dyn.AST                (Expr(..),Ann(..),az)
+
+toPos :: SourcePos -> (Int,Int)
+toPos pos = (sourceLine pos, sourceColumn pos)
+
+-------------------------------------------------------------------------------
 
 keywords = [
     "else",
@@ -31,4 +39,13 @@ tk_var = do
     s
     return (fst:rst)
 
+-------------------------------------------------------------------------------
+
+expr_var :: Parser Expr
+expr_var = do
+  pos <- toPos <$> getPosition
+  str <- tk_var
+  return $ EVar az{pos=pos} str
+
+expr = expr_var
 
