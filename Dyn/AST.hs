@@ -39,5 +39,5 @@ exprToString (ECons  _ hier)      = L.intercalate "." hier
 exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
 exprToString (EFunc  _ tp e)      = "func () " ++ exprToString e
-exprToString (ECall  _ e1 e2)     = exprToString e1 ++ " " ++ exprToString e2
+exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
 exprToString e                    = error $ show e

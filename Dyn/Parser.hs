@@ -81,18 +81,18 @@ tk_hier = do
 
 -------------------------------------------------------------------------------
 
+expr_var :: Parser Expr
+expr_var = do
+  pos <- toPos <$> getPosition
+  str <- tk_var
+  return $ EVar az{pos=pos} str
+
 expr_unit :: Parser Expr
 expr_unit = do
   pos  <- toPos <$> getPosition
   void <- tk_sym "("
   void <- tk_sym ")"
   return $ EUnit az{pos=pos}
-
-expr_var :: Parser Expr
-expr_var = do
-  pos <- toPos <$> getPosition
-  str <- tk_var
-  return $ EVar az{pos=pos} str
 
 expr_cons :: Parser Expr
 expr_cons = do
@@ -122,8 +122,8 @@ expr_parens = do
   void <- tk_sym ")"
   return e
 
-expr :: Parser Expr
-expr =
+expr_one :: Parser Expr
+expr_one =
   try expr_var  <|>
   try expr_unit <|>
   expr_cons     <|>
@@ -131,3 +131,12 @@ expr =
   expr_func     <|>
   expr_parens   <?> "expression"
 
+expr_call :: Parser Expr
+expr_call = do
+  pos <- toPos <$> getPosition
+  e1  <- expr_one
+  e2  <- expr_one
+  return $ ECall az {pos=pos} e1 e2
+
+expr :: Parser Expr
+expr = try expr_call <|> expr_one

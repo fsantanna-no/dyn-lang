@@ -42,13 +42,19 @@ main = hspec $ do
     it "A.B" $
       parse expr_cons "A.B"
         `shouldBe` Right (ECons az{pos=(1,1)} ["A","B"])
-  describe "expr_*:" $ do
+  describe "expr:" $ do
     it "(())" $
       parse expr "(())"
         `shouldBe` Right (EUnit az{pos=(1,2)})
     it "func" $
       parse expr "func () ()"
         `shouldBe` Right (EFunc az{pos=(1,1)} () (EUnit az{pos=(1,9)}))
+    it "a b c" $
+      parse expr "a b c"
+        `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
+    it "a b " $
+      parse expr "a b "
+        `shouldBe` Right (ECall az{pos=(1,1)} (EVar az{pos=(1,1)} "a") (EVar az{pos=(1,3)} "b"))
 
   describe "toString:" $ do
     describe "expr_*:" $ do
@@ -74,3 +80,6 @@ main = hspec $ do
       it "func" $
         (exprToString $ fromRight $ parse expr "func () xxx")
           `shouldBe` "func () xxx"
+      it "call" $
+        (exprToString $ fromRight $ parse expr "(a (b c)) d")
+          `shouldBe` "((a (b c)) d)"
