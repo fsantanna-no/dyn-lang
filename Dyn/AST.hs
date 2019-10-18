@@ -61,3 +61,7 @@ whereToString :: Where -> String
 whereToString (Where (e,[]))   = exprToString e
 whereToString (Where (e,dcls)) = exprToString e ++ " where " ++
                                   L.intercalate "," (map dclToString dcls)
+
+-------------------------------------------------------------------------------
+
+progToString = whereToString

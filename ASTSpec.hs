@@ -22,6 +22,8 @@ main = hspec $ do
           Where (EVar az "b",
             [Dcl ("b", (), Where (EUnit az,[]))])))
         `shouldBe` "a :: () = b where b :: () = ()"
+
+  describe "dclToString:" $ do
     it "b where b=a, a=()" $
       whereToString (
         Where (EVar az "b", [
@@ -29,3 +31,7 @@ main = hspec $ do
           Dcl ("a", (), Where (EUnit az,[]))
         ]))
         `shouldBe` "b where b :: () = a,a :: () = ()"
+
+  describe "progToString:" $ do
+    it "v" $
+      progToString (Where (EVar az "v", [])) `shouldBe` "v"
