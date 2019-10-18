@@ -17,6 +17,7 @@ type ID_Hier = [ID_Data]
 
 data Expr
   = EError Ann
+  | EAny   Ann                      -- ()           -- _
   | EVar   Ann ID_Var               -- (id)         -- a ; xs
   | EUnit  Ann                      -- ()           -- ()
   | ECons  Ann ID_Hier              -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
@@ -30,7 +31,7 @@ data Expr
 newtype Where = Where (Ann, Expr, [Dcl])
   deriving (Eq, Show)
 
-newtype Dcl = Dcl (Ann, ID_Var, Maybe Type, Maybe Where)
+newtype Dcl = Dcl (Ann, Expr, Maybe Type, Maybe Where)
   deriving (Eq, Show)
 
 type Prog = Where
@@ -40,6 +41,7 @@ type Prog = Where
 
 exprToString :: Expr -> String
 exprToString (EError _)           = "error"
+exprToString (EAny   _)           = "_"
 exprToString (EVar   _ id)        = id
 exprToString (EUnit  _)           = "()"
 exprToString (ECons  _ ["Int",n]) = n
@@ -48,7 +50,7 @@ exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
 exprToString (EFunc  _ TUnit e)   = "func () " ++ exprToString e
 exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
-exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~> " ++ exprToString e
+exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~ " ++ exprToString e
                                       ++ " then " ++ exprToString t
                                       ++ " else " ++ exprToString f
 --exprToString e                    = error $ show e
@@ -57,9 +59,9 @@ exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~> " ++ exprToS
 
 dclToString :: Int -> Dcl -> String
 
-dclToString spc (Dcl (_, id, Just TUnit, Just w))  = replicate spc ' ' ++ id ++ " :: () = " ++ whereToString spc w
-dclToString spc (Dcl (_, id, Just TUnit, Nothing)) = replicate spc ' ' ++ id ++ " :: ()"
-dclToString spc (Dcl (_, id, Nothing,    Just w))  = replicate spc ' ' ++ id ++ " = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = replicate spc ' ' ++ exprToString pat ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = replicate spc ' ' ++ exprToString pat ++ " :: ()"
+dclToString spc (Dcl (_, pat, Nothing,    Just w))  = replicate spc ' ' ++ exprToString pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 

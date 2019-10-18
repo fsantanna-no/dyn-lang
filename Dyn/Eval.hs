@@ -26,8 +26,8 @@ match _ _         _         = False
 -------------------------------------------------------------------------------
 
 evalDcl :: Env -> Dcl -> [(ID_Var, Expr)]
-evalDcl env (Dcl (_, id, _, Just w))  = [(id, evalWhere env w)]
-evalDcl env (Dcl (_, id, _, Nothing)) = []
+evalDcl env (Dcl (_, EVar _ id, _, Just w))  = [(id, evalWhere env w)]
+evalDcl env (Dcl (_, _, _, Nothing)) = []
 
 -------------------------------------------------------------------------------
 

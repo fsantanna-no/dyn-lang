@@ -83,13 +83,13 @@ spec = do
   describe "dcl:" $ do
     it "x :: () = ()" $
       parse' dcl "x :: () = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
     it "x :: ()" $
       parse' dcl "x :: ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Just tz, Nothing))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", Just tz, Nothing))
     it "x = ()" $
       parse' dcl "x = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
     it "x" $
       parse' dcl "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
@@ -121,9 +121,9 @@ spec = do
       it "call" $
         (exprToString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
-      it "if x ~> y then t else f" $
-        (exprToString $ fromRight $ parse' expr "if x ~> y then t else f")
-          `shouldBe` "if x ~> y then t else f"
+      it "if x ~ y then t else f" $
+        (exprToString $ fromRight $ parse' expr "if x ~ y then t else f")
+          `shouldBe` "if x ~ y then t else f"
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (progToString $ fromRight $ parse "x where x :: () = ();")
@@ -137,6 +137,9 @@ spec = do
       it "x where x,y" $
         (progToString $ fromRight $ parse "x where (x::()=y, y::()=())")
           `shouldBe` "x where\n  x :: () = y\n  y :: () = ()"
+      it "where-newline" $
+        (progToString $ fromRight $ parse "v where v :: () = f ()\n;")
+          `shouldBe` "v where\n  v :: () = (f ())"
       it "func" $
         (progToString $ fromRight $ parse
           [r|

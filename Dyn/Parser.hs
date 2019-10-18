@@ -1,11 +1,12 @@
 module Dyn.Parser where
 
+import Debug.Trace
 import Control.Monad          (void, when, guard)
 import Data.Maybe             (isJust)
 import Data.Bool              (bool)
 import Data.Char              (isLower, isUpper)
 
-import qualified Text.Parsec as P (parse)
+import qualified Text.Parsec as P (parse,parserZero)
 import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
 import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
@@ -113,6 +114,36 @@ tk_hier = do
 
 -------------------------------------------------------------------------------
 
+-- (x, (y,_))
+pat :: Parser Expr
+pat = lany <|> lvar <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
+  lany   = do
+            pos  <- toPos <$> getPosition
+            void <- tk_key "_"
+            return $ EAny az{pos=pos}
+  lvar   = do
+            pos  <- toPos <$> getPosition
+            var  <- tk_var
+            return $ EVar az{pos=pos} var
+  lcons  = do
+            pos  <- toPos <$> getPosition
+            cons <- tk_hier
+            loc  <- optionMaybe pat
+            return $ case loc of
+                      Nothing -> ECons az{pos=pos} cons
+                      Just l  -> ECall az{pos=pos} (ECons az{pos=pos} cons) l
+  lunit  = do
+            pos  <- toPos <$> getPosition
+            void <- tk_sym "("
+            void <- tk_sym ")"
+            return $ EUnit az{pos=pos}
+  ltuple = do
+            pos  <- toPos <$> getPosition
+            locs <- list_comma pat
+            return (ETuple az{pos=pos} $ locs)
+
+-------------------------------------------------------------------------------
+
 expr_error :: Parser Expr
 expr_error = do
   pos  <- toPos <$> getPosition
@@ -165,8 +196,8 @@ expr_if = do
   pos  <- toPos <$> getPosition
   void <- tk_key "if"
   e    <- expr
-  void <- tk_sym "~>"
-  p    <- expr
+  void <- tk_sym "~"
+  p    <- pat
   void <- tk_key "then"
   spcln
   t    <- expr
@@ -220,7 +251,7 @@ type_ = do
 dcl :: Parser Dcl
 dcl = do
   pos <- toPos <$> getPosition
-  str <- tk_var
+  p   <- pat
   tp  <- optionMaybe $ do
           void <- try $ tk_sym "::"
           tp   <- type_
@@ -230,7 +261,7 @@ dcl = do
           w    <- where_
           return w
   guard $ isJust tp || isJust w
-  return $ Dcl (az{pos=pos}, str, tp, w)
+  return $ Dcl (az{pos=pos}, p, tp, w)
 
 -------------------------------------------------------------------------------
 
