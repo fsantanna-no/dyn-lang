@@ -36,6 +36,9 @@ newtype Dcl = Dcl (Ann, Expr, Maybe Type, Maybe Where)
 
 type Prog = Where
 
+isEError (EError _) = True
+isEError _          = False
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@ module Dyn.Eval where
 
 import Debug.Trace
 import Data.Bool    (bool)
+import Data.List    (find)
 
 import Dyn.AST
 
@@ -22,12 +23,18 @@ evalExpr env (EError z)    = EError z
 evalExpr env (EUnit  z)    = EUnit  z
 evalExpr env (EVar   z id) = envRead env id
 
-evalExpr env (EIf z e p t f) =
-  case snd $ match env False p e' of  -- snd: never changes env
-    Left  err -> err -- error on match
-    Right ok  -> evalExpr env $ bool f t ok
+evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
   where
-    e'  = evalExpr env e
+    toError es = case find isEError es of
+      Nothing  -> ETuple z es
+      Just err -> err
+
+evalExpr env (EIf z e p t f) = toError $ snd $ match env False p $ evalExpr env e
+  where
+    toError (Left err) = err
+    toError (Right ok) = evalExpr env $ bool f t ok
+
+evalExpr _ v = v
 
 -------------------------------------------------------------------------------
 
@@ -42,10 +49,15 @@ match :: Env -> Bool -> Expr -> Expr -> Match
 
 match env _ _ (EError z) = (env, Left $ EError z)
 
+match env _ (EUnit  _) (EUnit _) = (env, Right True)
+
 match env True    (EVar z id) e = (envWrite env id e, Right True)
 match env False p@(EVar z id) e = match env False (evalExpr env p) e
 
-match env _ (EUnit  _) (EUnit _) = (env, Right True)
+match env set (ETuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
+  where
+    f (pat,e) (env, Right True) = match env set pat e
+    f _       (env, ret)        = (env, ret)
 
 match env _ _ _ = (env, Right False)
 
@@ -60,8 +72,9 @@ evalDcl env _ = (env, Right True)
 evalWhere :: Env -> Where -> Expr
 evalWhere env (Where (_, e, dcls)) =
   case foldr f (env, Right True) dcls of
-    (env', Right True) -> evalExpr env' e
-    (_,    Left  err)  -> err
+    (env', Right True)  -> evalExpr env' e
+    (_,    Right False) -> EError az
+    (_,    Left  err)   -> err
   where
     f :: Dcl -> Match -> Match
     f dcl (env, Right True)  = evalDcl env dcl
