@@ -105,3 +105,7 @@ main = hspec $ do
       it "if x matches y then t else f" $
         (exprToString $ fromRight $ parse expr "if x matches y then t else f")
           `shouldBe` "if x matches y then t else f"
+    describe "prog:" $ do
+      it "x where x=()" $
+        (progToString $ fromRight $ parse prog "x where x :: () = ()")
+          `shouldBe` "x where\n  x :: () = ()"

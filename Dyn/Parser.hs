@@ -8,7 +8,7 @@ import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
 import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
-import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy)
+import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option)
 
 import Dyn.AST
 
@@ -134,9 +134,9 @@ expr_if = do
   e    <- expr
   void <- tk_key "matches"
   p    <- expr
-  void <- tk_sym "then"
+  void <- tk_key "then"
   t    <- expr
-  void <- tk_sym "else"
+  void <- tk_key "else"
   f    <- expr
   return $ EIf az{pos=pos} e p t f
 
@@ -186,6 +186,12 @@ dcl = do
 
 where_ :: Parser Where
 where_ = do
-  pos <- toPos <$> getPosition
-  e   <- expr
-  return $ Where (az{pos=pos}, e, [])
+  pos  <- toPos <$> getPosition
+  e    <- expr
+  dcls <- option [] $ do
+            void <- tk_key "where"
+            dcls <- many1 dcl
+            return dcls
+  return $ Where (az{pos=pos}, e, dcls)
+
+prog = where_
