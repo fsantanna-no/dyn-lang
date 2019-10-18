@@ -7,7 +7,9 @@ data Ann = Ann { pos :: (Int,Int) }
 
 az = Ann { pos=(0,0) }
 
-type Type = ()
+data Type = TUnit
+  deriving (Eq, Show)
+tz = TUnit
 
 type ID_Var  = String
 type ID_Data = String
@@ -41,7 +43,7 @@ exprToString (ECons  _ ["Int",n]) = n
 exprToString (ECons  _ hier)      = L.intercalate "." hier
 exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
-exprToString (EFunc  _ () e)      = "func () " ++ exprToString e
+exprToString (EFunc  _ TUnit e)   = "func () " ++ exprToString e
 exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
 exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~> " ++ exprToString e
                                       ++ " then " ++ exprToString t
@@ -52,7 +54,7 @@ exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~> " ++ exprToS
 
 dclToString :: Int -> Dcl -> String
 
-dclToString spc (Dcl (_,id,(),w)) = replicate spc ' ' ++ id ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_,id,TUnit,w)) = replicate spc ' ' ++ id ++ " :: () = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 

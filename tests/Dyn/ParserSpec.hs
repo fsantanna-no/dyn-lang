@@ -65,7 +65,7 @@ spec = do
         `shouldBe` Right (EUnit az{pos=(1,2)})
     it "func" $
       parse expr "func () ()"
-        `shouldBe` Right (EFunc az{pos=(1,1)} () (EUnit az{pos=(1,9)}))
+        `shouldBe` Right (EFunc az{pos=(1,1)} tz (EUnit az{pos=(1,9)}))
     it "a b c" $
       parse expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
@@ -90,7 +90,7 @@ spec = do
   describe "dcl:" $ do
     it "x" $
       parse dcl "x :: () = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", (), Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, "x", tz, Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
 
   describe "toString:" $ do
     describe "expr_*:" $ do

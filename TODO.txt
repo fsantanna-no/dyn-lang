@@ -1,2 +1,6 @@
+- declaration w/o assignment
+- declaration w/o type
+- MATCH!
+
 - HSpec
     - pending, pendingWith

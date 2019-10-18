@@ -156,7 +156,7 @@ expr_func = do
   void <- tk_sym ")"
   spcln
   body <- expr
-  return $ EFunc az{pos=pos} () body
+  return $ EFunc az{pos=pos} tz body
 
 expr_if :: Parser Expr
 expr_if = do
@@ -216,7 +216,7 @@ dcl = do
   void <- tk_sym ")"
   void <- tk_sym "="
   w    <- where_
-  return $ Dcl (az{pos=pos}, str, (), w)
+  return $ Dcl (az{pos=pos}, str, tz, w)
 
 -------------------------------------------------------------------------------
 

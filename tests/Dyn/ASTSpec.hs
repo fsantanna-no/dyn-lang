@@ -16,21 +16,21 @@ spec = do
   describe "dclToString:" $ do
     it "a :: () = b" $
       dclToString 0
-        (Dcl (az, "a", (),
+        (Dcl (az, "a", tz,
           Where (az, EVar az "b", []))) `shouldBe` "a :: () = b"
     it "a :: () = b where\n  b=()" $
       dclToString 0
-        (Dcl (az, "a", (),
+        (Dcl (az, "a", tz,
           Where (az, EVar az "b",
-            [Dcl (az, "b", (), Where (az, EUnit az,[]))])))
+            [Dcl (az, "b", tz, Where (az, EUnit az,[]))])))
         `shouldBe` "a :: () = b where\n  b :: () = ()"
 
   describe "dclToString:" $ do
     it "b where b=a, a=()" $
       whereToString 0 (
         Where (az, EVar az "b", [
-          Dcl (az, "b", (), Where (az, EVar az "a",[])),
-          Dcl (az, "a", (), Where (az, EUnit az,[]))
+          Dcl (az, "b", tz, Where (az, EVar az "a",[])),
+          Dcl (az, "a", tz, Where (az, EUnit az,[]))
         ]))
         `shouldBe` "b where\n  b :: () = a\n  a :: () = ()"
 
