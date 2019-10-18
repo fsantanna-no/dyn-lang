@@ -8,4 +8,4 @@ main :: IO ()
 main = hspec $ do
   describe "exprToString:" $ do
     it "a" $
-      exprToString 0 (EVar az "a") `shouldBe` "a"
+      exprToString (EVar az "a") `shouldBe` "a"

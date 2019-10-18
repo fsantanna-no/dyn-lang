@@ -53,24 +53,24 @@ main = hspec $ do
   describe "toString:" $ do
     describe "expr_*:" $ do
       it "()" $
-        (exprToString 0 $ fromRight $ parse expr_unit "()")
+        (exprToString $ fromRight $ parse expr_unit "()")
           `shouldBe` "()"
       it "xxx" $
-        (exprToString 0 $ fromRight $ parse expr_var "xxx")
+        (exprToString $ fromRight $ parse expr_var "xxx")
           `shouldBe` "xxx"
       it "(xxx,yyy)" $
-        (exprToString 0 $ fromRight $ parse expr_tuple "(xxx, yyy)")
+        (exprToString $ fromRight $ parse expr_tuple "(xxx, yyy)")
           `shouldBe` "(xxx,yyy)"
     describe "expr:" $ do
       it "()" $
-        (exprToString 0 $ fromRight $ parse expr "()")
+        (exprToString $ fromRight $ parse expr "()")
           `shouldBe` "()"
       it "(())" $
-        (exprToString 0 $ fromRight $ parse expr "(())")
+        (exprToString $ fromRight $ parse expr "(())")
           `shouldBe` "()"
       it "A.B" $
-        (exprToString 0 $ fromRight $ parse expr "A.B")
+        (exprToString $ fromRight $ parse expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (exprToString 0 $ fromRight $ parse expr "func () xxx")
+        (exprToString $ fromRight $ parse expr "func () xxx")
           `shouldBe` "func () xxx"

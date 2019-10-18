@@ -30,14 +30,14 @@ newtype Dcl   = Dcl   (ID_Var, Type, Expr')
 
 type Prog  = Expr'
 
-exprToString :: Int -> Expr -> String
-exprToString spc (EError _)           = "error"
-exprToString spc (EVar   _ id)        = id
-exprToString spc (EUnit  _)           = "()"
-exprToString spc (ECons  _ ["Int",n]) = n
-exprToString spc (ECons  _ hier)      = L.intercalate "." hier
-exprToString spc (EArg   _)           = "..."
-exprToString spc (ETuple _ es)        = "(" ++ L.intercalate "," (map (exprToString spc) es) ++ ")"
-exprToString spc (EFunc  _ tp e)      = "func" ++ "\n" ++ exprToString (spc+4) e
-exprToString spc (ECall  _ e1 e2)     = exprToString spc e1 ++ " " ++ exprToString spc e2
-exprToString spc e                    = error $ show e
+exprToString :: Expr -> String
+exprToString (EError _)           = "error"
+exprToString (EVar   _ id)        = id
+exprToString (EUnit  _)           = "()"
+exprToString (ECons  _ ["Int",n]) = n
+exprToString (ECons  _ hier)      = L.intercalate "." hier
+exprToString (EArg   _)           = "..."
+exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
+exprToString (EFunc  _ tp e)      = "func () " ++ exprToString e
+exprToString (ECall  _ e1 e2)     = exprToString e1 ++ " " ++ exprToString e2
+exprToString e                    = error $ show e
