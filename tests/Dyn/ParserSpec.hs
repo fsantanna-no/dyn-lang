@@ -49,6 +49,9 @@ spec = do
     it "xxx" $
       parse' expr_var "xxx"
         `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
+    it "A" $
+      parse' expr_cons "A"
+        `shouldBe` Right (ECons az{pos=(1,1)} ["A"])
     it "A.B" $
       parse' expr_cons "A.B"
         `shouldBe` Right (ECons az{pos=(1,1)} ["A","B"])

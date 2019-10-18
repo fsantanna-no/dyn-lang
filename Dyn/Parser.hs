@@ -128,7 +128,7 @@ pat = lany <|> lvar <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
   lcons  = do
             pos  <- toPos <$> getPosition
             cons <- tk_hier
-            loc  <- optionMaybe pat
+            loc  <- optionMaybe $ try pat
             return $ case loc of
                       Nothing -> ECons az{pos=pos} cons
                       Just l  -> ECall az{pos=pos} (ECons az{pos=pos} cons) l

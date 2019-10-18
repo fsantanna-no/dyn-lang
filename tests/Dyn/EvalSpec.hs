@@ -53,7 +53,7 @@ spec = do
         `shouldBe` (EUnit az{pos=(1,17)})
     it "match-false" $
       (evalProg $ fromRight $ parse "if () ~ A then error else ()")
-        `shouldBe` (EUnit az{pos=(1,17)})
+        `shouldBe` (EUnit az{pos=(1,27)})
     it "match-error" $
       (evalProg $ fromRight $ parse "if error ~ () then () else error")
         `shouldBe` (EError az{pos=(1,4)})
