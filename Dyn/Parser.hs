@@ -79,5 +79,12 @@ expr_tuple = do
   exps <- try $ list2 expr
   return $ ETuple az{pos=pos} exps
 
-expr = expr_unit <|> expr_var <|> expr_tuple
+expr_parens :: Parser Expr
+expr_parens = do
+  void <- tk_sym "("
+  e    <- expr
+  void <- tk_sym ")"
+  return e
+
+expr = try expr_unit <|> expr_var <|> expr_tuple <|> expr_parens
 

@@ -31,11 +31,13 @@ main = hspec $ do
         parse tk_var "xxx "
           `shouldBe` Right "xxx"
 
-  describe "expr_var:" $ do
-    describe "expr_var:" $ do
-      it "xxx" $
-        parse expr_var "xxx"
-          `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
+  describe "expr:" $ do
+    it "xxx" $
+      parse expr_var "xxx"
+        `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
+    it "(())" $
+      parse expr "(())"
+        `shouldBe` Right (EUnit az{pos=(1,2)})
 
   describe "toString:" $ do
     describe "expr_unit:" $ do
@@ -53,4 +55,8 @@ main = hspec $ do
     describe "expr:" $ do
       it "()" $
         (exprToString 0 $ fromRight $ parse expr "()")
+          `shouldBe` "()"
+    describe "expr:" $ do
+      it "(())" $
+        (exprToString 0 $ fromRight $ parse expr "(())")
           `shouldBe` "()"
