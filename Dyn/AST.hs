@@ -31,6 +31,7 @@ newtype Dcl   = Dcl   (ID_Var, Type, Where)
 type Prog  = Where
 
 -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 exprToString :: Expr -> String
 exprToString (EError _)           = "error"
@@ -51,6 +52,12 @@ exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " matches " ++ ex
 
 dclToString :: Dcl -> String
 
-dclToString (Dcl (id, (), (Where (e,[]))))   = id ++ " :: () = " ++ exprToString e
-dclToString (Dcl (id, (), (Where (e,dcls)))) = id ++ " :: () = " ++ exprToString e ++ " where "
-                                                ++ L.intercalate "," (map dclToString dcls)
+dclToString (Dcl (id, (), w)) = id ++ " :: () = " ++ whereToString w
+
+-------------------------------------------------------------------------------
+
+whereToString :: Where -> String
+
+whereToString (Where (e,[]))   = exprToString e
+whereToString (Where (e,dcls)) = exprToString e ++ " where " ++
+                                  L.intercalate "," (map dclToString dcls)

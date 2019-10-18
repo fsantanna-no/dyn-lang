@@ -22,3 +22,10 @@ main = hspec $ do
           Where (EVar az "b",
             [Dcl ("b", (), Where (EUnit az,[]))])))
         `shouldBe` "a :: () = b where b :: () = ()"
+    it "b where b=a, a=()" $
+      whereToString (
+        Where (EVar az "b", [
+          Dcl ("b", (), Where (EVar az "a",[])),
+          Dcl ("a", (), Where (EUnit az,[]))
+        ]))
+        `shouldBe` "b where b :: () = a,a :: () = ()"
