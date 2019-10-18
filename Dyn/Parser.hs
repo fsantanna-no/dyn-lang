@@ -60,6 +60,13 @@ tk_var = do
 
 -------------------------------------------------------------------------------
 
+expr_unit :: Parser Expr
+expr_unit = do
+  pos  <- toPos <$> getPosition
+  void <- tk_sym "("
+  void <- tk_sym ")"
+  return $ EUnit az{pos=pos}
+
 expr_var :: Parser Expr
 expr_var = do
   pos <- toPos <$> getPosition
@@ -72,5 +79,5 @@ expr_tuple = do
   exps <- try $ list2 expr
   return $ ETuple az{pos=pos} exps
 
-expr = expr_var <|> expr_tuple
+expr = expr_unit <|> expr_var <|> expr_tuple
 

@@ -38,6 +38,10 @@ main = hspec $ do
           `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
 
   describe "toString:" $ do
+    describe "expr_unit:" $ do
+      it "()" $
+        (exprToString 0 $ fromRight $ parse expr_unit "()")
+          `shouldBe` "()"
     describe "expr_var:" $ do
       it "xxx" $
         (exprToString 0 $ fromRight $ parse expr_var "xxx")
@@ -46,3 +50,7 @@ main = hspec $ do
       it "(xxx,yyy)" $
         (exprToString 0 $ fromRight $ parse expr_tuple "(xxx, yyy)")
           `shouldBe` "(xxx,yyy)"
+    describe "expr:" $ do
+      it "()" $
+        (exprToString 0 $ fromRight $ parse expr "()")
+          `shouldBe` "()"
