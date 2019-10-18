@@ -173,17 +173,19 @@ expr = try expr_call <|> expr_one
 
 dcl :: Parser Dcl
 dcl = do
+  pos  <- toPos <$> getPosition
   str  <- tk_var
   void <- tk_sym "::"
   void <- tk_sym "("
   void <- tk_sym ")"
   void <- tk_sym "="
   w    <- where_
-  return $ Dcl (str, (), w)
+  return $ Dcl (az{pos=pos}, str, (), w)
 
 -------------------------------------------------------------------------------
 
 where_ :: Parser Where
 where_ = do
-  e <- expr
-  return $ Where (e, [])
+  pos <- toPos <$> getPosition
+  e   <- expr
+  return $ Where (az{pos=pos}, e, [])
