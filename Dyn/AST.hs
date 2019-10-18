@@ -14,7 +14,7 @@ type ID_Data = String
 type ID_Hier = [ID_Data]
 
 data Expr
-  = EError Ann Int
+  = EError Ann
   | EVar   Ann ID_Var               -- (id)         -- a ; xs
   | EUnit  Ann                      -- ()           -- ()
   | ECons  Ann ID_Hier              -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
@@ -31,7 +31,7 @@ newtype Dcl   = Dcl   (ID_Var, Type, Expr')
 type Prog  = Expr'
 
 exprToString :: Int -> Expr -> String
-exprToString spc (EError _ n)         = "error " ++ show n
+exprToString spc (EError _)           = "error"
 exprToString spc (EVar   _ id)        = id
 exprToString spc (EUnit  _)           = "()"
 exprToString spc (ECons  _ ["Int",n]) = n

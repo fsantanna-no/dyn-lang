@@ -8,7 +8,9 @@ import qualified Text.Parsec as P (eof, parse)
 import Text.Parsec.String (Parser)
 
 import Dyn.Parser
-import Dyn.AST    (Expr(..), Ann(..), az)
+import Dyn.AST
+
+fromRight (Right x) = x
 
 parse :: Parser a -> String -> Either String a
 parse rule input =
@@ -34,3 +36,9 @@ main = hspec $ do
       it "xxx" $
         parse expr_var "xxx"
           `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
+
+  describe "toString:" $ do
+    describe "expr_var:" $ do
+      it "xxx" $
+        (exprToString 0 $ fromRight $ parse expr_var "xxx")
+          `shouldBe` "xxx"
