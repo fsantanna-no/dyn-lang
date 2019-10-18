@@ -10,7 +10,7 @@ import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy)
 
-import Dyn.AST                (Expr(..),ID_Hier,Ann(..),az)
+import Dyn.AST
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -168,3 +168,22 @@ expr_call = do
 
 expr :: Parser Expr
 expr = try expr_call <|> expr_one
+
+-------------------------------------------------------------------------------
+
+dcl :: Parser Dcl
+dcl = do
+  str  <- tk_var
+  void <- tk_sym "::"
+  void <- tk_sym "("
+  void <- tk_sym ")"
+  void <- tk_sym "="
+  w    <- where_
+  return $ Dcl (str, (), w)
+
+-------------------------------------------------------------------------------
+
+where_ :: Parser Where
+where_ = do
+  e <- expr
+  return $ Where (e, [])

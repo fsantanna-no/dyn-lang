@@ -25,8 +25,8 @@ data Expr
   | EIf    Ann Expr Expr Expr Expr  -- (p,e,t,f)    -- if 10 matches x then t else f
   deriving (Eq, Show)
 
-newtype Where = Where (Expr,[Dcl])
-newtype Dcl   = Dcl   (ID_Var, Type, Where)
+newtype Where = Where (Expr,[Dcl])            deriving (Eq, Show)
+newtype Dcl   = Dcl   (ID_Var, Type, Where)   deriving (Eq, Show)
 
 type Prog  = Where
 

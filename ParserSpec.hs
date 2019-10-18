@@ -65,6 +65,16 @@ main = hspec $ do
       parse expr "..."
         `shouldBe` Right (EArg az{pos=(1,1)})
 
+  describe "where:" $ do
+    it "x" $
+      parse where_ "x"
+        `shouldBe` Right (Where (EVar az{pos=(1,1)} "x", []))
+
+  describe "dcl:" $ do
+    it "x" $
+      parse dcl "x :: () = ()"
+        `shouldBe` Right (Dcl ("x", (), Where (EUnit az{pos=(1,11)}, [])))
+
   describe "toString:" $ do
     describe "expr_*:" $ do
       it "()" $
