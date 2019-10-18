@@ -3,7 +3,10 @@ module Dyn.EvalSpec (main,spec) where
 import Test.Hspec
 
 import Dyn.AST
+import Dyn.Parser
 import Dyn.Eval
+
+fromRight (Right x) = x
 
 main :: IO ()
 main = hspec spec
@@ -40,3 +43,8 @@ spec = do
     it "a=()" $
       evalDcl [] (Dcl (az, "a", Just tz, Just $ Where (az, EUnit az,[])))
         `shouldBe` [("a", EUnit az)]
+
+  describe "parser:" $ do
+    it "error" $
+      (evalProg $ fromRight $ parse "error")
+        `shouldBe` (EError az{pos=(1,1)})

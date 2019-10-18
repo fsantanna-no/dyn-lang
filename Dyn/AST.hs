@@ -33,7 +33,7 @@ newtype Where = Where (Ann, Expr, [Dcl])
 newtype Dcl = Dcl (Ann, ID_Var, Maybe Type, Maybe Where)
   deriving (Eq, Show)
 
-type Prog  = Where
+type Prog = Where
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import Data.Maybe             (isJust)
 import Data.Bool              (bool)
 import Data.Char              (isLower, isUpper)
 
+import qualified Text.Parsec as P (parse)
 import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
 import Text.Parsec.Pos        (SourcePos, sourceLine, sourceColumn)
 import Text.Parsec.String     (Parser)
@@ -246,10 +247,21 @@ where_ = do
 
 -------------------------------------------------------------------------------
 
-prog :: Parser Where
+prog :: Parser Prog
 prog = do
   void <- spcln
   w    <- where_
   void <- spcln
   void <- eof
   return w
+
+-------------------------------------------------------------------------------
+
+parse :: String -> Either String Prog
+parse input = parse' prog input
+
+parse' :: Parser a -> String -> Either String a
+parse' rule input =
+  case P.parse (rule <* eof) "" input of
+    (Right v) -> Right v
+    (Left  v) -> Left (show v)
