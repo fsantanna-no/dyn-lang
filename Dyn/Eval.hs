@@ -73,13 +73,15 @@ match env set (ETuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es
     f (pat,e) (env, Right True) = match env set pat e
     f _       (env, ret)        = (env, ret)
 
+match env set (ECons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp == hre)
+
 match env set (ECall _ (ECons _ hrp) pat) (EData _ hre e) =
   if hrp == hre then
     match env set pat e
   else
     (env, Right False)
 
---match env set pat e = error $ show (pat,e)
+--match env set pat e = traceShow (pat,e) (env, Right False)
 match env _ _ _ = (env, Right False)
 
 -------------------------------------------------------------------------------

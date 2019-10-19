@@ -31,8 +31,8 @@ add (Nat.Zero, Nat.Succ Nat.Zero) where
       if y ~ Nat.Zero then
         x
       else
-        Nat.Succ (add (x,z)) where
-          Nat.Succ z = Show y
+        Nat.Succ (add (x,y')) where
+          Nat.Succ y' = y
         ;
       ; where
         (x,y) = ...
