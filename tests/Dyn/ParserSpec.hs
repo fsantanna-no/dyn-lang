@@ -115,68 +115,63 @@ spec = do
           `shouldBe` "if x ~ y then\n  t\nelse\n  f"
     describe "prog:" $ do
       it "x where x :: () = ()" $
-        (progToString $ fromRight $ parse "x where x :: () = ();")
-          `shouldBe` "x where\n  x :: () = ()"
+        (progToString $ fromRight $ parse "main :: () = ()")
+          `shouldBe` "main where\n  main :: () = ()"
       it "x where x :: ()" $
-        (progToString $ fromRight $ parse "x where x :: ();")
-          `shouldBe` "x where\n  x :: ()"
+        (progToString $ fromRight $ parse "main :: ()")
+          `shouldBe` "main where\n  main :: ()"
       it "x where x = ()" $
-        (progToString $ fromRight $ parse "x where x = ();")
-          `shouldBe` "x where\n  x = ()"
+        (progToString $ fromRight $ parse "main = ()")
+          `shouldBe` "main where\n  main = ()"
       it "x where x,y" $
-        (parseToString "x where x::()=y  y::()=();")
-          `shouldBe` "(line 1, column 19):\nunexpected \":\"\nexpecting identifier, \"where\", pattern or \";\""
+        (parseToString "main::()=y  y::()=()")
+          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", pattern or end of input"
       it "x where x,y" $
-        (parseToString "x where x::()=y\ny::()=();")
-          `shouldBe` "x where\n  x :: () = y\n  y :: () = ()"
+        (parseToString "main::()=y\ny::()=()")
+          `shouldBe` "main where\n  main :: () = y\n  y :: () = ()"
       it "where-newline" $
-        (progToString $ fromRight $ parse "v where v :: () = f ()\n;")
-          `shouldBe` "v where\n  v :: () = (f ())"
+        (progToString $ fromRight $ parse "main :: () = f ()\n")
+          `shouldBe` "main where\n  main :: () = (f ())"
       it "Xx a = ()" $
-        (progToString $ fromRight $ parse "a where Xx a = ();")
-          `shouldBe` "a where\n  (Xx a) = ()"
+        (progToString $ fromRight $ parse "Xx main = ()")
+          `shouldBe` "main where\n  (Xx main) = ()"
       it "func" $
         (progToString $ fromRight $ parse
           [r|
-v where
-  v :: () = f ()
-  f :: () = func () x where
-              x :: () = ...;
-            ;
-;
+main :: () = f ()
+f :: () = func () x where
+            x :: () = ...;
+          ;
 |])
-          `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n    x :: () = ..."
+          `shouldBe` "main where\n  main :: () = (f ())\n  f :: () = func ()\n  x where\n    x :: () = ..."
 
       it "where-where" $
         (parseToString
           [r|
-a where
-  a :: () = b d where
-    b :: () = c
-    c :: () = ()
-    ;
-  d :: () = ()
+main :: () = b d where
+  b :: () = c
+  c :: () = ()
   ;
+d :: () = ()
 |])
-          `shouldBe` "a where\n  a :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  d :: () = ()"
+          `shouldBe` "main where\n  main :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  d :: () = ()"
 
     describe "parseToString:" $ do
 
       it "Nat +" $
         parseToString [r|
-add (Nat.Zero, Nat.Succ Nat.Zero) where
-  add =
-    func ()
-      if y ~ Nat.Zero then
-        x
-      else
-        Nat.Succ (add (x,z)) where
-          Nat.Succ z = y
-        ;
-      ; where
-        (x,y) = ...
+main = add (Nat.Zero, Nat.Succ Nat.Zero)
+add =
+  func ()
+    if y ~ Nat.Zero then
+      x
+    else
+      Nat.Succ (add (x,z)) where
+        Nat.Succ z = y
       ;
+    ; where
+      (x,y) = ...
     ;
-;
+  ;
 |]
-        `shouldBe` "(add (Nat.Zero,(Nat.Succ Nat.Zero))) where\n  add = func () if y ~ Nat.Zero then x else (Nat.Succ (add (x,z))) where\n  (Nat.Succ z) = y where\n  (x,y) = ..."
+        `shouldBe` "main where\n  main = (add (Nat.Zero,(Nat.Succ Nat.Zero)))\n  add = func ()\n  if y ~ Nat.Zero then\n  x\nelse\n  (Nat.Succ (add (x,z))) where\n    (Nat.Succ z) = y where\n    (x,y) = ..."

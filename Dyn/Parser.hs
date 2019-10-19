@@ -255,10 +255,11 @@ where_ = do
 
 prog :: Parser Prog
 prog = do
+  pos  <- toPos <$> getPosition
   spc
-  w    <- where_
+  dcls <- list (tk_sym "") dcl
   void <- eof
-  return w
+  return $ Where (az{pos=pos}, EVar az{pos=pos} "main", dcls)
 
 -------------------------------------------------------------------------------
 

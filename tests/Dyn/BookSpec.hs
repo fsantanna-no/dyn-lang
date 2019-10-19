@@ -17,28 +17,27 @@ spec = do
 
   describe "TODO:" $ do
     it "f ()" $
-      run "f () where f = func () ...;;" `shouldBe` "()"
+      run "main = f () \n f = func () ...;" `shouldBe` "()"
 
     it "Nat" $
-      run "Nat.Succ Nat.Zero"
+      run "main = Nat.Succ Nat.Zero"
         `shouldBe` "(Nat.Succ (Nat.Zero ()))"
 
     it "Nat +" $            -- pg 58
       run [r|
-add (Nat.Zero, Nat.Succ Nat.Zero) where
-  add =
-    func ()
-      if y ~ Nat.Zero then
-        x
-      else
-        Nat.Succ (add (x,y')) where
-          Nat.Succ y' = y
-        ;
-      ; where
-        (x,y) = ...
+main = add (Nat.Zero, Nat.Succ Nat.Zero)
+add =
+  func ()
+    if y ~ Nat.Zero then
+      x
+    else
+      Nat.Succ (add (x,y')) where
+        Nat.Succ y' = y
       ;
+    ; where
+      (x,y) = ...
     ;
-;
+  ;
 |]
         `shouldBe` "(Nat.Succ (Nat.Zero ()))"
 

@@ -46,30 +46,30 @@ spec = do
 
   describe "parser:" $ do
     it "error" $
-      (evalProg $ fromRight $ parse "error")
-        `shouldBe` (EError az{pos=(1,1)})
+      (evalProg $ fromRight $ parse "main = error")
+        `shouldBe` (EError az{pos=(1,8)})
     it "match-true" $
-      (evalProg $ fromRight $ parse "if () ~ () then () else error;")
-        `shouldBe` (EUnit az{pos=(1,17)})
+      (evalProg $ fromRight $ parse "main = if () ~ () then () else error;")
+        `shouldBe` (EUnit az{pos=(1,24)})
     it "match-false" $
-      (evalProg $ fromRight $ parse "if () ~ A then error else ();")
-        `shouldBe` (EUnit az{pos=(1,27)})
+      (evalProg $ fromRight $ parse "main = if () ~ A then error else ();")
+        `shouldBe` (EUnit az{pos=(1,34)})
     it "match-error" $
-      (evalProg $ fromRight $ parse "if error ~ () then () else error;")
-        `shouldBe` (EError az{pos=(1,4)})
+      (evalProg $ fromRight $ parse "main = if error ~ () then () else error;")
+        `shouldBe` (EError az{pos=(1,11)})
     it "assign-var" $
-      (evalProg $ fromRight $ parse "a where a = A;")
-        `shouldBe` EData az{pos=(1,13)} ["A"] (EUnit az{pos=(1,13)})
+      (evalProg $ fromRight $ parse "main = a where a = A;")
+        `shouldBe` EData az{pos=(1,20)} ["A"] (EUnit az{pos=(1,20)})
     it "assign-tuple" $
-      (evalProg $ fromRight $ parse "(a,b) where (a,b) = (A,B);")
-        `shouldBe` ETuple az{pos=(1,1)} [EData az{pos=(1,22)} ["A"] (EUnit az{pos=(1,22)}),EData az{pos=(1,24)} ["B"] (EUnit az{pos=(1,24)})]
+      (evalProg $ fromRight $ parse "main = (a,b) where (a,b) = (A,B);")
+        `shouldBe` ETuple az{pos=(1,8)} [EData az{pos=(1,29)} ["A"] (EUnit az{pos=(1,29)}),EData az{pos=(1,31)} ["B"] (EUnit az{pos=(1,31)})]
 
   describe "run:"$ do
     it "(" $
-      run "(" `shouldBe` "(line 1, column 2):\nunexpected end of input\nexpecting expression"
+      run "main = (" `shouldBe` "(line 1, column 9):\nunexpected end of input\nexpecting expression"
     it "()" $
-      run "()" `shouldBe` "()"
+      run "main = ()" `shouldBe` "()"
     it "f ()" $
-      run "f () where f = func () ...;;" `shouldBe` "()"
+      run "main = f () where f = func () ...;;" `shouldBe` "()"
     it "Xx a = ()" $
-      run "a where Xx a = Xx ();" `shouldBe` "()"
+      run "main = a where Xx a = Xx ();" `shouldBe` "()"
