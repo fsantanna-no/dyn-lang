@@ -40,12 +40,13 @@ evalExpr env (EIf z e p t f) = toError $ snd $ match env False p $ evalExpr env 
 evalExpr env (ECall _ (EError z)     _)   = EError z
 evalExpr env (ECall z f arg) =
   case (evalExpr env f, evalExpr env arg) of
-    ((EError z1)     , _          ) -> EError z1
-    (_               , (EError z2)) -> EError z2
-    ((EFunc _ _ f')  , arg'       ) -> evalWhere env' f' where
-                                        env' = envWrite env "..." arg'
-    ((EData z1 hr _) , arg'       ) -> EData z1 hr arg'
-    (_               , _          ) -> EError z
+    ((EData _ ["Show"] _) , x          ) -> traceShowId x
+    ((EError z1)          , _          ) -> EError z1
+    (_                    , (EError z2)) -> EError z2
+    ((EFunc _ _ f')       , arg'       ) -> evalWhere env' f' where
+                                              env' = envWrite env "..." arg'
+    ((EData z1 hr _)      , arg'       ) -> EData z1 hr arg'
+    (_                    , _          ) -> EError z
 
 evalExpr _ v = v
 
