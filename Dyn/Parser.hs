@@ -300,8 +300,8 @@ parse' rule input =
     (Right v) -> Right v
     (Left  v) -> Left (show v)
 
-run :: String -> String
-run input =
+parseToString :: String -> String
+parseToString input =
   case parse input of
     (Left  v) -> v
     (Right p) -> progToString p

@@ -171,10 +171,10 @@ a where
 |])
           `shouldBe` "a where\n  a :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  d :: () = ()"
 
-    describe "run:" $ do
+    describe "parseToString:" $ do
 
       it "Nat +" $
-        run [r|
+        parseToString [r|
 add (Nat.Zero, Nat.Succ Nat.Zero) where
   add =
     func ()
