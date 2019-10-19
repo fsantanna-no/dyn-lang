@@ -41,6 +41,20 @@ isEError (EError _) = True
 isEError _          = False
 
 -------------------------------------------------------------------------------
+
+getAnn :: Expr -> Ann
+getAnn (EError z)         = z
+getAnn (EAny   z)         = z
+getAnn (EVar   z _)       = z
+getAnn (EUnit  z)         = z
+getAnn (ECons  z _)       = z
+getAnn (EData  z _ _)     = z
+getAnn (ETuple z _)       = z
+getAnn (EFunc  z _ _)     = z
+getAnn (ECall  z _ _)     = z
+getAnn (EArg   z)         = z
+getAnn (EIf    z _ _ _ _) = z
+
 -------------------------------------------------------------------------------
 
 exprToString :: Expr -> String

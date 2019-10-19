@@ -124,7 +124,10 @@ spec = do
         (progToString $ fromRight $ parse "x where x = ();")
           `shouldBe` "x where\n  x = ()"
       it "x where x,y" $
-        (progToString $ fromRight $ parse "x where x::()=y, y::()=();")
+        (parseToString "x where x::()=y  y::()=();")
+          `shouldBe` "(line 1, column 19):\nunexpected \":\"\nexpecting identifier, \"where\", pattern or \";\""
+      it "x where x,y" $
+        (parseToString "x where x::()=y\ny::()=();")
           `shouldBe` "x where\n  x :: () = y\n  y :: () = ()"
       it "where-newline" $
         (progToString $ fromRight $ parse "v where v :: () = f ()\n;")
@@ -136,7 +139,7 @@ spec = do
         (progToString $ fromRight $ parse
           [r|
 v where
-  v :: () = f (),
+  v :: () = f ()
   f :: () = func () x where
               x :: () = ...;
             ;
@@ -145,13 +148,13 @@ v where
           `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n  x :: () = ..."
 
       it "where-where" $
-        (progToString $ fromRight $ parse
+        (parseToString
           [r|
 a where
   a :: () = b d where
-    b :: () = c,
+    b :: () = c
     c :: () = ()
-    ;,
+    ;
   d :: () = ()
   ;
 |])

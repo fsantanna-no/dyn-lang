@@ -13,7 +13,7 @@ import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
-import Dyn.AST
+import Dyn.AST as A
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -207,6 +207,7 @@ expr_call = do
   pos <- toPos <$> getPosition
   e1  <- expr_one
   e2  <- expr_one
+  guard $ (fst $ A.pos $ getAnn e1) == (fst $ A.pos $ getAnn e2)  -- must be at the same line
   return $ ECall az {pos=pos} e1 e2
 
 expr :: Parser Expr
@@ -245,7 +246,7 @@ where_ = do
   e    <- expr
   dcls <- option [] $ do
             void <- tk_key "where"
-            dcls <- list (tk_sym ",") dcl
+            dcls <- list (tk_sym "") dcl
             void <- tk_sym ";"
             return dcls
   return $ Where (az{pos=pos}, e, dcls)
