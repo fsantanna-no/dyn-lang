@@ -12,7 +12,7 @@ import Dyn.Parser
 type Env = [(ID_Var,Expr)]
 
 envRead :: Env -> ID_Var -> Expr
-envRead env id = snd $ head $ filter ((==id).fst) env
+envRead env id = snd $ head $ traceShow (id,env) $ filter ((==id).fst) env
 
 envWrite :: Env -> ID_Var -> Expr -> Env
 envWrite env id e = (id,e) : env
@@ -42,7 +42,7 @@ evalExpr env (ECall z f arg) =
   case (evalExpr env f, evalExpr env arg) of
     ((EError z1)     , _          ) -> EError z1
     (_               , (EError z2)) -> EError z2
-    ((EFunc _ _ f')  , arg'       ) -> evalExpr env' f' where
+    ((EFunc _ _ f')  , arg'       ) -> evalWhere env' f' where
                                         env' = envWrite env "..." arg'
     ((EData z1 hr _) , arg'       ) -> EData z1 hr arg'
     (_               , _          ) -> EError z

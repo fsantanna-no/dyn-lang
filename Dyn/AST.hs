@@ -23,7 +23,7 @@ data Expr
   | ECons  Ann ID_Hier              -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | EData  Ann ID_Hier Expr         -- (ids,struct) -- Bool.True () ; Int.1 () ; Tree.Node (Tree.Leaf(),Tree.Leaf())
   | ETuple Ann [Expr]               -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Ann Type Expr            -- (type,body)
+  | EFunc  Ann Type Where           -- (type,body)
   | ECall  Ann Expr Expr            -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
   | EIf    Ann Expr Expr Expr Expr  -- (e,p,t,f)    -- if 10 ~> x then t else f
@@ -52,7 +52,7 @@ exprToString (ECons  _ hier)      = L.intercalate "." hier
 exprToString (EData  _ hier st)   = "(" ++ L.intercalate "." hier ++ " " ++ exprToString st ++ ")"
 exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
-exprToString (EFunc  _ TUnit e)   = "func () " ++ exprToString e
+exprToString (EFunc  _ TUnit bd)  = "func () " ++ whereToString 0 bd
 exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
 exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~ " ++ exprToString e
                                       ++ " then " ++ exprToString t

@@ -61,7 +61,7 @@ spec = do
         `shouldBe` Right (EUnit az{pos=(1,2)})
     it "func" $
       parse' expr "func () ()"
-        `shouldBe` Right (EFunc az{pos=(1,1)} tz (EUnit az{pos=(1,9)}))
+        `shouldBe` Right (EFunc az{pos=(1,1)} tz (Where (az{pos=(1,9)}, EUnit az{pos=(1,9)},[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
@@ -153,7 +153,7 @@ v where
             ;
   ;
 |])
-          `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n    x :: () = ..."
+          `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n  x :: () = ..."
       it "where-where" $
         (progToString $ fromRight $ parse
           [r|

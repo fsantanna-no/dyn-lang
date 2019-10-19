@@ -188,7 +188,7 @@ expr_func = do
   void <- tk_sym "("
   void <- tk_sym ")"
   spcln
-  body <- expr
+  body <- where_
   return $ EFunc az{pos=pos} tz body
 
 expr_if :: Parser Expr
@@ -201,6 +201,7 @@ expr_if = do
   void <- tk_key "then"
   spcln
   t    <- expr
+  spcln
   void <- tk_key "else"
   spcln
   f    <- expr
@@ -258,6 +259,7 @@ dcl = do
           return tp
   w   <- optionMaybe $ do
           void <- tk_sym "="
+          spcln
           w    <- where_
           return w
   guard $ isJust tp || isJust w
@@ -269,6 +271,7 @@ where_ :: Parser Where
 where_ = do
   pos  <- toPos <$> getPosition
   e    <- expr
+  spcln
   dcls <- option [] $ do
             void <- tk_key "where"
             spcln
