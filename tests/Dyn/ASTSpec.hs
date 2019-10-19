@@ -11,7 +11,7 @@ spec = do
 
   describe "exprToString:" $ do
     it "a" $
-      exprToString (EVar az "a") `shouldBe` "a"
+      exprToString 0 (EVar az "a") `shouldBe` "a"
 
   describe "dclToString:" $ do
     it "a :: () = b" $

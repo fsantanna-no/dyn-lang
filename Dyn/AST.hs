@@ -57,36 +57,38 @@ getAnn (EIf    z _ _ _ _) = z
 
 -------------------------------------------------------------------------------
 
-exprToString :: Expr -> String
-exprToString (EError _)           = "error"
-exprToString (EAny   _)           = "_"
-exprToString (EVar   _ id)        = id
-exprToString (EUnit  _)           = "()"
-exprToString (ECons  _ hier)      = L.intercalate "." hier
-exprToString (EData  _ hier st)   = "(" ++ L.intercalate "." hier ++ " " ++ exprToString st ++ ")"
-exprToString (EArg   _)           = "..."
-exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
-exprToString (EFunc  _ TUnit bd)  = "func () " ++ whereToString 0 bd
-exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
-exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~ " ++ exprToString e
-                                      ++ " then " ++ whereToString 0 t
-                                      ++ " else " ++ whereToString 0 f
+rep spc = replicate spc ' '
+
+exprToString :: Int -> Expr -> String
+exprToString spc (EError _)           = "error"
+exprToString spc (EAny   _)           = "_"
+exprToString spc (EVar   _ id)        = id
+exprToString spc (EUnit  _)           = "()"
+exprToString spc (ECons  _ hier)      = L.intercalate "." hier
+exprToString spc (EData  _ hier st)   = "(" ++ L.intercalate "." hier ++ " " ++ exprToString 0 st ++ ")"
+exprToString spc (EArg   _)           = "..."
+exprToString spc (ETuple _ es)        = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
+exprToString spc (EFunc  _ TUnit bd)  = "func ()\n" ++ rep (spc+2) ++ whereToString (spc+2) bd
+exprToString spc (ECall  _ e1 e2)     = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
+exprToString spc (EIf    _ p e t f)   = "if " ++ exprToString 0 p ++ " ~ " ++ exprToString 0 e
+                                          ++ " then\n" ++ rep (spc+2) ++ whereToString (spc+2) t
+                                          ++ "\n" ++ rep spc ++ "else\n" ++ rep (spc+2) ++ whereToString (spc+2) f
 --exprToString e                    = error $ show e
 
 -------------------------------------------------------------------------------
 
 dclToString :: Int -> Dcl -> String
 
-dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = replicate spc ' ' ++ exprToString pat ++ " :: () = " ++ whereToString spc w
-dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = replicate spc ' ' ++ exprToString pat ++ " :: ()"
-dclToString spc (Dcl (_, pat, Nothing,    Just w))  = replicate spc ' ' ++ exprToString pat ++ " = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = rep spc ++ exprToString spc pat ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = rep spc ++ exprToString spc pat ++ " :: ()"
+dclToString spc (Dcl (_, pat, Nothing,    Just w))  = rep spc ++ exprToString spc pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 
 whereToString :: Int -> Where -> String
 
-whereToString spc (Where (_,e,[]))   = exprToString e
-whereToString spc (Where (_,e,dcls)) = exprToString e ++ " where\n" ++
+whereToString spc (Where (_,e,[]))   = exprToString 0 e
+whereToString spc (Where (_,e,dcls)) = exprToString 0 e ++ " where\n" ++
                                         L.intercalate "\n" (map (dclToString (spc+2)) dcls)
 
 -------------------------------------------------------------------------------

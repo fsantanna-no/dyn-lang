@@ -113,4 +113,4 @@ run :: String -> String
 run input =
   case parse input of
     Left  err -> err
-    Right exp -> exprToString $ evalProg exp
+    Right exp -> exprToString 0 $ evalProg exp

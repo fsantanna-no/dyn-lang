@@ -86,33 +86,33 @@ spec = do
   describe "toString:" $ do
     describe "expr_*:" $ do
       it "()" $
-        (exprToString $ fromRight $ parse' expr_unit "()")
+        (exprToString 0 $ fromRight $ parse' expr_unit "()")
           `shouldBe` "()"
       it "xxx" $
-        (exprToString $ fromRight $ parse' expr_var "xxx")
+        (exprToString 0 $ fromRight $ parse' expr_var "xxx")
           `shouldBe` "xxx"
       it "(xxx,yyy)" $
-        (exprToString $ fromRight $ parse' expr_tuple "(xxx, yyy)")
+        (exprToString 0 $ fromRight $ parse' expr_tuple "(xxx, yyy)")
           `shouldBe` "(xxx,yyy)"
     describe "expr:" $ do
       it "()" $
-        (exprToString $ fromRight $ parse' expr "()")
+        (exprToString 0 $ fromRight $ parse' expr "()")
           `shouldBe` "()"
       it "(())" $
-        (exprToString $ fromRight $ parse' expr "(())")
+        (exprToString 0 $ fromRight $ parse' expr "(())")
           `shouldBe` "()"
       it "A.B" $
-        (exprToString $ fromRight $ parse' expr "A.B")
+        (exprToString 0 $ fromRight $ parse' expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (exprToString $ fromRight $ parse' expr "func () xxx;")
-          `shouldBe` "func () xxx"
+        (exprToString 0 $ fromRight $ parse' expr "func () xxx;")
+          `shouldBe` "func ()\n  xxx"
       it "call" $
-        (exprToString $ fromRight $ parse' expr "(a (b c)) d")
+        (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
       it "if x ~ y then t else f" $
-        (exprToString $ fromRight $ parse' expr "if x ~ y then t else f;")
-          `shouldBe` "if x ~ y then t else f"
+        (exprToString 0 $ fromRight $ parse' expr "if x ~ y then t else f;")
+          `shouldBe` "if x ~ y then\n  t\nelse\n  f"
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (progToString $ fromRight $ parse "x where x :: () = ();")
@@ -145,7 +145,7 @@ v where
             ;
 ;
 |])
-          `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n  x :: () = ..."
+          `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n    x :: () = ..."
 
       it "where-where" $
         (parseToString
