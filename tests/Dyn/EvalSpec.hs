@@ -69,3 +69,5 @@ spec = do
       run "(" `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting expression"
     it "()" $
       run "()" `shouldBe` Right (EUnit az{pos=(1,1)})
+    it "f ()" $
+      run "f () where (f = func () ...)" `shouldBe` Right (EUnit az{pos=(1,3)})
