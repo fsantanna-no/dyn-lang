@@ -72,4 +72,4 @@ spec = do
     it "f ()" $
       run "f () where (f = func () ...)" `shouldBe` "()"
     it "Xx a = ()" $
-      run "a where (Xx a = ())" `shouldBe` "()"
+      run "a where (Xx a = Xx ())" `shouldBe` "()"

@@ -33,8 +33,7 @@ add (Nat.Zero, Nat.Succ Nat.Zero) where
       else
         Nat.Succ (add (x,z)) where
           Nat.Succ z = y
-        ;
-      where
+        ; where
         (x,y) = ...
       ;
 ;

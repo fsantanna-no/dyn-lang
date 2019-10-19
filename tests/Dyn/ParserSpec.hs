@@ -157,6 +157,7 @@ v where
   ;
 |])
           `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n  x :: () = ..."
+
       it "where-where" $
         (progToString $ fromRight $ parse
           [r|
@@ -169,3 +170,22 @@ a where
   ;
 |])
           `shouldBe` "a where\n  a :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  d :: () = ()"
+
+    describe "run:" $ do
+
+      it "Nat +" $
+        run [r|
+add (Nat.Zero, Nat.Succ Nat.Zero) where
+  add =
+    func ()
+      if y ~ Nat.Zero then
+        x
+      else
+        Nat.Succ (add (x,z)) where
+          Nat.Succ z = y
+        ; where
+        (x,y) = ...
+      ;
+;
+|]
+        `shouldBe` "(add (Nat.Zero,(Nat.Succ Nat.Zero))) where\n  add = func () if y ~ Nat.Zero then x else (Nat.Succ (add (x,z))) where\n  (Nat.Succ z) = y where\n    (x,y) = ..."

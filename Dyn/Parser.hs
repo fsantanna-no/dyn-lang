@@ -299,3 +299,9 @@ parse' rule input =
   case P.parse (rule <* eof) "" input of
     (Right v) -> Right v
     (Left  v) -> Left (show v)
+
+run :: String -> String
+run input =
+  case parse input of
+    (Left  v) -> v
+    (Right p) -> progToString p
