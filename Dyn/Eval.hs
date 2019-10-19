@@ -24,6 +24,7 @@ evalExpr env (EError z)    = EError z
 evalExpr env (EUnit  z)    = EUnit  z
 evalExpr env (EVar   z id) = envRead env id
 evalExpr env (EArg   z)    = envRead env "..."
+evalExpr env (ECons  z hr) = EData z hr (EUnit z)
 
 evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
   where
@@ -39,11 +40,12 @@ evalExpr env (EIf z e p t f) = toError $ snd $ match env False p $ evalExpr env 
 evalExpr env (ECall _ (EError z)     _)   = EError z
 evalExpr env (ECall z f arg) =
   case (evalExpr env f, evalExpr env arg) of
-    ((EError z1)   , _          ) -> EError z1
-    (_             , (EError z2)) -> EError z2
-    ((EFunc _ _ f'), arg'       ) -> evalExpr env' f' where
-                                    env' = envWrite env "..." arg'
-    (_             , _          ) -> EError z
+    ((EError z1)     , _          ) -> EError z1
+    (_               , (EError z2)) -> EError z2
+    ((EFunc _ _ f')  , arg'       ) -> evalExpr env' f' where
+                                        env' = envWrite env "..." arg'
+    ((EData z1 hr _) , arg'       ) -> EData z1 hr arg'
+    (_               , _          ) -> EError z
 
 evalExpr _ v = v
 

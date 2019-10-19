@@ -21,6 +21,7 @@ data Expr
   | EVar   Ann ID_Var               -- (id)         -- a ; xs
   | EUnit  Ann                      -- ()           -- ()
   | ECons  Ann ID_Hier              -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
+  | EData  Ann ID_Hier Expr         -- (ids,struct) -- Bool.True () ; Int.1 () ; Tree.Node (Tree.Leaf(),Tree.Leaf())
   | ETuple Ann [Expr]               -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
   | EFunc  Ann Type Expr            -- (type,body)
   | ECall  Ann Expr Expr            -- (func,arg)   -- f a ; f(a) ; f(1,2)
@@ -47,8 +48,8 @@ exprToString (EError _)           = "error"
 exprToString (EAny   _)           = "_"
 exprToString (EVar   _ id)        = id
 exprToString (EUnit  _)           = "()"
-exprToString (ECons  _ ["Int",n]) = n
 exprToString (ECons  _ hier)      = L.intercalate "." hier
+exprToString (EData  _ hier st)   = "(" ++ L.intercalate "." hier ++ " " ++ exprToString st ++ ")"
 exprToString (EArg   _)           = "..."
 exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString es) ++ ")"
 exprToString (EFunc  _ TUnit e)   = "func () " ++ exprToString e

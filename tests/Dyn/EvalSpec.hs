@@ -59,10 +59,10 @@ spec = do
         `shouldBe` (EError az{pos=(1,4)})
     it "assign-var" $
       (evalProg $ fromRight $ parse "a where (a = A)")
-        `shouldBe` ECons az{pos=(1,14)} ["A"]
+        `shouldBe` EData az{pos=(1,14)} ["A"] (EUnit az{pos=(1,14)})
     it "assign-tuple" $
       (evalProg $ fromRight $ parse "(a,b) where (a,b) = (A,B);")
-        `shouldBe` ETuple az{pos=(1,1)} [ECons az{pos=(1,22)} ["A"],ECons az{pos=(1,24)} ["B"]]
+        `shouldBe` ETuple az{pos=(1,1)} [EData az{pos=(1,22)} ["A"] (EUnit az{pos=(1,22)}),EData az{pos=(1,24)} ["B"] (EUnit az{pos=(1,24)})]
 
   describe "run:"$ do
     it "(" $
