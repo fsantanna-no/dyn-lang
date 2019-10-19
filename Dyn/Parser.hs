@@ -205,6 +205,7 @@ expr_if = do
   void <- tk_key "else"
   spcln
   f    <- expr
+  spcln
   return $ EIf az{pos=pos} e p t f
 
 expr_parens :: Parser Expr
@@ -271,7 +272,6 @@ where_ :: Parser Where
 where_ = do
   pos  <- toPos <$> getPosition
   e    <- expr
-  spcln
   dcls <- option [] $ do
             void <- tk_key "where"
             spcln

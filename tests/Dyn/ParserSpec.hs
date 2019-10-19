@@ -143,6 +143,9 @@ spec = do
       it "where-newline" $
         (progToString $ fromRight $ parse "v where v :: () = f ()\n;")
           `shouldBe` "v where\n  v :: () = (f ())"
+      it "Xx a = ()" $
+        (progToString $ fromRight $ parse "a where (Xx a = ())")
+          `shouldBe` "a where\n  (Xx a) = ()"
       it "func" $
         (progToString $ fromRight $ parse
           [r|

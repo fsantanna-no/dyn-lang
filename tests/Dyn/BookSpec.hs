@@ -31,7 +31,7 @@ add (Nat.Zero, Nat.Succ Nat.Zero) where
       if y ~ Nat.Zero then
         x
       else
-        Nat.Succ (add x z) where
+        Nat.Succ (add (x,z)) where
           Nat.Succ z = y
         ;
       where
