@@ -97,8 +97,8 @@ evalWhere env (Where (_, e, dcls)) =
 evalProg :: Prog -> Expr
 evalProg w = evalWhere [] w
 
-run :: String -> Either String Expr
+run :: String -> String
 run input =
   case parse input of
-    Left  err -> Left err
-    Right exp -> Right $ evalProg exp
+    Left  err -> err
+    Right exp -> exprToString $ evalProg exp
