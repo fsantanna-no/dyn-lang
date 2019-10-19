@@ -12,7 +12,7 @@ import Dyn.Parser
 type Env = [(ID_Var,Expr)]
 
 envRead :: Env -> ID_Var -> Expr
-envRead env id = snd $ head $ traceShow (id,env) $ filter ((==id).fst) env
+envRead env id = snd $ head $ filter ((==id).fst) env
 
 envWrite :: Env -> ID_Var -> Expr -> Env
 envWrite env id e = (id,e) : env
@@ -35,7 +35,7 @@ evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
 evalExpr env (EIf z e p t f) = toError $ snd $ match env False p $ evalExpr env e
   where
     toError (Left err) = err
-    toError (Right ok) = evalExpr env $ bool f t ok
+    toError (Right ok) = evalWhere env $ bool f t ok
 
 evalExpr env (ECall _ (EError z)     _)   = EError z
 evalExpr env (ECall z f arg) =

@@ -21,33 +21,12 @@ toPos pos = (sourceLine pos, sourceColumn pos)
 -------------------------------------------------------------------------------
 
 -- LISTS
--- Parens with `,` separator:
---    (a,b,c,)
--- No-Parens with `\n` separator:
---    a
---    b
---    c
---    ;
+-- `,` separator:
+--    a,b,c,
 -- Optional separator at the end.
 
-list :: Parser a -> Parser [a]
-list p = (try $ list_comma p) <|> list_line p
-
-list_comma :: Parser a -> Parser [a]
-list_comma p = do
-  void <- tk_sym "("
-  vs   <- list_both (tk_sym ",") p
-  void <- tk_sym ")"
-  return vs
-
-list_line :: Parser a -> Parser [a]
-list_line p = do
-  vs   <- list_both (tk_sym "\n") p
-  void <- tk_sym ";"
-  return vs
-
-list_both :: Parser a -> Parser b -> Parser [b]
-list_both sep p = do
+list :: Parser a -> Parser b -> Parser [b]
+list sep p = do
   v    <- p
   vs   <- many $ try $ sep *> p
   void <- optional $ try $ sep
@@ -65,15 +44,7 @@ keywords = [
   ]
 
 spc :: Parser ()
-spc  = void $ many spc'
-spc' = (void $ oneOf " \t") <|> tk_comm
-
-ln :: Parser ()
-ln  = void $ many ln'
-ln' = void $ char '\n'
-
-spcln :: Parser ()
-spcln = void $ many (spc' <|> ln')
+spc  = void $ many $ (void $ oneOf " \t\n") <|> tk_comm
 
 tk_comm :: Parser ()
 tk_comm = void $ ((try $ string "--") >> (manyTill anyChar (void newline<|>eof)) <?> "")
@@ -139,7 +110,9 @@ pat = lany <|> lvar <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
             return $ EUnit az{pos=pos}
   ltuple = do
             pos  <- toPos <$> getPosition
-            locs <- list_comma pat
+            void <- tk_sym "("
+            locs <- list (tk_sym ",") pat
+            void <- tk_sym ")"
             return (ETuple az{pos=pos} $ locs)
 
 -------------------------------------------------------------------------------
@@ -178,7 +151,9 @@ expr_cons = do
 expr_tuple :: Parser Expr
 expr_tuple = do
   pos  <- toPos <$> getPosition
-  exps <- list_comma expr
+  void <- tk_sym "("
+  exps <- list (tk_sym ",") expr
+  void <- tk_sym ")"
   return $ ETuple az{pos=pos} exps
 
 expr_func :: Parser Expr
@@ -187,8 +162,8 @@ expr_func = do
   void <- tk_key "func"
   void <- tk_sym "("
   void <- tk_sym ")"
-  spcln
   body <- where_
+  void <- tk_sym ";"
   return $ EFunc az{pos=pos} tz body
 
 expr_if :: Parser Expr
@@ -199,13 +174,10 @@ expr_if = do
   void <- tk_sym "~"
   p    <- pat
   void <- tk_key "then"
-  spcln
-  t    <- expr
-  spcln
+  t    <- where_
   void <- tk_key "else"
-  spcln
-  f    <- expr
-  spcln
+  f    <- where_
+  void <- tk_sym ";"
   return $ EIf az{pos=pos} e p t f
 
 expr_parens :: Parser Expr
@@ -260,7 +232,6 @@ dcl = do
           return tp
   w   <- optionMaybe $ do
           void <- tk_sym "="
-          spcln
           w    <- where_
           return w
   guard $ isJust tp || isJust w
@@ -274,8 +245,8 @@ where_ = do
   e    <- expr
   dcls <- option [] $ do
             void <- tk_key "where"
-            spcln
-            dcls <- list dcl
+            dcls <- list (tk_sym ",") dcl
+            void <- tk_sym ";"
             return dcls
   return $ Where (az{pos=pos}, e, dcls)
 
@@ -283,9 +254,8 @@ where_ = do
 
 prog :: Parser Prog
 prog = do
-  void <- spcln
+  spc
   w    <- where_
-  void <- spcln
   void <- eof
   return w
 

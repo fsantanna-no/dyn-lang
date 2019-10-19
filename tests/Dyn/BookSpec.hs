@@ -17,9 +17,9 @@ spec = do
 
   describe "TODO:" $ do
     it "f ()" $
-      run "f () where (f = func () ...)" `shouldBe` "()"
+      run "f () where f = func () ...;;" `shouldBe` "()"
 
-    it "Nat" $              -- pg 57
+    it "Nat" $
       run "Nat.Succ Nat.Zero"
         `shouldBe` "(Nat.Succ (Nat.Zero ()))"
 
@@ -33,9 +33,11 @@ add (Nat.Zero, Nat.Succ Nat.Zero) where
       else
         Nat.Succ (add (x,z)) where
           Nat.Succ z = y
-        ; where
+        ;
+      ; where
         (x,y) = ...
       ;
+    ;
 ;
 |]
         `shouldBe` "(Nat.Succ (Nat.Zero ()))"

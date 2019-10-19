@@ -1,5 +1,7 @@
+- exprToString receber Int spc
+- sintaxe s/ where e \ns como espaco
+- main
 - Eval
-    - Funcoes
     - Book?
 
 - Dcl

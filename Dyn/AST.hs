@@ -17,16 +17,16 @@ type ID_Hier = [ID_Data]
 
 data Expr
   = EError Ann
-  | EAny   Ann                      -- ()           -- _
-  | EVar   Ann ID_Var               -- (id)         -- a ; xs
-  | EUnit  Ann                      -- ()           -- ()
-  | ECons  Ann ID_Hier              -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
-  | EData  Ann ID_Hier Expr         -- (ids,struct) -- Bool.True () ; Int.1 () ; Tree.Node (Tree.Leaf(),Tree.Leaf())
-  | ETuple Ann [Expr]               -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Ann Type Where           -- (type,body)
-  | ECall  Ann Expr Expr            -- (func,arg)   -- f a ; f(a) ; f(1,2)
+  | EAny   Ann                        -- ()           -- _
+  | EVar   Ann ID_Var                 -- (id)         -- a ; xs
+  | EUnit  Ann                        -- ()           -- ()
+  | ECons  Ann ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
+  | EData  Ann ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
+  | ETuple Ann [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
+  | EFunc  Ann Type Where             -- (type,body)
+  | ECall  Ann Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
-  | EIf    Ann Expr Expr Expr Expr  -- (e,p,t,f)    -- if 10 ~> x then t else f
+  | EIf    Ann Expr Expr Where Where  -- (e,p,t,f)    -- if 10 ~> x then t else f
   deriving (Eq, Show)
 
 newtype Where = Where (Ann, Expr, [Dcl])
@@ -55,8 +55,8 @@ exprToString (ETuple _ es)        = "(" ++ L.intercalate "," (map exprToString e
 exprToString (EFunc  _ TUnit bd)  = "func () " ++ whereToString 0 bd
 exprToString (ECall  _ e1 e2)     = "(" ++ exprToString e1 ++ " " ++ exprToString e2 ++ ")"
 exprToString (EIf    _ p e t f)   = "if " ++ exprToString p ++ " ~ " ++ exprToString e
-                                      ++ " then " ++ exprToString t
-                                      ++ " else " ++ exprToString f
+                                      ++ " then " ++ whereToString 0 t
+                                      ++ " else " ++ whereToString 0 f
 --exprToString e                    = error $ show e
 
 -------------------------------------------------------------------------------

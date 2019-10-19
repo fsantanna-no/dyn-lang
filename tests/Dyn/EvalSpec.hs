@@ -49,17 +49,17 @@ spec = do
       (evalProg $ fromRight $ parse "error")
         `shouldBe` (EError az{pos=(1,1)})
     it "match-true" $
-      (evalProg $ fromRight $ parse "if () ~ () then () else error")
+      (evalProg $ fromRight $ parse "if () ~ () then () else error;")
         `shouldBe` (EUnit az{pos=(1,17)})
     it "match-false" $
-      (evalProg $ fromRight $ parse "if () ~ A then error else ()")
+      (evalProg $ fromRight $ parse "if () ~ A then error else ();")
         `shouldBe` (EUnit az{pos=(1,27)})
     it "match-error" $
-      (evalProg $ fromRight $ parse "if error ~ () then () else error")
+      (evalProg $ fromRight $ parse "if error ~ () then () else error;")
         `shouldBe` (EError az{pos=(1,4)})
     it "assign-var" $
-      (evalProg $ fromRight $ parse "a where (a = A)")
-        `shouldBe` EData az{pos=(1,14)} ["A"] (EUnit az{pos=(1,14)})
+      (evalProg $ fromRight $ parse "a where a = A;")
+        `shouldBe` EData az{pos=(1,13)} ["A"] (EUnit az{pos=(1,13)})
     it "assign-tuple" $
       (evalProg $ fromRight $ parse "(a,b) where (a,b) = (A,B);")
         `shouldBe` ETuple az{pos=(1,1)} [EData az{pos=(1,22)} ["A"] (EUnit az{pos=(1,22)}),EData az{pos=(1,24)} ["B"] (EUnit az{pos=(1,24)})]
@@ -70,6 +70,6 @@ spec = do
     it "()" $
       run "()" `shouldBe` "()"
     it "f ()" $
-      run "f () where (f = func () ...)" `shouldBe` "()"
+      run "f () where f = func () ...;;" `shouldBe` "()"
     it "Xx a = ()" $
-      run "a where (Xx a = Xx ())" `shouldBe` "()"
+      run "a where Xx a = Xx ();" `shouldBe` "()"

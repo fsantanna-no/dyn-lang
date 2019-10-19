@@ -31,20 +31,6 @@ spec = do
       parse' tk_hier "A.B"
         `shouldBe` Right ["A","B"]
 
-  describe "list:" $ do
-    it "both: (),()" $
-      parse' (list_both (tk_sym ",") (tk_sym "()")) "(),()"
-        `shouldBe` Right [(),()]
-    it "list: ((),())" $
-      parse' (list (tk_sym "()")) "((),())"
-        `shouldBe` Right [(),()]
-    it "list: ()\n()" $
-      parse' (list (tk_sym "()")) "()\n();"
-        `shouldBe` Right [(),()]
-    it "list" $
-      parse' (list expr) "(xxx, yyy)"
-        `shouldBe` Right [EVar az{pos = (1,2)} "xxx",EVar az{pos = (1,7)} "yyy"]
-
   describe "expr_*:" $ do
     it "xxx" $
       parse' expr_var "xxx"
@@ -60,7 +46,7 @@ spec = do
       parse' expr "(())"
         `shouldBe` Right (EUnit az{pos=(1,2)})
     it "func" $
-      parse' expr "func () ()"
+      parse' expr "func () ();"
         `shouldBe` Right (EFunc az{pos=(1,1)} tz (Where (az{pos=(1,9)}, EUnit az{pos=(1,9)},[])))
     it "a b c" $
       parse' expr "a b c"
@@ -119,13 +105,13 @@ spec = do
         (exprToString $ fromRight $ parse' expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (exprToString $ fromRight $ parse' expr "func () xxx")
+        (exprToString $ fromRight $ parse' expr "func () xxx;")
           `shouldBe` "func () xxx"
       it "call" $
         (exprToString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
       it "if x ~ y then t else f" $
-        (exprToString $ fromRight $ parse' expr "if x ~ y then t else f")
+        (exprToString $ fromRight $ parse' expr "if x ~ y then t else f;")
           `shouldBe` "if x ~ y then t else f"
     describe "prog:" $ do
       it "x where x :: () = ()" $
@@ -138,23 +124,23 @@ spec = do
         (progToString $ fromRight $ parse "x where x = ();")
           `shouldBe` "x where\n  x = ()"
       it "x where x,y" $
-        (progToString $ fromRight $ parse "x where (x::()=y, y::()=())")
+        (progToString $ fromRight $ parse "x where x::()=y, y::()=();")
           `shouldBe` "x where\n  x :: () = y\n  y :: () = ()"
       it "where-newline" $
         (progToString $ fromRight $ parse "v where v :: () = f ()\n;")
           `shouldBe` "v where\n  v :: () = (f ())"
       it "Xx a = ()" $
-        (progToString $ fromRight $ parse "a where (Xx a = ())")
+        (progToString $ fromRight $ parse "a where Xx a = ();")
           `shouldBe` "a where\n  (Xx a) = ()"
       it "func" $
         (progToString $ fromRight $ parse
           [r|
 v where
-  v :: () = f ()
+  v :: () = f (),
   f :: () = func () x where
-              x :: () = ...
+              x :: () = ...;
             ;
-  ;
+;
 |])
           `shouldBe` "v where\n  v :: () = (f ())\n  f :: () = func () x where\n  x :: () = ..."
 
@@ -163,9 +149,9 @@ v where
           [r|
 a where
   a :: () = b d where
-    b :: () = c
+    b :: () = c,
     c :: () = ()
-    ;
+    ;,
   d :: () = ()
   ;
 |])
@@ -183,9 +169,11 @@ add (Nat.Zero, Nat.Succ Nat.Zero) where
       else
         Nat.Succ (add (x,z)) where
           Nat.Succ z = y
-        ; where
+        ;
+      ; where
         (x,y) = ...
       ;
+    ;
 ;
 |]
-        `shouldBe` "(add (Nat.Zero,(Nat.Succ Nat.Zero))) where\n  add = func () if y ~ Nat.Zero then x else (Nat.Succ (add (x,z))) where\n  (Nat.Succ z) = y where\n    (x,y) = ..."
+        `shouldBe` "(add (Nat.Zero,(Nat.Succ Nat.Zero))) where\n  add = func () if y ~ Nat.Zero then x else (Nat.Succ (add (x,z))) where\n  (Nat.Succ z) = y where\n  (x,y) = ..."
