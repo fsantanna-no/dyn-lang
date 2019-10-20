@@ -116,9 +116,9 @@ spec = do
       it "call" $
         (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
-      it "if x ~ y then t else f" $
-        (exprToString 0 $ fromRight $ parse' expr "if x ~ ~y then t else f;")
-          `shouldBe` "if x ~ y then\n  t\nelse\n  f"
+      it "case x of ~y->t\n_->f" $
+        (exprToString 0 $ fromRight $ parse' expr "case x of ~y->t \n _->f;")
+          `shouldBe` "case x of ~y->t \n _->f"
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (progToString $ fromRight $ parse "main :: () = ()")
@@ -176,12 +176,9 @@ d :: () = ()
 main = add (Nat.Zero, Nat.Succ Nat.Zero)
 add =
   func ()
-    if y ~ Nat.Zero then
-      x
-    else
-      Nat.Succ (add (x,z)) where
-        Nat.Succ z = y
-      ;
+    case y of
+      Nat.Zero   -> x
+      Nat.Succ z -> Nat.Succ (add (x,z))
     ; where
       (x,y) = ...
     ;

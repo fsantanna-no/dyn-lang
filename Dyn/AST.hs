@@ -27,7 +27,6 @@ data Expr
   | EFunc  Ann Type Where             -- (type,body)
   | ECall  Ann Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
-  | EIf    Ann Expr Patt Where Where  -- (e,p,t,f)    -- if 10 ~> x then t else f
   | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   deriving (Eq, Show)
 
@@ -56,16 +55,15 @@ isEError _            = False
 -------------------------------------------------------------------------------
 
 getAnn :: Expr -> Ann
-getAnn (EError z _)       = z
-getAnn (EVar   z _)       = z
-getAnn (EUnit  z)         = z
-getAnn (ECons  z _)       = z
-getAnn (EData  z _ _)     = z
-getAnn (ETuple z _)       = z
-getAnn (EFunc  z _ _)     = z
-getAnn (ECall  z _ _)     = z
-getAnn (EArg   z)         = z
-getAnn (EIf    z _ _ _ _) = z
+getAnn (EError z _)   = z
+getAnn (EVar   z _)   = z
+getAnn (EUnit  z)     = z
+getAnn (ECons  z _)   = z
+getAnn (EData  z _ _) = z
+getAnn (ETuple z _)   = z
+getAnn (EFunc  z _ _) = z
+getAnn (ECall  z _ _) = z
+getAnn (EArg   z)     = z
 getAnn (ECase  z _ _) = z
 
 -------------------------------------------------------------------------------
@@ -83,9 +81,7 @@ exprToString spc (EArg   _)           = "..."
 exprToString spc (ETuple _ es)        = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
 exprToString spc (EFunc  _ TUnit bd)  = "func ()\n" ++ rep (spc+2) ++ whereToString (spc+2) bd
 exprToString spc (ECall  _ e1 e2)     = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
-exprToString spc (EIf    _ e p t f)   = "if " ++ exprToString 0 e ++ " ~ " ++ pattToString 0 p
-                                          ++ " then\n" ++ rep (spc+2) ++ whereToString (spc+2) t
-                                          ++ "\n" ++ rep spc ++ "else\n" ++ rep (spc+2) ++ whereToString (spc+2) f
+
 exprToString spc (ECase  _ e cases)   =
   "case " ++ exprToString 0 e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
   where

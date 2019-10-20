@@ -17,46 +17,28 @@ main = hspec spec
 nat = [r|
 mul =
   func ()
-    if y ~ Nat.Zero then
-      Nat.Zero
-    else
-      add ((mul (x,y')), x) where
-        Nat.Succ y' = y
-      ;
-    ; where
-      (x,y) = ...
+    case ... of
+      (_,  Nat.Zero)    -> Nat.Zero
+      (=x, Nat.Succ =y) -> add (mul (x,y), x)
     ;
   ;
 
 add =
   func ()
-    if y ~ Nat.Zero then
-      x
-    else
-      Nat.Succ (add (x,y')) where
-        Nat.Succ y' = y
-      ;
-    ; where
-      (x,y) = ...
+    case ... of
+      (=x, Nat.Zero)    -> x
+      (=x, Nat.Succ =y) -> Nat.Succ (add (x,y))
     ;
   ;
 
-lte = func ()
-  if x ~ Nat.Zero then
-    Bool.True
-  else
-    if y ~ Nat.Zero then
-      Bool.False
-    else
-      lte (x',y') where
-        Nat.Succ x' = x
-        Nat.Succ y' = y
-      ;
+lte =
+  func ()
+    case ... of
+      (Nat.Zero,_) -> Bool.True
+      (_,Nat.Zero) -> Bool.False
+      (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
     ;
-  ; where
-    (x,y) = ...
   ;
-;
 
 ten   = Nat.Succ nine
 nine  = Nat.Succ eight
@@ -125,11 +107,10 @@ main = (lte (three,two), lte (three,three))
 main = add (smaller (ten,five) , smaller (one,four))
 smaller =
   func ()
-    if lte (x,y) ~ Bool.True then
-      x
-    else
-      y
-    ;if
+    case lte (x,y) of
+      Bool.True  -> x
+      Bool.False -> y
+    ; case
       where
         (x,y) = ...
       ; where

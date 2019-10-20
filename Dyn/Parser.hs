@@ -36,11 +36,8 @@ list sep p = do
 
 keywords = [
     "case",
-    "else",
     "error",
     "func",
-    "if",
-    "then",
     "of",
     "where"
   ]
@@ -175,21 +172,6 @@ expr_func = do
   void <- optional $ tk_key "func"
   return $ EFunc az{pos=pos} tz body
 
-expr_if :: Parser Expr
-expr_if = do
-  pos  <- toPos <$> getPosition
-  void <- tk_key "if"
-  e    <- expr
-  void <- tk_sym "~"
-  p    <- pat False
-  void <- tk_key "then"
-  t    <- where_
-  void <- tk_key "else"
-  f    <- where_
-  void <- tk_sym ";"
-  void <- optional $ tk_key "if"
-  return $ EIf az{pos=pos} e p t f
-
 expr_case :: Parser Expr
 expr_case = do
   pos  <- toPos <$> getPosition
@@ -217,7 +199,6 @@ expr_one =
   try expr_var    <|>   -- ID_Var
   expr_error      <|>   -- error
   expr_func       <|>   -- func
-  expr_if         <|>   -- if
   expr_case       <|>   -- case
 
   try expr_unit   <|>   -- ()

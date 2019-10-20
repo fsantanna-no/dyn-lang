@@ -35,20 +35,17 @@ evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
       Nothing  -> ETuple z es
       Just err -> err
 
-evalExpr env (EIf z e p t f) = toError $ snd $ match env p $ evalExpr env e
-  where
-    toError (Left err) = err
-    toError (Right ok) = evalWhere env $ bool f t ok
-
 evalExpr env (ECase z e cs) =
-  case filter f $ traceShowId $ map g cs of
+  case filter f $ map g cs of
     []                  -> EError z "pattern match fail"
     ((Left e,     _):_) -> e
     ((Right True, e):_) -> e
   where
+    e' = evalExpr env e
+
     g :: (Patt, Where) -> (Either Expr Bool, Expr)
     g (pat,whe) = (ret, evalWhere env' whe) where
-                    (env',ret) = match env pat e
+                    (env',ret) = match env pat e'
 
     f :: (Either Expr Bool, Expr) -> Bool
     f (Right False, _) = False  -- skip unmatched
