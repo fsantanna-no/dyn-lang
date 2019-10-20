@@ -15,49 +15,66 @@ main = hspec spec
 -------------------------------------------------------------------------------
 
 nat = [r|
-mul =
-  func ()
+  mul =
+    func ()
+      case ... of
+        (_,  Nat.Zero)    -> Nat.Zero
+        (=x, Nat.Succ =y) -> add (mul (x,y), x)
+      ;
+    ;
+
+  add =
+    func ()
+      case ... of
+        (=x, Nat.Zero)    -> x
+        (=x, Nat.Succ =y) -> Nat.Succ (add (x,y))
+      ;
+    ;
+
+  dec =
+    func ()
+      case ... of
+        Nat.Succ =x -> x
+      ;
+    ;
+
+  lte =
+    func ()
+      case ... of
+        (Nat.Zero,_) -> Bool.True
+        (_,Nat.Zero) -> Bool.False
+        (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
+      ;
+    ;
+
+  ten   = Nat.Succ nine
+  nine  = Nat.Succ eight
+  eight = Nat.Succ seven
+  seven = Nat.Succ six
+  six   = Nat.Succ five
+  five  = Nat.Succ four
+  four  = Nat.Succ three
+  three = Nat.Succ two
+  two   = Nat.Succ one
+  one   = Nat.Succ zero
+  zero  = Nat.Zero
+|]
+
+bool = [r|
+  and = func ()
     case ... of
-      (_,  Nat.Zero)    -> Nat.Zero
-      (=x, Nat.Succ =y) -> add (mul (x,y), x)
+      (Bool.False, _) -> Bool.False
+      (_, Bool.False) -> Bool.False
+      _               -> Bool.True
     ;
   ;
 
-add =
-  func ()
+  or = func ()
     case ... of
-      (=x, Nat.Zero)    -> x
-      (=x, Nat.Succ =y) -> Nat.Succ (add (x,y))
+      (Bool.True, _)  -> Bool.True
+      (_,         =y) -> y
     ;
   ;
-
-dec =
-  func ()
-    case ... of
-      Nat.Succ =x -> x
-    ;
-  ;
-
-lte =
-  func ()
-    case ... of
-      (Nat.Zero,_) -> Bool.True
-      (_,Nat.Zero) -> Bool.False
-      (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
-    ;
-  ;
-
-ten   = Nat.Succ nine
-nine  = Nat.Succ eight
-eight = Nat.Succ seven
-seven = Nat.Succ six
-six   = Nat.Succ five
-five  = Nat.Succ four
-four  = Nat.Succ three
-three = Nat.Succ two
-two   = Nat.Succ one
-one   = Nat.Succ zero
-zero  = Nat.Zero
 |]
 
 -------------------------------------------------------------------------------
@@ -469,56 +486,55 @@ not = func ()
   case ... of
     Bool.False -> Bool.True
     Bool.True  -> Bool.False
-    ;
+  ;
 ;
-|] ++ nat)
+|])
           `shouldBe` "Bool.True"
 
-{-
       it "and-1" $            -- pg 30
-        (run True $
-          unlines [
-            "func and (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.False then",
-            "     return Bool.False",
-            "   else/if y matches Bool.False then",
-            "     return Bool.False",
-            "   else",
-            "     return Bool.True",
-            "   end",
-            "end",
-            "return and (Bool.True,Bool.False)"
-           ])
-        `shouldBe` Right (EData ["Bool","False"] EUnit)
+        run ([r|
+main = and (Bool.True, Bool.False)
+and = func ()
+  case ... of
+    (Bool.False, _) -> Bool.False
+    (_, Bool.False) -> Bool.False
+    _               -> Bool.True
+  ;
+;
+|])
+          `shouldBe` "Bool.False"
 
       it "and-2" $            -- pg 30
-        (run True $
-          unlines [
-            "func and (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.False then",
-            "     return Bool.False",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "return (Bool.True) and (Bool.True)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        run ([r|
+main = and (Bool.True, Bool.True)
+|] ++ bool)
+          `shouldBe` "Bool.True"
 
-      it "or" $               -- pg 30
-        (run True $
-          unlines [
-            "func or (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.True then",
-            "     return Bool.True",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "return (Bool.True) or (Bool.False)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+      it "or-1" $               -- pg 30
+        run ([r|
+main = or (Bool.True, Bool.False)
+or = func ()
+  case ... of
+    (Bool.True, _)  -> Bool.True
+    (_,         =y) -> y
+  ;
+;
+|])
+          `shouldBe` "Bool.True"
 
+      it "or-2" $               -- pg 30
+        run ([r|
+main = or (Bool.False, Bool.False)
+or = func ()
+  case ... of
+    (Bool.True, _)  -> Bool.True
+    (_,         =y) -> y
+  ;
+;
+|])
+          `shouldBe` "Bool.False"
+
+{-
       it "===, =/=" $         -- pg 31
         (run True $
           unlines [

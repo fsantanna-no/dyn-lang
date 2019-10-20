@@ -1,6 +1,13 @@
 - Eval
     - Book?
 
+- Sintaxe
+    - mudar de ;  para .
+    - sequencia:
+        ; seq1
+        ; seq2
+    - set para mudar valor de variavel
+
 - Dcl
     - verificar que
         - todas as vars sao declaradas exatamente uma vez
