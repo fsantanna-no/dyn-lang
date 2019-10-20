@@ -23,7 +23,7 @@ spec = do
         (Dcl (az, PWrite az "a", Just tz,
           Just $ Where (az, EVar az "b",
             [Dcl (az, PWrite az "b", Just tz, Just $ Where (az, EUnit az,[]))])))
-        `shouldBe` "a :: () = b where\n  b :: () = ()"
+        `shouldBe` "a :: () = b where\n  b :: () = ()\n;"
 
   describe "dclToString:" $ do
     it "b where b=a, a=()" $
@@ -32,7 +32,7 @@ spec = do
           Dcl (az, PWrite az "b", Just tz, Just $ Where (az, EVar az "a",[])),
           Dcl (az, PWrite az "a", Just tz, Just $ Where (az, EUnit az,[]))
         ]))
-        `shouldBe` "b where\n  b :: () = a\n  a :: () = ()"
+        `shouldBe` "b where\n  b :: () = a\n  a :: () = ()\n;"
 
   describe "progToString:" $ do
     it "v" $

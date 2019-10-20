@@ -79,7 +79,7 @@ exprToString spc (ECons  _ hier)      = L.intercalate "." hier
 exprToString spc (EData  _ hier st)   = "(" ++ L.intercalate "." hier ++ " " ++ exprToString 0 st ++ ")"
 exprToString spc (EArg   _)           = "..."
 exprToString spc (ETuple _ es)        = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
-exprToString spc (EFunc  _ TUnit bd)  = "func ()\n" ++ rep (spc+2) ++ whereToString (spc+2) bd
+exprToString spc (EFunc  _ TUnit bd)  = "func ()\n" ++ rep (spc+2) ++ whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
 exprToString spc (ECall  _ e1 e2)     = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
 
 exprToString spc (ECase  _ e cases)   =
@@ -112,9 +112,10 @@ dclToString spc (Dcl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " 
 
 whereToString :: Int -> Where -> String
 
-whereToString spc (Where (_,e,[]))   = exprToString 0 e
-whereToString spc (Where (_,e,dcls)) = exprToString 0 e ++ " where" ++
+whereToString spc (Where (_,e,[]))   = exprToString spc e
+whereToString spc (Where (_,e,dcls)) = exprToString spc e ++ " where" ++
                                         (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (dclToString (spc+2)) dcls))
+                                        ++ "\n" ++ rep spc ++ ";"
 
 -------------------------------------------------------------------------------
 
