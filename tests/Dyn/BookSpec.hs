@@ -68,10 +68,10 @@ spec = do
   describe "PRE" $ do
     it "Nat +" $
       run ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
-        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
+        `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat *" $
       run ("main = mul (two,three)\n" ++ nat)
-        `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+        `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
 -------------------------------------------------------------------------------
 
@@ -93,13 +93,13 @@ square =
     ;
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
 
       it "lt" $
         run ([r|
 main = (lte (three,two), lte (three,three))
 |] ++ nat)
-          `shouldBe` "((Bool.False ()),(Bool.True ()))"
+          `shouldBe` "(Bool.False,Bool.True)"
 
       it "smaller" $                  -- pg 2
         run ([r|
@@ -115,7 +115,7 @@ smaller =
       ; where
   ;func
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
 
       it "square/smaller" $           -- pg 3
@@ -138,7 +138,7 @@ smaller =
       ; where
   ;func
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
 
       -- TODO-3-delta
 
@@ -154,7 +154,7 @@ fthree =
     three
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ()))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero)))"
 
 {-
       it "infinity" $         -- pg 5
@@ -196,7 +196,7 @@ multiply =
     ;
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
 {-
       it "multiply 3 infinity" $  -- pg 9
@@ -255,7 +255,7 @@ twice =
     ;
   ;
 |] ++ nat)
-            `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))))))))))))"
+            `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
 
 {-
         TODO: closures
@@ -385,7 +385,7 @@ fact =
     ;
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
 {-
       TODO: negative numbers
@@ -417,7 +417,7 @@ f =
     ;
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
       it "locals" $           -- pg 21
         run ([r|
@@ -431,9 +431,8 @@ f =
     ;
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
 
-{-
 -------------------------------------------------------------------------------
 
     --describe "Chapter 1.6 - Types:" $ do                      -- pg 21
@@ -450,6 +449,8 @@ f =
 
     describe "Chapter 2.1 - Booleans:" $ do                   -- pg 29
 
+{-
+      TODO: typesys
       it "data" $             -- pg 29
         (run True $
           unlines [
@@ -459,21 +460,21 @@ f =
             "return Bool_.True_"
           ])
         `shouldBe` Right (EData ["Bool_","True_"] EUnit)
+-}
 
       it "not" $              -- pg 30
-        (run True $
-          unlines [
-            "func not (x) : (Bool->Bool) do",
-            "   if x matches Bool.True then",
-            "     return Bool.False",
-            "   else",
-            "     return Bool.True",
-            "   end",
-            "end",
-            "return not Bool.False"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        run ([r|
+main = not Bool.False
+not = func ()
+  case ... of
+    Bool.False -> Bool.True
+    Bool.True  -> Bool.False
+    ;
+;
+|] ++ nat)
+          `shouldBe` "Bool.True"
 
+{-
       it "and-1" $            -- pg 30
         (run True $
           unlines [

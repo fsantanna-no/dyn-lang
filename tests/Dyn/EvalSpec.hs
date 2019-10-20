@@ -86,4 +86,4 @@ spec = do
       run "main = f () \n f = func () ...;" `shouldBe` "()"
     it "Nat" $
       run "main = Nat.Succ Nat.Zero"
-        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
+        `shouldBe` "(Nat.Succ Nat.Zero)"
