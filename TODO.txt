@@ -1,17 +1,11 @@
+- toString
+    - CORRIGIR CASE
+
 - Patt
     - testar ~func para gerar PError
-- remove If
-- Parsing
-    - , como espaco?
-- trocar IF por MATCH
-    - precisa voltar com o =x e ~x
 
 - Eval
     - Book?
-
-- toString
-    - gerar ';'
-    - testar ciclo
 
 - Dcl
     - verificar que
