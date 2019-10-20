@@ -1,5 +1,7 @@
 module Dyn.AST where
 
+import Debug.Trace
+
 import qualified Data.List as L
 
 data Ann = Ann { pos :: (Int,Int) }
@@ -79,17 +81,17 @@ exprToString spc (EIf    _ p e t f)   = "if " ++ exprToString 0 p ++ " ~ " ++ ex
 
 dclToString :: Int -> Dcl -> String
 
-dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = rep spc ++ exprToString spc pat ++ " :: () = " ++ whereToString spc w
-dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = rep spc ++ exprToString spc pat ++ " :: ()"
-dclToString spc (Dcl (_, pat, Nothing,    Just w))  = rep spc ++ exprToString spc pat ++ " = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = exprToString spc pat ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = exprToString spc pat ++ " :: ()"
+dclToString spc (Dcl (_, pat, Nothing,    Just w))  = exprToString spc pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 
 whereToString :: Int -> Where -> String
 
 whereToString spc (Where (_,e,[]))   = exprToString 0 e
-whereToString spc (Where (_,e,dcls)) = exprToString 0 e ++ " where\n" ++
-                                        L.intercalate "\n" (map (dclToString (spc+2)) dcls)
+whereToString spc (Where (_,e,dcls)) = exprToString 0 e ++ " where" ++
+                                        (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (dclToString (spc+2)) dcls))
 
 -------------------------------------------------------------------------------
 

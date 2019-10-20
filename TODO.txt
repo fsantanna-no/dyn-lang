@@ -1,4 +1,5 @@
-- exprToString receber Int spc
+- trocar IF por MATCH
+    - precisa voltar com o =x e ~x
 - Eval
     - Book?
 

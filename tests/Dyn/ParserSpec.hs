@@ -107,6 +107,12 @@ spec = do
       it "func" $
         (exprToString 0 $ fromRight $ parse' expr "func () xxx;")
           `shouldBe` "func ()\n  xxx"
+      it "func" $
+        (exprToString 0 $ fromRight $ parse' expr "func () xxx where xxx=() where y=();\n  x=();;")
+          `shouldBe` "func ()\n  xxx where\n    xxx = () where\n      y = ()\n    x = ()"
+      it "func" $
+        (exprToString 0 $ fromRight $ parse' expr "func () xxx where\n  xxx=() where\n    y=()\n    x=();;;")
+          `shouldBe` "func ()\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()"
       it "call" $
         (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
