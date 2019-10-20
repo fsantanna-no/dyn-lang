@@ -83,7 +83,9 @@ match env (PUnit  _)    (EUnit _)      = (env, Right True)
 match env (PWrite z id) e  = (envWrite env id e, Right True)
 match env (PRead  z e1) e2 = match env (toPatt $ evalExpr env e1) e2 where
                               toPatt :: Expr -> Patt
-                              toPatt (EData z hr st) = PCall z (PCons z hr) (toPatt st)
+                              toPatt (EUnit  z)       = PUnit  z
+                              toPatt (EData  z hr st) = PCall  z (PCons z hr) (toPatt st)
+                              toPatt (ETuple z es)    = PTuple z (map toPatt es)
                               toPatt _ = PError z "invalid pattern"
 
 match env (PTuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)

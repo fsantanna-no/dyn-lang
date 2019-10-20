@@ -76,3 +76,9 @@ spec = do
       run "main = f () where f = func () ...;;" `shouldBe` "()"
     it "Xx a = ()" $
       run "main = a where Xx a = Xx ();" `shouldBe` "()"
+    it "patt - read - fail" $
+      run "main = case () of ~func()(); -> ();" `shouldBe` "(line=1, col=19) ERROR: invalid pattern"
+    it "patt - read - ok" $
+      run "main = case () of ~() -> ();" `shouldBe` "()"
+    it "patt - read - ok" $
+      run "main = case ((),()) of ~((),()) -> ();" `shouldBe` "()"
