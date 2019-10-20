@@ -118,7 +118,7 @@ spec = do
           `shouldBe` "((a (b c)) d)"
       it "case x of ~y->t\n_->f" $
         (exprToString 0 $ fromRight $ parse' expr "case x of ~y->t \n _->f;")
-          `shouldBe` "case x of ~y->t \n _->f"
+          `shouldBe` "case x of\n  y -> t\n  _ -> f\n;"
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (progToString $ fromRight $ parse "main :: () = ()")
@@ -177,8 +177,8 @@ main = add (Nat.Zero, Nat.Succ Nat.Zero)
 add =
   func ()
     case y of
-      Nat.Zero   -> x
-      Nat.Succ z -> Nat.Succ (add (x,z))
+      Nat.Zero    -> x
+      Nat.Succ =z -> Nat.Succ (add (x,z))
     ; where
       (x,y) = ...
     ;
