@@ -28,7 +28,7 @@ data Expr
   | ECall  Ann Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
   | EIf    Ann Expr Patt Where Where  -- (e,p,t,f)    -- if 10 ~> x then t else f
-  | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,exp)] -- case x of A->a B->b _->z
+  | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   deriving (Eq, Show)
 
 data Patt
@@ -90,7 +90,7 @@ exprToString spc (ECase  _ e cases)   =
   "case " ++ exprToString 0 e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
   where
     f :: (Patt,Where) -> String
-    f (pat,exp) = "\n" ++ rep (spc+2) ++ pattToString 0 pat ++ " -> " ++ whereToString (spc+2) exp
+    f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString 0 pat ++ " -> " ++ whereToString (spc+2) whe
 --exprToString e                    = error $ show e
 
 -------------------------------------------------------------------------------

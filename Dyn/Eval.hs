@@ -40,6 +40,20 @@ evalExpr env (EIf z e p t f) = toError $ snd $ match env p $ evalExpr env e
     toError (Left err) = err
     toError (Right ok) = evalWhere env $ bool f t ok
 
+evalExpr env (ECase z e cs) =
+  case filter f $ traceShowId $ map g cs of
+    []                  -> EError z "pattern match fail"
+    ((Left e,     _):_) -> e
+    ((Right True, e):_) -> e
+  where
+    g :: (Patt, Where) -> (Either Expr Bool, Expr)
+    g (pat,whe) = (ret, evalWhere env' whe) where
+                    (env',ret) = match env pat e
+
+    f :: (Either Expr Bool, Expr) -> Bool
+    f (Right False, _) = False  -- skip unmatched
+    f _                = True   -- keep matched/errros
+
 evalExpr env (ECall _ (EError z msg)  _)   = EError z msg
 evalExpr env (ECall z f arg) =
   case (evalExpr env f, evalExpr env arg) of
@@ -64,10 +78,10 @@ type Match = (Env, Either Expr Bool)
 --       env    pat     e       ret
 match :: Env -> Patt -> Expr -> Match
 
-match env (PError z msg) _ = (env, Left $ EError z msg)
-match env _ (EError z msg) = (env, Left $ EError z msg)
-
-match env (PUnit  _) (EUnit _) = (env, Right True)
+match env (PError z msg) _             = (env, Left $ EError z msg)
+match env (PAny   _)     _             = (env, Right True)
+match env _             (EError z msg) = (env, Left $ EError z msg)
+match env (PUnit  _)    (EUnit _)      = (env, Right True)
 
 match env (PWrite z id) e  = (envWrite env id e, Right True)
 match env (PRead  z e1) e2 = match env (toPatt $ evalExpr env e1) e2 where

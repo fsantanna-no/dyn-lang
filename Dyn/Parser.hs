@@ -218,6 +218,7 @@ expr_one =
   expr_error      <|>   -- error
   expr_func       <|>   -- func
   expr_if         <|>   -- if
+  expr_case       <|>   -- case
 
   try expr_unit   <|>   -- ()
   try expr_parens <|>   -- (1-item)

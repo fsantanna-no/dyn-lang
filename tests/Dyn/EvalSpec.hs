@@ -49,14 +49,17 @@ spec = do
       (evalProg $ fromRight $ parse "main = error")
         `shouldBe` (EError az{pos=(1,8)} "<user>")
     it "match-true" $
-      (evalProg $ fromRight $ parse "main = if () ~ () then () else error;")
-        `shouldBe` (EUnit az{pos=(1,24)})
+      (evalProg $ fromRight $ parse "main = case () of () -> ()\n_ -> error;")
+        `shouldBe` (EUnit az{pos=(1,25)})
     it "match-false" $
-      (evalProg $ fromRight $ parse "main = if () ~ A then error else ();")
-        `shouldBe` (EUnit az{pos=(1,34)})
+      (evalProg $ fromRight $ parse "main = case () of A -> error\n_ -> ();")
+        `shouldBe` (EUnit az{pos=(2,6)})
     it "match-error" $
-      (evalProg $ fromRight $ parse "main = if error ~ () then () else error;")
-        `shouldBe` (EError az{pos=(1,11)} "<user>")
+      (evalProg $ fromRight $ parse "main = case error of ()->() \n _->error;")
+        `shouldBe` (EError az{pos=(1,13)} "<user>")
+    it "match-error" $
+      (evalProg $ fromRight $ parse "main = case () of A->();")
+        `shouldBe` EError (Ann {pos = (1,8)}) "pattern match fail"
     it "assign-var" $
       (evalProg $ fromRight $ parse "main = a where a = A;")
         `shouldBe` EData az{pos=(1,20)} ["A"] (EUnit az{pos=(1,20)})
