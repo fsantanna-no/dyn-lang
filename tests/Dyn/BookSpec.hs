@@ -23,9 +23,29 @@ spec = do
       run "main = Nat.Succ Nat.Zero"
         `shouldBe` "(Nat.Succ (Nat.Zero ()))"
 
-    it "Nat +" $            -- pg 58
-      run [r|
-main = add (Nat.Zero, Nat.Succ Nat.Zero)
+    it "Nat +" $
+      run ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
+        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
+
+    it "Nat *" $
+      run ("main = mul (two,three)\n" ++ nat)
+        `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+
+  where
+    nat = [r|
+mul =
+  func ()
+    if y ~ Nat.Zero then
+      Nat.Zero
+    else
+      add ((mul (x,y')), x) where
+        Nat.Succ y' = y
+      ;
+    ; where
+      (x,y) = ...
+    ;
+  ;
+
 add =
   func ()
     if y ~ Nat.Zero then
@@ -38,8 +58,14 @@ add =
       (x,y) = ...
     ;
   ;
+
+five  = Nat.Succ four
+four  = Nat.Succ three
+three = Nat.Succ two
+two   = Nat.Succ one
+one   = Nat.Succ zero
+zero  = Nat.Zero
 |]
-        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
 
 {-
 -------------------------------------------------------------------------------
