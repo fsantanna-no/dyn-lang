@@ -35,7 +35,7 @@ evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
       Nothing  -> ETuple z es
       Just err -> err
 
-evalExpr env (EIf z e p t f) = toError $ snd $ match env False p $ evalExpr env e
+evalExpr env (EIf z e p t f) = toError $ snd $ match env p $ evalExpr env e
   where
     toError (Left err) = err
     toError (Right ok) = evalWhere env $ bool f t ok
@@ -61,36 +61,40 @@ evalExpr _ v = v
 
 type Match = (Env, Either Expr Bool)
 
---       env    set     pat     e       ret
-match :: Env -> Bool -> Patt -> Expr -> Match
+--       env    pat     e       ret
+match :: Env -> Patt -> Expr -> Match
 
-match env _ _ (EError z msg) = (env, Left $ EError z msg)
+match env (PError z msg) _ = (env, Left $ EError z msg)
+match env _ (EError z msg) = (env, Left $ EError z msg)
 
-match env _ (PUnit  _) (EUnit _) = (env, Right True)
+match env (PUnit  _) (EUnit _) = (env, Right True)
 
-match env _ (PWrite z id) e  = (envWrite env id e, Right True)
---match env _ (PRead  z e1) e2 = match env False (evalExpr env e1) e2
+match env (PWrite z id) e  = (envWrite env id e, Right True)
+match env (PRead  z e1) e2 = match env (toPatt $ evalExpr env e1) e2 where
+                              toPatt :: Expr -> Patt
+                              toPatt (EData z hr st) = PCall z (PCons z hr) (toPatt st)
+                              toPatt _ = PError z "invalid pattern"
 
-match env set (PTuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
+match env (PTuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
   where
-    f (pat,e) (env, Right True) = match env set pat e
+    f (pat,e) (env, Right True) = match env pat e
     f _       (env, ret)        = (env, ret)
 
-match env set (PCons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp == hre)
+match env (PCons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp == hre)
 
-match env set (PCall _ (PCons _ hrp) pat) (EData _ hre e) =
+match env (PCall _ (PCons _ hrp) pat) (EData _ hre e) =
   if hrp == hre then
-    match env set pat e
+    match env pat e
   else
     (env, Right False)
 
---match env set pat e = traceShow (pat,e) (env, Right False)
-match env _ _ _ = (env, Right False)
+--match env pat e = traceShow (pat,e) (env, Right False)
+match env _ _ = (env, Right False)
 
 -------------------------------------------------------------------------------
 
 evalDcl :: Env -> Dcl -> Match
-evalDcl env (Dcl (_, p, _, Just w)) = match env True p (evalWhere env w)
+evalDcl env (Dcl (_, p, _, Just w)) = match env p (evalWhere env w)
 evalDcl env _ = (env, Right True)
 
 -------------------------------------------------------------------------------

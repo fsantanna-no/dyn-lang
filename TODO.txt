@@ -1,4 +1,5 @@
 - Patt
+    - testar ~func para gerar PError
 - remove If
 - Parsing
     - , como espaco?

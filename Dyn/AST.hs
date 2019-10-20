@@ -32,7 +32,8 @@ data Expr
   deriving (Eq, Show)
 
 data Patt
-  = PAny   Ann                        -- ()           -- _
+  = PError Ann String                 -- (msg)        -- error "bug found"
+  | PAny   Ann                        -- ()           -- _
   | PWrite Ann ID_Var                 -- (id)         -- =a ; =xs
   | PRead  Ann Expr                   -- (exp)        -- ~a ; ~xs
   | PUnit  Ann                        -- ()           -- ()
