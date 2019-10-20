@@ -78,7 +78,7 @@ spec = do
 
       it "square" $
         run ([r|
-main = square three
+main = square two
 square =
   func ()
     mul (x,x) where
@@ -86,7 +86,7 @@ square =
     ;
   ;
 |] ++ nat)
-          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ()))))))))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))"
 
       it "lt" $
         run ([r|
@@ -111,23 +111,27 @@ smaller =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 
 
-{-
       it "square/smaller" $           -- pg 3
-        (run True $
-          unlines [
-            "func square (x) : (Int -> Int) do",
-            "   return x * x",
-            "end",
-            "func smaller (x,y) : ((Int,Int) -> Int) do",
-            "   if x <= y then",
-            "     return x",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "return square (smaller (5, 3+4))"
-           ])
-        `shouldBe` Right (EData ["Int","25"] EUnit)
+        run ([r|
+main = square (smaller (four, two))
+square =
+  func ()
+    mul (x,x) where
+      x = ...
+    ;
+  ;
+smaller =
+  func ()
+    case lte (x,y) of
+      Bool.True  -> x
+      Bool.False -> y
+    ; case
+      where
+        (x,y) = ...
+      ; where
+  ;func
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))"
 
       -- TODO-3-delta
 
@@ -136,14 +140,14 @@ smaller =
     describe "Chapter 1.2 - Evaluation:" $ do                 -- pg 4
 
       it "three" $            -- pg 5
-        (run True $
-          unlines [
-            "func three (x) : (Int -> Int) do",
-            "   return 3",
-            "end",
-            "return three 10"
-           ])
-        `shouldBe` Right (EData ["Int","3"] EUnit)
+        run ([r|
+main = fthree ten
+fthree =
+  func ()
+    three
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ()))))"
 
 {-
       it "infinity" $         -- pg 5
@@ -174,19 +178,20 @@ smaller =
 
     describe "Chapter 1.3 - Values:" $ do                     -- pg 7
 
-      it "multiply 3 4" $     -- pg 9
-        (run True $
-          unlines [
-            "func multiply (x,y) : ((Int,Int) -> Int) do",
-            "   if x == 0 then",
-            "     return 0",
-            "   else",
-            "     return x * y",
-            "   end",
-            "end",
-            "return multiply (3,4)"
-           ])
-        `shouldBe` Right (EData ["Int","12"] EUnit)
+      it "multiply 2 3" $     -- pg 9
+        run ([r|
+main = multiply (two,three)
+multiply =
+  func ()
+    case ... of
+      (~zero, _)  -> zero
+      (=x,    =y) -> mul (x,y)
+    ;
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+
+{-
 
 {-
       it "multiply 3 infinity" $  -- pg 9
