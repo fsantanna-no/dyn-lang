@@ -59,17 +59,9 @@ spec :: Spec
 spec = do
 
   describe "PRE" $ do
-    it "f ()" $
-      run "main = f () \n f = func () ...;" `shouldBe` "()"
-
-    it "Nat" $
-      run "main = Nat.Succ Nat.Zero"
-        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
-
     it "Nat +" $
       run ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Zero ()))"
-
     it "Nat *" $
       run ("main = mul (two,three)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"

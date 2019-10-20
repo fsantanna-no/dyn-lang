@@ -82,3 +82,8 @@ spec = do
       run "main = case () of ~() -> ();" `shouldBe` "()"
     it "patt - read - ok" $
       run "main = case ((),()) of ~((),()) -> ();" `shouldBe` "()"
+    it "f ()" $
+      run "main = f () \n f = func () ...;" `shouldBe` "()"
+    it "Nat" $
+      run "main = Nat.Succ Nat.Zero"
+        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
