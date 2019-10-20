@@ -224,6 +224,7 @@ multiply =
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
 {-
+      TODO: closures
         it "smallerc" $            -- pg 11
           (run True $
             unlines [
@@ -257,6 +258,7 @@ twice =
             `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))))))))))))"
 
 {-
+        TODO: closures
         it "twicec" $            -- pg 12
           (run True $
             unlines [
@@ -354,6 +356,7 @@ twice =
 
     describe "Chapter 1.5 - Definitions:" $ do                -- pg 17
 
+      TODO: negative numbers
       it "signum" $           -- pg 18
         (run True $
           unlines [
@@ -385,6 +388,7 @@ fact =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 
 {-
+      TODO: negative numbers
       it "fact - error" $     -- pg 20
         (run True $
           unlines [
@@ -400,29 +404,36 @@ fact =
             "return fact (-5)"
            ])
         `shouldBe` Right (EError 1)
+-}
 
       it "locals" $           -- pg 20
-        (run True $
-          unlines [
-            "func f (x,y) : ((Int,Int)->Int) do",
-            "   var a:Int = x+y",
-            "   return (a+1) * (a+2)",
-            "end",
-            "return f (2,3)"
-           ])
-        `shouldBe` Right (EData ["Int","42"] EUnit)
+        run ([r|
+main = f (zero,one)
+f =
+  func ()
+    mul (add(a,one), add(a,two)) where
+      a = add (x,y)
+      (x,y) = ...
+    ;
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 
       it "locals" $           -- pg 21
-        (run True $
-          unlines [
-            "func f (x,y) : ((Int,Int)->Int) do",
-            "   var (a,b):(Int,Int) = (x+y, x*y)",
-            "   return (a+1) * (b+2)",
-            "end",
-            "return f (2,3)"
-           ])
-        `shouldBe` Right (EData ["Int","48"] EUnit)
+        run ([r|
+main = f (zero,one)
+f =
+  func ()
+    mul (add(a,one), add(b,two)) where
+      a = add (x,y)
+      b = mul (x,y)
+      (x,y) = ...
+    ;
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))"
 
+{-
 -------------------------------------------------------------------------------
 
     --describe "Chapter 1.6 - Types:" $ do                      -- pg 21
