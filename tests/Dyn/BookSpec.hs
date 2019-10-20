@@ -120,21 +120,24 @@ main = (lte (three,two), lte (three,three))
 |] ++ nat)
           `shouldBe` "((Bool.False ()),(Bool.True ()))"
 
-{-
       it "smaller" $                  -- pg 2
-        (run True $
-          unlines [
-            "func smaller (x,y) : ((Int,Int) -> Int) do",
-            "   if x <= y then",
-            "     return x",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "return (smaller(10,5)) + (smaller(1,4))"
-           ])
-        `shouldBe` Right (EData ["Int","6"] EUnit)
+        run ([r|
+main = add (smaller (ten,five) , smaller (one,four))
+smaller =
+  func ()
+    if lte (x,y) ~ Bool.True then
+      x
+    else
+      y
+    ; where
+      (x,y) = ...
+    ;
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 
+
+{-
       it "square/smaller" $           -- pg 3
         (run True $
           unlines [

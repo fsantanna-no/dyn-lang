@@ -189,10 +189,10 @@ expr_parens = do
 
 expr_one :: Parser Expr
 expr_one =
-  try expr_error  <|>   -- error
-  try expr_func   <|>   -- func
-  try expr_if     <|>   -- if
-  expr_var        <|>   -- ID_Var
+  try expr_var    <|>   -- ID_Var
+  expr_error      <|>   -- error
+  expr_func       <|>   -- func
+  expr_if         <|>   -- if
 
   try expr_unit   <|>   -- ()
   try expr_parens <|>   -- (1-item)
