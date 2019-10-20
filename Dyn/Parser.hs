@@ -88,20 +88,26 @@ tk_hier = do
 -------------------------------------------------------------------------------
 
 -- (x, (y,_))
-pat :: Parser Patt
-pat = lany <|> lvar <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
+pat :: Bool -> Parser Patt
+pat only_write = lany <|> lwrite <|> lread <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
   lany   = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "_"
             return $ PAny az{pos=pos}
-  lvar   = do
+  lwrite = do
             pos  <- toPos <$> getPosition
+            void <- bool (tk_sym "=") (tk_sym "") only_write
             var  <- tk_var
             return $ PWrite az{pos=pos} var
+  lread  = do
+            pos  <- toPos <$> getPosition
+            void <- bool (tk_sym "~") P.parserZero only_write
+            exp  <- expr
+            return $ PRead az{pos=pos} exp
   lcons  = do
             pos  <- toPos <$> getPosition
             cons <- tk_hier
-            loc  <- optionMaybe $ try pat
+            loc  <- optionMaybe $ try $ pat only_write
             return $ case loc of
                       Nothing -> PCons az{pos=pos} cons
                       Just l  -> PCall az{pos=pos} (PCons az{pos=pos} cons) l
@@ -113,7 +119,7 @@ pat = lany <|> lvar <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
   ltuple = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "("
-            locs <- list (tk_sym ",") pat
+            locs <- list (tk_sym ",") $ pat only_write
             void <- tk_sym ")"
             return (PTuple az{pos=pos} $ locs)
 
@@ -175,7 +181,7 @@ expr_if = do
   void <- tk_key "if"
   e    <- expr
   void <- tk_sym "~"
-  p    <- pat
+  p    <- pat False
   void <- tk_key "then"
   t    <- where_
   void <- tk_key "else"
@@ -191,7 +197,7 @@ expr_case = do
   e    <- expr
   void <- tk_key "of"
   cs   <- list (tk_sym "") $ do
-            p    <- pat
+            p    <- pat False
             void <- tk_sym "->"
             w    <- where_
             return (p,w)
@@ -245,7 +251,7 @@ type_ = do
 dcl :: Parser Dcl
 dcl = do
   pos <- toPos <$> getPosition
-  p   <- pat
+  p   <- pat True
   tp  <- optionMaybe $ do
           void <- try $ tk_sym "::"
           tp   <- type_

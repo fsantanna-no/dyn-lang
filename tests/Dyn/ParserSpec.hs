@@ -117,7 +117,7 @@ spec = do
         (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
       it "if x ~ y then t else f" $
-        (exprToString 0 $ fromRight $ parse' expr "if x ~ y then t else f;")
+        (exprToString 0 $ fromRight $ parse' expr "if x ~ ~y then t else f;")
           `shouldBe` "if x ~ y then\n  t\nelse\n  f"
     describe "prog:" $ do
       it "x where x :: () = ()" $
