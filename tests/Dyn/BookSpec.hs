@@ -31,6 +31,13 @@ add =
     ;
   ;
 
+dec =
+  func ()
+    case ... of
+      Nat.Succ =x -> x
+    ;
+  ;
+
 lte =
   func ()
     case ... of
@@ -192,8 +199,6 @@ multiply =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 
 {-
-
-{-
       it "multiply 3 infinity" $  -- pg 9
         (run True $
           unlines [
@@ -218,6 +223,7 @@ multiply =
 
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
+{-
         it "smallerc" $            -- pg 11
           (run True $
             unlines [
@@ -230,33 +236,27 @@ multiply =
               "return (smallerc (z))(12)"
              ])
           `shouldBe` Right (EData ["Bool","True"] EUnit)
+-}
 
         it "twice" $            -- pg 12
-          (run True $
-            unlines [
-              "func square (x) : (Int -> Int) do",
-              "   return x * x",
-              "end",
-              "func twice (f,x) : (((Int->Int), Int) -> Int) do",
-              "   return f(f x)",
-              "end",
-              "return twice (square, 2)"
-             ])
-          `shouldBe` Right (EData ["Int","16"] EUnit)
+          run ([r|
+main = twice (square,two)
+square =
+  func ()
+    mul (x,x) where
+      x = ...
+    ;
+  ;
+twice =
+  func ()
+    case ... of
+      (=f,=x) -> f (f x)
+    ;
+  ;
+|] ++ nat)
+            `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))))))))))))"
 
-        it "twice" $            -- pg 12
-          (run True $
-            unlines [
-              "func square (x) : (Int -> Int) do",
-              "   return x * x",
-              "end",
-              "func twice (f,x) : (((Int->Int), Int) -> Int) do",
-              "   return f(f x)",
-              "end",
-              "return twice (square, 2)"
-             ])
-          `shouldBe` Right (EData ["Int","16"] EUnit)
-
+{-
         it "twicec" $            -- pg 12
           (run True $
             unlines [
@@ -369,21 +369,22 @@ multiply =
             "return (signum 1) + ((signum (-10)) + (signum (10-10)))"
            ])
         `shouldBe` Right (EData ["Int","0"] EUnit)
+-}
 
       it "fact" $             -- pg 19
-        (run True $
-          unlines [
-            "func fact (n) : (Int->Int) do",
-            "   if n == 0 then",
-            "     return 1",
-            "   else",
-            "     return n * (fact (n-1))",
-            "   end",
-            "end",
-            "return fact 5"
-           ])
-        `shouldBe` Right (EData ["Int","120"] EUnit)
+        run ([r|
+main = fact three
+fact =
+  func ()
+    case ... of
+      Nat.Zero -> one
+      =n       -> mul (n, fact (dec n))
+    ;
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 
+{-
       it "fact - error" $     -- pg 20
         (run True $
           unlines [

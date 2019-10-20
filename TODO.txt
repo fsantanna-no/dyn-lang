@@ -6,5 +6,5 @@
         - todas as vars sao declaradas exatamente uma vez
         - todas sao inicializadas extamente uma vez
 
-- HSpec
-    - pending, pendingWith
+- Full
+    - operadores infixados +, prefixados (+), e funcoes infixadas `f`
