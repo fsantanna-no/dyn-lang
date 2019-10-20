@@ -129,10 +129,11 @@ smaller =
       x
     else
       y
-    ; where
-      (x,y) = ...
-    ;
-  ;
+    ;if
+      where
+        (x,y) = ...
+      ; where
+  ;func
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
 

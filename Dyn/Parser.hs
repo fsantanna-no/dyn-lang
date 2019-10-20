@@ -164,6 +164,7 @@ expr_func = do
   void <- tk_sym ")"
   body <- where_
   void <- tk_sym ";"
+  void <- optional $ tk_key "func"
   return $ EFunc az{pos=pos} tz body
 
 expr_if :: Parser Expr
@@ -178,6 +179,7 @@ expr_if = do
   void <- tk_key "else"
   f    <- where_
   void <- tk_sym ";"
+  void <- optional $ tk_key "if"
   return $ EIf az{pos=pos} e p t f
 
 expr_parens :: Parser Expr
@@ -248,6 +250,7 @@ where_ = do
             void <- tk_key "where"
             dcls <- list (tk_sym "") dcl
             void <- tk_sym ";"
+            void <- optional $ tk_key "where"
             return dcls
   return $ Where (az{pos=pos}, e, dcls)
 

@@ -8,9 +8,6 @@
     - gerar ';'
     - testar ciclo
 
-- Sintaxe
-    - if ... ;if
-
 - Dcl
     - verificar que
         - todas as vars sao declaradas exatamente uma vez
