@@ -35,11 +35,13 @@ list sep p = do
 -------------------------------------------------------------------------------
 
 keywords = [
+    "case",
     "else",
     "error",
     "func",
     "if",
     "then",
+    "of",
     "where"
   ]
 
@@ -86,34 +88,34 @@ tk_hier = do
 -------------------------------------------------------------------------------
 
 -- (x, (y,_))
-pat :: Parser Expr
+pat :: Parser Patt
 pat = lany <|> lvar <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
   lany   = do
             pos  <- toPos <$> getPosition
-            void <- tk_key "_"
-            return $ EAny az{pos=pos}
+            void <- tk_sym "_"
+            return $ PAny az{pos=pos}
   lvar   = do
             pos  <- toPos <$> getPosition
             var  <- tk_var
-            return $ EVar az{pos=pos} var
+            return $ PWrite az{pos=pos} var
   lcons  = do
             pos  <- toPos <$> getPosition
             cons <- tk_hier
             loc  <- optionMaybe $ try pat
             return $ case loc of
-                      Nothing -> ECons az{pos=pos} cons
-                      Just l  -> ECall az{pos=pos} (ECons az{pos=pos} cons) l
+                      Nothing -> PCons az{pos=pos} cons
+                      Just l  -> PCall az{pos=pos} (PCons az{pos=pos} cons) l
   lunit  = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "("
             void <- tk_sym ")"
-            return $ EUnit az{pos=pos}
+            return $ PUnit az{pos=pos}
   ltuple = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "("
             locs <- list (tk_sym ",") pat
             void <- tk_sym ")"
-            return (ETuple az{pos=pos} $ locs)
+            return (PTuple az{pos=pos} $ locs)
 
 -------------------------------------------------------------------------------
 
@@ -181,6 +183,21 @@ expr_if = do
   void <- tk_sym ";"
   void <- optional $ tk_key "if"
   return $ EIf az{pos=pos} e p t f
+
+expr_case :: Parser Expr
+expr_case = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "case"
+  e    <- expr
+  void <- tk_key "of"
+  cs   <- list (tk_sym "") $ do
+            p    <- pat
+            void <- tk_sym "->"
+            w    <- where_
+            return (p,w)
+  void <- tk_sym ";"
+  void <- optional $ tk_key "case"
+  return $ ECase az{pos=pos} e cs
 
 expr_parens :: Parser Expr
 expr_parens = do

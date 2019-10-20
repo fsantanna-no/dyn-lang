@@ -72,13 +72,13 @@ spec = do
   describe "dcl:" $ do
     it "x :: () = ()" $
       parse' dcl "x :: () = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
     it "x :: ()" $
       parse' dcl "x :: ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", Just tz, Nothing))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Nothing))
     it "x = ()" $
       parse' dcl "x = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
+        `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
     it "x" $
       parse' dcl "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
@@ -163,6 +163,13 @@ d :: () = ()
           `shouldBe` "main where\n  main :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  d :: () = ()"
 
     describe "parseToString:" $ do
+
+      it "case" $
+        parseToString "main = case x of Bool.True -> a\nBool.False -> b;"
+          `shouldBe` "xxx"
+      it "case" $
+        parseToString "main = case x of _ -> a;"
+          `shouldBe` "xxx"
 
       it "Nat +" $
         parseToString [r|

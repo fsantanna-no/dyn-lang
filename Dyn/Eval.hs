@@ -62,23 +62,23 @@ evalExpr _ v = v
 type Match = (Env, Either Expr Bool)
 
 --       env    set     pat     e       ret
-match :: Env -> Bool -> Expr -> Expr -> Match
+match :: Env -> Bool -> Patt -> Expr -> Match
 
 match env _ _ (EError z msg) = (env, Left $ EError z msg)
 
-match env _ (EUnit  _) (EUnit _) = (env, Right True)
+match env _ (PUnit  _) (EUnit _) = (env, Right True)
 
-match env True    (EVar z id) e = (envWrite env id e, Right True)
-match env False p@(EVar z id) e = match env False (evalExpr env p) e
+match env _ (PWrite z id) e  = (envWrite env id e, Right True)
+--match env _ (PRead  z e1) e2 = match env False (evalExpr env e1) e2
 
-match env set (ETuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
+match env set (PTuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
   where
     f (pat,e) (env, Right True) = match env set pat e
     f _       (env, ret)        = (env, ret)
 
-match env set (ECons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp == hre)
+match env set (PCons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp == hre)
 
-match env set (ECall _ (ECons _ hrp) pat) (EData _ hre e) =
+match env set (PCall _ (PCons _ hrp) pat) (EData _ hre e) =
   if hrp == hre then
     match env set pat e
   else

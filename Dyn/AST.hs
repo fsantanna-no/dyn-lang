@@ -19,7 +19,6 @@ type ID_Hier = [ID_Data]
 
 data Expr
   = EError Ann String                 -- (msg)        -- error "bug found"
-  | EAny   Ann                        -- ()           -- _
   | EVar   Ann ID_Var                 -- (id)         -- a ; xs
   | EUnit  Ann                        -- ()           -- ()
   | ECons  Ann ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
@@ -28,13 +27,24 @@ data Expr
   | EFunc  Ann Type Where             -- (type,body)
   | ECall  Ann Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
-  | EIf    Ann Expr Expr Where Where  -- (e,p,t,f)    -- if 10 ~> x then t else f
+  | EIf    Ann Expr Patt Where Where  -- (e,p,t,f)    -- if 10 ~> x then t else f
+  | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,exp)] -- case x of A->a B->b _->z
+  deriving (Eq, Show)
+
+data Patt
+  = PAny   Ann                        -- ()           -- _
+  | PWrite Ann ID_Var                 -- (id)         -- =a ; =xs
+  | PRead  Ann Expr                   -- (exp)        -- ~a ; ~xs
+  | PUnit  Ann                        -- ()           -- ()
+  | PCons  Ann ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
+  | PTuple Ann [Patt]                 -- (patts)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
+  | PCall  Ann Patt Patt              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   deriving (Eq, Show)
 
 newtype Where = Where (Ann, Expr, [Dcl])
   deriving (Eq, Show)
 
-newtype Dcl = Dcl (Ann, Expr, Maybe Type, Maybe Where)
+newtype Dcl = Dcl (Ann, Patt, Maybe Type, Maybe Where)
   deriving (Eq, Show)
 
 type Prog = Where
@@ -46,7 +56,6 @@ isEError _            = False
 
 getAnn :: Expr -> Ann
 getAnn (EError z _)       = z
-getAnn (EAny   z)         = z
 getAnn (EVar   z _)       = z
 getAnn (EUnit  z)         = z
 getAnn (ECons  z _)       = z
@@ -56,6 +65,7 @@ getAnn (EFunc  z _ _)     = z
 getAnn (ECall  z _ _)     = z
 getAnn (EArg   z)         = z
 getAnn (EIf    z _ _ _ _) = z
+getAnn (ECase  z _ _) = z
 
 -------------------------------------------------------------------------------
 
@@ -64,7 +74,6 @@ rep spc = replicate spc ' '
 exprToString :: Int -> Expr -> String
 exprToString spc (EError z msg)       = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR: " ++ msg
                                           where (ln,cl) = pos z
-exprToString spc (EAny   _)           = "_"
 exprToString spc (EVar   _ id)        = id
 exprToString spc (EUnit  _)           = "()"
 exprToString spc (ECons  _ hier)      = L.intercalate "." hier
@@ -73,18 +82,34 @@ exprToString spc (EArg   _)           = "..."
 exprToString spc (ETuple _ es)        = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
 exprToString spc (EFunc  _ TUnit bd)  = "func ()\n" ++ rep (spc+2) ++ whereToString (spc+2) bd
 exprToString spc (ECall  _ e1 e2)     = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
-exprToString spc (EIf    _ p e t f)   = "if " ++ exprToString 0 p ++ " ~ " ++ exprToString 0 e
+exprToString spc (EIf    _ e p t f)   = "if " ++ exprToString 0 e ++ " ~ " ++ pattToString 0 p
                                           ++ " then\n" ++ rep (spc+2) ++ whereToString (spc+2) t
                                           ++ "\n" ++ rep spc ++ "else\n" ++ rep (spc+2) ++ whereToString (spc+2) f
+exprToString spc (ECase  _ e cases)   =
+  "case " ++ exprToString 0 e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
+  where
+    f :: (Patt,Where) -> String
+    f (pat,exp) = "\n" ++ rep (spc+2) ++ pattToString 0 pat ++ " -> " ++ whereToString (spc+2) exp
 --exprToString e                    = error $ show e
+
+-------------------------------------------------------------------------------
+
+pattToString :: Int -> Patt -> String
+pattToString spc (PAny   _)           = "_"
+pattToString spc (PWrite _ id)        = {-"=" ++-} id
+pattToString spc (PRead  _ e)         = {-"~" ++-} exprToString spc e
+pattToString spc (PUnit  _)           = "()"
+pattToString spc (PCons  _ hier)      = L.intercalate "." hier
+pattToString spc (PTuple _ es)        = "(" ++ L.intercalate "," (map (pattToString 0) es) ++ ")"
+pattToString spc (PCall  _ p1 p2)     = "(" ++ pattToString 0 p1 ++ " " ++ pattToString 0 p2 ++ ")"
 
 -------------------------------------------------------------------------------
 
 dclToString :: Int -> Dcl -> String
 
-dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = exprToString spc pat ++ " :: () = " ++ whereToString spc w
-dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = exprToString spc pat ++ " :: ()"
-dclToString spc (Dcl (_, pat, Nothing,    Just w))  = exprToString spc pat ++ " = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = pattToString spc pat ++ " :: () = " ++ whereToString spc w
+dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = pattToString spc pat ++ " :: ()"
+dclToString spc (Dcl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 

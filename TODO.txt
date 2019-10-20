@@ -1,3 +1,7 @@
+- Patt
+- remove If
+- Parsing
+    - , como espaco?
 - trocar IF por MATCH
     - precisa voltar com o =x e ~x
 
