@@ -12,27 +12,9 @@ import Dyn.Eval
 main :: IO ()
 main = hspec spec
 
-spec :: Spec
-spec = do
+-------------------------------------------------------------------------------
 
-  describe "TODO:" $ do
-    it "f ()" $
-      run "main = f () \n f = func () ...;" `shouldBe` "()"
-
-    it "Nat" $
-      run "main = Nat.Succ Nat.Zero"
-        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
-
-    it "Nat +" $
-      run ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
-        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
-
-    it "Nat *" $
-      run ("main = mul (two,three)\n" ++ nat)
-        `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
-
-  where
-    nat = [r|
+nat = [r|
 mul =
   func ()
     if y ~ Nat.Zero then
@@ -59,6 +41,11 @@ add =
     ;
   ;
 
+ten   = Nat.Succ nine
+nine  = Nat.Succ eight
+eight = Nat.Succ seven
+seven = Nat.Succ six
+six   = Nat.Succ five
 five  = Nat.Succ four
 four  = Nat.Succ three
 three = Nat.Succ two
@@ -67,7 +54,27 @@ one   = Nat.Succ zero
 zero  = Nat.Zero
 |]
 
-{-
+-------------------------------------------------------------------------------
+
+spec :: Spec
+spec = do
+
+  describe "PRE" $ do
+    it "f ()" $
+      run "main = f () \n f = func () ...;" `shouldBe` "()"
+
+    it "Nat" $
+      run "main = Nat.Succ Nat.Zero"
+        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
+
+    it "Nat +" $
+      run ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
+        `shouldBe` "(Nat.Succ (Nat.Zero ()))"
+
+    it "Nat *" $
+      run ("main = mul (two,three)\n" ++ nat)
+        `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ())))))))"
+
 -------------------------------------------------------------------------------
 
     -- TODO-3-20: square : Float -> Float
@@ -79,15 +86,18 @@ zero  = Nat.Zero
     describe "Chapter 1.1 - Sessions and Scripts:" $ do       -- pg 1
 
       it "square" $                   -- pg 2
-        (run True $
-          unlines [
-            "func square (x) : (Int -> Int) do",
-            "   return x * x",
-            "end",
-            "return square 3"
-           ])
-        `shouldBe` Right (EData ["Int","9"] EUnit)
+        run ([r|
+main = square three
+square =
+  func ()
+    mul (x,x) where
+      x = ...
+    ;
+  ;
+|] ++ nat)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ()))))))))))"
 
+{-
       it "smaller" $                  -- pg 2
         (run True $
           unlines [

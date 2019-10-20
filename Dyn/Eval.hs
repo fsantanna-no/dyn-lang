@@ -11,8 +11,11 @@ import Dyn.Parser
 
 type Env = [(ID_Var,Expr)]
 
-envRead :: Env -> ID_Var -> Expr
-envRead env id = snd $ head $ filter ((==id).fst) env
+envRead :: Env -> Ann -> ID_Var -> Expr
+envRead env z id =
+  case filter ((==id).fst) env of
+    []        -> EError z $ "unassigned variable '" ++ id ++ "'"
+    ((_,x):_) -> x
 
 envWrite :: Env -> ID_Var -> Expr -> Env
 envWrite env id e = (id,e) : env
@@ -20,11 +23,11 @@ envWrite env id e = (id,e) : env
 -------------------------------------------------------------------------------
 
 evalExpr :: Env -> Expr -> Expr
-evalExpr env (EError z)    = EError z
-evalExpr env (EUnit  z)    = EUnit  z
-evalExpr env (EVar   z id) = envRead env id
-evalExpr env (EArg   z)    = envRead env "..."
-evalExpr env (ECons  z hr) = EData z hr (EUnit z)
+evalExpr env (EError z msg) = EError z msg
+evalExpr env (EUnit  z)     = EUnit  z
+evalExpr env (EVar   z id)  = envRead env z id
+evalExpr env (EArg   z)     = envRead env z "..."
+evalExpr env (ECons  z hr)  = EData z hr (EUnit z)
 
 evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
   where
@@ -37,16 +40,16 @@ evalExpr env (EIf z e p t f) = toError $ snd $ match env False p $ evalExpr env 
     toError (Left err) = err
     toError (Right ok) = evalWhere env $ bool f t ok
 
-evalExpr env (ECall _ (EError z)     _)   = EError z
+evalExpr env (ECall _ (EError z msg)  _)   = EError z msg
 evalExpr env (ECall z f arg) =
   case (evalExpr env f, evalExpr env arg) of
-    ((EData _ ["Show"] _) , x          ) -> traceShowId x
-    ((EError z1)          , _          ) -> EError z1
-    (_                    , (EError z2)) -> EError z2
-    ((EFunc _ _ f')       , arg'       ) -> evalWhere env' f' where
-                                              env' = envWrite env "..." arg'
-    ((EData z1 hr _)      , arg'       ) -> EData z1 hr arg'
-    (_                    , _          ) -> EError z
+    ((EData _ ["Show"] _) , x              ) -> traceShowId x
+    (e1@(EError _ _)      , _              ) -> e1
+    (_                    , e2@(EError _ _)) -> e2
+    ((EFunc _ _ f')       , arg'           ) -> evalWhere env' f' where
+                                                  env' = envWrite env "..." arg'
+    ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'
+    (_                    , _              ) -> EError z "invalid call"
 
 evalExpr _ v = v
 
@@ -61,7 +64,7 @@ type Match = (Env, Either Expr Bool)
 --       env    set     pat     e       ret
 match :: Env -> Bool -> Expr -> Expr -> Match
 
-match env _ _ (EError z) = (env, Left $ EError z)
+match env _ _ (EError z msg) = (env, Left $ EError z msg)
 
 match env _ (EUnit  _) (EUnit _) = (env, Right True)
 
@@ -96,12 +99,12 @@ evalWhere :: Env -> Where -> Expr
 evalWhere env (Where (_, e, dcls)) =
   case foldr f (env, Right True) dcls of
     (env', Right True)  -> evalExpr env' e
-    (_,    Right False) -> EError az
+    (_,    Right False) -> EError az "invalid assignment"
     (_,    Left  err)   -> err
   where
     f :: Dcl -> Match -> Match
     f dcl (env, Right True)  = evalDcl env dcl
-    f dcl (env, Right False) = (env, Left $ EError az) -- match fail (irrefutable pattern)
+    f dcl (env, Right False) = (env, Left $ EError az "invalid assignment")
     f dcl (env, Left  e)     = (env, Left e)           -- found error
 
 -------------------------------------------------------------------------------

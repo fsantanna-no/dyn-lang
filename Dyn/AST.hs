@@ -18,7 +18,7 @@ type ID_Data = String
 type ID_Hier = [ID_Data]
 
 data Expr
-  = EError Ann
+  = EError Ann String                 -- (msg)        -- error "bug found"
   | EAny   Ann                        -- ()           -- _
   | EVar   Ann ID_Var                 -- (id)         -- a ; xs
   | EUnit  Ann                        -- ()           -- ()
@@ -39,13 +39,13 @@ newtype Dcl = Dcl (Ann, Expr, Maybe Type, Maybe Where)
 
 type Prog = Where
 
-isEError (EError _) = True
-isEError _          = False
+isEError (EError _ _) = True
+isEError _            = False
 
 -------------------------------------------------------------------------------
 
 getAnn :: Expr -> Ann
-getAnn (EError z)         = z
+getAnn (EError z _)       = z
 getAnn (EAny   z)         = z
 getAnn (EVar   z _)       = z
 getAnn (EUnit  z)         = z
@@ -62,7 +62,8 @@ getAnn (EIf    z _ _ _ _) = z
 rep spc = replicate spc ' '
 
 exprToString :: Int -> Expr -> String
-exprToString spc (EError _)           = "error"
+exprToString spc (EError z msg)       = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR: " ++ msg
+                                          where (ln,cl) = pos z
 exprToString spc (EAny   _)           = "_"
 exprToString spc (EVar   _ id)        = id
 exprToString spc (EUnit  _)           = "()"

@@ -121,7 +121,7 @@ expr_error :: Parser Expr
 expr_error = do
   pos  <- toPos <$> getPosition
   void <- tk_key "error"
-  return $ EError az{pos=pos}
+  return $ EError az{pos=pos} "<user>"
 
 expr_arg :: Parser Expr
 expr_arg = do

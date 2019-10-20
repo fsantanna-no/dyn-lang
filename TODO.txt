@@ -1,7 +1,12 @@
 - trocar IF por MATCH
     - precisa voltar com o =x e ~x
+
 - Eval
     - Book?
+
+- toString
+    - gerar ';'
+    - testar ciclo
 
 - Sintaxe
     - if ... ;if

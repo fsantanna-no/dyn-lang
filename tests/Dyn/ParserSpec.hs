@@ -56,7 +56,7 @@ spec = do
         `shouldBe` Right (ECall az{pos=(1,1)} (EVar az{pos=(1,1)} "a") (EVar az{pos=(1,3)} "b"))
     it "error" $
       parse' expr "error"
-        `shouldBe` Right (EError az{pos=(1,1)})
+        `shouldBe` Right (EError az{pos=(1,1)} "<user>")
     it "errors" $
       parse' expr "errors"
         `shouldBe` Right (EVar az{pos=(1,1)} "errors")

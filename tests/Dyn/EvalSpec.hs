@@ -47,7 +47,7 @@ spec = do
   describe "parser:" $ do
     it "error" $
       (evalProg $ fromRight $ parse "main = error")
-        `shouldBe` (EError az{pos=(1,8)})
+        `shouldBe` (EError az{pos=(1,8)} "<user>")
     it "match-true" $
       (evalProg $ fromRight $ parse "main = if () ~ () then () else error;")
         `shouldBe` (EUnit az{pos=(1,24)})
@@ -56,7 +56,7 @@ spec = do
         `shouldBe` (EUnit az{pos=(1,34)})
     it "match-error" $
       (evalProg $ fromRight $ parse "main = if error ~ () then () else error;")
-        `shouldBe` (EError az{pos=(1,11)})
+        `shouldBe` (EError az{pos=(1,11)} "<user>")
     it "assign-var" $
       (evalProg $ fromRight $ parse "main = a where a = A;")
         `shouldBe` EData az{pos=(1,20)} ["A"] (EUnit az{pos=(1,20)})
