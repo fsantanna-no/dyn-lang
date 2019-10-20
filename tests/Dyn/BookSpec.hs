@@ -41,6 +41,23 @@ add =
     ;
   ;
 
+lte = func ()
+  if x ~ Nat.Zero then
+    Bool.True
+  else
+    if y ~ Nat.Zero then
+      Bool.False
+    else
+      lte (x',y') where
+        Nat.Succ x' = x
+        Nat.Succ y' = y
+      ;
+    ;
+  ; where
+    (x,y) = ...
+  ;
+;
+
 ten   = Nat.Succ nine
 nine  = Nat.Succ eight
 eight = Nat.Succ seven
@@ -85,7 +102,7 @@ spec = do
 
     describe "Chapter 1.1 - Sessions and Scripts:" $ do       -- pg 1
 
-      it "square" $                   -- pg 2
+      it "square" $
         run ([r|
 main = square three
 square =
@@ -96,6 +113,12 @@ square =
   ;
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Zero ()))))))))))"
+
+      it "lt" $
+        run ([r|
+main = (lte (three,two), lte (three,three))
+|] ++ nat)
+          `shouldBe` "((Bool.False ()),(Bool.True ()))"
 
 {-
       it "smaller" $                  -- pg 2
