@@ -541,7 +541,7 @@ or = func ->
 |])
           `shouldBe` "Bool.False"
 
-      it "===, =/=" $         -- pg 31
+      it "eq, neq" $         -- pg 31
         run ([r|
 main = neq (eq (Bool.True,Bool.True), Bool.False)
 eq = func ->

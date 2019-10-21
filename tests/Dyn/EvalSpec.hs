@@ -67,7 +67,7 @@ spec = do
       (evalProg $ fromRight $ parse "main = (a,b) where (a,b) = (A,B);")
         `shouldBe` ETuple az{pos=(1,8)} [EData az{pos=(1,29)} ["A"] (EUnit az{pos=(1,29)}),EData az{pos=(1,31)} ["B"] (EUnit az{pos=(1,31)})]
 
-  describe "run:"$ do
+  describe "run:" $ do
     it "(" $
       run "main = (" `shouldBe` "(line 1, column 9):\nunexpected end of input\nexpecting expression"
     it "()" $
