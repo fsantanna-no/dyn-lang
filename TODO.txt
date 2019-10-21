@@ -1,5 +1,11 @@
-- Eval
-    - Book?
+- dicts w/ typesys???
+- data
+- typesys
+    - inference?
+- generic fs
+    - w/o cs
+    - w/  cs
+- closures
 
 - Sintaxe
     - mudar de ;  para .

@@ -248,7 +248,7 @@ multiply =
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
 {-
-      TODO: closures
+        -- TODO: closures
         it "smallerc" $            -- pg 11
           (run True $
             unlines [
@@ -282,7 +282,7 @@ twice =
             `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
 
 {-
-        TODO: closures
+        -- TODO: closures
         it "twicec" $            -- pg 12
           (run True $
             unlines [
@@ -380,7 +380,7 @@ twice =
 
     describe "Chapter 1.5 - Definitions:" $ do                -- pg 17
 
-      TODO: negative numbers
+      -- TODO: negative numbers
       it "signum" $           -- pg 18
         (run True $
           unlines [
@@ -412,7 +412,7 @@ fact =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
 {-
-      TODO: negative numbers
+      -- TODO: negative numbers
       it "fact - error" $     -- pg 20
         (run True $
           unlines [
@@ -474,7 +474,7 @@ f =
     describe "Chapter 2.1 - Booleans:" $ do                   -- pg 29
 
 {-
-      TODO: typesys
+      -- TODO: typesys
       it "data" $             -- pg 29
         (run True $
           unlines [
@@ -558,7 +558,7 @@ neq = func ()
           `shouldBe` "Bool.True"
 
 {-
-      TODO: typeclass
+      -- TODO: typeclass
       it "IEqualable: default =/=" $   -- pg 32
         (run True $
           unlines [
@@ -633,47 +633,23 @@ analyse = func ()
 |] ++ nat)
           `shouldBe` "(Tri.Fail,Tri.Scal,Tri.Isos,Tri.Equi)"
 
-{-
-
-      it "analyse triangles" $         -- pg 33
-        (run True $
-          pre ++ unlines [
-            "data Triangle",
-            "data Triangle.Failure",
-            "data Triangle.Isosceles",
-            "data Triangle.Equilateral",
-            "data Triangle.Scalene",
-            "",
-            "implementation of IEqualable for Triangle with",
-            "end",
-            "",
-            "func analyse (x,y,z) : ((Int,Int,Int) -> Triangle) do",
-            "   if (x + y) @<= z then",
-            "     return Triangle.Failure",
-            "   else/if x === z then",
-            "     return Triangle.Equilateral",
-            "   else/if (x === y) or (y === z) then",
-            "     return Triangle.Isosceles",
-            "   else",
-            "     return Triangle.Scalene",
-            "   end",
-            "end",
-            "return ((((analyse (10,20,30)) === (Triangle.Failure)) and ((analyse (10,20,25)) === (Triangle.Scalene)))",
-            "   and ((analyse (10,20,20)) === (Triangle.Isosceles))) and ((analyse (10,10,10)) === (Triangle.Equilateral))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
-
       it "implication" $         -- pg 34
-        (run True $
-          pre ++ unlines [
-            "func impl (x,y) : ((Bool,Bool) -> Bool) do",
-            " return (not x) or y",
-            "end",
-            "return (((impl (Bool.False,Bool.True)) and (impl (Bool.True,Bool.True)))",
-            "  and (impl (Bool.False,Bool.False))) and (not (impl (Bool.True,Bool.False)))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        run ([r|
+main = (impl (Bool.False,Bool.True),
+        impl (Bool.True, Bool.True),
+        impl (Bool.False,Bool.False),
+        not (impl (Bool.True,Bool.False)))
 
+impl = func ()
+  or (not x, y) where
+    (x,y) = ...
+  ;
+;
+|] ++ bool)
+          `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True)"
+
+{-
+      TODO: typeclass
       it "analyse triangles" $         -- pg 35
         (run True $
           pre ++ unlines [
