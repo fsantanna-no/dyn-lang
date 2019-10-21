@@ -61,6 +61,13 @@ nat = [r|
 |]
 
 bool = [r|
+  not = func ()
+    case ... of
+      Bool.False -> Bool.True
+      Bool.True  -> Bool.False
+    ;
+  ;
+
   and = func ()
     case ... of
       (Bool.False, _) -> Bool.False
@@ -534,66 +541,27 @@ or = func ()
 |])
           `shouldBe` "Bool.False"
 
-{-
       it "===, =/=" $         -- pg 31
-        (run True $
-          unlines [
-            "func not (x) : (Bool->Bool) do",
-            "   if x matches Bool.True then",
-            "     return Bool.False",
-            "   else",
-            "     return Bool.True",
-            "   end",
-            "end",
-            "func and (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.False then",
-            "     return Bool.False",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "func or (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.True then",
-            "     return Bool.True",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "func === (x,y) : ((Bool,Bool)->Bool) do",
-            "   return (x and y) or ((not x) and (not y))",
-            "end",
-            "func =/= (x,y) : ((Bool,Bool)->Bool) do",
-            "   return not (x === y)",
-            "end",
-            "return ((Bool.True) === (Bool.True)) =/= Bool.False"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        run ([r|
+main = neq (eq (Bool.True,Bool.True), Bool.False)
+eq = func ()
+  or (and (x,y), (and (not x, not y))) where
+    (x,y) = ...
+  ;
+;
+neq = func ()
+  not (eq (x,y)) where
+    (x,y) = ...
+  ;
+;
+|] ++ bool)
+          `shouldBe` "Bool.True"
 
+{-
+      TODO: typeclass
       it "IEqualable: default =/=" $   -- pg 32
         (run True $
           unlines [
-            "func not (x) : (Bool->Bool) do",
-            "   if x matches Bool.True then",
-            "     return Bool.False",
-            "   else",
-            "     return Bool.True",
-            "   end",
-            "end",
-            "func and (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.False then",
-            "     return Bool.False",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "func or (x,y) : ((Bool,Bool)->Bool) do",
-            "   if x matches Bool.True then",
-            "     return Bool.True",
-            "   else",
-            "     return y",
-            "   end",
-            "end",
-            "",
             "interface IEqualable for a with",
             "   func ===       : ((a,a) -> Bool)",
             "   func =/= (x,y) : ((a,a) -> Bool) do return not (x === y) end",
@@ -626,6 +594,7 @@ or = func ()
            ])
         `shouldBe` Left "(line 78, column 16):\nvariable '@<=' has no associated implementation for '((Xx.Aa,Xx.Bb) -> ?)'\n"
 
+      -- TODO: modulus operator
       it "leap years" $         -- pg 33
         (run True $
           pre ++ unlines [
@@ -639,25 +608,32 @@ or = func ()
             "return (((not (leapyear 1979)) and (leapyear 1980)) and (not (leapyear 100))) and (leapyear 400)"
            ])
         `shouldBe` Right (EData ["Bool","True"] EUnit)
+-}
 
       it "analyse triangles" $         -- pg 33
-        (run True $
-          pre ++ unlines [
-            "func analyse (x,y,z) : ((Int,Int,Int) -> Int) do",
-            "   if (x + y) <= z then",
-            "     return 0",  -- Fail
-            "   else/if x == z then",
-            "     return 1",  -- Equi
-            "   else/if (x == y) or (y == z) then",
-            "     return 2",  -- Isos
-            "   else",
-            "     return 3",  -- Scal
-            "   end",
-            "end",
-            "return ((((analyse (10,20,30)) == 0) and ((analyse (10,20,25)) == 3))",
-            "   and ((analyse (10,20,20)) == 2)) and ((analyse (10,10,10)) == 1)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        run ([r|
+main = (analyse (ten, twenty, mul(ten,three)),
+        analyse (ten, twenty, add(twenty,five)),
+        analyse (ten, twenty, twenty),
+        analyse (ten, ten,    ten))
+twenty = add (ten,ten)
+analyse = func ()
+  case lte (add (x,y), z) of
+    Bool.True -> Tri.Fail
+    _ -> case (x,y,z) of
+      (~z,_,_) -> Tri.Equi
+      (~y,_,_) -> Tri.Isos
+      (_,_,~y) -> Tri.Isos
+      _        -> Tri.Scal
+    ;
+  ; where
+    (x,y,z) = ...
+  ;
+;
+|] ++ nat)
+          `shouldBe` "(Tri.Fail,Tri.Scal,Tri.Isos,Tri.Equi)"
+
+{-
 
       it "analyse triangles" $         -- pg 33
         (run True $

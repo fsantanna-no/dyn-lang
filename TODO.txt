@@ -6,6 +6,7 @@
     - sequencia:
         ; seq1
         ; seq2
+        ; -> x
     - set para mudar valor de variavel
 
 - Dcl
