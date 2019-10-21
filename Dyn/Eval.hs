@@ -113,15 +113,15 @@ evalDcl env _ = (env, Right True)
 -------------------------------------------------------------------------------
 
 evalWhere :: Env -> Where -> Expr
-evalWhere env (Where (_, e, dcls)) =
+evalWhere env (Where (z, e, dcls)) =
   case foldr f (env, Right True) dcls of
     (env', Right True)  -> evalExpr env' e
-    (_,    Right False) -> EError az "invalid assignment"
+    (_,    Right False) -> EError z "invalid assignment"
     (_,    Left  err)   -> err
   where
     f :: Dcl -> Match -> Match
     f dcl (env, Right True)  = evalDcl env dcl
-    f dcl (env, Right False) = (env, Left $ EError az "invalid assignment")
+    f dcl (env, Right False) = (env, Left $ EError z "invalid assignment")
     f dcl (env, Left  e)     = (env, Left e)           -- found error
 
 -------------------------------------------------------------------------------

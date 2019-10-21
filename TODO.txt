@@ -1,4 +1,3 @@
-- func: tipo opcional
 - dicts w/o typesys???
 - data
 - typesys
@@ -22,6 +21,8 @@
       ;
 - Full
     - numerais -> data
+    - typedef:
+        - Dict.IEq
 
 - Dcl
     - verificar que
