@@ -165,12 +165,12 @@ expr_func :: Parser Expr
 expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
-  void <- tk_sym "("
-  void <- tk_sym ")"
+  tp   <- option tz type_
+  void <- tk_sym "->"
   body <- where_
   void <- tk_sym ";"
-  void <- optional $ tk_key "func"
-  return $ EFunc az{pos=pos} tz body
+  void <- optional $ tk_key "func"    -- ambiguity with (func $ func)
+  return $ EFunc az{pos=pos} tp body
 
 expr_case :: Parser Expr
 expr_case = do
@@ -184,7 +184,7 @@ expr_case = do
             w    <- where_
             return (p,w)
   void <- tk_sym ";"
-  void <- optional $ tk_key "case"
+  void <- optional $ tk_key "case"    -- ambiguity with (case $ case)
   return $ ECase az{pos=pos} e cs
 
 expr_parens :: Parser Expr

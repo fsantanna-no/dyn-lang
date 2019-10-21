@@ -73,17 +73,17 @@ spec = do
     it "()" $
       run "main = ()" `shouldBe` "()"
     it "f ()" $
-      run "main = f () where f = func () ...;;" `shouldBe` "()"
+      run "main = f () where f = func () -> ...;;" `shouldBe` "()"
     it "Xx a = ()" $
       run "main = a where Xx a = Xx ();" `shouldBe` "()"
     it "patt - read - fail" $
-      run "main = case () of ~func()(); -> ();" `shouldBe` "(line=1, col=19) ERROR: invalid pattern"
+      run "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR: invalid pattern"
     it "patt - read - ok" $
       run "main = case () of ~() -> ();" `shouldBe` "()"
     it "patt - read - ok" $
       run "main = case ((),()) of ~((),()) -> ();" `shouldBe` "()"
     it "f ()" $
-      run "main = f () \n f = func () ...;" `shouldBe` "()"
+      run "main = f () \n f = func ()-> ...;" `shouldBe` "()"
     it "Nat" $
       run "main = Nat.Succ Nat.Zero"
         `shouldBe` "(Nat.Succ Nat.Zero)"

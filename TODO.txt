@@ -1,4 +1,5 @@
-- dicts w/ typesys???
+- func: tipo opcional
+- dicts w/o typesys???
 - data
 - typesys
     - inference?
@@ -7,13 +8,20 @@
     - w/  cs
 - closures
 
-- Sintaxe
-    - mudar de ;  para .
+- Basic
+    - mudar de ; para .
     - sequencia:
         ; seq1
         ; seq2
         ; -> x
     - set para mudar valor de variavel
+    - data sealed
+        Bool
+        Bool.False
+        Bool.True
+      ;
+- Full
+    - numerais -> data
 
 - Dcl
     - verificar que
@@ -22,3 +30,11 @@
 
 - Full
     - operadores infixados +, prefixados (+), e funcoes infixadas `f`
+
+-------------------------------------------------------------------------------
+
+- 2 relações de subtipagem
+    - heranças
+        - struct
+    - classes
+        - dicionario

@@ -80,7 +80,7 @@ exprToString spc (EData  _ h (EUnit _)) = L.intercalate "." h
 exprToString spc (EData  _ h st)        = "(" ++ L.intercalate "." h ++ " " ++ exprToString 0 st ++ ")"
 exprToString spc (EArg   _)             = "..."
 exprToString spc (ETuple _ es)          = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
-exprToString spc (EFunc  _ TUnit bd)    = "func ()\n" ++ rep (spc+2) ++ whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
+exprToString spc (EFunc  _ TUnit bd)    = "func () ->\n" ++ rep (spc+2) ++ whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
 exprToString spc (ECall  _ e1 e2)       = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
 
 exprToString spc (ECase  _ e cases)     =
