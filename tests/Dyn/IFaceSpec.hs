@@ -36,18 +36,18 @@ bool = [r|
 -- instance IEq (Bool)
 ieq_bool = [r|
   -- Wrappers are closures with fixed "ieq_bool" dict
-  eq_bool  = func -> eq (ieq_bool,x,y) where
-              (x,y)  = ...
-              (eq,_) = ieq_bool
-             ;;
-  neq_bool = func -> neq (ieq_bool,x,y) where
+  eq_bool  = func -> eq_ (ieq_bool,x,y) where
               (x,y)   = ...
-              (_,neq) = ieq_bool
+              (eq_,_) = ieq_bool
+             ;;
+  neq_bool = func -> neq_ (ieq_bool,x,y) where
+              (x,y)    = ...
+              (_,neq_) = ieq_bool
              ;;
 
--- Dict receives eq/neq methods.
---  - implements eq, uses default neq
---  - methods receive extra dict
+  -- Dict receives eq/neq methods.
+  --  - implements eq, uses default neq
+  --  - methods receive extra dict
   ieq_bool = (eq_bool_,neq_) where
     eq_bool_ = func ->
       or (and (x,y), (and (not x, not y))) where
@@ -62,6 +62,7 @@ ieq = [r|
   -- Methods are renamed to include "dict" param:
   --  - eq_ is not implemented
   --  - neq_ has a default implentation
+  -- eq_ = ???
   neq_ = func ->
     not (eq_ ((eq_,neq_),x,y)) where
       ((eq_,neq_),x,y) = ...
@@ -86,7 +87,6 @@ main = v where  -- neq (eq(T,T), F)
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-{-
     it "IEqualable/IOrderable" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
@@ -96,27 +96,56 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         lt_bool  (Bool.False, Bool.True) )
 ;
 
+  -- implementation IOrderable for Bool
+  -- wrappers
+  lt_bool  = func -> lt_  (ieq_bool,iord_bool,x,y) where
+              (x,y)        = ...
+              (lt_,_,_,_)  = iord_bool
+             ;;
+  lte_bool = func -> lte_ (ieq_bool,iord_bool,x,y) where
+              (x,y)        = ...
+              (_,lte_,_,_) = iord_bool
+             ;;
+  gt_bool  = func -> gt_  (ieq_bool,iord_bool,x,y) where
+              (x,y)        = ...
+              (_,_,gt_,_)  = iord_bool
+             ;;
+  gte_bool = func -> gte_ (ieq_bool,iord_bool,x,y) where
+              (x,y)        = ...
+              (_,_,_,gte_) = iord_bool
+             ;;
+  -- dict
+  iord_bool = (lt_bool_,lte_,gt_,gte_) where
+    lt_bool_ = func ->
+      case (x,y) of
+        (Bool.False, Bool.False) -> Bool.False
+        (Bool.False, Bool.True)  -> Bool.True
+        (Bool.True,  Bool.False) -> Bool.False
+        (Bool.True,  Bool.True)  -> Bool.False
+      ; where
+        (_,_,x,y) = ...
+      ;
+    ;
+  ;
+
   -- interface IOrderable
+  -- lt_ = ???
   lte_ = func ->
     or ( lt_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y),
-         eq_ ((eq_,neq_),x,y) )
-
-interface IOrderable for a where (a is IEqualable) with
-  func @<        : ((a,a) -> Bool)
-  func @<= (x,y) : ((a,a) -> Bool) do return (x @< y) or (x === y) end
-  func @>  (x,y) : ((a,a) -> Bool) do return not (x @<= y)         end
-  func @>= (x,y) : ((a,a) -> Bool) do return (x @> y) or (x === y) end
-end
-
-implementation of IOrderable for Bool with
-  func @< (x,y) : ((Bool,Bool) -> Bool) do
-    if      (x, y) matches (Bool.False, Bool.False) then return Bool.False
-    else/if (x, y) matches (Bool.False, Bool.True)  then return Bool.True
-    else/if (x, y) matches (Bool.True,  Bool.False) then return Bool.False
-    else/if (x, y) matches (Bool.True,  Bool.True)  then return Bool.False
-    end
-  end
-end
-|] ++ ieq_bool ++ bool)
+         eq_ ((eq_,neq_),x,y) ) where
+      ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
+    ;
+  ;
+  gt_ = func ->
+    not (lte_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y)) where
+      ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
+    ;
+  ;
+  gte_ = func ->
+    or ( gt_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y),
+         eq_ ((eq_,neq_),x,y) ) where
+      ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
+    ;
+  ;
+|] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
--}
