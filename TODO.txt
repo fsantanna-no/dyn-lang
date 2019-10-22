@@ -1,6 +1,8 @@
 - tipos, mas sem typesys
 - dicts w/o typesys???
-    - implementacao para tipo generico (implementation of IEq for (a,a))
+    - implementacao para tipo generico
+        - implementation of IEq for (a,a)
+        - implementation of IEq for a where a is IXx
 - data
 - typesys
     - inference?

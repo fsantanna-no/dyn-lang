@@ -16,13 +16,20 @@ spec = do
 
   describe "manual" $ do
 
-    it "IEqualable: default neq" $
+    it "IEqualable: overrides eq" $
+      run ([r|
+main = v where  -- neq (eq(T,T), F)
+  v = neq_ ((eq_,neq_), eq_ ((eq_,neq_),Bool.True,Bool.True), Bool.False)
+;
+|] ++ ieq ++ bool)
+        `shouldBe` "Bool.True"
+
+    it "IEqualable: (eq(T,F) == (F,T)" $
       run ([r|
 main = v where  -- neq (eq(T,T), F)
   -- typesystem renames to concrete type methods
   v = neq_bool (eq_bool (Bool.True,Bool.True), Bool.False)
 ;
-
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
@@ -112,6 +119,7 @@ ieq_bool = [r|
   -- Dict receives eq/neq methods.
   --  - implements eq, uses default neq
   --  - methods receive extra dict
+  -- overrides default eq
   ieq_bool = (eq_bool_,neq_) where
     eq_bool_ = func ->
       or (and (x,y), (and (not x, not y))) where
@@ -146,9 +154,16 @@ iord = [r|
 -- interface IEq(eq,neq)
 ieq = [r|
   -- Methods are renamed to include "dict" param:
-  --  - eq_ is not implemented
+  --  - eq_  has a default implentation
   --  - neq_ has a default implentation
-  -- eq_ = ???
+  eq_ = func ->
+    case (x,y) of
+      (~y,~x) -> Bool.True
+      _       -> Bool.False
+    ; where
+      (x,y) = ...
+    ;
+  ;
   neq_ = func ->
     not (eq_ ((eq_,neq_),x,y)) where
       ((eq_,neq_),x,y) = ...
