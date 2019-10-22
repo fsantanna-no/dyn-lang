@@ -71,7 +71,7 @@ getAnn (ECase  z _ _) = z
 rep spc = replicate spc ' '
 
 exprToString :: Int -> Expr -> String
-exprToString spc (EError z msg)         = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR: " ++ msg
+exprToString spc (EError z msg)         = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR : " ++ msg
                                             where (ln,cl) = pos z
 exprToString spc (EVar   _ id)          = id
 exprToString spc (EUnit  _)             = "()"
