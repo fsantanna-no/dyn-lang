@@ -9,67 +9,6 @@ import Dyn.AST
 import Dyn.Parser
 import Dyn.Eval
 
-bool = [r|
-  not = func ->
-    case ... of
-      Bool.False -> Bool.True
-      Bool.True  -> Bool.False
-    ;
-  ;
-
-  and = func ->
-    case ... of
-      (Bool.False, _) -> Bool.False
-      (_, Bool.False) -> Bool.False
-      _               -> Bool.True
-    ;
-  ;
-
-  or = func ->
-    case ... of
-      (Bool.True, _)  -> Bool.True
-      (_,         =y) -> y
-    ;
-  ;
-|]
-
--- instance IEq (Bool)
-ieq_bool = [r|
-  -- Wrappers are closures with fixed "ieq_bool" dict
-  eq_bool  = func -> eq_ (ieq_bool,x,y) where
-              (x,y)   = ...
-              (eq_,_) = ieq_bool
-             ;;
-  neq_bool = func -> neq_ (ieq_bool,x,y) where
-              (x,y)    = ...
-              (_,neq_) = ieq_bool
-             ;;
-
-  -- Dict receives eq/neq methods.
-  --  - implements eq, uses default neq
-  --  - methods receive extra dict
-  ieq_bool = (eq_bool_,neq_) where
-    eq_bool_ = func ->
-      or (and (x,y), (and (not x, not y))) where
-        (_,x,y) = ...
-      ;
-    ;
-  ;
-|]
-
--- interface IEq(eq,neq)
-ieq = [r|
-  -- Methods are renamed to include "dict" param:
-  --  - eq_ is not implemented
-  --  - neq_ has a default implentation
-  -- eq_ = ???
-  neq_ = func ->
-    not (eq_ ((eq_,neq_),x,y)) where
-      ((eq_,neq_),x,y) = ...
-    ;
-  ;
-|]
-
 main :: IO ()
 main = hspec spec
 
@@ -95,8 +34,37 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         gt_bool  (Bool.False, Bool.False),
         lt_bool  (Bool.False, Bool.True) )
 ;
+|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+        `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-  -- implementation IOrderable for Bool
+-------------------------------------------------------------------------------
+
+bool = [r|
+  not = func ->
+    case ... of
+      Bool.False -> Bool.True
+      Bool.True  -> Bool.False
+    ;
+  ;
+
+  and = func ->
+    case ... of
+      (Bool.False, _) -> Bool.False
+      (_, Bool.False) -> Bool.False
+      _               -> Bool.True
+    ;
+  ;
+
+  or = func ->
+    case ... of
+      (Bool.True, _)  -> Bool.True
+      (_,         =y) -> y
+    ;
+  ;
+|]
+
+-- implementation IOrderable for Bool
+iord_bool = [r|
   -- wrappers
   lt_bool  = func -> lt_  (ieq_bool,iord_bool,x,y) where
               (x,y)        = ...
@@ -127,8 +95,34 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
       ;
     ;
   ;
+|]
 
-  -- interface IOrderable
+-- instance IEq (Bool)
+ieq_bool = [r|
+  -- Wrappers are closures with fixed "ieq_bool" dict
+  eq_bool  = func -> eq_ (ieq_bool,x,y) where
+              (x,y)   = ...
+              (eq_,_) = ieq_bool
+             ;;
+  neq_bool = func -> neq_ (ieq_bool,x,y) where
+              (x,y)    = ...
+              (_,neq_) = ieq_bool
+             ;;
+
+  -- Dict receives eq/neq methods.
+  --  - implements eq, uses default neq
+  --  - methods receive extra dict
+  ieq_bool = (eq_bool_,neq_) where
+    eq_bool_ = func ->
+      or (and (x,y), (and (not x, not y))) where
+        (_,x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+-- interface IOrderable
+iord = [r|
   -- lt_ = ???
   lte_ = func ->
     or ( lt_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y),
@@ -147,5 +141,17 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
       ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
     ;
   ;
-|] ++ ieq_bool ++ bool ++ ieq)
-        `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
+|]
+
+-- interface IEq(eq,neq)
+ieq = [r|
+  -- Methods are renamed to include "dict" param:
+  --  - eq_ is not implemented
+  --  - neq_ has a default implentation
+  -- eq_ = ???
+  neq_ = func ->
+    not (eq_ ((eq_,neq_),x,y)) where
+      ((eq_,neq_),x,y) = ...
+    ;
+  ;
+|]

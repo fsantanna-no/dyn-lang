@@ -14,78 +14,6 @@ main = hspec spec
 
 -------------------------------------------------------------------------------
 
-nat = [r|
-  mul =
-    func ->
-      case ... of
-        (_,  Nat.Zero)    -> Nat.Zero
-        (=x, Nat.Succ =y) -> add (mul (x,y), x)
-      ;
-    ;
-
-  add =
-    func ->
-      case ... of
-        (=x, Nat.Zero)    -> x
-        (=x, Nat.Succ =y) -> Nat.Succ (add (x,y))
-      ;
-    ;
-
-  dec =
-    func ->
-      case ... of
-        Nat.Succ =x -> x
-      ;
-    ;
-
-  lte =
-    func ->
-      case ... of
-        (Nat.Zero,_) -> Bool.True
-        (_,Nat.Zero) -> Bool.False
-        (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
-      ;
-    ;
-
-  ten   = Nat.Succ nine
-  nine  = Nat.Succ eight
-  eight = Nat.Succ seven
-  seven = Nat.Succ six
-  six   = Nat.Succ five
-  five  = Nat.Succ four
-  four  = Nat.Succ three
-  three = Nat.Succ two
-  two   = Nat.Succ one
-  one   = Nat.Succ zero
-  zero  = Nat.Zero
-|]
-
-bool = [r|
-  not = func ->
-    case ... of
-      Bool.False -> Bool.True
-      Bool.True  -> Bool.False
-    ;
-  ;
-
-  and = func ->
-    case ... of
-      (Bool.False, _) -> Bool.False
-      (_, Bool.False) -> Bool.False
-      _               -> Bool.True
-    ;
-  ;
-
-  or = func ->
-    case ... of
-      (Bool.True, _)  -> Bool.True
-      (_,         =y) -> y
-    ;
-  ;
-|]
-
--------------------------------------------------------------------------------
-
 spec :: Spec
 spec = do
 
@@ -2568,3 +2496,75 @@ implementation of IOrderable for Bool with
 end
 |]
 -}
+
+-------------------------------------------------------------------------------
+
+nat = [r|
+  mul =
+    func ->
+      case ... of
+        (_,  Nat.Zero)    -> Nat.Zero
+        (=x, Nat.Succ =y) -> add (mul (x,y), x)
+      ;
+    ;
+
+  add =
+    func ->
+      case ... of
+        (=x, Nat.Zero)    -> x
+        (=x, Nat.Succ =y) -> Nat.Succ (add (x,y))
+      ;
+    ;
+
+  dec =
+    func ->
+      case ... of
+        Nat.Succ =x -> x
+      ;
+    ;
+
+  lte =
+    func ->
+      case ... of
+        (Nat.Zero,_) -> Bool.True
+        (_,Nat.Zero) -> Bool.False
+        (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
+      ;
+    ;
+
+  ten   = Nat.Succ nine
+  nine  = Nat.Succ eight
+  eight = Nat.Succ seven
+  seven = Nat.Succ six
+  six   = Nat.Succ five
+  five  = Nat.Succ four
+  four  = Nat.Succ three
+  three = Nat.Succ two
+  two   = Nat.Succ one
+  one   = Nat.Succ zero
+  zero  = Nat.Zero
+|]
+
+bool = [r|
+  not = func ->
+    case ... of
+      Bool.False -> Bool.True
+      Bool.True  -> Bool.False
+    ;
+  ;
+
+  and = func ->
+    case ... of
+      (Bool.False, _) -> Bool.False
+      (_, Bool.False) -> Bool.False
+      _               -> Bool.True
+    ;
+  ;
+
+  or = func ->
+    case ... of
+      (Bool.True, _)  -> Bool.True
+      (_,         =y) -> y
+    ;
+  ;
+|]
