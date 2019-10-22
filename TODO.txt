@@ -1,4 +1,6 @@
+- tipos, mas sem typesys
 - dicts w/o typesys???
+    - implementacao para tipo generico (implementation of IEq for (a,a))
 - data
 - typesys
     - inference?
@@ -23,6 +25,8 @@
     - numerais -> data
     - typedef:
         - Dict.IEq
+    - interface/implementation
+    - vtable
 
 - Dcl
     - verificar que
