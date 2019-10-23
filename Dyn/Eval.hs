@@ -57,7 +57,7 @@ evalExpr env (ECall z f arg) =
     ((EData _ ["Show"] _) , x              ) -> traceShowId x
     (e1@(EError _ _)      , _              ) -> e1
     (_                    , e2@(EError _ _)) -> e2
-    ((EFunc _ _ f')       , arg'           ) -> evalWhere env' f' where
+    ((EFunc _ _ _ f')     , arg'           ) -> evalWhere env' f' where
                                                   env' = envWrite env "..." arg'
     ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'
     (_                    , _              ) -> EError z "invalid call"

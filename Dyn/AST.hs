@@ -24,7 +24,7 @@ data Expr
   | ECons  Ann ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | EData  Ann ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
   | ETuple Ann [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Ann Type Where             -- (type,body)
+  | EFunc  Ann Type Expr Where        -- (type,ups,body)
   | ECall  Ann Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
   | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
@@ -55,16 +55,16 @@ isEError _            = False
 -------------------------------------------------------------------------------
 
 getAnn :: Expr -> Ann
-getAnn (EError z _)   = z
-getAnn (EVar   z _)   = z
-getAnn (EUnit  z)     = z
-getAnn (ECons  z _)   = z
-getAnn (EData  z _ _) = z
-getAnn (ETuple z _)   = z
-getAnn (EFunc  z _ _) = z
-getAnn (ECall  z _ _) = z
-getAnn (EArg   z)     = z
-getAnn (ECase  z _ _) = z
+getAnn (EError z _)     = z
+getAnn (EVar   z _)     = z
+getAnn (EUnit  z)       = z
+getAnn (ECons  z _)     = z
+getAnn (EData  z _ _)   = z
+getAnn (ETuple z _)     = z
+getAnn (EFunc  z _ _ _) = z
+getAnn (ECall  z _ _)   = z
+getAnn (EArg   z)       = z
+getAnn (ECase  z _ _)   = z
 
 dclGetAnn :: Dcl -> Ann
 dclGetAnn (Dcl (z,_,_,_)) = z
@@ -83,7 +83,7 @@ exprToString spc (EData  _ h (EUnit _)) = L.intercalate "." h
 exprToString spc (EData  _ h st)        = "(" ++ L.intercalate "." h ++ " " ++ exprToString 0 st ++ ")"
 exprToString spc (EArg   _)             = "..."
 exprToString spc (ETuple _ es)          = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
-exprToString spc (EFunc  _ TUnit bd)    = "func () ->\n" ++ rep (spc+2) ++ whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
+exprToString spc (EFunc  _ TUnit ups bd) = "func :: () " ++ exprToString 0 ups ++ " ->\n" ++ rep (spc+2) ++ whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
 exprToString spc (ECall  _ e1 e2)       = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
 
 exprToString spc (ECase  _ e cases)     =
