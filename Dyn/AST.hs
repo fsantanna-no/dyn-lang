@@ -66,6 +66,9 @@ getAnn (ECall  z _ _) = z
 getAnn (EArg   z)     = z
 getAnn (ECase  z _ _) = z
 
+dclGetAnn :: Dcl -> Ann
+dclGetAnn (Dcl (z,_,_,_)) = z
+
 -------------------------------------------------------------------------------
 
 rep spc = replicate spc ' '

@@ -59,7 +59,7 @@ spec = do
         `shouldBe` (EError az{pos=(1,13)} "<user>")
     it "match-error" $
       (evalProg $ fromRight $ parse "main = case () of A->();")
-        `shouldBe` EError (Ann {pos = (1,8)}) "pattern match fail"
+        `shouldBe` EError (Ann {pos = (1,8)}) "non-exhaustive patterns"
     it "assign-var" $
       (evalProg $ fromRight $ parse "main = a where a = A;")
         `shouldBe` EData az{pos=(1,20)} ["A"] (EUnit az{pos=(1,20)})
@@ -80,6 +80,10 @@ spec = do
       run "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"func () ->\\n  ()\\n;\""
     it "patt - read - ok" $
       run "main = case () of ~() -> ();" `shouldBe` "()"
+    it "patt - fail" $
+      run "main = x where Xxx = Yyy;" `shouldBe` "(line=1, col=8) ERROR : invalid assignment"
+    it "patt - fail" $
+      run "main = case Xxx of Yyy->Xxx;" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
     it "patt - read - ok" $
       run "main = case ((),()) of ~((),()) -> ();" `shouldBe` "()"
     it "f ()" $
