@@ -4,6 +4,8 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
+prelude = iord_nat ++ ieq_nat ++ iord_bool ++ ieq_bool ++ iord ++ ieq ++ nat ++ bool
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
@@ -156,6 +158,30 @@ iord_bool = [r|
         (Bool.True,  Bool.True)  -> Bool.False
       ; where
         (_,_,x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
+
+-- instance IEq (Int)
+ieq_nat = [r|
+  ieq_nat = (eq,neq)
+|]
+
+-- implementation IOrd for Bool
+iord_nat = [r|
+  iord_nat = (lt,lte,gt,gte) where
+    lt = func () ->
+      case (x,y) of
+        (Nat.Zero,     Nat.Zero)     -> Bool.False
+        (Nat.Zero,     _)            -> Bool.True
+        (Nat.Succ _,   Nat.Zero)     -> Bool.False
+        (Nat.Succ =x', Nat.Succ =y') -> lt (ieq,iord,x',y')
+      ; where
+        (lt,_,_,_)     = iord
+        (ieq,iord,x,y) = ...
       ;
     ;
   ;

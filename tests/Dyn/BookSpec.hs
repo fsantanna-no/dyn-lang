@@ -181,11 +181,15 @@ multiply =
 main = (smallerc two) four
 smallerc =
   func () ->
-    func (x) -> lt (x,...) ; where
+    func (x) ->
+      lt (ieq_nat,iord_nat,x,...) where
+        (lt,_,_,_) = iord_nat
+      ;
+    ; where
       x = ...
     ;
   ;
-|] ++ nat ++ iord_bool ++ bool ++ iord ++ ieq)
+|] ++ prelude)
           `shouldBe` "Bool.True"
 
 
