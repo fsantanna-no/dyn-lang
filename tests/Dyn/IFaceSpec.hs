@@ -60,7 +60,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
     it "implementation of IEq for a where a is IXxx" $
       run ([r|
 main = eq ((eq,neq),Xxx,Xxx) where
-  (eq,neq) = ieq_ixxx ixxx_xxx
+  (eq,neq) = ieq_ixxx ixxx_xxx      -- higher-kinded types (HKT)?
 ;
 
 ieq_ixxx = func -> -- ixxx -> ieq

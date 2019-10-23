@@ -1,6 +1,19 @@
-- tipos, mas sem typesys
+- lists
+    - vai permitir [a] where a is ...
+        - dinamico e estatico
+- typeclass
+    - dinamico manual
+    - multiplas vars manual
+
+- sintaxe de tipos, mas sem typesys
 - data
 - typesys
+    - typeclass
+        - trabalho vai ser:
+            - ver que nome é poli (eq)
+            - pegar todos os dicts(s) que casam com o(s) constraint(s) (ieq_*, ishow_*)
+            - achar o(s) dict(s) que casa(m) com a chamada (f(1,"a") -> ieq_nat,ishow_string)
+            - inserir o(s) dict(s) como argumento(s)
     - inference?
 - generic fs
     - w/o cs

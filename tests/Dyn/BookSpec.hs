@@ -976,20 +976,18 @@ impl = func ->
             "return fromEnum ((toEnum (Bool.False)) + 1)"
            ])
         `shouldBe` Right (EData ["Bool","True"] EUnit)
+-}
 
 -------------------------------------------------------------------------------
 
     describe "Chapter 2.4 - Tuples:" $ do                     -- pg 41
 
       it "mkpair" $         -- pg 41
-        (run True $
-          unlines [
-            "data Pair for (a,b) with (a,b)",
-            "var p1 : Pair of (Int,Int) = Pair (1,2)",
-            "return p1"
-           ])
-        `shouldBe` Right (EData ["Pair"] (ETuple [EData ["Int","1"] EUnit,EData ["Int","2"] EUnit]))
+        run ("main = Pair (one,two)" ++ nat)
+        `shouldBe` "(Pair ((Nat.Succ Nat.Zero),(Nat.Succ (Nat.Succ Nat.Zero))))"
 
+{-
+      -- TODO: type compatibility ECons/EFunc
       it "mkpair" $         -- pg 41
         (run True $
           unlines [
@@ -999,57 +997,42 @@ impl = func ->
             "return p1"
            ])
         `shouldBe` Right (EData ["Pair"] (ETuple [EData ["Int","1"] EUnit,EData ["Int","2"] EUnit]))
+-}
 
       it "fst/snd" $         -- pg 41
-        (run True $
-          pre ++ unlines [
-            "func fst (x,y) : ((a,b) -> a) do",
-            "   return x",
-            "end",
-            "func snd (_,y) : ((a,b) -> a) do",
-            "   return y",
-            "end",
-            "return (((fst (1,-1)) + (snd (1,-1))) === 0) and (snd (Bool.False, Bool.True))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        run ([r|
+main = and (eq (ieq_nat, add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True))
+fst = func -> x where (x,_)=... ;;
+snd = func -> y where (_,y)=... ;;
+|] ++ prelude)
+        `shouldBe` "Bool.True"
 
       it "pair" $         -- pg 42
-        (run True $
-          pre ++ unlines [
-            "func pair ((f,g), x) : ((((a->b),(a->c)),a) -> (b,c)) do",
-            "   return (f x, g x)",
-            "end",
-            "func f x : (Int -> Bool) do",
-            "   return (x rem 2) === 1",
-            "end",
-            "func g x : (Int -> Int) do",
-            "   return x * 2",
-            "end",
-            "return pair ((f,g), 3)"
-           ])
-        `shouldBe` Right (ETuple [EData ["Bool","True"] EUnit,EData ["Int","6"] EUnit])
+        run ([r|
+main = pair ((f,g), one)
+f = func -> eq (ieq_nat, add (zero,...), ...) ;
+g = func -> mul (two, ...) ;
+pair = func -> (f x, g x) where
+  ((f,g),x) = ...
+;;
+|] ++ prelude)
+        `shouldBe` "(Bool.True,(Nat.Succ (Nat.Succ Nat.Zero)))"
 
-      it "compose" $         -- pg 42
-        (run True $
-          pre ++ unlines [
-            "func compose (f,g) : (((a->b),(b->c)) -> (a -> c)[2]) do",
-            "   return func x : (a -> c)[2] do",
-            "           return f (g x)",
-            "          end",
-            "end",
-            "func inc x : (Int -> Int) do",
-            "   return x+1",
-            "end",
-            "func dec x : (Int -> Int) do",
-            "   return x-1",
-            "end",
-            "func dup x : (Int -> Int) do",
-            "   return x*2",
-            "end",
-            "return (compose (dec, compose(dup,inc))) 10"
-           ])
-        `shouldBe` Right (EData ["Int","21"] EUnit)
+      it "compose" $         -- pg 15
+        run ([r|
+main    = (compose (dec, compose (dup,Nat.Succ))) one
+dup     = func -> mul (two,...) ;
+compose = func ->
+  func {f,g} ->
+    f (g ...)
+  ; where
+    (f,g) = ...
+  ;
+;
+|] ++ prelude)
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero)))"
 
+{-
       it "cross" $         -- pg 42
         (run True $
           pre ++ unlines [
