@@ -59,21 +59,29 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 {-
     it "IEq a where a is IXxx" $
       run ([r|
-main = eq ((eq,neq), x1,x2) where
+main = eq ((eq,neq),Xxx,Xxx) where
   (eq,neq) = ieq_ixxx
 ;
 
-ieq_ixxx  = (eq_ixxx_,neq_ixxx_)
-eq_ixxx_  = func ->
-  eq () f x where
-    ((f), x,y) = ...
+ieq_ixxx  = (eq,neq) where
+  eq = func ->
+    eq ((eq,neq), (f x), (f y)) where
+      (eq,neq)  = ieq_bool
+      (_,(f),x,y) = ...
+    ;
+  ;
 ;
-neq_ixxx_ = neq_
 
-ixxx_xxx = f_xxx
-f_xxx -> Bool.True ;
-
-|] ++ bool ++ ieq)
+ixxx_xxx = f where
+  f = func ->
+    case x of
+      Xxx -> Bool.True
+    ; where
+      (_,x) = ...
+    ;
+  ;
+;
+|] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 -}
 
@@ -102,13 +110,12 @@ ieq_bool = [r|
   --  - implements eq, uses default neq
   --  - methods receive extra dict
   -- overrides default eq
-  ieq_bool = (eq_bool,neq_bool) where
-    eq_bool  = func ->  -- (ieq_bool,Bool,Bool) -> Bool
+  ieq_bool = (eq,neq) where
+    eq = func ->  -- (ieq_bool,Bool,Bool) -> Bool
       or (and (x,y), (and (not x, not y))) where
         (_,x,y) = ...
       ;
     ;
-    neq_bool = neq
   ;
 |]
 
