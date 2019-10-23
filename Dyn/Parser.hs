@@ -179,12 +179,14 @@ expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
   tp   <- option tz (tk_sym "::" *> type_)
-  ups  <- expr                        -- (), (x), (x,y)
+  void <- tk_sym "("
+  ups  <- option [] $ list (tk_sym ",") tk_var    -- (), (x), (x,y)
+  void <- tk_sym ")"
   void <- tk_sym "->"
   body <- where_
   void <- tk_sym ";"
   void <- optional $ tk_key "func"    -- ambiguity with (func $ func)
-  return $ EFunc az{pos=pos} tp ups body
+  return $ EFunc az{pos=pos} tp (map (\id -> (id,EUnit az{pos=pos})) ups) body
 
 expr_case :: Parser Expr
 expr_case = do

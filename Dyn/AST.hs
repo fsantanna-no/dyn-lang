@@ -17,6 +17,8 @@ type ID_Var  = String
 type ID_Data = String
 type ID_Hier = [ID_Data]
 
+type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
+
 data Expr
   = EError Ann String                 -- (msg)        -- error "bug found"
   | EVar   Ann ID_Var                 -- (id)         -- a ; xs
@@ -24,7 +26,7 @@ data Expr
   | ECons  Ann ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | EData  Ann ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
   | ETuple Ann [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Ann Type Expr Where        -- (type,ups,body)
+  | EFunc  Ann Type Ups Where         -- (type,ups,body)
   | ECall  Ann Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Ann
   | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
@@ -90,7 +92,11 @@ exprToString spc (EData  _ h (EUnit _)) = L.intercalate "." h
 exprToString spc (EData  _ h st)        = "(" ++ L.intercalate "." h ++ " " ++ exprToString 0 st ++ ")"
 exprToString spc (EArg   _)             = "..."
 exprToString spc (ETuple _ es)          = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
-exprToString spc (EFunc  _ TUnit ups bd) = "func :: () " ++ exprToString 0 ups ++ " ->\n" ++ rep (spc+2) ++ whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
+exprToString spc (EFunc  _ TUnit ups bd) = "func :: () " ++ ups' ++ " ->\n" ++ rep (spc+2) ++
+                                            whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
+                                           where
+                                            ups' :: String
+                                            ups' = "(" ++ (L.intercalate "," $ map fst ups) ++ ")"
 exprToString spc (ECall  _ e1 e2)       = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
 
 exprToString spc (ECase  _ e cases)     =

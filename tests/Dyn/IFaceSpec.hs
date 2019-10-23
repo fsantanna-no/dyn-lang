@@ -66,7 +66,7 @@ main = eq ((eq,neq),Xxx,Xxx) where
 
 ieq_ixxx = func () -> -- ixxx -> ieq
   (eq,neq) where
-    eq = func () ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
+    eq = func (f) ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
       eq ((eq,neq), f ((f),x), f ((f),y)) where
         (eq,neq) = ieq_bool
         (_,x,y)  = ...
