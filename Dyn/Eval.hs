@@ -57,9 +57,12 @@ evalExpr env (ECall z f arg) =
     ((EData _ ["Show"] _) , x              ) -> traceShowId x
     (e1@(EError _ _)      , _              ) -> e1
     (_                    , e2@(EError _ _)) -> e2
-    ((EFunc _ _ _ f')     , arg'           ) -> evalWhere env' f' where
-                                                  env' = envWrite env "..." arg'
     ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'
+    ((EFunc _ _ ups f')   , arg'           ) -> evalWhere env' f' where
+      env' = foldr g env ps where
+              g (id,val) env = envWrite env id val
+      ps = ("...",arg') : map g (exprToList ups) where
+            g e@(EVar _ id) = (id, evalExpr env e)
     (_                    , _              ) -> EError z "invalid call"
 
 evalExpr _ v = v

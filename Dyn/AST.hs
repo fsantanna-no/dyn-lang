@@ -71,6 +71,13 @@ dclGetAnn (Dcl (z,_,_,_)) = z
 
 -------------------------------------------------------------------------------
 
+exprToList :: Expr -> [Expr]
+exprToList (EUnit  _)    = []
+exprToList (ETuple _ es) = es
+exprToList e             = [e]
+
+-------------------------------------------------------------------------------
+
 rep spc = replicate spc ' '
 
 exprToString :: Int -> Expr -> String
