@@ -32,6 +32,13 @@ list sep p = do
   void <- optional $ try $ sep
   return (v:vs)
 
+parens :: Parser a -> Parser a
+parens p = do
+  void <- tk_sym "("
+  ret  <- p
+  void <- tk_sym ")"
+  return ret
+
 -------------------------------------------------------------------------------
 
 keywords = [
@@ -121,16 +128,10 @@ pat only_write =
             void <- tk_sym "("
             void <- tk_sym ")"
             return $ PUnit az{pos=pos}
-  lparens = do
-            void <- tk_sym "("
-            loc  <- pat only_write
-            void <- tk_sym ")"
-            return loc
+  lparens = parens $ pat only_write
   ltuple = do
             pos  <- toPos <$> getPosition
-            void <- tk_sym "("
-            locs <- list (tk_sym ",") $ pat only_write
-            void <- tk_sym ")"
+            locs <- parens $ list (tk_sym ",") $ pat only_write
             return (PTuple az{pos=pos} $ locs)
 
 -------------------------------------------------------------------------------
@@ -169,9 +170,7 @@ expr_cons = do
 expr_tuple :: Parser Expr
 expr_tuple = do
   pos  <- toPos <$> getPosition
-  void <- tk_sym "("
-  exps <- list (tk_sym ",") expr
-  void <- tk_sym ")"
+  exps <- parens $ list (tk_sym ",") expr
   return $ ETuple az{pos=pos} exps
 
 expr_func :: Parser Expr
@@ -179,9 +178,7 @@ expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
   tp   <- option tz (tk_sym "::" *> type_)
-  void <- tk_sym "("
-  ups  <- option [] $ list (tk_sym ",") tk_var    -- (), (x), (x,y)
-  void <- tk_sym ")"
+  ups  <- parens $ option [] $ list (tk_sym ",") tk_var    -- (), (x), (x,y)
   void <- tk_sym "->"
   body <- where_
   void <- tk_sym ";"
@@ -204,11 +201,7 @@ expr_case = do
   return $ ECase az{pos=pos} e cs
 
 expr_parens :: Parser Expr
-expr_parens = do
-  void <- tk_sym "("
-  e    <- expr
-  void <- tk_sym ")"
-  return e
+expr_parens = parens expr
 
 expr_one :: Parser Expr
 expr_one =
