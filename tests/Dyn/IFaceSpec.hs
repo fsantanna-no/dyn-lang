@@ -57,17 +57,15 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-{-
--}
     it "implementation of IEq for a where a is IXxx" $
       run ([r|
 main = eq ((eq,neq),Xxx,Xxx) where
   (eq,neq) = ieq_ixxx ixxx_xxx
 ;
 
-ieq_ixxx = func () -> -- ixxx -> ieq
+ieq_ixxx = func -> -- ixxx -> ieq
   (eq,neq) where
-    eq = func (f) ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
+    eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
       eq ((eq,neq), f ((f),x), f ((f),y)) where
         (eq,neq) = ieq_bool
         (_,x,y)  = ...
@@ -79,7 +77,7 @@ ieq_ixxx = func () -> -- ixxx -> ieq
 ;
 
 ixxx_xxx = f where
-  f = func () -> -- :: (ixxx_xxx,X) -> Bool
+  f = func -> -- :: (ixxx_xxx,X) -> Bool
     case x of
       Xxx -> Bool.True
     ; where
@@ -89,3 +87,24 @@ ixxx_xxx = f where
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
+
+{-
+    it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
+          (run True $
+            unlines [
+              "interface IEq for a with"          ,
+              " var eq  : ((a,a) -> Int)"         ,
+              " func neq (x,y) : ((a,a) -> Int) do return 1 - (x eq y) end",
+              "end"                               ,
+              "implementation of IEq for Int with" ,
+              " func eq (x,y) : ((Int,Int) -> Int) do",
+              "   if y matches x then return 1 else return 0 end"                  ,
+              " end"                              ,
+              "end"                               ,
+              "func f x : (a -> Int) where a is IEq do",
+              "   return x eq x",   -- eq_a
+              "end",
+              "return f 1"  -- eq_a=eq_Int
+             ])
+          `shouldBe` Right (EData ["Int","1"] EUnit)
+-}

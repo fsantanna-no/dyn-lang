@@ -33,10 +33,13 @@ list sep p = do
   return (v:vs)
 
 parens :: Parser a -> Parser a
-parens p = do
-  void <- tk_sym "("
+parens p = parensWith (tk_sym "(", tk_sym ")") p
+
+parensWith :: (Parser b,Parser b) -> Parser a -> Parser a
+parensWith (open,close) p = do
+  void <- open
   ret  <- p
-  void <- tk_sym ")"
+  void <- close
   return ret
 
 -------------------------------------------------------------------------------
@@ -178,7 +181,9 @@ expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
   tp   <- option tz (tk_sym "::" *> type_)
-  ups  <- parens $ option [] $ list (tk_sym ",") tk_var    -- (), (x), (x,y)
+  ups  <- option [] $
+            parensWith (tk_sym "{", tk_sym "}") $
+              list (tk_sym ",") tk_var    -- {x}, {x,y}
   void <- tk_sym "->"
   body <- where_
   void <- tk_sym ";"

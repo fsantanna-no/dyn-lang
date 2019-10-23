@@ -40,7 +40,7 @@ spec = do
         run ([r|
 main = square two
 square =
-  func () ->
+  func ->
     mul (x,x) where
       x = ...
     ;
@@ -58,7 +58,7 @@ main = (lte (three,two), lte (three,three))
         run ([r|
 main = add (smaller (ten,five) , smaller (one,four))
 smaller =
-  func () ->
+  func ->
     case lte (x,y) of
       Bool.True  -> x
       Bool.False -> y
@@ -75,13 +75,13 @@ smaller =
         run ([r|
 main = square (smaller (four, two))
 square =
-  func () ->
+  func ->
     mul (x,x) where
       x = ...
     ;
   ;
 smaller =
-  func () ->
+  func ->
     case lte (x,y) of
       Bool.True  -> x
       Bool.False -> y
@@ -103,7 +103,7 @@ smaller =
         run ([r|
 main = fthree ten
 fthree =
-  func () ->
+  func ->
     three
   ;
 |] ++ nat)
@@ -142,7 +142,7 @@ fthree =
         run ([r|
 main = multiply (two,three)
 multiply =
-  func () ->
+  func ->
     case ... of
       (~zero, _)  -> zero
       (=x,    =y) -> mul (x,y)
@@ -180,8 +180,8 @@ multiply =
           run ([r|
 main = (smallerc two) four
 smallerc =
-  func () ->
-    func (x) ->
+  func ->
+    func {x} ->
       lt (ieq_nat,iord_nat,x,...) where
         (lt,_,_,_) = iord_nat
       ;
@@ -196,8 +196,8 @@ smallerc =
         it "twice" $            -- pg 12
           run ([r|
 main = twice (square,two)
-square = func () -> mul (...,...) ;
-twice = func () ->
+square = func -> mul (...,...) ;
+twice = func ->
   case ... of
     (=f,=x) -> f (f x)
   ;
@@ -208,9 +208,9 @@ twice = func () ->
         it "twicec" $            -- pg 12
           run ([r|
 main   = eq (ieq_nat, (twicec square) two, mul(four,four))
-square = func () -> mul (...,...);
-twicec = func () ->
-  func (f) ->
+square = func -> mul (...,...);
+twicec = func ->
+  func {f} ->
     f (f ...)
   ; where
     f = ...
@@ -223,9 +223,9 @@ twicec = func () ->
           run ([r|
 main   = eq (ieq_nat, quad two, mul (four,four))
 quad   = twicec square
-square = func () -> mul (...,...);
-twicec = func () ->
-  func (f) ->
+square = func -> mul (...,...);
+twicec = func ->
+  func {f} ->
     f (f ...)
   ; where
     f = ...
@@ -237,16 +237,16 @@ twicec = func () ->
         it "curry" $            -- pg 13
           run ([r|
 main   = eq (ieq_nat, (twicec square) two, mul(four,four))
-square = func () -> mul (...,...);
+square = func -> mul (...,...);
 twicec = curry twice
-twice  = func () ->
+twice  = func ->
   case ... of
     (=f,=x) -> f (f x)
   ;
 ;
-curry  = func () ->
-  func (f) ->
-    func (f,x) ->
+curry  = func ->
+  func {f} ->
+    func {f,x} ->
       f (x,...)
     ; where
       x = ...
@@ -273,8 +273,8 @@ curry  = func () ->
         it "uncurry" $            -- pg 11
           run ([r|
 main = (uncurry smallerc) (two,ten)
-smallerc = func () ->
-  func (x) ->
+smallerc = func ->
+  func {x} ->
     lt (ieq_nat,iord_nat,x,...) where
       (lt,_,_,_) = iord_nat
     ;
@@ -282,8 +282,8 @@ smallerc = func () ->
     x = ...
   ;
 ;
-uncurry = func () ->
-  func (f) ->
+uncurry = func ->
+  func {f} ->
     (f i) j where
       (i,j) = ...
     ;
@@ -300,9 +300,9 @@ uncurry = func () ->
           run ([r|
 main    = eq (ieq_nat, quad two, mul (four,four))
 quad    = compose (square,square)
-square  = func () -> mul (...,...);
-compose = func () ->
-  func (f,g) ->
+square  = func -> mul (...,...);
+compose = func ->
+  func {f,g} ->
     f (g ...)
   ; where
     (f,g) = ...
@@ -338,7 +338,7 @@ compose = func () ->
         run ([r|
 main = fact three
 fact =
-  func () ->
+  func ->
     case ... of
       Nat.Zero -> one
       =n       -> mul (n, fact (dec n))
@@ -370,7 +370,7 @@ fact =
         run ([r|
 main = f (zero,one)
 f =
-  func () ->
+  func ->
     mul (add(a,one), add(a,two)) where
       a = add (x,y)
       (x,y) = ...
@@ -383,7 +383,7 @@ f =
         run ([r|
 main = f (zero,one)
 f =
-  func () ->
+  func ->
     mul (add(a,one), add(b,two)) where
       a = add (x,y)
       b = mul (x,y)
@@ -425,7 +425,7 @@ f =
       it "not" $              -- pg 30
         run ([r|
 main = not Bool.False
-not = func () ->
+not = func ->
   case ... of
     Bool.False -> Bool.True
     Bool.True  -> Bool.False
@@ -437,7 +437,7 @@ not = func () ->
       it "and-1" $            -- pg 30
         run ([r|
 main = and (Bool.True, Bool.False)
-and = func () ->
+and = func ->
   case ... of
     (Bool.False, _) -> Bool.False
     (_, Bool.False) -> Bool.False
@@ -456,7 +456,7 @@ main = and (Bool.True, Bool.True)
       it "or-1" $               -- pg 30
         run ([r|
 main = or (Bool.True, Bool.False)
-or = func () ->
+or = func ->
   case ... of
     (Bool.True, _)  -> Bool.True
     (_,         =y) -> y
@@ -468,7 +468,7 @@ or = func () ->
       it "or-2" $               -- pg 30
         run ([r|
 main = or (Bool.False, Bool.False)
-or = func () ->
+or = func ->
   case ... of
     (Bool.True, _)  -> Bool.True
     (_,         =y) -> y
@@ -480,12 +480,12 @@ or = func () ->
       it "eq, neq" $         -- pg 31
         run ([r|
 main = neq (eq (Bool.True,Bool.True), Bool.False)
-eq = func () ->
+eq = func ->
   or (and (x,y), (and (not x, not y))) where
     (x,y) = ...
   ;
 ;
-neq = func () ->
+neq = func ->
   not (eq (x,y)) where
     (x,y) = ...
   ;
@@ -553,7 +553,7 @@ main = (analyse (ten, twenty, mul(ten,three)),
         analyse (ten, twenty, twenty),
         analyse (ten, ten,    ten))
 twenty = add (ten,ten)
-analyse = func () ->
+analyse = func ->
   case lte (add (x,y), z) of
     Bool.True -> Tri.Fail
     _ -> case (x,y,z) of
@@ -576,7 +576,7 @@ main = (impl (Bool.False,Bool.True),
         impl (Bool.False,Bool.False),
         not (impl (Bool.True,Bool.False)))
 
-impl = func () ->
+impl = func ->
   or (not x, y) where
     (x,y) = ...
   ;

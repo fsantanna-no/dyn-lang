@@ -1,3 +1,4 @@
+- closures opcional, usar {}
 - dicts w/o typesys???
     - implementacao para tipo generico
         - "func f x : (a -> Int) where a is IEq do",
@@ -8,7 +9,6 @@
 - generic fs
     - w/o cs
     - w/  cs
-- closures
 
 - Basic
     - mudar de ; para .
