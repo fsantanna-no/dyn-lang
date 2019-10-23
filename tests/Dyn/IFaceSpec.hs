@@ -16,102 +16,95 @@ spec = do
 
   describe "manual" $ do
 
-    it "IEqualable: default eq" $
-      run ([r|
-main = v where  -- neq (eq(T,T), F)
-  v = neq_ ((eq_,neq_), eq_ ((eq_,neq_),Bool.True,Bool.True), Bool.False)
+    it "IEq: default eq" $
+      run ([r|  -- neq (eq(T,T), F)
+main = neq ((eq,neq), eq ((eq,neq),Bool.True,Bool.True), Bool.False) where
+  (eq,neq) = ieq
 ;
 |] ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEqualable: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
+    it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
       run ([r|
 main = (x,y) where
-  x = eq_ ((eq_,neq_), (Bool.True,Bool.False), (Bool.False,Bool.True))
-  y = eq_ ((eq_,neq_), (Bool.True,Bool.False), (Bool.True,Bool.False))
+  x = eq ((eq,neq), (Bool.True,Bool.False), (Bool.False,Bool.True))
+  y = eq ((eq,neq), (Bool.True,Bool.False), (Bool.True,Bool.False))
+  (eq,neq) = ieq
 ;
 |] ++ bool ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
-    it "IEqualable: overrides eq (ieq_bool)" $
+    it "IEq: overrides eq (ieq_bool)" $
       run ([r|
 main = v where  -- neq (eq(T,T), F)
-  -- typesystem renames to concrete type methods
-  v = neq_bool (eq_bool (Bool.True,Bool.True), Bool.False)
+  v = neq ((eq,neq), eq (ieq,Bool.True,Bool.True), Bool.False)
+  (eq,neq) = ieq_bool
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEqualable/IOrderable" $
+    it "IEq/IOrd" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte_bool (Bool.True,  Bool.False),
-        gte_bool (Bool.True,  Bool.True),
-        gt_bool  (Bool.False, Bool.False),
-        lt_bool  (Bool.False, Bool.True) )
+  v = ( lte ((eq,neq), (lt,lte,gt,gte), Bool.True,  Bool.False),
+        gte ((eq,neq), (lt,lte,gt,gte), Bool.True,  Bool.True),
+        gt  ((eq,neq), (lt,lte,gt,gte), Bool.False, Bool.False),
+        lt  ((eq,neq), (lt,lte,gt,gte), Bool.False, Bool.True) )
+  (eq,neq)        = ieq_bool
+  (lt,lte,gt,gte) = iord_bool
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
+{-
+    it "IEq a where a is IXx" $
+      run ([r|
+main = v where  -- neq (eq(T,T), F)
+  v = neq_ ((eq_,neq_), eq_ ((eq_,neq_),Bool.True,Bool.True), Bool.False)
+
+  ixx_bool = f_bool_ where
+    f_bool_ = func ->
+      eq_ ((eq_,neq_),x,y) where
+        ((eq_,neq_),x,y)
+;
+|] ++ bool ++ ieq)
+        `shouldBe` "Bool.True"
+-}
+
 -------------------------------------------------------------------------------
 
--- implementation IOrderable for Bool
+-- implementation IOrd for Bool
 iord_bool = [r|
-  -- wrappers
-  lt_bool  = func -> lt_  (ieq_bool,iord_bool,x,y) where
-              (x,y)        = ...
-              (lt_,_,_,_)  = iord_bool
-             ;;
-  lte_bool = func -> lte_ (ieq_bool,iord_bool,x,y) where
-              (x,y)        = ...
-              (_,lte_,_,_) = iord_bool
-             ;;
-  gt_bool  = func -> gt_  (ieq_bool,iord_bool,x,y) where
-              (x,y)        = ...
-              (_,_,gt_,_)  = iord_bool
-             ;;
-  gte_bool = func -> gte_ (ieq_bool,iord_bool,x,y) where
-              (x,y)        = ...
-              (_,_,_,gte_) = iord_bool
-             ;;
   -- dict
-  iord_bool = (lt_bool_,lte_,gt_,gte_) where
-    lt_bool_ = func ->
-      case (x,y) of
-        (Bool.False, Bool.False) -> Bool.False
-        (Bool.False, Bool.True)  -> Bool.True
-        (Bool.True,  Bool.False) -> Bool.False
-        (Bool.True,  Bool.True)  -> Bool.False
-      ; where
-        (_,_,x,y) = ...
-      ;
+  iord_bool = (lt_bool_,lte_bool_,gt_bool_,gte_bool_)
+  lt_bool_ = func ->
+    case (x,y) of
+      (Bool.False, Bool.False) -> Bool.False
+      (Bool.False, Bool.True)  -> Bool.True
+      (Bool.True,  Bool.False) -> Bool.False
+      (Bool.True,  Bool.True)  -> Bool.False
+    ; where
+      (_,_,x,y) = ...
     ;
   ;
+  lte_bool_ = lte_
+  gt_bool_  = gt_
+  gte_bool_ = gte_
 |]
 
 -- instance IEq (Bool)
 ieq_bool = [r|
-  -- Wrappers are closures with fixed "ieq_bool" dict
-  eq_bool  = func -> eq_ (ieq_bool,x,y) where
-              (x,y)   = ...
-              (eq_,_) = ieq_bool
-             ;;
-  neq_bool = func -> neq_ (ieq_bool,x,y) where
-              (x,y)    = ...
-              (_,neq_) = ieq_bool
-             ;;
-
   -- Dict receives eq/neq methods.
   --  - implements eq, uses default neq
   --  - methods receive extra dict
   -- overrides default eq
-  ieq_bool = (eq_bool_,neq_) where
-    eq_bool_ = func ->
-      or (and (x,y), (and (not x, not y))) where
-        (_,x,y) = ...
-      ;
+  ieq_bool  = (eq_bool_,neq_bool_)
+  eq_bool_  = func ->  -- (ieq_bool,Bool,Bool) -> Bool
+    or (and (x,y), (and (not x, not y))) where
+      (_,x,y) = ...
     ;
   ;
+  neq_bool_ = neq_
 |]
 
 -- Bool type: not, and, or
@@ -142,18 +135,18 @@ bool = [r|
 -- interface IOrd(lt,lte,dt,gte)
 iord = [r|
   -- lt_ = ???
-  lte_ = func ->
+  lte_ = func ->  -- (ieq_*,iord_*,a,a) -> Bool
     or ( lt_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y),
          eq_ ((eq_,neq_),x,y) ) where
       ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
     ;
   ;
-  gt_ = func ->
+  gt_ = func ->  -- (ieq_*,iord_*,a,a) -> Bool
     not (lte_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y)) where
       ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
     ;
   ;
-  gte_ = func ->
+  gte_ = func ->  -- (ieq_*,iord_*,a,a) -> Bool
     or ( gt_ ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y),
          eq_ ((eq_,neq_),x,y) ) where
       ((eq_,neq_),(lt_,lte_,gt_,gte_),x,y) = ...
@@ -166,7 +159,8 @@ ieq = [r|
   -- Methods are renamed to include "dict" param:
   --  - eq_  has a default implentation
   --  - neq_ has a default implentation
-  eq_ = func ->
+  ieq = (eq_,neq_)
+  eq_ = func ->  -- (ieq_*,a,a) -> Bool
     case (x,y) of
       (~y,~x) -> Bool.True
       _       -> Bool.False
@@ -174,7 +168,7 @@ ieq = [r|
       (_,x,y) = ...
     ;
   ;
-  neq_ = func ->
+  neq_ = func ->  -- (ieq_*,a,a) -> Bool
     not (eq_ ((eq_,neq_),x,y)) where
       ((eq_,neq_),x,y) = ...
     ;
