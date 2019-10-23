@@ -76,12 +76,14 @@ spec = do
       run "main = f () where f = func () -> ...;;" `shouldBe` "()"
     it "Xx a = ()" $
       run "main = a where Xx a = Xx ();" `shouldBe` "()"
+    it "patt - (x)" $
+      run "main = x where (x) = ();" `shouldBe` "()"
     it "patt - read - fail" $
       run "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"func () ->\\n  ()\\n;\""
     it "patt - read - ok" $
       run "main = case () of ~() -> ();" `shouldBe` "()"
     it "patt - fail" $
-      run "main = x where Xxx = Yyy;" `shouldBe` "(line=1, col=8) ERROR : invalid assignment"
+      run "main = x where Xxx = Yyy;" `shouldBe` "(line=1, col=16) ERROR : invalid assignment"
     it "patt - fail" $
       run "main = case Xxx of Yyy->Xxx;" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
     it "patt - read - ok" $

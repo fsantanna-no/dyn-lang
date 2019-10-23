@@ -86,7 +86,15 @@ tk_hier = do
 
 -- (x, (y,_))
 pat :: Bool -> Parser Patt
-pat only_write = lany <|> lwrite <|> lread <|> lcons <|> try lunit <|> ltuple <?> "pattern" where
+pat only_write =
+  lany        <|>
+  lwrite      <|>
+  lread       <|>
+  lcons       <|>
+  try lunit   <|>
+  try lparens <|>   -- (1-item)
+  ltuple      <?> "pattern" where
+
   lany   = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "_"
@@ -113,6 +121,11 @@ pat only_write = lany <|> lwrite <|> lread <|> lcons <|> try lunit <|> ltuple <?
             void <- tk_sym "("
             void <- tk_sym ")"
             return $ PUnit az{pos=pos}
+  lparens = do
+            void <- tk_sym "("
+            loc  <- pat only_write
+            void <- tk_sym ")"
+            return loc
   ltuple = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "("
