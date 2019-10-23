@@ -28,7 +28,9 @@ evalExpr env (EUnit  z)     = EUnit  z
 evalExpr env (EVar   z id)  = envRead env z id
 evalExpr env (EArg   z)     = envRead env z "..."
 evalExpr env (ECons  z hr)  = EData z hr (EUnit z)
---evalExpr env (ECons  z hr)  = EData z hr (EUnit z)
+
+evalExpr env (EFunc  z tp ups bdy) = EFunc z tp (map f ups) bdy where
+  f (id,_) = (id, evalExpr env (EVar z id))
 
 evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
   where
@@ -61,6 +63,7 @@ evalExpr env (ECall z f arg) =
     ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'
     ((EFunc _ _ ups f')   , arg'           ) -> evalWhere env' f' where
       env' = envWrite (ups++env) "..." arg'
+    --(x,y) -> error $ show (x,y)
 
 evalExpr _ v = v
 
