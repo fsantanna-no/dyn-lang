@@ -167,7 +167,7 @@ multiply =
             "end",
             "return multiply (3,infinity())"
            ])
-        `shouldBe` Right (EError (-1))
+          `shouldBe` Right (EError (-1))
 -}
 
 -------------------------------------------------------------------------------
@@ -196,120 +196,126 @@ smallerc =
         it "twice" $            -- pg 12
           run ([r|
 main = twice (square,two)
-square =
-  func () ->
-    mul (x,x) where
-      x = ...
-    ;
+square = func () -> mul (...,...) ;
+twice = func () ->
+  case ... of
+    (=f,=x) -> f (f x)
   ;
-twice =
-  func () ->
-    case ... of
-      (=f,=x) -> f (f x)
-    ;
-  ;
+;
 |] ++ nat)
-            `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
+          `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
 
-{-
-        -- TODO: closures
         it "twicec" $            -- pg 12
-          (run True $
-            unlines [
-              "func square (x) : (Int -> Int) do",
-              "   return x * x",
-              "end",
-              "func twicec f : ((Int->Int) -> (Int->Int)[1]) do",
-              "   return func x : (Int -> Int)[1] do return f(f x) end",
-              "end",
-              "return (twicec (square)) 2"
-             ])
-          `shouldBe` Right (EData ["Int","16"] EUnit)
+          run ([r|
+main   = eq (ieq_nat, (twicec square) two, mul(four,four))
+square = func () -> mul (...,...);
+twicec = func () ->
+  func (f) ->
+    f (f ...)
+  ; where
+    f = ...
+  ;
+;
+|] ++ ieq_nat ++ ieq ++ nat)
+          `shouldBe` "Bool.True"
 
         it "quad" $            -- pg 12
-          (run True $
-            unlines [
-              "func square (x) : (Int -> Int) do",
-              "   return x * x",
-              "end",
-              "func twicec f : ((Int->Int) -> (Int->Int)[1]) do",
-              "   return func x : (Int -> Int)[1] do return f(f x) end",
-              "end",
-              "var quad : (Int -> Int) = twicec (square)",
-              "return quad 2"
-             ])
-          `shouldBe` Right (EData ["Int","16"] EUnit)
+          run ([r|
+main   = eq (ieq_nat, quad two, mul (four,four))
+quad   = twicec square
+square = func () -> mul (...,...);
+twicec = func () ->
+  func (f) ->
+    f (f ...)
+  ; where
+    f = ...
+  ;
+;
+|] ++ prelude)
+          `shouldBe` "Bool.True"
 
         it "curry" $            -- pg 13
-          (run True $
-            unlines [
-              "func square (x) : (Int -> Int) do",
-              "   return x * x",
-              "end",
-              "func twice (f,x) : (((Int->Int), Int) -> Int) do",
-              "   return f(f x)",
-              "end",
-              "func curry f : (((a,b)->c) -> ((a -> (b -> c))[1])) do",
-              "   return func x : (a -> (b -> c)[2])[1] do",
-              "           return func y : (b -> c)[2] do",
-              "                   return f(x,y)",
-              "                  end",
-              "          end",
-              "end",
-              "var twicec : ((Int->Int) -> (Int -> Int)) = curry (twice)",
-              "return (twicec (square)) 2"
-             ])
-          `shouldBe` Right (EData ["Int","16"] EUnit)
+          run ([r|
+main   = eq (ieq_nat, (twicec square) two, mul(four,four))
+square = func () -> mul (...,...);
+twicec = curry twice
+twice  = func () ->
+  case ... of
+    (=f,=x) -> f (f x)
+  ;
+;
+curry  = func () ->
+  func (f) ->
+    func (f,x) ->
+      f (x,...)
+    ; where
+      x = ...
+    ;
+  ; where
+    f = ...
+  ;
+;
+|] ++ prelude)
+          `shouldBe` "Bool.True"
 
       describe "Chapter 1.4.3 - Operators:" $ do               -- pg 13
 
+{-
+      -- TODO: operators
         it "+" $                -- pg 13
           (run True $
             unlines [
               "return 1 + (+ (2,3))"
              ])
           `shouldBe` Right (EData ["Int","6"] EUnit)
+-}
 
         it "uncurry" $            -- pg 11
-          (run True $
-            unlines [
-              "func smallerc x : (Int -> (Int->Bool)[1]) do",
-              "   return func y : (Int -> Bool)[1] do",
-              "           return x < y",
-              "          end",
-              "end",
-              "func uncurry f : ((a -> (b->c)[1]) -> ((a,b)->c)[1]) do",
-              "   return func (i,j) : ((a,b) -> c)[1] do",
-              "           return (f i) j",
-              "          end",
-              "end",
-              "var g : ((a,b)->c)[1] = uncurry smallerc",
-              "return g(10,12)"
-             ])
-          `shouldBe` Right (EData ["Bool","True"] EUnit)
+          run ([r|
+main = (uncurry smallerc) (two,ten)
+smallerc = func () ->
+  func (x) ->
+    lt (ieq_nat,iord_nat,x,...) where
+      (lt,_,_,_) = iord_nat
+    ;
+  ; where
+    x = ...
+  ;
+;
+uncurry = func () ->
+  func (f) ->
+    (f i) j where
+      (i,j) = ...
+    ;
+  ; where
+    f = ...
+  ;
+;
+|] ++ prelude)
+          `shouldBe` "Bool.True"
 
       describe "Chapter 1.4.7 - Composition:" $ do               -- pg 15
 
         it "compose" $         -- pg 15
-          (run True $
-            pre ++ unlines [
-              "func compose (f,g) : (((a->b),(b->c)) -> (a -> c)[2]) do",
-              "   return func x : (a -> c)[2] do",
-              "           return f (g x)",
-              "          end",
-              "end",
-              "func square (x) : (Int -> Int) do",
-              "   return x * x",
-              "end",
-              "var quad : (Int -> Int)[2] = compose (square,square)",
-              "return quad 2"
-             ])
-          `shouldBe` Right (EData ["Int","16"] EUnit)
+          run ([r|
+main    = eq (ieq_nat, quad two, mul (four,four))
+quad    = compose (square,square)
+square  = func () -> mul (...,...);
+compose = func () ->
+  func (f,g) ->
+    f (g ...)
+  ; where
+    (f,g) = ...
+  ;
+;
+|] ++ prelude)
+          `shouldBe` "Bool.True"
 
 -------------------------------------------------------------------------------
 
     describe "Chapter 1.5 - Definitions:" $ do                -- pg 17
 
+{-
       -- TODO: negative numbers
       it "signum" $           -- pg 18
         (run True $
