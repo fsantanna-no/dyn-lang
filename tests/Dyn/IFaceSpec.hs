@@ -88,23 +88,13 @@ ixxx_xxx = f where
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-{-
     it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
-          (run True $
-            unlines [
-              "interface IEq for a with"          ,
-              " var eq  : ((a,a) -> Int)"         ,
-              " func neq (x,y) : ((a,a) -> Int) do return 1 - (x eq y) end",
-              "end"                               ,
-              "implementation of IEq for Int with" ,
-              " func eq (x,y) : ((Int,Int) -> Int) do",
-              "   if y matches x then return 1 else return 0 end"                  ,
-              " end"                              ,
-              "end"                               ,
-              "func f x : (a -> Int) where a is IEq do",
-              "   return x eq x",   -- eq_a
-              "end",
-              "return f 1"  -- eq_a=eq_Int
-             ])
-          `shouldBe` Right (EData ["Int","1"] EUnit)
--}
+      run ([r|
+main = f (ieq_nat, one)
+f = func ->
+  eq ((eq,neq),x,x) where
+    ((eq,neq), x) = ...
+  ;
+;
+|] ++ prelude)
+          `shouldBe` "Bool.True"
