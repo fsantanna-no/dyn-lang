@@ -57,23 +57,28 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
 {-
-    it "IEq a where a is IXxx" $
+-}
+    it "implementation of IEq for a where a is IXxx" $
       run ([r|
 main = eq ((eq,neq),Xxx,Xxx) where
-  (eq,neq) = ieq_ixxx
+  (eq,neq) = ieq_ixxx ixxx_xxx
 ;
 
-ieq_ixxx  = (eq,neq) where
-  eq = func ->
-    eq ((eq,neq), (f x), (f y)) where
-      (eq,neq)  = ieq_bool
-      (_,(f),x,y) = ...
+ieq_ixxx = func () -> -- ixxx -> ieq
+  (eq,neq) where
+    eq = func () ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
+      eq ((eq,neq), f ((f),x), f ((f),y)) where
+        (eq,neq) = ieq_bool
+        (_,x,y)  = ...
+      ;
+    ; where
+      (f) = ...
     ;
   ;
 ;
 
 ixxx_xxx = f where
-  f = func ->
+  f = func () -> -- :: (ixxx_xxx,X) -> Bool
     case x of
       Xxx -> Bool.True
     ; where
@@ -83,7 +88,6 @@ ixxx_xxx = f where
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
--}
 
 -------------------------------------------------------------------------------
 
@@ -91,7 +95,7 @@ ixxx_xxx = f where
 iord_bool = [r|
   -- dict
   iord_bool = (lt,lte,gt,gte) where
-    lt = func ->
+    lt = func () ->
       case (x,y) of
         (Bool.False, Bool.False) -> Bool.False
         (Bool.False, Bool.True)  -> Bool.True
@@ -111,7 +115,7 @@ ieq_bool = [r|
   --  - methods receive extra dict
   -- overrides default eq
   ieq_bool = (eq,neq) where
-    eq = func ->  -- (ieq_bool,Bool,Bool) -> Bool
+    eq = func () ->  -- (ieq_bool,Bool,Bool) -> Bool
       or (and (x,y), (and (not x, not y))) where
         (_,x,y) = ...
       ;
@@ -121,14 +125,14 @@ ieq_bool = [r|
 
 -- Bool type: not, and, or
 bool = [r|
-  not = func ->
+  not = func () ->
     case ... of
       Bool.False -> Bool.True
       Bool.True  -> Bool.False
     ;
   ;
 
-  and = func ->
+  and = func () ->
     case ... of
       (Bool.False, _) -> Bool.False
       (_, Bool.False) -> Bool.False
@@ -136,7 +140,7 @@ bool = [r|
     ;
   ;
 
-  or = func ->
+  or = func () ->
     case ... of
       (Bool.True, _)  -> Bool.True
       (_,         =y) -> y
@@ -147,18 +151,18 @@ bool = [r|
 -- interface IOrd(lt,lte,dt,gte)
 iord = [r|
   -- lt_ = ???
-  lte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
+  lte = func () ->  -- (ieq_*,iord_*,a,a) -> Bool
     or ( lt ((eq,neq),(lt,lte,gt,gte),x,y),
          eq ((eq,neq),x,y) ) where
       ((eq,neq),(lt,lte,gt,gte),x,y) = ...
     ;
   ;
-  gt = func ->  -- (ieq_*,iord_*,a,a) -> Bool
+  gt = func () ->  -- (ieq_*,iord_*,a,a) -> Bool
     not (lte ((eq,neq),(lt,lte,gt,gte),x,y)) where
       ((eq,neq),(lt,lte,gt,gte),x,y) = ...
     ;
   ;
-  gte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
+  gte = func () ->  -- (ieq_*,iord_*,a,a) -> Bool
     or ( gt ((eq,neq),(lt,lte,gt,gte),x,y),
          eq ((eq,neq),x,y) ) where
       ((eq,neq),(lt,lte,gt,gte),x,y) = ...
@@ -172,7 +176,7 @@ ieq = [r|
   --  - eq_  has a default implentation
   --  - neq_ has a default implentation
   ieq = (eq,neq)  -- IEq is an interface with all members instantiated, so it support all types
-  eq = func ->  -- (ieq_*,a,a) -> Bool
+  eq = func () ->  -- (ieq_*,a,a) -> Bool
     case (x,y) of
       (~y,~x) -> Bool.True
       _       -> Bool.False
@@ -180,7 +184,7 @@ ieq = [r|
       (_,x,y) = ...
     ;
   ;
-  neq = func ->  -- (ieq_*,a,a) -> Bool
+  neq = func () ->  -- (ieq_*,a,a) -> Bool
     not (eq ((eq,neq),x,y)) where
       ((eq,neq),x,y) = ...
     ;

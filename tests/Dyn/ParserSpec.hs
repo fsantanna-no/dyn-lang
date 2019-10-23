@@ -46,8 +46,8 @@ spec = do
       parse' expr "(())"
         `shouldBe` Right (EUnit az{pos=(1,2)})
     it "func" $
-      parse' expr "func () -> ();"
-        `shouldBe` Right (EFunc az{pos=(1,1)} tz (Where (az{pos=(1,12)}, EUnit az{pos=(1,12)},[])))
+      parse' expr "func :: () () -> ();"
+        `shouldBe` Right (EFunc az{pos=(1,1)} tz (Where (az{pos=(1,18)}, EUnit az{pos=(1,18)},[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
@@ -118,13 +118,13 @@ spec = do
         (exprToString 0 $ fromRight $ parse' expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func -> xxx;")
+        (exprToString 0 $ fromRight $ parse' expr "func :: () () -> xxx;")
           `shouldBe` "func () ->\n  xxx\n;"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func () -> xxx where xxx=() where y=();\n  x=();;")
+        (exprToString 0 $ fromRight $ parse' expr "func :: () () -> xxx where xxx=() where y=();\n  x=();;")
           `shouldBe` "func () ->\n  xxx where\n    xxx = () where\n      y = ()\n    ;\n    x = ()\n  ;\n;"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();;;")
+        (exprToString 0 $ fromRight $ parse' expr "func () -> xxx where\n  xxx=() where\n    y=()\n    x=();;;")
           `shouldBe` "func () ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;"
       it "call" $
         (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")
@@ -158,7 +158,7 @@ spec = do
         (progToString $ fromRight $ parse
           [r|
 main :: () = f ()
-f :: () = func -> x where
+f :: () = func () -> x where
             x :: () = ...;
           ;
 |])
@@ -188,7 +188,7 @@ d :: () = ()
         parseToString [r|
 main = add (Nat.Zero, Nat.Succ Nat.Zero)
 add =
-  func () ->
+  func :: () () ->
     case y of
       Nat.Zero    -> x
       Nat.Succ =z -> Nat.Succ (add (x,z))

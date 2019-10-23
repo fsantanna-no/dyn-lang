@@ -178,7 +178,8 @@ expr_func :: Parser Expr
 expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
-  tp   <- option tz type_
+  tp   <- option tz (tk_sym "::" *> type_)
+  clos <- expr                        -- (), (x), (x,y)
   void <- tk_sym "->"
   body <- where_
   void <- tk_sym ";"
