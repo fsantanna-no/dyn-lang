@@ -1,9 +1,5 @@
-- Parser parens
-- closures
-    - func (up1,ip2) -> ...
 - dicts w/o typesys???
     - implementacao para tipo generico
-        - implementation of IEq for a where a is IXx
         - "func f x : (a -> Int) where a is IEq do",
 - tipos, mas sem typesys
 - data

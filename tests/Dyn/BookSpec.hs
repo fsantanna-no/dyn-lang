@@ -8,6 +8,7 @@ import Text.RawString.QQ
 import Dyn.AST
 import Dyn.Parser
 import Dyn.Eval
+import Dyn.Prelude
 
 main :: IO ()
 main = hspec spec
@@ -175,21 +176,18 @@ multiply =
 
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
-{-
-        -- TODO: closures
         it "smallerc" $            -- pg 11
-          (run True $
-            unlines [
-              "func smallerc x : (Int -> (Int->Bool)[1]) do",
-              "   return func y : (Int -> Bool)[1] do",
-              "           return x < y",
-              "          end",
-              "end",
-              "var z : Int = 10",
-              "return (smallerc (z))(12)"
-             ])
-          `shouldBe` Right (EData ["Bool","True"] EUnit)
--}
+          run ([r|
+main = (smallerc two) four
+smallerc =
+  func () ->
+    func (x) -> lt (x,...) ; where
+      x = ...
+    ;
+  ;
+|] ++ nat ++ iord_bool ++ bool ++ iord ++ ieq)
+          `shouldBe` "Bool.True"
+
 
         it "twice" $            -- pg 12
           run ([r|
@@ -2496,75 +2494,3 @@ implementation of IOrderable for Bool with
 end
 |]
 -}
-
--------------------------------------------------------------------------------
-
-nat = [r|
-  mul =
-    func () ->
-      case ... of
-        (_,  Nat.Zero)    -> Nat.Zero
-        (=x, Nat.Succ =y) -> add (mul (x,y), x)
-      ;
-    ;
-
-  add =
-    func () ->
-      case ... of
-        (=x, Nat.Zero)    -> x
-        (=x, Nat.Succ =y) -> Nat.Succ (add (x,y))
-      ;
-    ;
-
-  dec =
-    func () ->
-      case ... of
-        Nat.Succ =x -> x
-      ;
-    ;
-
-  lte =
-    func () ->
-      case ... of
-        (Nat.Zero,_) -> Bool.True
-        (_,Nat.Zero) -> Bool.False
-        (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
-      ;
-    ;
-
-  ten   = Nat.Succ nine
-  nine  = Nat.Succ eight
-  eight = Nat.Succ seven
-  seven = Nat.Succ six
-  six   = Nat.Succ five
-  five  = Nat.Succ four
-  four  = Nat.Succ three
-  three = Nat.Succ two
-  two   = Nat.Succ one
-  one   = Nat.Succ zero
-  zero  = Nat.Zero
-|]
-
-bool = [r|
-  not = func () ->
-    case ... of
-      Bool.False -> Bool.True
-      Bool.True  -> Bool.False
-    ;
-  ;
-
-  and = func () ->
-    case ... of
-      (Bool.False, _) -> Bool.False
-      (_, Bool.False) -> Bool.False
-      _               -> Bool.True
-    ;
-  ;
-
-  or = func () ->
-    case ... of
-      (Bool.True, _)  -> Bool.True
-      (_,         =y) -> y
-    ;
-  ;
-|]
