@@ -71,16 +71,16 @@ spec = do
 
   describe "dcl:" $ do
     it "x :: () = ()" $
-      parse' dcl "x :: () = ()"
+      parse' dcl_var "x :: () = ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
     it "x :: ()" $
-      parse' dcl "x :: ()"
+      parse' dcl_var "x :: ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Nothing))
     it "x = ()" $
-      parse' dcl "x = ()"
+      parse' dcl_var "x = ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
     it "x" $
-      parse' dcl "x"
+      parse' dcl_var "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
 
   describe "toString:" $ do
@@ -96,7 +96,7 @@ spec = do
           `shouldBe` "(xxx,yyy)"
     describe "dcl:" $ do
       it "case" $
-        (dclToString 0 $ fromRight $ parse' dcl "main = case x of Bool.True -> a\nBool.False -> b;")
+        (dclToString 0 $ fromRight $ parse' dcl_var "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $
@@ -144,7 +144,7 @@ spec = do
           `shouldBe` "main where\n  main = ()\n;"
       it "x where x,y" $
         (parseToString "main::()=y  y::()=()")
-          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", pattern or end of input"
+          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", declaration or end of input"
       it "x where x,y" $
         (parseToString "main::()=y\ny::()=()")
           `shouldBe` "main where\n  main :: () = y\n  y :: () = ()\n;"

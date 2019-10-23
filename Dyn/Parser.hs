@@ -244,8 +244,8 @@ type_ = do
 
 -------------------------------------------------------------------------------
 
-dcl :: Parser Dcl
-dcl = do
+dcl_var :: Parser Dcl
+dcl_var = do
   pos <- toPos <$> getPosition
   p   <- pat True
   tp  <- optionMaybe $ do
@@ -259,19 +259,24 @@ dcl = do
   guard $ isJust tp || isJust w
   return $ Dcl (az{pos=pos}, p, tp, w)
 
+dcls :: Parser [Dcl]
+dcls = (f <$> dcl_var) <?> "declaration"
+  where
+    f x = [x]
+
 -------------------------------------------------------------------------------
 
 where_ :: Parser Where
 where_ = do
-  pos  <- toPos <$> getPosition
-  e    <- expr
-  dcls <- option [] $ do
-            void <- tk_key "where"
-            dcls <- list (tk_sym "") dcl
-            void <- tk_sym ";"
-            void <- optional $ tk_key "where"
-            return dcls
-  return $ Where (az{pos=pos}, e, dcls)
+  pos <- toPos <$> getPosition
+  e   <- expr
+  ds  <- option [] $ do
+          void <- tk_key "where"
+          ds <- concat <$> list (tk_sym "") dcls
+          void <- tk_sym ";"
+          void <- optional $ tk_key "where"
+          return ds
+  return $ Where (az{pos=pos}, e, ds)
 
 -------------------------------------------------------------------------------
 
@@ -279,9 +284,9 @@ prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
-  dcls <- list (tk_sym "") dcl
+  ds   <- concat <$> list (tk_sym "") dcls
   void <- eof
-  return $ Where (az{pos=pos}, EVar az{pos=pos} "main", dcls)
+  return $ Where (az{pos=pos}, EVar az{pos=pos} "main", ds)
 
 -------------------------------------------------------------------------------
 
