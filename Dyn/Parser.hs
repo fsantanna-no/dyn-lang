@@ -14,6 +14,7 @@ import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, 
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
 import Dyn.AST as A
+import Dyn.IFace
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -337,25 +338,11 @@ prog = do
   void <- eof
   return $
     let
-      f (PLDcl dcl) = [dcl]
-      f (PLIFace iface@(IFace (z, (cls,_), dcls))) = ifaceToDict dcls iface : dcls
-      f (PLImpl _ ) = []
+      f (PLDcl   dcl)   = [dcl]
+      f (PLIFace iface) = ifaceToDcls iface
+      f (PLImpl  impl)  = implToDcls  impl
      in
       Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap f ds)
-
-ifaceToDict :: [Dcl] -> IFace -> Dcl
-ifaceToDict ds (IFace (z, (cls,_), dcls)) =
-  Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[])) where
-    ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
-    e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
-
-{-
-      dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
-      ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
-      e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
-     in
-      Dcl (z, PWrite z ("d"++cls++concat hr), Nothing, Just $ Where (z,e,ds))
--}
 
 -------------------------------------------------------------------------------
 
