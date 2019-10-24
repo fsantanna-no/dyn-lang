@@ -263,7 +263,7 @@ type_ = do
 dcl :: Parser Dcl
 dcl = do
   pos <- toPos <$> getPosition
-  p   <- pat True
+  p   <- pat True <?> "declaration"
   tp  <- optionMaybe $ do
           void <- try $ tk_sym "::"
           tp   <- type_
@@ -294,9 +294,8 @@ where_ = do
 
 -------------------------------------------------------------------------------
 
-{-
-dcl_iface :: Parser Dcl
-dcl_iface = do
+iface :: Parser IFace
+iface = do
   pos  <- toPos <$> getPosition
   void <- tk_key "interface"
   cls  <- tk_iface
@@ -306,7 +305,8 @@ dcl_iface = do
   ds   <- dcls
   void <- tk_sym ";"
   void <- optional $ tk_key "interface"
-  return $
+  return $ IFace (az{pos=pos}, (cls,var), ds)
+{-
     let
       z    = az{pos=pos}
       dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
@@ -318,13 +318,21 @@ dcl_iface = do
 
 -------------------------------------------------------------------------------
 
+data PList = PLDcl Dcl | PLIFace IFace
+
 prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
-  ds   <- dcls
+  ds   <- list (tk_sym "") ((PLDcl <$> try dcl) <|> (PLIFace <$> iface))
   void <- eof
-  return $ Where (az{pos=pos}, EVar az{pos=pos} "main", ds)
+  return $
+    let
+      g (PLDcl dcl) = dcl
+      f (PLDcl _) = True
+      f _         = False
+     in
+      Where (az{pos=pos}, EVar az{pos=pos} "main", map g $ filter f ds)
 
 -------------------------------------------------------------------------------
 

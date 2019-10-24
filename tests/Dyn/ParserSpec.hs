@@ -144,7 +144,7 @@ spec = do
           `shouldBe` "main where\n  main = ()\n;"
       it "x where x,y" $
         (parseToString "main::()=y  y::()=()")
-          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", pattern or end of input"
+          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", declaration, \"interface\" or end of input"
       it "x where x,y" $
         (parseToString "main::()=y\ny::()=()")
           `shouldBe` "main where\n  main :: () = y\n  y :: () = ()\n;"
