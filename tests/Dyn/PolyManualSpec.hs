@@ -39,7 +39,7 @@ main = (x,y) where
       run ([r|
 main = v where  -- neq (eq(T,T), F)
   v = neq (dieq, eq (dieq,Bool.True,Bool.True), Bool.False)
-  Dict.IEq (eq,neq) = dieq_bool
+  Dict.IEq (eq,neq) = dieq
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"

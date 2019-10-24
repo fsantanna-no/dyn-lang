@@ -6,9 +6,9 @@ import Test.Hspec
 import Text.RawString.QQ
 
 import Dyn.AST
-import qualified Dyn.Parser as P
+import Dyn.Parser
 import Dyn.Eval
-import Dyn.Prelude hiding (ieq)
+import Dyn.Prelude hiding (ieq,iord,ieq_bool,iord_bool)
 import Dyn.Ifce
 
 main :: IO ()
@@ -42,12 +42,12 @@ interface IEq for a with
 |] ++ bool)
         `shouldBe` "Bool.True"
 
-    it "XXX: IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
+    it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
       run ([r|
 main = (x,y) where
-  x = eq (dieq, (Bool.True,Bool.False), (Bool.False,Bool.True))
-  y = eq (dieq, (Bool.True,Bool.False), (Bool.True,Bool.False))
-  Dict.IEq (eq,neq) = dieq
+  x = eq (dIEq, (Bool.True,Bool.False), (Bool.False,Bool.True))
+  y = eq (dIEq, (Bool.True,Bool.False), (Bool.True,Bool.False))
+  Dict.IEq (eq,neq) = dIEq
 ;
 
 implementation of IEq for Bool with
@@ -60,12 +60,11 @@ implementation of IEq for Bool with
 |] ++ bool ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
-{-
     it "IEq: overrides eq (dieq_bool)" $
       run ([r|
 main = v where  -- neq (eq(T,T), F)
-  v = neq (dieq_bool, eq (dieq_bool,Bool.True,Bool.True), Bool.False)
-  Dict.IEq (eq,neq) = dieq_bool
+  v = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False)
+  Dict.IEq (eq,neq) = dIEq
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -73,16 +72,17 @@ main = v where  -- neq (eq(T,T), F)
     it "IEq/IOrd" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte (dieq_bool, diord_bool, Bool.True,  Bool.False),
-        gte (dieq_bool, diord_bool, Bool.True,  Bool.True),
-        gt  (dieq_bool, diord_bool, Bool.False, Bool.False),
-        lt  (dieq_bool, diord_bool, Bool.False, Bool.True) )
-  Dict.IEq  (eq,neq)        = dieq_bool
-  Dict.IOrd (lt,lte,gt,gte) = diord_bool
+  v = ( lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False),
+        gte (dIEqBool, dIOrdBool, Bool.True,  Bool.True),
+        gt  (dIEqBool, dIOrdBool, Bool.False, Bool.False),
+        lt  (dIEqBool, dIOrdBool, Bool.False, Bool.True) )
+  Dict.IEq  (eq,neq)        = dIEqBool
+  Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
+{-
     it "implementation of IEq for a where a is IXxx" $
       run ([r|
 main = eq (Dict.IEq (eq,neq),Xxx,Xxx) where
