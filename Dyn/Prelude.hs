@@ -96,12 +96,20 @@ ieq = [r|
       (~y,_) -> Bool.True
       _      -> Bool.False
     ; where
-      (_,x,y) = ...
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      (dieq,p1,p2) = ...
     ;
   ;
   neq = func ->  -- (ieq_*,a,a) -> Bool
-    not (eq (Dict.IEq (eq,neq),x,y)) where
-      (Dict.IEq (eq,neq),x,y) = ...
+    not (eq (dieq,x,y)) where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      (dieq,p1,p2) = ...
     ;
   ;
 |]
@@ -116,14 +124,24 @@ iord = [r|
     ;
   ;
   gt = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-    not (lte (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y)) where
-      (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y) = ...
+    not (lte (dieq,diord,x,y)) where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      Dict.IOrd (lt,lte,gt,gte) = diord
+      (dieq,diord,p1,p2) = ...
     ;
   ;
   gte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-    or ( gt (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y),
-         eq (Dict.IEq (eq,neq),x,y) ) where
-      (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y) = ...
+    or ( gt (dieq,diord,x,y),
+         eq (dieq,x,y) ) where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      Dict.IOrd (lt,lte,gt,gte) = diord
+      (dieq,diord,p1,p2) = ...
     ;
   ;
 |]
@@ -140,7 +158,10 @@ ieq_bool = [r|
   dieq_bool = Dict.IEq (eq,neq) where
     eq = func ->  -- (dieq_bool,Bool,Bool) -> Bool
       or (and (x,y), (and (not x, not y))) where
-        (_,x,y) = ...
+        (x,y) = ...
+        -- AUTO
+        ... = (p1,p2)
+        (dieq,p1,p2) = ...
       ;
     ;
   ;
@@ -157,7 +178,10 @@ iord_bool = [r|
         (Bool.True,  Bool.False) -> Bool.False
         (Bool.True,  Bool.True)  -> Bool.False
       ; where
-        (_,_,x,y) = ...
+        (x,y) = ...
+        -- AUTO
+        ... = (p1,p2)
+        (dieq,diord,p1,p2) = ...
       ;
     ;
   ;
@@ -180,8 +204,11 @@ iord_nat = [r|
         (Nat.Succ _,   Nat.Zero)     -> Bool.False
         (Nat.Succ =x', Nat.Succ =y') -> lt (dieq,diord,x',y')
       ; where
+        (x,y) = ...
+        -- AUTO
+        ... = (p1,p2)
         Dict.IOrd (lt,_,_,_) = diord
-        (dieq,diord,x,y)  = ...
+        (dieq,diord,p1,p2)   = ...
       ;
     ;
   ;
