@@ -330,7 +330,7 @@ prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
-  ds   <- list (tk_sym "") (
+  pl   <- list (tk_sym "") (
             (PLDcl   <$> try dcl)   <|>
             (PLIFace <$> try iface) <|>
             (PLImpl  <$> impl)
@@ -338,11 +338,17 @@ prog = do
   void <- eof
   return $
     let
-      f (PLDcl   dcl)   = [dcl]
-      f (PLIFace iface) = ifaceToDcls iface
-      f (PLImpl  impl)  = implToDcls  impl
+      toDcl (PLDcl   dcl)  = [dcl]
+      toDcl (PLIFace ifc)  = ifaceToDcls ifc
+      toDcl (PLImpl  impl) = implToDcls  (plToIfcs pl) impl
      in
-      Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap f ds)
+      Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDcl pl)
+
+plToIfcs :: [PList] -> [IFace]
+plToIfcs pl = map g $ filter f pl where
+                f (PLIFace ifc) = True
+                f _             = False
+                g (PLIFace ifc) = ifc
 
 -------------------------------------------------------------------------------
 

@@ -1,4 +1,6 @@
-- Sugar/IFace
+- IFace -> Ifce, ifc
+- Dcl -> Decl
+- continuar com implementation
 - lists
     - vai permitir [a] where a is ...
         - dinamico e estatico
