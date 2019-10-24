@@ -183,7 +183,7 @@ smallerc =
   func ->
     func {x} ->
       lt (ieq_nat,iord_nat,x,...) where
-        (lt,_,_,_) = iord_nat
+        Dict.IOrd (lt,_,_,_) = iord_nat
       ;
     ; where
       x = ...
@@ -276,7 +276,7 @@ main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
     lt (ieq_nat,iord_nat,x,...) where
-      (lt,_,_,_) = iord_nat
+      Dict.IOrd (lt,_,_,_) = iord_nat
     ;
   ; where
     x = ...

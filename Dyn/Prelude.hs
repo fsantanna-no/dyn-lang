@@ -90,7 +90,7 @@ ieq = [r|
   -- Methods are renamed to include "dict" param:
   --  - eq_  has a default implentation
   --  - neq_ has a default implentation
-  ieq = (eq,neq)  -- IEq is an interface with all members instantiated, so it support all types
+  dieq = Dict.IEq (eq,neq)  -- IEq is an interface with all members instantiated, so it support all types
   eq = func ->  -- (ieq_*,a,a) -> Bool
     case (x,y) of
       (~y,~x) -> Bool.True
@@ -100,8 +100,8 @@ ieq = [r|
     ;
   ;
   neq = func ->  -- (ieq_*,a,a) -> Bool
-    not (eq ((eq,neq),x,y)) where
-      ((eq,neq),x,y) = ...
+    not (eq (Dict.IEq (eq,neq),x,y)) where
+      (Dict.IEq (eq,neq),x,y) = ...
     ;
   ;
 |]
@@ -110,20 +110,20 @@ ieq = [r|
 iord = [r|
   -- lt_ = ???
   lte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-    or ( lt ((eq,neq),(lt,lte,gt,gte),x,y),
-         eq ((eq,neq),x,y) ) where
-      ((eq,neq),(lt,lte,gt,gte),x,y) = ...
+    or ( lt (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y),
+         eq (Dict.IEq (eq,neq),x,y) ) where
+      (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y) = ...
     ;
   ;
   gt = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-    not (lte ((eq,neq),(lt,lte,gt,gte),x,y)) where
-      ((eq,neq),(lt,lte,gt,gte),x,y) = ...
+    not (lte (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y)) where
+      (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y) = ...
     ;
   ;
   gte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-    or ( gt ((eq,neq),(lt,lte,gt,gte),x,y),
-         eq ((eq,neq),x,y) ) where
-      ((eq,neq),(lt,lte,gt,gte),x,y) = ...
+    or ( gt (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y),
+         eq (Dict.IEq (eq,neq),x,y) ) where
+      (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y) = ...
     ;
   ;
 |]
@@ -137,8 +137,8 @@ ieq_bool = [r|
   --  - implements eq, uses default neq
   --  - methods receive extra dict
   -- overrides default eq
-  ieq_bool = (eq,neq) where
-    eq = func ->  -- (ieq_bool,Bool,Bool) -> Bool
+  dieq_bool = Dict.IEq (eq,neq) where
+    eq = func ->  -- (dieq_bool,Bool,Bool) -> Bool
       or (and (x,y), (and (not x, not y))) where
         (_,x,y) = ...
       ;
@@ -149,7 +149,7 @@ ieq_bool = [r|
 -- implementation IOrd for Bool
 iord_bool = [r|
   -- dict
-  iord_bool = (lt,lte,gt,gte) where
+  diord_bool = Dict.IOrd (lt,lte,gt,gte) where
     lt = func ->
       case (x,y) of
         (Bool.False, Bool.False) -> Bool.False
@@ -167,21 +167,21 @@ iord_bool = [r|
 
 -- instance IEq (Int)
 ieq_nat = [r|
-  ieq_nat = (eq,neq)
+  ieq_nat = Dict.IEq (eq,neq)
 |]
 
 -- implementation IOrd for Bool
 iord_nat = [r|
-  iord_nat = (lt,lte,gt,gte) where
+  iord_nat = Dict.IOrd (lt,lte,gt,gte) where
     lt = func ->
       case (x,y) of
         (Nat.Zero,     Nat.Zero)     -> Bool.False
         (Nat.Zero,     _)            -> Bool.True
         (Nat.Succ _,   Nat.Zero)     -> Bool.False
-        (Nat.Succ =x', Nat.Succ =y') -> lt (ieq,iord,x',y')
+        (Nat.Succ =x', Nat.Succ =y') -> lt (dieq,diord,x',y')
       ; where
-        (lt,_,_,_)     = iord
-        (ieq,iord,x,y) = ...
+        Dict.IOrd (lt,_,_,_) = diord
+        (dieq,diord,x,y)  = ...
       ;
     ;
   ;

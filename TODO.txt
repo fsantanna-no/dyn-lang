@@ -1,8 +1,8 @@
-- colocar tipos dicts explicitos
-    - newtype
 - parser receber
     - [(Parser Expr), (Parser Dcl), ...]
     - diretorio Sugar
+- colocar tipos dicts explicitos
+    - newtype
 - lists
     - vai permitir [a] where a is ...
         - dinamico e estatico

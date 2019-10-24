@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Dyn.PolyManual (main,spec) where
+module Dyn.PolyManualSpec (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ
@@ -19,8 +19,8 @@ spec = do
 
     it "IEq: default eq" $
       run sgz ([r|  -- neq (eq(T,T), F)
-main = neq ((eq,neq), eq ((eq,neq),Bool.True,Bool.True), Bool.False) where
-  (eq,neq) = ieq
+main = neq (dieq, eq (dieq,Bool.True,Bool.True), Bool.False) where
+  Dict.IEq (eq,neq) = dieq
 ;
 |] ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -28,18 +28,18 @@ main = neq ((eq,neq), eq ((eq,neq),Bool.True,Bool.True), Bool.False) where
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
       run sgz ([r|
 main = (x,y) where
-  x = eq ((eq,neq), (Bool.True,Bool.False), (Bool.False,Bool.True))
-  y = eq ((eq,neq), (Bool.True,Bool.False), (Bool.True,Bool.False))
-  (eq,neq) = ieq
+  x = eq (dieq, (Bool.True,Bool.False), (Bool.False,Bool.True))
+  y = eq (dieq, (Bool.True,Bool.False), (Bool.True,Bool.False))
+  Dict.IEq (eq,neq) = dieq
 ;
 |] ++ bool ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
-    it "IEq: overrides eq (ieq_bool)" $
+    it "IEq: overrides eq (dieq_bool)" $
       run sgz ([r|
 main = v where  -- neq (eq(T,T), F)
-  v = neq ((eq,neq), eq (ieq,Bool.True,Bool.True), Bool.False)
-  (eq,neq) = ieq_bool
+  v = neq (dieq, eq (dieq,Bool.True,Bool.True), Bool.False)
+  Dict.IEq (eq,neq) = dieq_bool
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -49,12 +49,12 @@ main = v where  -- neq (eq(T,T), F)
     it "IEq/IOrd" $
       run sgz ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte ((eq,neq), (lt,lte,gt,gte), Bool.True,  Bool.False),
-        gte ((eq,neq), (lt,lte,gt,gte), Bool.True,  Bool.True),
-        gt  ((eq,neq), (lt,lte,gt,gte), Bool.False, Bool.False),
-        lt  ((eq,neq), (lt,lte,gt,gte), Bool.False, Bool.True) )
-  (eq,neq)        = ieq_bool
-  (lt,lte,gt,gte) = iord_bool
+  v = ( lte (dieq_bool, diord_bool, Bool.True,  Bool.False),
+        gte (dieq_bool, diord_bool, Bool.True,  Bool.True),
+        gt  (dieq_bool, diord_bool, Bool.False, Bool.False),
+        lt  (dieq_bool, diord_bool, Bool.False, Bool.True) )
+  Dict.IEq  (eq,neq)        = dieq_bool
+  Dict.IOrd (lt,lte,gt,gte) = diord_bool
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
@@ -63,16 +63,16 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 
     it "implementation of IEq for a where a is IXxx" $
       run sgz ([r|
-main = eq ((eq,neq),Xxx,Xxx) where
-  (eq,neq) = ieq_ixxx ixxx_xxx      -- higher-kinded types (HKT)?
+main = eq (Dict.IEq (eq,neq),Xxx,Xxx) where
+  Dict.IEq (eq,neq) = ieq_ixxx dixxx_xxx      -- higher-kinded types (HKT)?
 ;
 
 ieq_ixxx = func -> -- ixxx -> ieq
-  (eq,neq) where
+  Dict.IEq (eq,neq) where
     eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
-      eq ((eq,neq), f ((f),x), f ((f),y)) where
-        (eq,neq) = ieq_bool
-        (_,x,y)  = ...
+      eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
+        Dict.IEq (eq,neq) = dieq_bool
+        (_,x,y) = ...
       ;
     ; where
       (f) = ...
@@ -80,8 +80,8 @@ ieq_ixxx = func -> -- ixxx -> ieq
   ;
 ;
 
-ixxx_xxx = f where
-  f = func -> -- :: (ixxx_xxx,X) -> Bool
+dixxx_xxx = f where
+  f = func -> -- :: (dixxx_xxx,X) -> Bool
     case x of
       Xxx -> Bool.True
     ; where
@@ -96,8 +96,8 @@ ixxx_xxx = f where
       run sgz ([r|
 main = f (ieq_nat, one)
 f = func ->
-  eq ((eq,neq),x,x) where
-    ((eq,neq), x) = ...
+  eq (Dict.IEq (eq,neq),x,x) where
+    (Dict.IEq (eq,neq), x) = ...
   ;
 ;
 |] ++ prelude)
