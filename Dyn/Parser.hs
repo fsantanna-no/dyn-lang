@@ -18,6 +18,9 @@ import Dyn.AST as A
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
 
+type Sugar = (Parser [Dcl])
+sgz = (P.parserZero)
+
 -------------------------------------------------------------------------------
 
 -- LISTS
@@ -259,8 +262,8 @@ dcl_var = do
   guard $ isJust tp || isJust w
   return $ Dcl (az{pos=pos}, p, tp, w)
 
-dcls :: Parser [Dcl]
-dcls = (f <$> dcl_var) <?> "declaration"
+dcls :: Sugar -> Parser [Dcl]
+dcls (sgDcls) = (f <$> dcl_var) <|> sgDcls <?> "declaration"
   where
     f x = [x]
 
@@ -272,7 +275,7 @@ where_ = do
   e   <- expr
   ds  <- option [] $ do
           void <- tk_key "where"
-          ds <- concat <$> list (tk_sym "") dcls
+          ds <- concat <$> list (tk_sym "") (dcls sgz)
           void <- tk_sym ";"
           void <- optional $ tk_key "where"
           return ds
@@ -280,18 +283,18 @@ where_ = do
 
 -------------------------------------------------------------------------------
 
-prog :: Parser Prog
-prog = do
+prog :: Sugar -> Parser Prog
+prog sugar = do
   pos  <- toPos <$> getPosition
   spc
-  ds   <- concat <$> list (tk_sym "") dcls
+  ds   <- concat <$> list (tk_sym "") (dcls sugar)
   void <- eof
   return $ Where (az{pos=pos}, EVar az{pos=pos} "main", ds)
 
 -------------------------------------------------------------------------------
 
-parse :: String -> Either String Prog
-parse input = parse' prog input
+parse :: Sugar -> String -> Either String Prog
+parse sugar input = parse' (prog sugar) input
 
 parse' :: Parser a -> String -> Either String a
 parse' rule input =
@@ -299,8 +302,8 @@ parse' rule input =
     (Right v) -> Right v
     (Left  v) -> Left (show v)
 
-parseToString :: String -> String
-parseToString input =
-  case parse input of
+parseToString :: Sugar -> String -> String
+parseToString sugar input =
+  case parse sugar input of
     (Left  v) -> v
     (Right p) -> progToString p

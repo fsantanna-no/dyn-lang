@@ -132,8 +132,8 @@ evalWhere env (Where (z, e, dcls)) =
 evalProg :: Prog -> Expr
 evalProg w = evalWhere [] w
 
-run :: String -> String
-run input =
-  case parse input of
+run :: Sugar -> String -> String
+run sugar input =
+  case parse sugar input of
     Left  err -> err
     Right exp -> exprToString 0 $ evalProg exp

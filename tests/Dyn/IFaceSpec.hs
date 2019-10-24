@@ -18,7 +18,7 @@ spec = do
   describe "manual" $ do
 
     it "IEq: default eq" $
-      run ([r|  -- neq (eq(T,T), F)
+      run sgz ([r|  -- neq (eq(T,T), F)
 main = neq ((eq,neq), eq ((eq,neq),Bool.True,Bool.True), Bool.False) where
   (eq,neq) = ieq
 ;
@@ -26,7 +26,7 @@ main = neq ((eq,neq), eq ((eq,neq),Bool.True,Bool.True), Bool.False) where
         `shouldBe` "Bool.True"
 
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
-      run ([r|
+      run sgz ([r|
 main = (x,y) where
   x = eq ((eq,neq), (Bool.True,Bool.False), (Bool.False,Bool.True))
   y = eq ((eq,neq), (Bool.True,Bool.False), (Bool.True,Bool.False))
@@ -36,7 +36,7 @@ main = (x,y) where
         `shouldBe` "(Bool.False,Bool.True)"
 
     it "IEq: overrides eq (ieq_bool)" $
-      run ([r|
+      run sgz ([r|
 main = v where  -- neq (eq(T,T), F)
   v = neq ((eq,neq), eq (ieq,Bool.True,Bool.True), Bool.False)
   (eq,neq) = ieq_bool
@@ -45,7 +45,7 @@ main = v where  -- neq (eq(T,T), F)
         `shouldBe` "Bool.True"
 
     it "IEq/IOrd" $
-      run ([r|
+      run sgz ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( lte ((eq,neq), (lt,lte,gt,gte), Bool.True,  Bool.False),
         gte ((eq,neq), (lt,lte,gt,gte), Bool.True,  Bool.True),
@@ -58,7 +58,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
     it "implementation of IEq for a where a is IXxx" $
-      run ([r|
+      run sgz ([r|
 main = eq ((eq,neq),Xxx,Xxx) where
   (eq,neq) = ieq_ixxx ixxx_xxx      -- higher-kinded types (HKT)?
 ;
@@ -89,7 +89,7 @@ ixxx_xxx = f where
         `shouldBe` "Bool.True"
 
     it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
-      run ([r|
+      run sgz ([r|
 main = f (ieq_nat, one)
 f = func ->
   eq ((eq,neq),x,x) where
