@@ -37,9 +37,8 @@ dcl_iface = do
   cls  <- tk_class
   void <- tk_key "for"
   var  <- tk_var
-  --ctx  <- option [] $ try pContext
   void <- tk_key "with"
-  ds   <- dcls dcl_iface
+  ds   <- dcls sugar
   void <- tk_sym ";"
   void <- optional $ tk_key "interface"
   return $
@@ -50,6 +49,29 @@ dcl_iface = do
       e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
      in
       dict : ds
+
+{-
+dcl_impl :: Parser [Dcl]
+dcl_impl = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "implementation"
+  void <- tk_key "of"
+  cls  <- tk_class
+  void <- tk_key "for"
+  hr   <- tk_hier
+  void <- tk_key "with"
+  ds   <- dcls sugar
+  void <- tk_sym ";"
+  void <- optional $ tk_key "implementation"
+  return $
+    let
+      z    = az{pos=pos}
+      dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
+      ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
+      e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+     in
+      Dcl (z, PWrite z ("d"++cls++concat hr), Nothing, Just $ Where (z,e,ds))
+-}
 
 -------------------------------------------------------------------------------
 

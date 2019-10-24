@@ -55,8 +55,9 @@ keywords = [
     "where",
 
     -- TODO: hardcoded from Sugar/*
-    "interface",
     "for",
+    "implementation",
+    "interface",
     "with"
   ]
 
