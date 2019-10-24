@@ -13,9 +13,11 @@ data Type = TUnit
   deriving (Eq, Show)
 tz = TUnit
 
-type ID_Var  = String
-type ID_Data = String
-type ID_Hier = [ID_Data]
+type ID_Var   = String
+type ID_Data  = String
+type ID_Hier  = [ID_Data]
+type ID_IFace = String
+
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
 

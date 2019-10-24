@@ -20,10 +20,10 @@ spec = do
 
   describe "PRE" $ do
     it "Nat +" $
-      run sgz ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
+      run ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat *" $
-      run sgz ("main = mul (two,three)\n" ++ nat)
+      run ("main = mul (two,three)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
 -------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ spec = do
     describe "Chapter 1.1 - Sessions and Scripts:" $ do       -- pg 1
 
       it "square" $
-        run sgz ([r|
+        run ([r|
 main = square two
 square =
   func ->
@@ -49,13 +49,13 @@ square =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
 
       it "lt" $
-        run sgz ([r|
+        run ([r|
 main = (lte (three,two), lte (three,three))
 |] ++ nat)
           `shouldBe` "(Bool.False,Bool.True)"
 
       it "smaller" $                  -- pg 2
-        run sgz ([r|
+        run ([r|
 main = add (smaller (ten,five) , smaller (one,four))
 smaller =
   func ->
@@ -72,7 +72,7 @@ smaller =
 
 
       it "square/smaller" $           -- pg 3
-        run sgz ([r|
+        run ([r|
 main = square (smaller (four, two))
 square =
   func ->
@@ -100,7 +100,7 @@ smaller =
     describe "Chapter 1.2 - Evaluation:" $ do                 -- pg 4
 
       it "three" $            -- pg 5
-        run sgz ([r|
+        run ([r|
 main = fthree ten
 fthree =
   func ->
@@ -139,7 +139,7 @@ fthree =
     describe "Chapter 1.3 - Values:" $ do                     -- pg 7
 
       it "multiply 2 3" $     -- pg 9
-        run sgz ([r|
+        run ([r|
 main = multiply (two,three)
 multiply =
   func ->
@@ -177,7 +177,7 @@ multiply =
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
         it "smallerc" $            -- pg 11
-          run sgz ([r|
+          run ([r|
 main = (smallerc two) four
 smallerc =
   func ->
@@ -194,7 +194,7 @@ smallerc =
 
 
         it "twice" $            -- pg 12
-          run sgz ([r|
+          run ([r|
 main = twice (square,two)
 square = func -> mul (...,...) ;
 twice = func ->
@@ -206,7 +206,7 @@ twice = func ->
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
 
         it "twicec" $            -- pg 12
-          run sgz ([r|
+          run ([r|
 main   = eq (ieq_nat, (twicec square) two, mul(four,four))
 square = func -> mul (...,...);
 twicec = func ->
@@ -220,7 +220,7 @@ twicec = func ->
           `shouldBe` "Bool.True"
 
         it "quad" $            -- pg 12
-          run sgz ([r|
+          run ([r|
 main   = eq (ieq_nat, quad two, mul (four,four))
 quad   = twicec square
 square = func -> mul (...,...);
@@ -235,7 +235,7 @@ twicec = func ->
           `shouldBe` "Bool.True"
 
         it "curry" $            -- pg 13
-          run sgz ([r|
+          run ([r|
 main   = eq (ieq_nat, (twicec square) two, mul(four,four))
 square = func -> mul (...,...);
 twicec = curry twice
@@ -271,7 +271,7 @@ curry  = func ->
 -}
 
         it "uncurry" $            -- pg 11
-          run sgz ([r|
+          run ([r|
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
@@ -297,7 +297,7 @@ uncurry = func ->
       describe "Chapter 1.4.7 - Composition:" $ do               -- pg 15
 
         it "compose" $         -- pg 15
-          run sgz ([r|
+          run ([r|
 main    = eq (ieq_nat, quad two, mul (four,four))
 quad    = compose (square,square)
 square  = func -> mul (...,...);
@@ -335,7 +335,7 @@ compose = func ->
 -}
 
       it "fact" $             -- pg 19
-        run sgz ([r|
+        run ([r|
 main = fact three
 fact =
   func ->
@@ -367,7 +367,7 @@ fact =
 -}
 
       it "locals" $           -- pg 20
-        run sgz ([r|
+        run ([r|
 main = f (zero,one)
 f =
   func ->
@@ -380,7 +380,7 @@ f =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
       it "locals" $           -- pg 21
-        run sgz ([r|
+        run ([r|
 main = f (zero,one)
 f =
   func ->
@@ -423,7 +423,7 @@ f =
 -}
 
       it "not" $              -- pg 30
-        run sgz ([r|
+        run ([r|
 main = not Bool.False
 not = func ->
   case ... of
@@ -435,7 +435,7 @@ not = func ->
           `shouldBe` "Bool.True"
 
       it "and-1" $            -- pg 30
-        run sgz ([r|
+        run ([r|
 main = and (Bool.True, Bool.False)
 and = func ->
   case ... of
@@ -448,13 +448,13 @@ and = func ->
           `shouldBe` "Bool.False"
 
       it "and-2" $            -- pg 30
-        run sgz ([r|
+        run ([r|
 main = and (Bool.True, Bool.True)
 |] ++ bool)
           `shouldBe` "Bool.True"
 
       it "or-1" $               -- pg 30
-        run sgz ([r|
+        run ([r|
 main = or (Bool.True, Bool.False)
 or = func ->
   case ... of
@@ -466,7 +466,7 @@ or = func ->
           `shouldBe` "Bool.True"
 
       it "or-2" $               -- pg 30
-        run sgz ([r|
+        run ([r|
 main = or (Bool.False, Bool.False)
 or = func ->
   case ... of
@@ -478,7 +478,7 @@ or = func ->
           `shouldBe` "Bool.False"
 
       it "eq, neq" $         -- pg 31
-        run sgz ([r|
+        run ([r|
 main = neq (eq (Bool.True,Bool.True), Bool.False)
 eq = func ->
   or (and (x,y), (and (not x, not y))) where
@@ -547,7 +547,7 @@ neq = func ->
 -}
 
       it "analyse triangles" $         -- pg 33
-        run sgz ([r|
+        run ([r|
 main = (analyse (ten, twenty, mul(ten,three)),
         analyse (ten, twenty, add(twenty,five)),
         analyse (ten, twenty, twenty),
@@ -570,7 +570,7 @@ analyse = func ->
           `shouldBe` "(Tri.Fail,Tri.Scal,Tri.Isos,Tri.Equi)"
 
       it "implication" $         -- pg 34
-        run sgz ([r|
+        run ([r|
 main = (impl (Bool.False,Bool.True),
         impl (Bool.True, Bool.True),
         impl (Bool.False,Bool.False),
@@ -983,7 +983,7 @@ impl = func ->
     describe "Chapter 2.4 - Tuples:" $ do                     -- pg 41
 
       it "mkpair" $         -- pg 41
-        run sgz ("main = Pair (one,two)" ++ nat)
+        run ("main = Pair (one,two)" ++ nat)
         `shouldBe` "(Pair ((Nat.Succ Nat.Zero),(Nat.Succ (Nat.Succ Nat.Zero))))"
 
 {-
@@ -1000,7 +1000,7 @@ impl = func ->
 -}
 
       it "fst/snd" $         -- pg 41
-        run sgz ([r|
+        run ([r|
 main = and (eq (ieq_nat, add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True))
 fst = func -> x where (x,_)=... ;;
 snd = func -> y where (_,y)=... ;;
@@ -1008,7 +1008,7 @@ snd = func -> y where (_,y)=... ;;
         `shouldBe` "Bool.True"
 
       it "pair" $         -- pg 42
-        run sgz ([r|
+        run ([r|
 main = pair ((f,g), one)
 f = func -> eq (ieq_nat, add (zero,...), ...) ;
 g = func -> mul (two, ...) ;
@@ -1019,7 +1019,7 @@ pair = func -> (f x, g x) where
         `shouldBe` "(Bool.True,(Nat.Succ (Nat.Succ Nat.Zero)))"
 
       it "compose" $         -- pg 15
-        run sgz ([r|
+        run ([r|
 main    = (compose (dec, compose (dup,Nat.Succ))) one
 dup     = func -> mul (two,...) ;
 compose = func ->

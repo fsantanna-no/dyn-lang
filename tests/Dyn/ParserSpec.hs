@@ -71,16 +71,16 @@ spec = do
 
   describe "dcl:" $ do
     it "x :: () = ()" $
-      parse' dcl_var "x :: () = ()"
+      parse' dcl "x :: () = ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
     it "x :: ()" $
-      parse' dcl_var "x :: ()"
+      parse' dcl "x :: ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Nothing))
     it "x = ()" $
-      parse' dcl_var "x = ()"
+      parse' dcl "x = ()"
         `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
     it "x" $
-      parse' dcl_var "x"
+      parse' dcl "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
 
   describe "toString:" $ do
@@ -96,7 +96,7 @@ spec = do
           `shouldBe` "(xxx,yyy)"
     describe "dcl:" $ do
       it "case" $
-        (dclToString 0 $ fromRight $ parse' dcl_var "main = case x of Bool.True -> a\nBool.False -> b;")
+        (dclToString 0 $ fromRight $ parse' dcl "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $
@@ -104,7 +104,7 @@ spec = do
           `shouldBe` "case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "prog:" $ do
       it "case" $
-        (whereToString 0 $ fromRight $ parse' (prog sgz) "main = case x of Bool.True -> a\nBool.False -> b;")
+        (whereToString 0 $ fromRight $ parse' (prog) "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main where\n  main = case x of\n    Bool.True -> a\n    Bool.False -> b\n  ;\n;"
 
     describe "expr:" $ do
@@ -134,28 +134,28 @@ spec = do
           `shouldBe` "case x of\n  y -> t\n  _ -> f\n;"
     describe "prog:" $ do
       it "x where x :: () = ()" $
-        (progToString $ fromRight $ parse sgz "main :: () = ()")
+        (progToString $ fromRight $ parse "main :: () = ()")
           `shouldBe` "main where\n  main :: () = ()\n;"
       it "x where x :: ()" $
-        (progToString $ fromRight $ parse sgz "main :: ()")
+        (progToString $ fromRight $ parse "main :: ()")
           `shouldBe` "main where\n  main :: ()\n;"
       it "x where x = ()" $
-        (progToString $ fromRight $ parse sgz "main = ()")
+        (progToString $ fromRight $ parse "main = ()")
           `shouldBe` "main where\n  main = ()\n;"
       it "x where x,y" $
-        (parseToString sgz "main::()=y  y::()=()")
-          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", declaration or end of input"
+        (parseToString "main::()=y  y::()=()")
+          `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", pattern or end of input"
       it "x where x,y" $
-        (parseToString sgz "main::()=y\ny::()=()")
+        (parseToString "main::()=y\ny::()=()")
           `shouldBe` "main where\n  main :: () = y\n  y :: () = ()\n;"
       it "where-newline" $
-        (progToString $ fromRight $ parse sgz "main :: () = f ()\n")
+        (progToString $ fromRight $ parse "main :: () = f ()\n")
           `shouldBe` "main where\n  main :: () = (f ())\n;"
       it "Xx a = ()" $
-        (progToString $ fromRight $ parse sgz "Xx main = ()")
+        (progToString $ fromRight $ parse "Xx main = ()")
           `shouldBe` "main where\n  (Xx main) = ()\n;"
       it "func" $
-        (progToString $ fromRight $ parse sgz
+        (progToString $ fromRight $ parse
           [r|
 main :: () = f ()
 f :: () = func -> x where
@@ -165,7 +165,7 @@ f :: () = func -> x where
           `shouldBe` "main where\n  main :: () = (f ())\n  f :: () = func :: () ->\n    x where\n      x :: () = ...\n    ;\n  ;\n;"
 
       it "where-where" $
-        (parseToString sgz
+        (parseToString
           [r|
 main :: () = b d where
   b :: () = c
@@ -178,14 +178,14 @@ d :: () = ()
     describe "parseToString:" $ do
 
       it "case" $
-        parseToString sgz "main = case x of Bool.True -> a\nBool.False -> b;"
+        parseToString "main = case x of Bool.True -> a\nBool.False -> b;"
           `shouldBe` "main where\n  main = case x of\n    Bool.True -> a\n    Bool.False -> b\n  ;\n;"
       it "case" $
-        parseToString sgz "main = case x of _ -> a;"
+        parseToString "main = case x of _ -> a;"
           `shouldBe` "main where\n  main = case x of\n    _ -> a\n  ;\n;"
 
       it "Nat +" $
-        parseToString sgz [r|
+        parseToString [r|
 main = add (Nat.Zero, Nat.Succ Nat.Zero)
 add =
   func :: () ->

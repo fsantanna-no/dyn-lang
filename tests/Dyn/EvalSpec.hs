@@ -46,50 +46,50 @@ spec = do
 
   describe "parser:" $ do
     it "error" $
-      (evalProg $ fromRight $ parse sgz "main = error")
+      (evalProg $ fromRight $ parse "main = error")
         `shouldBe` (EError az{pos=(1,8)} "<user>")
     it "match-true" $
-      (evalProg $ fromRight $ parse sgz "main = case () of () -> ()\n_ -> error;")
+      (evalProg $ fromRight $ parse "main = case () of () -> ()\n_ -> error;")
         `shouldBe` (EUnit az{pos=(1,25)})
     it "match-false" $
-      (evalProg $ fromRight $ parse sgz "main = case () of A -> error\n_ -> ();")
+      (evalProg $ fromRight $ parse "main = case () of A -> error\n_ -> ();")
         `shouldBe` (EUnit az{pos=(2,6)})
     it "match-error" $
-      (evalProg $ fromRight $ parse sgz "main = case error of ()->() \n _->error;")
+      (evalProg $ fromRight $ parse "main = case error of ()->() \n _->error;")
         `shouldBe` (EError az{pos=(1,13)} "<user>")
     it "match-error" $
-      (evalProg $ fromRight $ parse sgz "main = case () of A->();")
+      (evalProg $ fromRight $ parse "main = case () of A->();")
         `shouldBe` EError (Ann {pos = (1,8)}) "non-exhaustive patterns"
     it "assign-var" $
-      (evalProg $ fromRight $ parse sgz "main = a where a = A;")
+      (evalProg $ fromRight $ parse "main = a where a = A;")
         `shouldBe` EData az{pos=(1,20)} ["A"] (EUnit az{pos=(1,20)})
     it "assign-tuple" $
-      (evalProg $ fromRight $ parse sgz "main = (a,b) where (a,b) = (A,B);")
+      (evalProg $ fromRight $ parse "main = (a,b) where (a,b) = (A,B);")
         `shouldBe` ETuple az{pos=(1,8)} [EData az{pos=(1,29)} ["A"] (EUnit az{pos=(1,29)}),EData az{pos=(1,31)} ["B"] (EUnit az{pos=(1,31)})]
 
   describe "run:" $ do
     it "(" $
-      run sgz "main = (" `shouldBe` "(line 1, column 9):\nunexpected end of input\nexpecting expression"
+      run "main = (" `shouldBe` "(line 1, column 9):\nunexpected end of input\nexpecting expression"
     it "()" $
-      run sgz "main = ()" `shouldBe` "()"
+      run "main = ()" `shouldBe` "()"
     it "f ()" $
-      run sgz "main = f () where f = func :: () -> ...;;" `shouldBe` "()"
+      run "main = f () where f = func :: () -> ...;;" `shouldBe` "()"
     it "Xx a = ()" $
-      run sgz "main = a where Xx a = Xx ();" `shouldBe` "()"
+      run "main = a where Xx a = Xx ();" `shouldBe` "()"
     it "patt - (x)" $
-      run sgz "main = x where (x) = ();" `shouldBe` "()"
+      run "main = x where (x) = ();" `shouldBe` "()"
     it "patt - read - fail" $
-      run sgz "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"func :: () ->\\n  ()\\n;\""
+      run "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"func :: () ->\\n  ()\\n;\""
     it "patt - read - ok" $
-      run sgz "main = case () of ~() -> ();" `shouldBe` "()"
+      run "main = case () of ~() -> ();" `shouldBe` "()"
     it "patt - fail" $
-      run sgz "main = x where Xxx = Yyy;" `shouldBe` "(line=1, col=16) ERROR : invalid assignment"
+      run "main = x where Xxx = Yyy;" `shouldBe` "(line=1, col=16) ERROR : invalid assignment"
     it "patt - fail" $
-      run sgz "main = case Xxx of Yyy->Xxx;" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
+      run "main = case Xxx of Yyy->Xxx;" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
     it "patt - read - ok" $
-      run sgz "main = case ((),()) of ~((),()) -> ();" `shouldBe` "()"
+      run "main = case ((),()) of ~((),()) -> ();" `shouldBe` "()"
     it "f ()" $
-      run sgz "main = f () \n f = func :: ()-> ...;" `shouldBe` "()"
+      run "main = f () \n f = func :: ()-> ...;" `shouldBe` "()"
     it "Nat" $
-      run sgz "main = Nat.Succ Nat.Zero"
+      run "main = Nat.Succ Nat.Zero"
         `shouldBe` "(Nat.Succ Nat.Zero)"

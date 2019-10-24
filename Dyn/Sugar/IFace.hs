@@ -18,38 +18,6 @@ import Text.Parsec.Combinator (optional, option)
 import Dyn.AST
 import Dyn.Parser
 
-type ID_Var  = String
-
-tk_class :: Parser String    -- Int, Int_0   /no/ I, II, int, _Int
-tk_class = do
-    fst <- char 'I'
-    snd <- satisfy isUpper
-    rst <- many $ (digit <|> letter <|> char '_' <?> "interface identifier")
-    --guard $ not $ null $ filter (\c -> isLower c) rst
-    when (all isUpper rst) $ unexpected "uppercase identifier"
-    spc
-    return (fst:snd:rst)
-
-dcl_iface :: Parser [Dcl]
-dcl_iface = do
-  pos  <- toPos <$> getPosition
-  void <- tk_key "interface"
-  cls  <- tk_class
-  void <- tk_key "for"
-  var  <- tk_var
-  void <- tk_key "with"
-  ds   <- dcls sugar
-  void <- tk_sym ";"
-  void <- optional $ tk_key "interface"
-  return $
-    let
-      z    = az{pos=pos}
-      dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
-      ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
-      e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
-     in
-      dict : ds
-
 {-
 dcl_impl :: Parser [Dcl]
 dcl_impl = do

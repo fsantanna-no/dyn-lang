@@ -18,9 +18,6 @@ import Dyn.AST as A
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
 
-type Sugar = (Parser [Dcl])
-sgz = (P.parserZero)
-
 -------------------------------------------------------------------------------
 
 -- LISTS
@@ -54,7 +51,7 @@ keywords = [
     "of",
     "where",
 
-    -- TODO: hardcoded from Sugar/*
+    -- Xtensions
     "for",
     "implementation",
     "interface",
@@ -100,6 +97,16 @@ tk_hier :: Parser ID_Hier
 tk_hier = do
   v <- (:) <$> tk_data <*> many (try $ tk_sym "." *> tk_data)
   return v
+
+tk_iface :: Parser ID_IFace
+tk_iface = do
+    fst <- char 'I'
+    snd <- satisfy isUpper
+    rst <- many $ (digit <|> letter <|> char '_' <?> "interface identifier")
+    --guard $ not $ null $ filter (\c -> isLower c) rst
+    when (all isUpper rst) $ unexpected "uppercase identifier"
+    spc
+    return (fst:snd:rst)
 
 -------------------------------------------------------------------------------
 
@@ -253,8 +260,8 @@ type_ = do
 
 -------------------------------------------------------------------------------
 
-dcl_var :: Parser Dcl
-dcl_var = do
+dcl :: Parser Dcl
+dcl = do
   pos <- toPos <$> getPosition
   p   <- pat True
   tp  <- optionMaybe $ do
@@ -268,11 +275,8 @@ dcl_var = do
   guard $ isJust tp || isJust w
   return $ Dcl (az{pos=pos}, p, tp, w)
 
-dcls :: Sugar -> Parser [Dcl]
-dcls (sgDcls) = concat <$> list (tk_sym "")
-                  (try sgDcls <|> (f <$> dcl_var) <?> "declaration")
-  where
-    f x = [x]
+dcls :: Parser [Dcl]
+dcls = list (tk_sym "") dcl
 
 -------------------------------------------------------------------------------
 
@@ -282,7 +286,7 @@ where_ = do
   e   <- expr
   ds  <- option [] $ do
           void <- tk_key "where"
-          ds   <- dcls sgz
+          ds   <- dcls
           void <- tk_sym ";"
           void <- optional $ tk_key "where"
           return ds
@@ -290,18 +294,42 @@ where_ = do
 
 -------------------------------------------------------------------------------
 
-prog :: Sugar -> Parser Prog
-prog sugar = do
+{-
+dcl_iface :: Parser Dcl
+dcl_iface = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "interface"
+  cls  <- tk_iface
+  void <- tk_key "for"
+  var  <- tk_var
+  void <- tk_key "with"
+  ds   <- dcls
+  void <- tk_sym ";"
+  void <- optional $ tk_key "interface"
+  return $
+    let
+      z    = az{pos=pos}
+      dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
+      ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
+      e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+     in
+      dict : ds
+-}
+
+-------------------------------------------------------------------------------
+
+prog :: Parser Prog
+prog = do
   pos  <- toPos <$> getPosition
   spc
-  ds   <- dcls sugar
+  ds   <- dcls
   void <- eof
   return $ Where (az{pos=pos}, EVar az{pos=pos} "main", ds)
 
 -------------------------------------------------------------------------------
 
-parse :: Sugar -> String -> Either String Prog
-parse sugar input = parse' (prog sugar) input
+parse :: String -> Either String Prog
+parse input = parse' prog input
 
 parse' :: Parser a -> String -> Either String a
 parse' rule input =
@@ -309,8 +337,8 @@ parse' rule input =
     (Right v) -> Right v
     (Left  v) -> Left (show v)
 
-parseToString :: Sugar -> String -> String
-parseToString sugar input =
-  case parse sugar input of
+parseToString :: String -> String
+parseToString input =
+  case parse input of
     (Left  v) -> v
     (Right p) -> progToString p

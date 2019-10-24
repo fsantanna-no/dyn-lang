@@ -8,8 +8,7 @@ import Text.RawString.QQ
 import Dyn.AST
 import qualified Dyn.Parser as P
 import Dyn.Eval
-import Dyn.Prelude hiding (ieq)
-import Dyn.Sugar.IFace
+import Dyn.Prelude
 
 main :: IO ()
 main = hspec spec
@@ -19,7 +18,7 @@ spec = do
   describe "IEq" $ do
 
     it "IEq: default eq" $
-      run sugar ([r|  -- neq (eq(T,T), F)
+      run ([r|  -- neq (eq(T,T), F)
 main = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False) where
   Dict.IEq (eq,neq) = dIEq
 ;
@@ -43,7 +42,7 @@ interface IEq for a with
         `shouldBe` "Bool.True"
 
     it "XXX: IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
-      run P.sgz ([r|
+      run ([r|
 main = (x,y) where
   x = eq (dieq, (Bool.True,Bool.False), (Bool.False,Bool.True))
   y = eq (dieq, (Bool.True,Bool.False), (Bool.True,Bool.False))
@@ -61,7 +60,7 @@ implementation of IEq for Bool with
 
 {-
     it "IEq: overrides eq (dieq_bool)" $
-      run P.sgz ([r|
+      run ([r|
 main = v where  -- neq (eq(T,T), F)
   v = neq (dieq_bool, eq (dieq_bool,Bool.True,Bool.True), Bool.False)
   Dict.IEq (eq,neq) = dieq_bool
@@ -70,7 +69,7 @@ main = v where  -- neq (eq(T,T), F)
         `shouldBe` "Bool.True"
 
     it "IEq/IOrd" $
-      run P.sgz ([r|
+      run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( lte (dieq_bool, diord_bool, Bool.True,  Bool.False),
         gte (dieq_bool, diord_bool, Bool.True,  Bool.True),
@@ -83,7 +82,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
     it "implementation of IEq for a where a is IXxx" $
-      run P.sgz ([r|
+      run ([r|
 main = eq (Dict.IEq (eq,neq),Xxx,Xxx) where
   Dict.IEq (eq,neq) = ieq_ixxx ixxx_xxx      -- higher-kinded types (HKT)?
 ;
@@ -114,7 +113,7 @@ ixxx_xxx = f where
         `shouldBe` "Bool.True"
 
     it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
-      run P.sgz ([r|
+      run ([r|
 main = f (ieq_nat, one)
 f = func ->
   eq (Dict.IEq (eq,neq),x,x) where
