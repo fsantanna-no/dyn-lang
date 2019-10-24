@@ -133,11 +133,11 @@ pattToString spc (PCall  _ p1 p2)     = "(" ++ pattToString 0 p1 ++ " " ++ pattT
 
 -------------------------------------------------------------------------------
 
-dclToString :: Int -> Decl -> String
+declToString :: Int -> Decl -> String
 
-dclToString spc (Decl (_, pat, Just TUnit, Just w))  = pattToString spc pat ++ " :: () = " ++ whereToString spc w
-dclToString spc (Decl (_, pat, Just TUnit, Nothing)) = pattToString spc pat ++ " :: ()"
-dclToString spc (Decl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
+declToString spc (Decl (_, pat, Just TUnit, Just w))  = pattToString spc pat ++ " :: () = " ++ whereToString spc w
+declToString spc (Decl (_, pat, Just TUnit, Nothing)) = pattToString spc pat ++ " :: ()"
+declToString spc (Decl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 
@@ -145,7 +145,7 @@ whereToString :: Int -> Where -> String
 
 whereToString spc (Where (_,e,[]))   = exprToString spc e
 whereToString spc (Where (_,e,dcls)) = exprToString spc e ++ " where" ++
-                                        (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (dclToString (spc+2)) dcls))
+                                        (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (declToString (spc+2)) dcls))
                                         ++ "\n" ++ rep spc ++ ";"
 
 -------------------------------------------------------------------------------

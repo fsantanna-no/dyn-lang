@@ -18,28 +18,12 @@ spec = do
 
   describe "IEq" $ do
 
-    it "IEq: default eq" $
+    it "XXX: IEq: default eq" $
       run ([r|  -- neq (eq(T,T), F)
 main = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False) where
   Dict.IEq (eq,neq) = dIEq
 ;
-
-interface IEq for a with
-  eq = func ->  -- (a,a) -> Bool
-    case (x,y) of
-      (~y,_) -> Bool.True
-      _      -> Bool.False
-    ; where
-      (_,x,y) = ...
-    ;
-  ;
-  neq = func ->  -- (a,a) -> Bool
-    not (eq (Dict.IEq (eq,neq),x,y)) where
-      (Dict.IEq (eq,neq),x,y) = ...
-    ;
-  ;
-;
-|] ++ bool)
+|] ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $

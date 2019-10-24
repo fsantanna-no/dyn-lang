@@ -97,7 +97,7 @@ spec = do
           `shouldBe` "(xxx,yyy)"
     describe "decl:" $ do
       it "case" $
-        (dclToString 0 $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
+        (declToString 0 $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $

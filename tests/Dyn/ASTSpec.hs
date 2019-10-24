@@ -13,19 +13,19 @@ spec = do
     it "a" $
       exprToString 0 (EVar az "a") `shouldBe` "a"
 
-  describe "dclToString:" $ do
+  describe "declToString:" $ do
     it "a :: () = b" $
-      dclToString 0
+      declToString 0
         (Decl (az, PWrite az "a", Just tz,
           Just $ Where (az, EVar az "b", []))) `shouldBe` "a :: () = b"
     it "a :: () = b where\n  b=()" $
-      dclToString 0
+      declToString 0
         (Decl (az, PWrite az "a", Just tz,
           Just $ Where (az, EVar az "b",
             [Decl (az, PWrite az "b", Just tz, Just $ Where (az, EUnit az,[]))])))
         `shouldBe` "a :: () = b where\n  b :: () = ()\n;"
 
-  describe "dclToString:" $ do
+  describe "declToString:" $ do
     it "b where b=a, a=()" $
       whereToString 0 (
         Where (az, EVar az "b", [

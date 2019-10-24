@@ -27,6 +27,7 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
           sameId   (Ifce (_, (id,_), _))    = (id == ifc)
           getDecls (Ifce (_, (_,_), dcls))  = dcls
           getId    (Decl (_,PWrite _ id,_,_)) = id
+  dcls' = traceShow (map (declToString 0) dcls) dcls
 
 -------------------------------------------------------------------------------
 
