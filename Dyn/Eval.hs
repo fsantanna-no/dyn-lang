@@ -83,7 +83,8 @@ match env (PAny   _)     _             = (env, Right True)
 match env _             (EError z msg) = (env, Left $ EError z msg)
 match env (PUnit  _)    (EUnit _)      = (env, Right True)
 
-match env (PWrite z id) e  = (envWrite env id e, Right True)
+match env (PArg   z)    e  = (envWrite env "..." e, Right True)
+match env (PWrite z id) e  = (envWrite env id    e, Right True)
 match env (PRead  z e1) e2 = match env (toPatt $ evalExpr env e1) e2 where
                               toPatt :: Expr -> Patt
                               toPatt (EUnit  z)       = PUnit  z

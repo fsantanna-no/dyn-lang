@@ -36,6 +36,7 @@ data Expr
 
 data Patt
   = PError Ann String                 -- (msg)        -- error "bug found"
+  | PArg   Ann                        -- ()           -- ...
   | PAny   Ann                        -- ()           -- _
   | PWrite Ann ID_Var                 -- (id)         -- =a ; =xs
   | PRead  Ann Expr                   -- (exp)        -- ~a ; ~xs
@@ -121,6 +122,7 @@ exprToString spc (ECase  _ e cases)     =
 -------------------------------------------------------------------------------
 
 pattToString :: Int -> Patt -> String
+pattToString spc (PArg   _)           = "..."
 pattToString spc (PAny   _)           = "_"
 pattToString spc (PWrite _ id)        = {-"=" ++-} id
 pattToString spc (PRead  _ e)         = {-"~" ++-} exprToString spc e

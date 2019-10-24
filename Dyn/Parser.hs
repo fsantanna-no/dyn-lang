@@ -114,6 +114,7 @@ tk_ifce = do
 -- (x, (y,_))
 pat :: Bool -> Parser Patt
 pat only_write =
+  larg        <|>
   lany        <|>
   lwrite      <|>
   lread       <|>
@@ -122,6 +123,11 @@ pat only_write =
   try lparens <|>   -- (1-item)
   ltuple      <?> "pattern" where
 
+  larg   = do
+            pos  <- toPos <$> getPosition
+            void <- tk_sym "..."
+            guard only_write
+            return $ PArg az{pos=pos}
   lany   = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "_"

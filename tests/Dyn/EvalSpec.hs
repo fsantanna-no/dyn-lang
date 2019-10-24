@@ -93,3 +93,6 @@ spec = do
     it "Nat" $
       run "main = Nat.Succ Nat.Zero"
         `shouldBe` "(Nat.Succ Nat.Zero)"
+    it "..." $
+      run "main = ... where ... = Nat.Zero;"
+        `shouldBe` "Nat.Zero"
