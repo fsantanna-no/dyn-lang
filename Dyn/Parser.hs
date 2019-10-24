@@ -306,15 +306,6 @@ iface = do
   void <- tk_sym ";"
   void <- optional $ tk_key "interface"
   return $ IFace (az{pos=pos}, (cls,var), ds)
-{-
-    let
-      z    = az{pos=pos}
-      dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
-      ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
-      e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
-     in
-      dict : ds
--}
 
 -------------------------------------------------------------------------------
 
@@ -328,11 +319,16 @@ prog = do
   void <- eof
   return $
     let
-      g (PLDcl dcl) = dcl
-      f (PLDcl _) = True
-      f _         = False
+      f (PLDcl dcl) = [dcl]
+      f (PLIFace iface@(IFace (z, (cls,_), dcls))) = ifaceToDict dcls iface : dcls
      in
-      Where (az{pos=pos}, EVar az{pos=pos} "main", map g $ filter f ds)
+      Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap f ds)
+
+ifaceToDict :: [Dcl] -> IFace -> Dcl
+ifaceToDict ds (IFace (z, (cls,_), dcls)) =
+  Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[])) where
+    ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
+    e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
 
 -------------------------------------------------------------------------------
 
