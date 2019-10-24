@@ -2,6 +2,7 @@
 
 module Dyn.ParserSpec (main,spec) where
 
+import Debug.Trace
 import Test.Hspec
 import Text.RawString.QQ
 
@@ -100,7 +101,7 @@ spec = do
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $
-        (whereToString 0 $ fromRight $ parse' where_ "case x of Bool.True -> a\nBool.False -> b;")
+        (whereToString 0 $ fromRight $ parse' where_ "case x of Bool.True -> a\nBool.False -> b;case")
           `shouldBe` "case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "prog:" $ do
       it "case" $
@@ -118,13 +119,13 @@ spec = do
         (exprToString 0 $ fromRight $ parse' expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func :: () -> xxx;")
+        (exprToString 0 $ fromRight $ parse' expr "func :: () -> xxx;func")
           `shouldBe` "func :: () ->\n  xxx\n;"
       it "func" $
         (exprToString 0 $ fromRight $ parse' expr "func :: () -> xxx where xxx=() where y=();\n  x=();;")
           `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n    ;\n    x = ()\n  ;\n;"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();;;")
+        (exprToString 0 $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();where;where;func")
           `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;"
       it "call" $
         (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")

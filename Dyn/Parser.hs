@@ -71,13 +71,13 @@ tk_sym str = do
     spc
     return ()
 
-tk_key :: String -> Parser String
+tk_key :: String -> Parser ()
 tk_key k = do
     key  <- string k
     void <- notFollowedBy (letter <|> char '_' <|> digit)
     guard $ elem key keywords
     spc
-    return key
+    return ()
 
 tk_var :: Parser String     -- x, x_0       // Xx
 tk_var = do
@@ -203,8 +203,9 @@ expr_func = do
               list (tk_sym ",") tk_var    -- {x}, {x,y}
   void <- tk_sym "->"
   body <- where_
-  void <- tk_sym ";"
-  void <- optional $ tk_key "func"    -- ambiguity with (func $ func)
+  void <- string ";"
+  void <- optional $ try $ tk_key "func"
+  spc
   return $ EFunc az{pos=pos} tp (map (\id -> (id,EUnit az{pos=pos})) ups) body
 
 expr_case :: Parser Expr
@@ -218,8 +219,9 @@ expr_case = do
             void <- tk_sym "->"
             w    <- where_
             return (p,w)
-  void <- tk_sym ";"
-  void <- optional $ tk_key "case"    -- ambiguity with (case $ case)
+  void <- string ";"
+  void <- optional $ try $ tk_key "case"
+  spc
   return $ ECase az{pos=pos} e cs
 
 expr_parens :: Parser Expr
@@ -288,8 +290,9 @@ where_ = do
   ds  <- option [] $ do
           void <- tk_key "where"
           ds   <- dcls
-          void <- tk_sym ";"
-          void <- optional $ tk_key "where"
+          void <- string ";"
+          void <- optional $ try $ tk_key "where"
+          spc
           return ds
   return $ Where (az{pos=pos}, e, ds)
 
@@ -304,8 +307,9 @@ ifce = do
   var  <- tk_var
   void <- tk_key "with"
   ds   <- dcls
-  void <- tk_sym ";"
-  void <- optional $ tk_key "interface"
+  void <- string ";"
+  void <- optional $ try $ tk_key "interface"
+  spc
   return $ Ifce (az{pos=pos}, (cls,var), ds)
 
 impl :: Parser Impl
@@ -318,8 +322,9 @@ impl = do
   hr   <- tk_hier
   void <- tk_key "with"
   ds   <- dcls
-  void <- tk_sym ";"
-  void <- optional $ tk_key "implementation"
+  void <- string ";"
+  void <- optional $ try $ tk_key "implementation"
+  spc
   return $ Impl (az{pos=pos}, (cls,hr), ds)
 
 -------------------------------------------------------------------------------
@@ -333,7 +338,7 @@ prog = do
   pl   <- list (tk_sym "") (
             (PLDecl <$> try decl) <|>
             (PLIfce <$> try ifce) <|>
-            (PLImpl <$> impl)
+            (PLImpl <$> impl) -- <|>
           )
   void <- eof
   return $

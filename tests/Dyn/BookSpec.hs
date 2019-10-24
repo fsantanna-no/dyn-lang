@@ -62,10 +62,10 @@ smaller =
     case lte (x,y) of
       Bool.True  -> x
       Bool.False -> y
-    ; case
+    ;case
       where
         (x,y) = ...
-      ; where
+      ;where
   ;func
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
@@ -85,10 +85,10 @@ smaller =
     case lte (x,y) of
       Bool.True  -> x
       Bool.False -> y
-    ; case
+    ;case
       where
         (x,y) = ...
-      ; where
+      ;where
   ;func
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
