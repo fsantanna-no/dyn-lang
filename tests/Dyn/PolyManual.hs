@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Dyn.IFaceSpec (main,spec) where
+module Dyn.PolyManual (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ
@@ -15,7 +15,7 @@ main = hspec spec
 
 spec = do
 
-  describe "manual" $ do
+  describe "IEq" $ do
 
     it "IEq: default eq" $
       run sgz ([r|  -- neq (eq(T,T), F)
@@ -44,6 +44,8 @@ main = v where  -- neq (eq(T,T), F)
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
+  describe "IEq/IOrd" $ do
+
     it "IEq/IOrd" $
       run sgz ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
@@ -56,6 +58,8 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
+
+  describe "HKT" $ do
 
     it "implementation of IEq for a where a is IXxx" $
       run sgz ([r|
