@@ -78,6 +78,10 @@ exprToList (EUnit  _)    = []
 exprToList (ETuple _ es) = es
 exprToList e             = [e]
 
+listToExpr :: [Expr] -> Expr
+listToExpr [x]    = x
+listToExpr (x:xs) = ETuple (getAnn x) (x:xs)
+
 -------------------------------------------------------------------------------
 
 rep spc = replicate spc ' '

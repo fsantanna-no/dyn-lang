@@ -52,7 +52,12 @@ keywords = [
     "error",
     "func",
     "of",
-    "where"
+    "where",
+
+    -- TODO: hardcoded from Sugar/*
+    "interface",
+    "for",
+    "with"
   ]
 
 spc :: Parser ()
@@ -263,7 +268,8 @@ dcl_var = do
   return $ Dcl (az{pos=pos}, p, tp, w)
 
 dcls :: Sugar -> Parser [Dcl]
-dcls (sgDcls) = (f <$> dcl_var) <|> sgDcls <?> "declaration"
+dcls (sgDcls) = concat <$> list (tk_sym "")
+                  (try sgDcls <|> (f <$> dcl_var) <?> "declaration")
   where
     f x = [x]
 
@@ -275,7 +281,7 @@ where_ = do
   e   <- expr
   ds  <- option [] $ do
           void <- tk_key "where"
-          ds <- concat <$> list (tk_sym "") (dcls sgz)
+          ds   <- dcls sgz
           void <- tk_sym ";"
           void <- optional $ tk_key "where"
           return ds
@@ -287,7 +293,7 @@ prog :: Sugar -> Parser Prog
 prog sugar = do
   pos  <- toPos <$> getPosition
   spc
-  ds   <- concat <$> list (tk_sym "") (dcls sugar)
+  ds   <- dcls sugar
   void <- eof
   return $ Where (az{pos=pos}, EVar az{pos=pos} "main", ds)
 

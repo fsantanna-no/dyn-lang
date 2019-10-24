@@ -93,8 +93,8 @@ ieq = [r|
   dieq = Dict.IEq (eq,neq)  -- IEq is an interface with all members instantiated, so it support all types
   eq = func ->  -- (ieq_*,a,a) -> Bool
     case (x,y) of
-      (~y,~x) -> Bool.True
-      _       -> Bool.False
+      (~y,_) -> Bool.True
+      _      -> Bool.False
     ; where
       (_,x,y) = ...
     ;

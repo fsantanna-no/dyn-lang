@@ -1,8 +1,4 @@
-- parser receber
-    - [(Parser Expr), (Parser Dcl), ...]
-    - diretorio Sugar
-- colocar tipos dicts explicitos
-    - newtype
+- Sugar/IFace
 - lists
     - vai permitir [a] where a is ...
         - dinamico e estatico
