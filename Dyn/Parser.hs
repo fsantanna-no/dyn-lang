@@ -307,20 +307,39 @@ iface = do
   void <- optional $ tk_key "interface"
   return $ IFace (az{pos=pos}, (cls,var), ds)
 
+impl :: Parser Impl
+impl = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "implementation"
+  void <- tk_key "of"
+  cls  <- tk_iface
+  void <- tk_key "for"
+  hr   <- tk_hier
+  void <- tk_key "with"
+  ds   <- dcls
+  void <- tk_sym ";"
+  void <- optional $ tk_key "implementation"
+  return $ Impl (az{pos=pos}, (cls,hr), ds)
+
 -------------------------------------------------------------------------------
 
-data PList = PLDcl Dcl | PLIFace IFace
+data PList = PLDcl Dcl | PLIFace IFace | PLImpl Impl
 
 prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
-  ds   <- list (tk_sym "") ((PLDcl <$> try dcl) <|> (PLIFace <$> iface))
+  ds   <- list (tk_sym "") (
+            (PLDcl   <$> try dcl)   <|>
+            (PLIFace <$> try iface) <|>
+            (PLImpl  <$> impl)
+          )
   void <- eof
   return $
     let
       f (PLDcl dcl) = [dcl]
       f (PLIFace iface@(IFace (z, (cls,_), dcls))) = ifaceToDict dcls iface : dcls
+      f (PLImpl _ ) = []
      in
       Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap f ds)
 
@@ -329,6 +348,14 @@ ifaceToDict ds (IFace (z, (cls,_), dcls)) =
   Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[])) where
     ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
     e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+
+{-
+      dict = Dcl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
+      ids  = map (\(Dcl (_,PWrite _ id,_,_)) -> id) ds
+      e    = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+     in
+      Dcl (z, PWrite z ("d"++cls++concat hr), Nothing, Just $ Where (z,e,ds))
+-}
 
 -------------------------------------------------------------------------------
 

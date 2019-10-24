@@ -54,6 +54,9 @@ newtype Dcl = Dcl (Ann, Patt, Maybe Type, Maybe Where)
 newtype IFace = IFace (Ann, (ID_IFace,ID_Var), [Dcl])
   deriving (Eq, Show)
 
+newtype Impl = Impl (Ann, (ID_IFace,ID_Hier), [Dcl])
+  deriving (Eq, Show)
+
 type Prog = Where
 
 isEError (EError _ _) = True

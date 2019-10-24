@@ -8,7 +8,8 @@ import Text.RawString.QQ
 import Dyn.AST
 import qualified Dyn.Parser as P
 import Dyn.Eval
-import Dyn.Prelude
+import Dyn.Prelude hiding (ieq)
+import Dyn.IFace
 
 main :: IO ()
 main = hspec spec
@@ -55,6 +56,7 @@ implementation of IEq for Bool with
       (_,x,y) = ...
     ;
   ;
+;
 |] ++ bool ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
