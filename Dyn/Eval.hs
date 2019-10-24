@@ -109,9 +109,9 @@ match env _ _ = (env, Right False)
 
 -------------------------------------------------------------------------------
 
-evalDcl :: Env -> Dcl -> Match
-evalDcl env (Dcl (_, p, _, Just w)) = match env p (evalWhere env w)
-evalDcl env _ = (env, Right True)
+evalDecl :: Env -> Decl -> Match
+evalDecl env (Decl (_, p, _, Just w)) = match env p (evalWhere env w)
+evalDecl env _ = (env, Right True)
 
 -------------------------------------------------------------------------------
 
@@ -122,8 +122,8 @@ evalWhere env (Where (z, e, dcls)) =
     (_,    Right False) -> EError (dclGetAnn $ head dcls) "invalid assignment"
     (_,    Left  err)   -> err
   where
-    f :: Dcl -> Match -> Match
-    f dcl (env, Right True)  = evalDcl env dcl
+    f :: Decl -> Match -> Match
+    f dcl (env, Right True)  = evalDecl env dcl
     f dcl (env, Right False) = (env, Left $ EError (dclGetAnn dcl) "invalid assignment")
     f dcl (env, Left  e)     = (env, Left e)           -- found error
 

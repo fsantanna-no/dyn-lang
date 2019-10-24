@@ -69,18 +69,18 @@ spec = do
       parse' where_ "x"
         `shouldBe` Right (Where (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", []))
 
-  describe "dcl:" $ do
+  describe "decl:" $ do
     it "x :: () = ()" $
-      parse' dcl "x :: () = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+      parse' decl "x :: () = ()"
+        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
     it "x :: ()" $
-      parse' dcl "x :: ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Nothing))
+      parse' decl "x :: ()"
+        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Nothing))
     it "x = ()" $
-      parse' dcl "x = ()"
-        `shouldBe` Right (Dcl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
+      parse' decl "x = ()"
+        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
     it "x" $
-      parse' dcl "x"
+      parse' decl "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
 
   describe "toString:" $ do
@@ -94,9 +94,9 @@ spec = do
       it "(xxx,yyy)" $
         (exprToString 0 $ fromRight $ parse' expr_tuple "(xxx, yyy)")
           `shouldBe` "(xxx,yyy)"
-    describe "dcl:" $ do
+    describe "decl:" $ do
       it "case" $
-        (dclToString 0 $ fromRight $ parse' dcl "main = case x of Bool.True -> a\nBool.False -> b;")
+        (dclToString 0 $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $

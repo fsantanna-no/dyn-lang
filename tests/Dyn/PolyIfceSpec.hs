@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Dyn.PolyIFaceSpec (main,spec) where
+module Dyn.PolyIfceSpec (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ
@@ -9,7 +9,7 @@ import Dyn.AST
 import qualified Dyn.Parser as P
 import Dyn.Eval
 import Dyn.Prelude hiding (ieq)
-import Dyn.IFace
+import Dyn.Ifce
 
 main :: IO ()
 main = hspec spec

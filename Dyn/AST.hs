@@ -13,10 +13,10 @@ data Type = TUnit
   deriving (Eq, Show)
 tz = TUnit
 
-type ID_Var   = String
-type ID_Data  = String
-type ID_Hier  = [ID_Data]
-type ID_IFace = String
+type ID_Var  = String
+type ID_Data = String
+type ID_Hier = [ID_Data]
+type ID_Ifce = String
 
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
@@ -45,16 +45,16 @@ data Patt
   | PCall  Ann Patt Patt              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   deriving (Eq, Show)
 
-newtype Where = Where (Ann, Expr, [Dcl])
+newtype Where = Where (Ann, Expr, [Decl])
   deriving (Eq, Show)
 
-newtype Dcl = Dcl (Ann, Patt, Maybe Type, Maybe Where)
+newtype Decl = Decl (Ann, Patt, Maybe Type, Maybe Where)
   deriving (Eq, Show)
 
-newtype IFace = IFace (Ann, (ID_IFace,ID_Var), [Dcl])
+newtype Ifce = Ifce (Ann, (ID_Ifce,ID_Var), [Decl])
   deriving (Eq, Show)
 
-newtype Impl = Impl (Ann, (ID_IFace,ID_Hier), [Dcl])
+newtype Impl = Impl (Ann, (ID_Ifce,ID_Hier), [Decl])
   deriving (Eq, Show)
 
 type Prog = Where
@@ -76,8 +76,8 @@ getAnn (ECall  z _ _)   = z
 getAnn (EArg   z)       = z
 getAnn (ECase  z _ _)   = z
 
-dclGetAnn :: Dcl -> Ann
-dclGetAnn (Dcl (z,_,_,_)) = z
+dclGetAnn :: Decl -> Ann
+dclGetAnn (Decl (z,_,_,_)) = z
 
 -------------------------------------------------------------------------------
 
@@ -131,11 +131,11 @@ pattToString spc (PCall  _ p1 p2)     = "(" ++ pattToString 0 p1 ++ " " ++ pattT
 
 -------------------------------------------------------------------------------
 
-dclToString :: Int -> Dcl -> String
+dclToString :: Int -> Decl -> String
 
-dclToString spc (Dcl (_, pat, Just TUnit, Just w))  = pattToString spc pat ++ " :: () = " ++ whereToString spc w
-dclToString spc (Dcl (_, pat, Just TUnit, Nothing)) = pattToString spc pat ++ " :: ()"
-dclToString spc (Dcl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
+dclToString spc (Decl (_, pat, Just TUnit, Just w))  = pattToString spc pat ++ " :: () = " ++ whereToString spc w
+dclToString spc (Decl (_, pat, Just TUnit, Nothing)) = pattToString spc pat ++ " :: ()"
+dclToString spc (Decl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 

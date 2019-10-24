@@ -27,21 +27,21 @@ spec = do
     it "b where b=a, a=()" $
       evalWhere []
         (Where (az, EVar az "b", [
-          Dcl (az, PWrite az "b", Just tz, Just $ Where (az, EVar az "a",[])),
-          Dcl (az, PWrite az "a", Just tz, Just $ Where (az, EUnit az,[]))
+          Decl (az, PWrite az "b", Just tz, Just $ Where (az, EVar az "a",[])),
+          Decl (az, PWrite az "a", Just tz, Just $ Where (az, EUnit az,[]))
         ]))
         `shouldBe` (EUnit az)
     it "b where b::() b=()" $
       evalWhere []
         (Where (az, EVar az "b", [
-          Dcl (az, PWrite az "b", Just tz, Nothing),
-          Dcl (az, PWrite az "b", Nothing, Just $ Where (az, EUnit az,[]))
+          Decl (az, PWrite az "b", Just tz, Nothing),
+          Decl (az, PWrite az "b", Nothing, Just $ Where (az, EUnit az,[]))
         ]))
         `shouldBe` (EUnit az)
 
-  describe "evalDcl:" $ do
+  describe "evalDecl:" $ do
     it "a=()" $
-      evalDcl [] (Dcl (az, PWrite az "a", Just tz, Just $ Where (az, EUnit az,[])))
+      evalDecl [] (Decl (az, PWrite az "a", Just tz, Just $ Where (az, EUnit az,[])))
         `shouldBe` ([("a", EUnit az)], Right True)
 
   describe "parser:" $ do

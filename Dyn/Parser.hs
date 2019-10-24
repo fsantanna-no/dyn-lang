@@ -14,7 +14,7 @@ import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, 
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
 import Dyn.AST as A
-import Dyn.IFace
+import Dyn.Ifce
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -99,8 +99,8 @@ tk_hier = do
   v <- (:) <$> tk_data <*> many (try $ tk_sym "." *> tk_data)
   return v
 
-tk_iface :: Parser ID_IFace
-tk_iface = do
+tk_ifce :: Parser ID_Ifce
+tk_ifce = do
     fst <- char 'I'
     snd <- satisfy isUpper
     rst <- many $ (digit <|> letter <|> char '_' <?> "interface identifier")
@@ -261,8 +261,8 @@ type_ = do
 
 -------------------------------------------------------------------------------
 
-dcl :: Parser Dcl
-dcl = do
+decl :: Parser Decl
+decl = do
   pos <- toPos <$> getPosition
   p   <- pat True <?> "declaration"
   tp  <- optionMaybe $ do
@@ -274,10 +274,10 @@ dcl = do
           w    <- where_
           return w
   guard $ isJust tp || isJust w
-  return $ Dcl (az{pos=pos}, p, tp, w)
+  return $ Decl (az{pos=pos}, p, tp, w)
 
-dcls :: Parser [Dcl]
-dcls = list (tk_sym "") dcl
+dcls :: Parser [Decl]
+dcls = list (tk_sym "") decl
 
 -------------------------------------------------------------------------------
 
@@ -295,25 +295,25 @@ where_ = do
 
 -------------------------------------------------------------------------------
 
-iface :: Parser IFace
-iface = do
+ifce :: Parser Ifce
+ifce = do
   pos  <- toPos <$> getPosition
   void <- tk_key "interface"
-  cls  <- tk_iface
+  cls  <- tk_ifce
   void <- tk_key "for"
   var  <- tk_var
   void <- tk_key "with"
   ds   <- dcls
   void <- tk_sym ";"
   void <- optional $ tk_key "interface"
-  return $ IFace (az{pos=pos}, (cls,var), ds)
+  return $ Ifce (az{pos=pos}, (cls,var), ds)
 
 impl :: Parser Impl
 impl = do
   pos  <- toPos <$> getPosition
   void <- tk_key "implementation"
   void <- tk_key "of"
-  cls  <- tk_iface
+  cls  <- tk_ifce
   void <- tk_key "for"
   hr   <- tk_hier
   void <- tk_key "with"
@@ -324,31 +324,31 @@ impl = do
 
 -------------------------------------------------------------------------------
 
-data PList = PLDcl Dcl | PLIFace IFace | PLImpl Impl
+data PList = PLDecl Decl | PLIfce Ifce | PLImpl Impl
 
 prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
   pl   <- list (tk_sym "") (
-            (PLDcl   <$> try dcl)   <|>
-            (PLIFace <$> try iface) <|>
-            (PLImpl  <$> impl)
+            (PLDecl <$> try decl) <|>
+            (PLIfce <$> try ifce) <|>
+            (PLImpl <$> impl)
           )
   void <- eof
   return $
     let
-      toDcl (PLDcl   dcl)  = [dcl]
-      toDcl (PLIFace ifc)  = ifaceToDcls ifc
-      toDcl (PLImpl  impl) = implToDcls  (plToIfcs pl) impl
+      toDecl (PLDecl dcl) = [dcl]
+      toDecl (PLIfce ifc) = ifceToDecls ifc
+      toDecl (PLImpl imp) = implToDecls (plToIfcs pl) imp
      in
-      Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDcl pl)
+      Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecl pl)
 
-plToIfcs :: [PList] -> [IFace]
+plToIfcs :: [PList] -> [Ifce]
 plToIfcs pl = map g $ filter f pl where
-                f (PLIFace ifc) = True
+                f (PLIfce ifc) = True
                 f _             = False
-                g (PLIFace ifc) = ifc
+                g (PLIfce ifc) = ifc
 
 -------------------------------------------------------------------------------
 
