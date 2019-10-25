@@ -111,8 +111,8 @@ match env _ _ = (env, Right False)
 -------------------------------------------------------------------------------
 
 evalDecl :: Env -> Decl -> Match
-evalDecl env (Decl (_, p, _, Just w)) = match env p (evalWhere env w)
-evalDecl env _ = (env, Right True)
+evalDecl env (DAtr _ p w) = match env p (evalWhere env w)
+evalDecl env _            = (env, Right True)
 
 -------------------------------------------------------------------------------
 

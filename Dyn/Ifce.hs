@@ -14,8 +14,8 @@ import Dyn.AST
 ifceToDecls :: Ifce -> [Decl]
 ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
   -- dIEq = Dict.IEq (eq,neq)
-  dict = Decl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[])) where
-    ids = map (\(Decl (_,PWrite _ id,_,_)) -> id) dcls
+  dict = DAtr z (PWrite z ("d"++cls)) (Where (z,e,[])) where
+    ids = map (\(DAtr _ (PWrite _ id) _) -> id) $ filter isDAtr dcls
     e   = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
 
   -- TODO:
@@ -32,21 +32,21 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
   --      (fN,...,gN) = dN
   --      (d1,...,dN, p1,...,pN) = ...
   dcls' = map f dcls where
-            f (Decl (z1,e1,tp1,
-                Just (Where (z2,
-                             EFunc z3 tp3@(Type (_,TFunc inp3 _,cs3)) ups3 (Where (z4,e4,ds4)),
-                             ds2)))) =
+            f (DAtr z1 pat1
+                (Where (z2,
+                        EFunc z3 tp3@(Type (_,TFunc inp3 _,cs3)) ups3 (Where (z4,e4,ds4)),
+                        ds2))) =
 
-              Decl (z1,e1,tp1,
-                Just (Where (z2,
-                             EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
-                             ds2)))
+              DAtr z1 pat1
+                (Where (z2,
+                        EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
+                        ds2))
               where
                 ds4' = ds4 ++ [
                           -- ... = (p1,...pN)
-                          Decl (z1, PArg z1, Nothing, Just $ Where (z1,eps,[])),
+                          DAtr z1 (PArg z1) (Where (z1,eps,[])),
                           -- (d1,...,dN, p1,...,pN) = ...
-                          Decl (z1, pall, Nothing, Just $ Where (z1,EArg z1,[]))
+                          DAtr z1 pall      (Where (z1,EArg z1,[]))
                          ]
 
                 -- [daIEq,daIShow,dbIEq,...]
@@ -70,12 +70,12 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
   -- dIEqBool = Dict.IEq (eq,neq) where eq=...
-  dict = Decl (z, PWrite z ("d"++ifc++concat hr), Nothing, Just $ Where (z,e,dcls))
+  dict = DAtr z (PWrite z ("d"++ifc++concat hr)) (Where (z,e,dcls))
   e    = ECall z (ECons z ["Dict",ifc]) (listToExpr $ map (EVar z) ids)
   ids  = map getId $ getDecls $ head $ filter sameId ifcs where
           sameId   (Ifce (_, (id,_), _))    = (id == ifc)
           getDecls (Ifce (_, (_,_), dcls))  = dcls
-          getId    (Decl (_,PWrite _ id,_,_)) = id
+          getId    (DAtr _ (PWrite _ id) _) = id
   --dcls' = traceShow (map (declToString 0) dcls) $ map f dcls where
           --f (Decl (z,e,tp,Just wh)) = traceShow (whereToString 0 wh) $ Decl (z,e,tp,Just wh)
 

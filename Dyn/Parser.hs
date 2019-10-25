@@ -342,23 +342,33 @@ ttype_parens = do
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-decl :: Parser Decl
-decl = do
+decl_sig :: Parser [Decl]
+decl_sig = do
+  pos  <- toPos <$> getPosition
+  id   <- tk_var
+  void <- tk_sym "::"
+  tp   <- type_
+  atr  <- option [] $ do
+            void <- tk_sym "="
+            w    <- where_
+            return $ singleton $ DAtr az{pos=pos} (PWrite az{pos=pos} id) w
+  return $ (DSig az{pos=pos} id tp) : atr
+
+decl_atr :: Parser [Decl]
+decl_atr = do
   pos <- toPos <$> getPosition
-  p   <- pat True <?> "declaration"
-  tp  <- optionMaybe $ do
-          void <- try $ tk_sym "::"
-          tp   <- type_
-          return tp
-  w   <- optionMaybe $ do
+  pat <- pat True <?> "declaration"
+  whe <- do
           void <- tk_sym "="
           w    <- where_
           return w
-  guard $ isJust tp || isJust w
-  return $ Decl (az{pos=pos}, p, tp, w)
+  return $ singleton $ DAtr az{pos=pos} pat whe
 
-dcls :: Parser [Decl]
-dcls = list (tk_sym "") decl
+decl :: Parser [Decl]
+decl = try decl_sig <|> decl_atr
+
+decls :: Parser [Decl]
+decls = concat <$> list (tk_sym "") decl
 
 -------------------------------------------------------------------------------
 
@@ -368,7 +378,7 @@ where_ = do
   e   <- expr
   ds  <- option [] $ do
           void <- tk_key "where"
-          ds   <- dcls
+          ds   <- decls
           void <- string ";"
           void <- optional $ try $ tk_key "where"
           spc
@@ -385,7 +395,7 @@ ifce = do
   void <- tk_key "for"
   var  <- tk_var
   void <- tk_key "with"
-  ds   <- dcls
+  ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "interface"
   spc
@@ -400,7 +410,7 @@ impl = do
   void <- tk_key "for"
   hr   <- tk_hier
   void <- tk_key "with"
-  ds   <- dcls
+  ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "implementation"
   spc
@@ -415,10 +425,10 @@ prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
-  pl   <- list (tk_sym "") (
-            (GDecl <$> try decl) <|>
-            (GIfce <$> try ifce) <|>
-            (GImpl <$> impl) -- <|>
+  pl   <- concat <$> list (tk_sym "") (
+            (fmap (GDecl<$>) (try decl)) <|>
+            (singleton <$> GIfce <$> try ifce) <|>
+            (singleton <$> GImpl <$> impl) -- <|>
           )
   void <- eof
   return $

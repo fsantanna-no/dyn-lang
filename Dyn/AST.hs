@@ -68,8 +68,17 @@ data Patt
 newtype Where = Where (Ann, Expr, [Decl])
   deriving (Eq, Show)
 
-newtype Decl = Decl (Ann, Patt, Maybe Type, Maybe Where)
+data Decl = DSig Ann ID_Var Type
+          | DAtr Ann Patt Where
   deriving (Eq, Show)
+
+isDSig :: Decl -> Bool
+isDSig (DSig _ _ _) = True
+isDSig _            = False
+
+isDAtr :: Decl -> Bool
+isDAtr (DAtr _ _ _) = True
+isDAtr _            = False
 
 newtype Ifce = Ifce (Ann, (ID_Ifce,ID_Var), [Decl])
   deriving (Eq, Show)
@@ -109,7 +118,8 @@ pattGetAnn (PTuple z _)     = z
 pattGetAnn (PCall  z _ _)   = z
 
 declGetAnn :: Decl -> Ann
-declGetAnn (Decl (z,_,_,_)) = z
+declGetAnn (DSig z _ _) = z
+declGetAnn (DAtr z _ _) = z
 
 -------------------------------------------------------------------------------
 
@@ -199,9 +209,8 @@ pattToString spc (PCall  _ p1 p2)     = "(" ++ pattToString 0 p1 ++ " " ++ pattT
 
 declToString :: Int -> Decl -> String
 
-declToString spc (Decl (_, pat, Just tp, Just w))  = pattToString spc pat ++ " :: " ++ typeToString tp ++ " = " ++ whereToString spc w
-declToString spc (Decl (_, pat, Just tp, Nothing)) = pattToString spc pat ++ " :: " ++ typeToString tp ++ ""
-declToString spc (Decl (_, pat, Nothing, Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
+declToString spc (DSig _ var tp) = var ++ " :: " ++ typeToString tp
+declToString spc (DAtr _ pat wh) = pattToString spc pat ++ " = " ++ whereToString spc wh
 
 -------------------------------------------------------------------------------
 

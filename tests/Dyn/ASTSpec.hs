@@ -14,25 +14,27 @@ spec = do
       exprToString 0 (EVar az "a") `shouldBe` "a"
 
   describe "declToString:" $ do
-    it "a :: () = b" $
+    it "a :: ()" $
+      declToString 0 (DSig az "a" tz)
+        `shouldBe` "a :: ()"
+    it "a = b" $
+      declToString 0 (DAtr az (PWrite az "a") (Where (az, EVar az "b", [])))
+        `shouldBe` "a = b"
+    it "a = b where\n  b=()" $
       declToString 0
-        (Decl (az, PWrite az "a", Just tz,
-          Just $ Where (az, EVar az "b", []))) `shouldBe` "a :: () = b"
-    it "a :: () = b where\n  b=()" $
-      declToString 0
-        (Decl (az, PWrite az "a", Just tz,
-          Just $ Where (az, EVar az "b",
-            [Decl (az, PWrite az "b", Just tz, Just $ Where (az, EUnit az,[]))])))
-        `shouldBe` "a :: () = b where\n  b :: () = ()\n;"
+        (DAtr az (PWrite az "a")
+          (Where (az, EVar az "b",
+            [DSig az "b" tz])))
+        `shouldBe` "a = b where\n  b :: ()\n;"
 
   describe "declToString:" $ do
     it "b where b=a, a=()" $
       whereToString 0 (
         Where (az, EVar az "b", [
-          Decl (az, PWrite az "b", Just tz, Just $ Where (az, EVar az "a",[])),
-          Decl (az, PWrite az "a", Just tz, Just $ Where (az, EUnit az,[]))
+          DAtr az (PWrite az "b") (Where (az, EVar az "a",[])),
+          DAtr az (PWrite az "a") (Where (az, EUnit az,[]))
         ]))
-        `shouldBe` "b where\n  b :: () = a\n  a :: () = ()\n;"
+        `shouldBe` "b where\n  b = a\n  a = ()\n;"
 
   describe "progToString:" $ do
     it "v" $

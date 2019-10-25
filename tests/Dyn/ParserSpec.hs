@@ -73,16 +73,16 @@ spec = do
   describe "decl:" $ do
     it "x :: () = ()" $
       parse' decl "x :: () = ()"
-        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just (Type (az{pos=(1,6)}, TUnit, [])), Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+        `shouldBe` Right [DSig az{pos=(1,1)} "x" (Type (az{pos=(1,6)}, TUnit, [])),DAtr az{pos=(1,1)} (PWrite az{pos=(1,1)} "x") (Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, []))]
     it "x :: ()" $
       parse' decl "x :: ()"
-        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just (Type (az{pos=(1,6)}, TUnit, [])), Nothing))
+        `shouldBe` Right [DSig az{pos=(1,1)} "x" (Type (az{pos=(1,6)}, TUnit, []))]
     it "x = ()" $
       parse' decl "x = ()"
-        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))
+        `shouldBe` Right [DAtr az{pos=(1,1)} (PWrite az{pos=(1,1)} "x") (Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  []))]
     it "x" $
       parse' decl "x"
-        `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier, \"::\" or \"=\""
+        `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier or \"=\""
 
   describe "toString:" $ do
     describe "expr_*:" $ do
@@ -97,7 +97,7 @@ spec = do
           `shouldBe` "(xxx,yyy)"
     describe "decl:" $ do
       it "case" $
-        (declToString 0 $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
+        (declToString 0 $ head $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $
@@ -136,7 +136,7 @@ spec = do
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (progToString $ fromRight $ parse "main :: () = ()")
-          `shouldBe` "main where\n  main :: () = ()\n;"
+          `shouldBe` "main where\n  main :: ()\n  main = ()\n;"
       it "x where x :: ()" $
         (progToString $ fromRight $ parse "main :: ()")
           `shouldBe` "main where\n  main :: ()\n;"
@@ -148,10 +148,10 @@ spec = do
           `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", declaration, \"interface\", \"implementation\" or end of input"
       it "x where x,y" $
         (parseToString "main::()=y\ny::()=()")
-          `shouldBe` "main where\n  main :: () = y\n  y :: () = ()\n;"
+          `shouldBe` "main where\n  main :: ()\n  main = y\n  y :: ()\n  y = ()\n;"
       it "where-newline" $
         (progToString $ fromRight $ parse "main :: () = f ()\n")
-          `shouldBe` "main where\n  main :: () = (f ())\n;"
+          `shouldBe` "main where\n  main :: ()\n  main = (f ())\n;"
       it "Xx a = ()" $
         (progToString $ fromRight $ parse "Xx main = ()")
           `shouldBe` "main where\n  (Xx main) = ()\n;"
@@ -163,7 +163,7 @@ f :: () = func -> x where
             x :: () = ...;
           ;
 |])
-          `shouldBe` "main where\n  main :: () = (f ())\n  f :: () = func :: () ->\n    x where\n      x :: () = ...\n    ;\n  ;\n;"
+          `shouldBe` "main where\n  main :: ()\n  main = (f ())\n  f :: ()\n  f = func :: () ->\n    x where\n      x :: ()\n      x = ...\n    ;\n  ;\n;"
 
       it "where-where" $
         (parseToString
@@ -174,7 +174,7 @@ main :: () = b d where
   ;
 d :: () = ()
 |])
-          `shouldBe` "main where\n  main :: () = (b d) where\n    b :: () = c\n    c :: () = ()\n  ;\n  d :: () = ()\n;"
+          `shouldBe` "main where\n  main :: ()\n  main = (b d) where\n    b :: ()\n    b = c\n    c :: ()\n    c = ()\n  ;\n  d :: ()\n  d = ()\n;"
 
     describe "parseToString:" $ do
 
