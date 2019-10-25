@@ -408,31 +408,32 @@ impl = do
 
 -------------------------------------------------------------------------------
 
-data PList = PLDecl Decl | PLIfce Ifce | PLImpl Impl
+-- top-level global declarations
+data GList = GDecl Decl | GIfce Ifce | GImpl Impl
 
 prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
   pl   <- list (tk_sym "") (
-            (PLDecl <$> try decl) <|>
-            (PLIfce <$> try ifce) <|>
-            (PLImpl <$> impl) -- <|>
+            (GDecl <$> try decl) <|>
+            (GIfce <$> try ifce) <|>
+            (GImpl <$> impl) -- <|>
           )
   void <- eof
   return $
     let
-      toDecl (PLDecl dcl) = [dcl]
-      toDecl (PLIfce ifc) = ifceToDecls ifc
-      toDecl (PLImpl imp) = implToDecls (plToIfcs pl) imp
+      toDecl (GDecl dcl) = [dcl]
+      toDecl (GIfce ifc) = ifceToDecls ifc
+      toDecl (GImpl imp) = implToDecls (plToIfcs pl) imp
      in
       Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecl pl)
 
-plToIfcs :: [PList] -> [Ifce]
+plToIfcs :: [GList] -> [Ifce]
 plToIfcs pl = map g $ filter f pl where
-                f (PLIfce ifc) = True
-                f _             = False
-                g (PLIfce ifc) = ifc
+                f (GIfce ifc) = True
+                f _           = False
+                g (GIfce ifc) = ifc
 
 -------------------------------------------------------------------------------
 
