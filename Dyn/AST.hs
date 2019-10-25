@@ -9,17 +9,30 @@ data Ann = Ann { pos :: (Int,Int) }
 
 az = Ann { pos=(0,0) }
 
-data Type = TUnit
-  deriving (Eq, Show)
-tz = TUnit
-
 type ID_Var  = String
 type ID_Data = String
 type ID_Hier = [ID_Data]
 type ID_Ifce = String
 
+-------------------------------------------------------------------------------
 
-type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
+newtype Type = Type (Ann, TType, TCtrs)
+  deriving (Eq,Show)
+
+cz = []
+tz = Type (az, TUnit, cz)
+
+type TCtrs = [(ID_Var, [ID_Ifce])]  -- [(a,[IEq,IOrd,IShow]), (b,[...])]
+
+data TType = --TAny                         -- bot/sup
+             TUnit
+           | TVar   ID_Var
+           | TData  ID_Hier {-[TType]-}       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
+           | TTuple [TType]               -- (len >= 2)
+           | TFunc  {-FuncType-} TType TType  -- inp out
+  deriving (Eq,Show)
+
+-------------------------------------------------------------------------------
 
 data Expr
   = EError Ann String                 -- (msg)        -- error "bug found"
@@ -34,6 +47,10 @@ data Expr
   | ECase  Ann Expr [(Patt,Where)]    -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   deriving (Eq, Show)
 
+type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
+
+-------------------------------------------------------------------------------
+
 data Patt
   = PError Ann String                 -- (msg)        -- error "bug found"
   | PArg   Ann                        -- ()           -- ...
@@ -45,6 +62,8 @@ data Patt
   | PTuple Ann [Patt]                 -- (patts)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
   | PCall  Ann Patt Patt              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   deriving (Eq, Show)
+
+-------------------------------------------------------------------------------
 
 newtype Where = Where (Ann, Expr, [Decl])
   deriving (Eq, Show)
@@ -113,6 +132,23 @@ listToPatt (x:xs) = PTuple (pattGetAnn x) (x:xs)
 
 -------------------------------------------------------------------------------
 
+typeToString :: Type -> String
+typeToString (Type (_,ttp,cs)) =
+  case cs of
+    [] -> typeToString' ttp
+    l  -> typeToString' ttp ++ " where (" ++ L.intercalate "," (map f l) ++ ")" where
+            f (var,[cls]) = var ++ " is " ++ cls
+            f (var,clss)  = var ++ " is (" ++ L.intercalate "," clss ++ ")"
+
+typeToString' :: TType -> String
+--typeToString' TAny            = "?"
+typeToString' TUnit           = "()"
+typeToString' (TData ids)  = L.intercalate "." ids
+--typeToString' (TData ids [x]) = L.intercalate "." ids ++ " of " ++ typeToString' x
+--typeToString' (TData ids ofs) = L.intercalate "." ids ++ " of " ++ "(" ++ L.intercalate "," (map typeToString' ofs) ++ ")"
+
+-------------------------------------------------------------------------------
+
 rep spc = replicate spc ' '
 
 exprToString :: Int -> Expr -> String
@@ -125,7 +161,7 @@ exprToString spc (EData  _ h (EUnit _)) = L.intercalate "." h
 exprToString spc (EData  _ h st)        = "(" ++ L.intercalate "." h ++ " " ++ exprToString 0 st ++ ")"
 exprToString spc (EArg   _)             = "..."
 exprToString spc (ETuple _ es)          = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
-exprToString spc (EFunc  _ TUnit ups bd) = "func :: () " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
+exprToString spc (EFunc  _ tp ups bd)   = "func :: " ++ typeToString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
                                             whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
                                            where
                                             upsToString []  = ""
@@ -155,9 +191,9 @@ pattToString spc (PCall  _ p1 p2)     = "(" ++ pattToString 0 p1 ++ " " ++ pattT
 
 declToString :: Int -> Decl -> String
 
-declToString spc (Decl (_, pat, Just TUnit, Just w))  = pattToString spc pat ++ " :: () = " ++ whereToString spc w
-declToString spc (Decl (_, pat, Just TUnit, Nothing)) = pattToString spc pat ++ " :: ()"
-declToString spc (Decl (_, pat, Nothing,    Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
+declToString spc (Decl (_, pat, Just tp, Just w))  = pattToString spc pat ++ " :: " ++ typeToString tp ++ " = " ++ whereToString spc w
+declToString spc (Decl (_, pat, Just tp, Nothing)) = pattToString spc pat ++ " :: " ++ typeToString tp ++ ""
+declToString spc (Decl (_, pat, Nothing, Just w))  = pattToString spc pat ++ " = " ++ whereToString spc w
 
 -------------------------------------------------------------------------------
 

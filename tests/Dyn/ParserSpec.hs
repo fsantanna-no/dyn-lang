@@ -48,7 +48,7 @@ spec = do
         `shouldBe` Right (EUnit az{pos=(1,2)})
     it "func" $
       parse' expr "func :: () -> ();"
-        `shouldBe` Right (EFunc az{pos=(1,1)} tz [] (Where (az{pos=(1,15)}, EUnit az{pos=(1,15)},[])))
+        `shouldBe` Right (EFunc az{pos=(1,1)} (Type (az{pos=(1,9)}, TUnit, [])) [] (Where (az{pos=(1,15)}, EUnit az{pos=(1,15)},[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
@@ -73,10 +73,10 @@ spec = do
   describe "decl:" $ do
     it "x :: () = ()" $
       parse' decl "x :: () = ()"
-        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
+        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just (Type (az{pos=(1,6)}, TUnit, [])), Just $ Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, [])))
     it "x :: ()" $
       parse' decl "x :: ()"
-        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just tz, Nothing))
+        `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Just (Type (az{pos=(1,6)}, TUnit, [])), Nothing))
     it "x = ()" $
       parse' decl "x = ()"
         `shouldBe` Right (Decl (az{pos=(1,1)}, PWrite az{pos=(1,1)} "x", Nothing, Just $ Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  [])))

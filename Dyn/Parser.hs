@@ -263,9 +263,10 @@ expr = try expr_call <|> expr_one
 
 type_ :: Parser Type
 type_ = do
+  pos <- toPos <$> getPosition
   void <- tk_sym "("
   void <- tk_sym ")"
-  return TUnit
+  return $ Type (az{pos=pos}, TUnit, [])
 
 -------------------------------------------------------------------------------
 
