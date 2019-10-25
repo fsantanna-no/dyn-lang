@@ -93,57 +93,63 @@ isEError _            = False
 
 -------------------------------------------------------------------------------
 
--- TODO: typeclass
+class IAnn a where
+  getAnn :: a -> Ann
 
-getAnn :: Expr -> Ann
-getAnn (EError z _)     = z
-getAnn (EVar   z _)     = z
-getAnn (EUnit  z)       = z
-getAnn (ECons  z _)     = z
-getAnn (EData  z _ _)   = z
-getAnn (ETuple z _)     = z
-getAnn (EFunc  z _ _ _) = z
-getAnn (ECall  z _ _)   = z
-getAnn (EArg   z)       = z
-getAnn (ECase  z _ _)   = z
+instance IAnn Expr where
+  getAnn (EError z _)     = z
+  getAnn (EVar   z _)     = z
+  getAnn (EUnit  z)       = z
+  getAnn (ECons  z _)     = z
+  getAnn (EData  z _ _)   = z
+  getAnn (ETuple z _)     = z
+  getAnn (EFunc  z _ _ _) = z
+  getAnn (ECall  z _ _)   = z
+  getAnn (EArg   z)       = z
+  getAnn (ECase  z _ _)   = z
 
-pattGetAnn :: Patt -> Ann
-pattGetAnn (PError z _)     = z
-pattGetAnn (PArg   z)       = z
-pattGetAnn (PRead  z _)     = z
-pattGetAnn (PWrite z _)     = z
-pattGetAnn (PUnit  z)       = z
-pattGetAnn (PCons  z _)     = z
-pattGetAnn (PTuple z _)     = z
-pattGetAnn (PCall  z _ _)   = z
+instance IAnn Patt where
+  getAnn (PError z _)     = z
+  getAnn (PArg   z)       = z
+  getAnn (PRead  z _)     = z
+  getAnn (PWrite z _)     = z
+  getAnn (PUnit  z)       = z
+  getAnn (PCons  z _)     = z
+  getAnn (PTuple z _)     = z
+  getAnn (PCall  z _ _)   = z
 
-declGetAnn :: Decl -> Ann
-declGetAnn (DSig z _ _) = z
-declGetAnn (DAtr z _ _) = z
-
--------------------------------------------------------------------------------
-
-exprToList :: Expr -> [Expr]
-exprToList (EUnit  _)    = []
-exprToList (ETuple _ es) = es
-exprToList e             = [e]
-
-ttypeToList :: TType -> [TType]
-ttypeToList TUnit         = []
-ttypeToList (TTuple ttps) = ttps
-ttypeToList ttp           = [ttp]
+instance IAnn Decl where
+  getAnn (DSig z _ _) = z
+  getAnn (DAtr z _ _) = z
 
 -------------------------------------------------------------------------------
 
-listToExpr :: [Expr] -> Expr
-listToExpr []     = EUnit $ error "TODO: z"
-listToExpr [x]    = x
-listToExpr (x:xs) = ETuple (getAnn x) (x:xs)
+class IList a where
+  toList   ::  a  -> [a]
+  fromList :: [a] ->  a
 
-listToPatt :: [Patt] -> Patt
-listToPatt []     = PUnit $ error "TODO: z"
-listToPatt [x]    = x
-listToPatt (x:xs) = PTuple (pattGetAnn x) (x:xs)
+instance IList Expr where
+  toList (EUnit  _)    = []
+  toList (ETuple _ es) = es
+  toList e             = [e]
+
+  fromList []     = EUnit $ error "TODO: z"
+  fromList [x]    = x
+  fromList (x:xs) = ETuple (getAnn x) (x:xs)
+
+instance IList TType where
+  toList TUnit         = []
+  toList (TTuple ttps) = ttps
+  toList ttp           = [ttp]
+
+  fromList x = error "TODO"
+
+instance IList Patt where
+  toList x = error "TODO"
+
+  fromList []     = PUnit $ error "TODO: z"
+  fromList [x]    = x
+  fromList (x:xs) = PTuple (getAnn x) (x:xs)
 
 -------------------------------------------------------------------------------
 

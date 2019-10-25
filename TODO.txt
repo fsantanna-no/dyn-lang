@@ -1,7 +1,5 @@
 - interface
-    - tirar tipo "a" explicito e colocar auto
     - passar "IOrd a where a is IEq" como constraint de a para baixo
-    - derivar as fcs dos daIEq
 - typeclasses
     - getAnn
     - toString
