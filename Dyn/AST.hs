@@ -118,12 +118,17 @@ exprToList (EUnit  _)    = []
 exprToList (ETuple _ es) = es
 exprToList e             = [e]
 
+ttypeToList :: TType -> [TType]
+ttypeToList TUnit         = []
+ttypeToList (TTuple ttps) = ttps
+ttypeToList ttp           = [ttp]
+
+-------------------------------------------------------------------------------
+
 listToExpr :: [Expr] -> Expr
 listToExpr []     = EUnit $ error "TODO: z"
 listToExpr [x]    = x
 listToExpr (x:xs) = ETuple (getAnn x) (x:xs)
-
--------------------------------------------------------------------------------
 
 listToPatt :: [Patt] -> Patt
 listToPatt []     = PUnit $ error "TODO: z"
