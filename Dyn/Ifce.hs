@@ -34,34 +34,38 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
   dcls' = map f dcls where
             f (Decl (z1,e1,tp1,
                 Just (Where (z2,
-                             EFunc z3 tp3@(Type (_,_,cs3)) ups3 (Where (z4,e4,ds4)),
-                             ds2)))) = traceShow dicts $
+                             EFunc z3 tp3@(Type (_,TFunc inp3 _,cs3)) ups3 (Where (z4,e4,ds4)),
+                             ds2)))) =
 
               Decl (z1,e1,tp1,
                 Just (Where (z2,
                              EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
                              ds2)))
               where
-                dicts = concatMap f cs3 where
-                          f (var,ifcs) = map (('d':var)++) ifcs
                 ds4' = ds4 ++ [
+                          -- ... = (p1,...pN)
                           Decl (z1, PArg z1, Nothing, Just $ Where (z1,eps,[])),
+                          -- (d1,...,dN, p1,...,pN) = ...
                           Decl (z1, pall, Nothing, Just $ Where (z1,EArg z1,[]))
                          ]
 
+                -- [daIEq,daIShow,dbIEq,...]
+                dicts = concatMap f cs3 where
+                          f (var,ifcs) = map (('d':var)++) ifcs
+
                 -- (p1,...,pN)
-                eps = listToExpr $ take 2 $ map (EVar z1) $ map ('p':) incs'
+                eps = listToExpr $ map (EVar z1) $ ps
 
                 -- (d1,...,dN, p1,...,pN)
-                pall = listToPatt $ ds ++ ps where
-                  --ds = take 1 $ map (PWrite z1) $ map ('d':) incs'
-                  ds = map (PWrite z1) $ dicts
-                  ps = take 2 $ map (PWrite z1) $ map ('p':) incs'
+                pall = listToPatt $ dicts' ++ ps' where
+                  dicts' = map (PWrite z1) $ dicts
+                  ps'    = map (PWrite z1) $ ps
 
-                -- [1,2,...]
-                incs :: [Int]
-                incs = 1 : map (+1) incs
-                incs' = map show incs
+                -- [p1,...,pN]
+                ps :: [ID_Var]
+                ps = map ('p':) $ map show $ take (length $ ttypeToList inp3) incs where
+                      incs :: [Int]
+                      incs = 1 : map (+1) incs
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
@@ -98,36 +102,30 @@ ieq = [r|
 iord = [r|
   interface IOrd for a with
     lt  = ()
-    lte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-      or ( lt (dieq,diord,x,y),
-           eq (dieq,x,y) ) where
+    lte = func :: ((a,a) -> Bool) where a is (IEq,IOrd) ->
+      or ( lt (daIEq,daIOrd,x,y),
+           eq (daIEq,x,y) ) where
         (x,y) = ...
         -- AUTO
-        ... = (p1,p2)
-        Dict.IEq (eq,neq) = dieq
-        Dict.IOrd (lt,lte,gt,gte) = diord
-        (dieq,diord,p1,p2) = ...
+        Dict.IEq (eq,neq) = daIEq
+        Dict.IOrd (lt,lte,gt,gte) = daIOrd
       ;
     ;
-    gt = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-      not (lte (dieq,diord,x,y)) where
+    gt = func:: ((a,a) -> Bool) where a is (IEq,IOrd) ->
+      not (lte (daIEq,daIOrd,x,y)) where
         (x,y) = ...
         -- AUTO
-        ... = (p1,p2)
-        Dict.IEq (eq,neq) = dieq
-        Dict.IOrd (lt,lte,gt,gte) = diord
-        (dieq,diord,p1,p2) = ...
+        Dict.IEq (eq,neq) = daIEq
+        Dict.IOrd (lt,lte,gt,gte) = daIOrd
         ;
     ;
-    gte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
-      or ( gt (dieq,diord,x,y),
-           eq (dieq,x,y) ) where
+    gte = func:: ((a,a) -> Bool) where a is (IEq,IOrd) ->
+      or ( gt (daIEq,daIOrd,x,y),
+           eq (daIEq,x,y) ) where
         (x,y) = ...
         -- AUTO
-        ... = (p1,p2)
-        Dict.IEq (eq,neq) = dieq
-        Dict.IOrd (lt,lte,gt,gte) = diord
-        (dieq,diord,p1,p2) = ...
+        Dict.IEq (eq,neq) = daIEq
+        Dict.IOrd (lt,lte,gt,gte) = daIOrd
       ;
     ;
   ;
@@ -142,7 +140,7 @@ ieq_bool = [r|
         (x,y) = ...
         -- AUTO
         ... = (p1,p2)
-        (dieq,p1,p2) = ...
+        (daIEq,p1,p2) = ...
       ;
     ;
   ;
@@ -160,7 +158,7 @@ iord_bool = [r|
         (x,y) = ...
         -- AUTO
         ... = (p1,p2)
-        (dieq,diord,p1,p2) = ...
+        (daIEq,daIOrd,p1,p2) = ...
       ;
     ;
   ;
