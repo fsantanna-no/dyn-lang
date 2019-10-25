@@ -135,17 +135,20 @@ listToPatt (x:xs) = PTuple (pattGetAnn x) (x:xs)
 typeToString :: Type -> String
 typeToString (Type (_,ttp,cs)) =
   case cs of
-    [] -> typeToString' ttp
-    l  -> typeToString' ttp ++ " where (" ++ L.intercalate "," (map f l) ++ ")" where
+    [] -> ttypeToString ttp
+    l  -> ttypeToString ttp ++ " where (" ++ L.intercalate "," (map f l) ++ ")" where
             f (var,[cls]) = var ++ " is " ++ cls
             f (var,clss)  = var ++ " is (" ++ L.intercalate "," clss ++ ")"
 
-typeToString' :: TType -> String
---typeToString' TAny            = "?"
-typeToString' TUnit           = "()"
-typeToString' (TData ids)  = L.intercalate "." ids
---typeToString' (TData ids [x]) = L.intercalate "." ids ++ " of " ++ typeToString' x
---typeToString' (TData ids ofs) = L.intercalate "." ids ++ " of " ++ "(" ++ L.intercalate "," (map typeToString' ofs) ++ ")"
+ttypeToString :: TType -> String
+--ttypeToString TAny            = "?"
+ttypeToString TUnit            = "()"
+ttypeToString (TVar   id)      = id
+ttypeToString (TData  hr)      = L.intercalate "." hr
+ttypeToString (TTuple ttps)    = "(" ++ L.intercalate "," (map ttypeToString ttps) ++ ")"
+ttypeToString (TFunc  inp out) = "(" ++ ttypeToString inp ++ " -> " ++ ttypeToString out ++ ")"
+--ttypeToString (TData ids [x]) = L.intercalate "." ids ++ " of " ++ ttypeToString x
+--ttypeToString (TData ids ofs) = L.intercalate "." ids ++ " of " ++ "(" ++ L.intercalate "," (map ttypeToString ofs) ++ ")"
 
 -------------------------------------------------------------------------------
 
