@@ -120,12 +120,12 @@ evalWhere :: Env -> Where -> Expr
 evalWhere env (Where (z, e, dcls)) =
   case foldr f (env, Right True) dcls of
     (env', Right True)  -> evalExpr env' e
-    (_,    Right False) -> EError (dclGetAnn $ head dcls) "invalid assignment"
+    (_,    Right False) -> EError (declGetAnn $ head dcls) "invalid assignment"
     (_,    Left  err)   -> err
   where
     f :: Decl -> Match -> Match
     f dcl (env, Right True)  = evalDecl env dcl
-    f dcl (env, Right False) = (env, Left $ EError (dclGetAnn dcl) "invalid assignment")
+    f dcl (env, Right False) = (env, Left $ EError (declGetAnn dcl) "invalid assignment")
     f dcl (env, Left  e)     = (env, Left e)           -- found error
 
 -------------------------------------------------------------------------------

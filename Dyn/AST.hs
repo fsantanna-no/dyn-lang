@@ -65,6 +65,8 @@ isEError _            = False
 
 -------------------------------------------------------------------------------
 
+-- TODO: typeclass
+
 getAnn :: Expr -> Ann
 getAnn (EError z _)     = z
 getAnn (EVar   z _)     = z
@@ -77,8 +79,18 @@ getAnn (ECall  z _ _)   = z
 getAnn (EArg   z)       = z
 getAnn (ECase  z _ _)   = z
 
-dclGetAnn :: Decl -> Ann
-dclGetAnn (Decl (z,_,_,_)) = z
+pattGetAnn :: Patt -> Ann
+pattGetAnn (PError z _)     = z
+pattGetAnn (PArg   z)       = z
+pattGetAnn (PRead  z _)     = z
+pattGetAnn (PWrite z _)     = z
+pattGetAnn (PUnit  z)       = z
+pattGetAnn (PCons  z _)     = z
+pattGetAnn (PTuple z _)     = z
+pattGetAnn (PCall  z _ _)   = z
+
+declGetAnn :: Decl -> Ann
+declGetAnn (Decl (z,_,_,_)) = z
 
 -------------------------------------------------------------------------------
 
@@ -88,8 +100,16 @@ exprToList (ETuple _ es) = es
 exprToList e             = [e]
 
 listToExpr :: [Expr] -> Expr
+listToExpr []     = EUnit $ error "TODO: z"
 listToExpr [x]    = x
 listToExpr (x:xs) = ETuple (getAnn x) (x:xs)
+
+-------------------------------------------------------------------------------
+
+listToPatt :: [Patt] -> Patt
+listToPatt []     = PUnit $ error "TODO: z"
+listToPatt [x]    = x
+listToPatt (x:xs) = PTuple (pattGetAnn x) (x:xs)
 
 -------------------------------------------------------------------------------
 
