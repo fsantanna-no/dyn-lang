@@ -19,6 +19,9 @@ import Dyn.Ifce
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
 
+singleton x = [x]
+
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 -- LISTS
@@ -44,11 +47,13 @@ parensWith (open,close) p = do
   return ret
 
 -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 keywords = [
     "case",
     "error",
     "func",
+    "is",
     "of",
     "where",
 
@@ -110,6 +115,7 @@ tk_ifce = do
     return (fst:snd:rst)
 
 -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 -- (x, (y,_))
 pat :: Bool -> Parser Patt
@@ -159,6 +165,35 @@ pat only_write =
             pos  <- toPos <$> getPosition
             locs <- parens $ list (tk_sym ",") $ pat only_write
             return (PTuple az{pos=pos} $ locs)
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+expr :: Parser Expr
+expr = try expr_call <|> expr_one
+
+expr_call :: Parser Expr
+expr_call = do
+  pos <- toPos <$> getPosition
+  e1  <- expr_one
+  e2  <- expr_one
+  guard $ (fst $ A.pos $ getAnn e1) == (fst $ A.pos $ getAnn e2)  -- must be at the same line
+  return $ ECall az {pos=pos} e1 e2
+
+expr_one :: Parser Expr
+expr_one =
+  try expr_var    <|>   -- ID_Var
+  expr_error      <|>   -- error
+  expr_func       <|>   -- func
+  expr_case       <|>   -- case
+
+  try expr_unit   <|>   -- ()
+  try expr_parens <|>   -- (1-item)
+  expr_tuple      <|>   -- (...)
+
+  expr_cons       <|>   -- ID_Data
+  expr_arg              -- ...
+                  <?> "expression"
 
 -------------------------------------------------------------------------------
 
@@ -233,39 +268,30 @@ expr_case = do
 expr_parens :: Parser Expr
 expr_parens = parens expr
 
-expr_one :: Parser Expr
-expr_one =
-  try expr_var    <|>   -- ID_Var
-  expr_error      <|>   -- error
-  expr_func       <|>   -- func
-  expr_case       <|>   -- case
-
-  try expr_unit   <|>   -- ()
-  try expr_parens <|>   -- (1-item)
-  expr_tuple      <|>   -- (...)
-
-  expr_cons       <|>   -- ID_Data
-  expr_arg              -- ...
-                  <?> "expression"
-
-expr_call :: Parser Expr
-expr_call = do
-  pos <- toPos <$> getPosition
-  e1  <- expr_one
-  e2  <- expr_one
-  guard $ (fst $ A.pos $ getAnn e1) == (fst $ A.pos $ getAnn e2)  -- must be at the same line
-  return $ ECall az {pos=pos} e1 e2
-
-expr :: Parser Expr
-expr = try expr_call <|> expr_one
-
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 type_ :: Parser Type
 type_ = do
   pos <- toPos <$> getPosition
   ttp <- ttype
-  return $ Type (az{pos=pos}, ttp, [])
+  cs  <- option [] $ try ctrs
+  return $ Type (az{pos=pos}, ttp, cs)
+
+ctrs :: Parser TCtrs
+ctrs = do
+  void <- try $ tk_key "where"
+  cs   <- (singleton <$> ctr) <|> (parens $ list (tk_sym ",") $ ctr)
+  return cs
+
+ctr :: Parser (ID_Var,[ID_Ifce])
+ctr = do
+  var  <- tk_var
+  void <- tk_key "is"
+  ifcs <- (singleton <$> tk_ifce) <|> (parens $ list (tk_sym ",") $ tk_ifce)
+  return (var,ifcs)
+
+-------------------------------------------------------------------------------
 
 ttype :: Parser TType
 ttype = do
@@ -313,6 +339,7 @@ ttype_parens = do
   void <- tk_sym ")"
   return tp
 
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 decl :: Parser Decl
