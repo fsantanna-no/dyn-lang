@@ -20,6 +20,7 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
 
   -- TODO:
   --    - (da,...,dx)  -- respect generic constrained vars
+  --    - (fN,...,gN) = dN
   --    - from types, discover pN, g, dN
   --
   --  eq = func ->
@@ -33,14 +34,16 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
   dcls' = map f dcls where
             f (Decl (z1,e1,tp1,
                 Just (Where (z2,
-                             EFunc z3 tp3 ups3 (Where (z4,e4,ds4)),
-                             ds2)))) =
+                             EFunc z3 tp3@(Type (_,_,cs3)) ups3 (Where (z4,e4,ds4)),
+                             ds2)))) = traceShow dicts $
 
               Decl (z1,e1,tp1,
                 Just (Where (z2,
                              EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
                              ds2)))
               where
+                dicts = concatMap f cs3 where
+                          f (var,ifcs) = map (('d':var)++) ifcs
                 ds4' = ds4 ++ [
                           Decl (z1, PArg z1, Nothing, Just $ Where (z1,eps,[])),
                           Decl (z1, pall, Nothing, Just $ Where (z1,EArg z1,[]))
@@ -51,7 +54,8 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
 
                 -- (d1,...,dN, p1,...,pN)
                 pall = listToPatt $ ds ++ ps where
-                  ds = take 1 $ map (PWrite z1) $ map ('d':) incs'
+                  --ds = take 1 $ map (PWrite z1) $ map ('d':) incs'
+                  ds = map (PWrite z1) $ dicts
                   ps = take 2 $ map (PWrite z1) $ map ('p':) incs'
 
                 -- [1,2,...]
@@ -75,7 +79,7 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
 
 ieq = [r|
   interface IEq for a with
-    eq = func :: ((a,a) -> Bool) ->  -- where a is IEq
+    eq = func :: ((a,a) -> Bool) where a is IEq ->
       case (x,y) of
         (~y,_) -> Bool.True
         _      -> Bool.False
@@ -83,8 +87,8 @@ ieq = [r|
         (x,y) = ...
       ;
     ;
-    neq = func ->  -- (a,a) -> Bool
-      not (eq (d1,x,y)) where
+    neq = func :: ((a,a) -> Bool) where a is IEq ->
+      not (eq (daIEq,x,y)) where
         (x,y) = ...
       ;
     ;
