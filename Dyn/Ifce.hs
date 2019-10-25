@@ -75,7 +75,7 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
 
 ieq = [r|
   interface IEq for a with
-    eq = func ->  -- (a,a) -> Bool
+    eq = func :: ((a,a) -> Bool) ->  -- where a is IEq
       case (x,y) of
         (~y,_) -> Bool.True
         _      -> Bool.False

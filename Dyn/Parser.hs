@@ -264,9 +264,54 @@ expr = try expr_call <|> expr_one
 type_ :: Parser Type
 type_ = do
   pos <- toPos <$> getPosition
+  ttp <- ttype
+  return $ Type (az{pos=pos}, ttp, [])
+
+ttype :: Parser TType
+ttype = do
+  ttp <- try ttype_D      <|> try ttype_V <|> try ttype_0 <|>
+         try ttype_parens <|> try ttype_N <|> ttype_F <?> "type"
+  return ttp
+
+ttype_0 :: Parser TType
+ttype_0 = do
   void <- tk_sym "("
   void <- tk_sym ")"
-  return $ Type (az{pos=pos}, TUnit, [])
+  return TUnit
+
+ttype_D :: Parser TType
+ttype_D = do
+  hier <- tk_hier
+  return $ TData hier {-(f ofs)-}
+
+ttype_N :: Parser TType
+ttype_N = do
+  ttps <- parens $ list (tk_sym ",") $ ttype
+  return $ TTuple ttps
+
+ttype_F :: Parser TType
+ttype_F = do
+  void <- tk_sym "("
+  inp  <- ttype
+  void <- tk_sym "->"
+  out  <- ttype
+  void <- tk_sym ")"
+  return $ TFunc inp out
+
+ttype_V :: Parser TType
+ttype_V = do
+  ref <- option False $ do
+          void <- try $ tk_key "ref"
+          return True
+  var <- tk_var
+  return $ TVar var
+
+ttype_parens :: Parser TType
+ttype_parens = do
+  void <- tk_sym "("
+  tp   <- ttype
+  void <- tk_sym ")"
+  return tp
 
 -------------------------------------------------------------------------------
 
