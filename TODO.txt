@@ -1,4 +1,4 @@
-- continuar com implementation
+- continuar com interface/implementation usando tipos
 - lists
     - vai permitir [a] where a is ...
         - dinamico e estatico

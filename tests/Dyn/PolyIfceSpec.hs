@@ -18,7 +18,7 @@ spec = do
 
   describe "IEq" $ do
 
-    it "XXX: IEq: default eq" $
+    it "IEq: default eq" $
       run ([r|  -- neq (eq(T,T), F)
 main = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False) where
   Dict.IEq (eq,neq) = dIEq

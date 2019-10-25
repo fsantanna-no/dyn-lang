@@ -12,11 +12,52 @@ import Dyn.AST
 -------------------------------------------------------------------------------
 
 ifceToDecls :: Ifce -> [Decl]
-ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls where
+ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
   -- dIEq = Dict.IEq (eq,neq)
-  dict = Decl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[]))
-  ids = map (\(Decl (_,PWrite _ id,_,_)) -> id) dcls
-  e   = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+  dict = Decl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[])) where
+    ids = map (\(Decl (_,PWrite _ id,_,_)) -> id) dcls
+    e   = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+
+  -- TODO:
+  --    - (da,...,dx)  -- respect generic constrained vars
+  --    - from types, discover pN, g, dN
+  --
+  --  eq = func ->
+  --    ret where
+  --      <...>
+  --      -- AUTO
+  --      ... = (p1,...pN)
+  --      (f1,...,g1) = d1
+  --      (fN,...,gN) = dN
+  --      (d1,...,dN, p1,...,pN) = ...
+  dcls' = map f dcls where
+            f (Decl (z1,e1,tp1,
+                Just (Where (z2,
+                             EFunc z3 tp3 ups3 (Where (z4,e4,ds4)),
+                             ds2)))) =
+
+              Decl (z1,e1,tp1,
+                Just (Where (z2,
+                             EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
+                             ds2)))
+              where
+                ds4' = ds4 ++ [
+                          Decl (z1, PArg z1, Nothing, Just $ Where (z1,eps,[])),
+                          Decl (z1, pall, Nothing, Just $ Where (z1,EArg z1,[]))
+                         ]
+
+                -- (p1,...,pN)
+                eps = listToExpr $ take 2 $ map (EVar z1) $ map ('p':) incs'
+
+                -- (d1,...,dN, p1,...,pN)
+                pall = listToPatt $ ds ++ ps where
+                  ds = take 1 $ map (PWrite z1) $ map ('d':) incs'
+                  ps = take 2 $ map (PWrite z1) $ map ('p':) incs'
+
+                -- [1,2,...]
+                incs :: [Int]
+                incs = 1 : map (+1) incs
+                incs' = map show incs
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
@@ -27,7 +68,8 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
           sameId   (Ifce (_, (id,_), _))    = (id == ifc)
           getDecls (Ifce (_, (_,_), dcls))  = dcls
           getId    (Decl (_,PWrite _ id,_,_)) = id
-  dcls' = traceShow (map (declToString 0) dcls) dcls
+  --dcls' = traceShow (map (declToString 0) dcls) $ map f dcls where
+          --f (Decl (z,e,tp,Just wh)) = traceShow (whereToString 0 wh) $ Decl (z,e,tp,Just wh)
 
 -------------------------------------------------------------------------------
 
@@ -39,19 +81,11 @@ ieq = [r|
         _      -> Bool.False
       ; where
         (x,y) = ...
-        -- AUTO
-        ... = (p1,p2)
-        Dict.IEq (eq,neq) = dieq
-        (dieq,p1,p2) = ...
       ;
     ;
     neq = func ->  -- (a,a) -> Bool
-      not (eq (dieq,x,y)) where
+      not (eq (d1,x,y)) where
         (x,y) = ...
-        -- AUTO
-        ... = (p1,p2)
-        Dict.IEq (eq,neq) = dieq
-        (dieq,p1,p2) = ...
       ;
     ;
   ;
