@@ -11,6 +11,8 @@ import Text.RawString.QQ
 import Dyn.AST
 import Dyn.Classes
 
+-------------------------------------------------------------------------------
+
 findIfce :: [Ifce] -> ID_Ifce -> Ifce
 findIfce ifces ifc = fromJust $ L.find f ifces where
                       f :: Ifce -> Bool
@@ -28,6 +30,70 @@ sups _ _ = error $ "TODO: multiple constraints"
 ifceToIds :: Ifce -> [ID_Var]
 ifceToIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
                                   getId (DSig _ id _) = id
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- interface IEq for a
+--
+--  dIEq = Dict.IEq (eq,neq)          -- AUTO
+--  eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq
+--    ret where
+--      <...>
+--      -- AUTO
+--      ... = (p1,...pN)
+--      (f1,...,g1) = d1
+--      (fN,...,gN) = dN
+--      ((d1,...,dN), p1,...,pN) = ...
+
+ifceToDecls :: [Ifce] -> Ifce -> [Decl]
+ifceToDecls ifces me@(Ifce (z,ifc_id,_,dcls)) = dict ++ dcls' where
+
+  -- dIEq = Dict.IEq (eq,neq)
+  -- (only if all methods are implemented)
+  dict :: [Decl]
+  dict = bool [] [datr] has_all_impls where
+          datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
+            e = ECall z (ECons z ["Dict",ifc_id])
+                        (fromList $ map (EVar z) $ ifceToIds me)
+
+          has_all_impls = (length dsigs == length datrs) where
+                            (dsigs, datrs) = declsSplit dcls
+
+  dcls' = ifceImplToDecls ifces me dcls
+
+-------------------------------------------------------------------------------
+
+-- implemenation of IEq for Bool
+-- implemenation of IEq for a where a is IXxx
+--
+--  dIEqBool = Dict.IEq (eq,neq) where
+--    eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq/IXxx
+--      ret where
+--        <...>
+--        -- AUTO
+--        ... = (p1,...pN)
+--        (f1,...,g1) = d1
+--        (fN,...,gN) = dN
+--        ((d1,...,dN), p1,...,pN) = ...
+
+implToDecls :: [Ifce] -> Impl -> [Decl]
+implToDecls ifces (Impl (z,ifc,tp,dcls)) = [dict] ++ dcls' where
+  -- dIEqBool = Dict.IEq (eq,neq) where eq=...
+  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,e,dcls')) where
+          e = ECall z (ECons z ["Dict",ifc])
+                      (fromList $ map (EVar z) $ ifceToIds ifce)
+
+  toString' (Type (_, TData hr, _      )) = concat hr
+  toString' (Type (_, TVar _,   [(_,l)])) = concat l
+
+  dcls' = ifceImplToDecls ifces ifce dcls
+
+  ifce = fromJust $ L.find h ifces where
+          h :: Ifce -> Bool
+          h (Ifce (_,id,_,_)) = (id == ifc)
+
+-------------------------------------------------------------------------------
 
 ifceImplToDecls :: [Ifce] -> Ifce -> [Decl] -> [Decl]
 ifceImplToDecls ifces ifce dcls =
@@ -90,62 +156,6 @@ ifceImplToDecls ifces ifce dcls =
     f decl = error $ toString decl
 
 -------------------------------------------------------------------------------
-
--- interface IEq for a
---
---  dIEq = Dict.IEq (eq,neq)          -- AUTO
---  eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq
---    ret where
---      <...>
---      -- AUTO
---      ... = (p1,...pN)
---      (f1,...,g1) = d1
---      (fN,...,gN) = dN
---      ((d1,...,dN), p1,...,pN) = ...
-
-ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z,ifc_id,_,dcls)) = dict ++ dcls' where
-
-  -- dIEq = Dict.IEq (eq,neq)
-  -- (only if all methods are implemented)
-  dict :: [Decl]
-  dict = bool [] [datr] has_all_impls where
-          datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
-            e = ECall z (ECons z ["Dict",ifc_id])
-                        (fromList $ map (EVar z) $ ifceToIds me)
-
-          has_all_impls = (length dsigs == length datrs) where
-                            (dsigs, datrs) = declsSplit dcls
-
-  dcls' = ifceImplToDecls ifces me dcls
-
--------------------------------------------------------------------------------
-
--- implemenation of IEq for Bool
---
---  dIEqBool = Dict.IEq (eq,neq) where
---    eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq
---      ret where
---        <...>
---        -- AUTO
---        ... = (p1,...pN)
---        (f1,...,g1) = d1
---        (fN,...,gN) = dN
---        ((d1,...,dN), p1,...,pN) = ...
-
-implToDecls :: [Ifce] -> Impl -> [Decl]
-implToDecls ifces (Impl (z,ifc,Type (_,TData hr,_),dcls)) = [dict] ++ dcls' where
-  -- dIEqBool = Dict.IEq (eq,neq) where eq=...
-  dict = DAtr z (PWrite z ("d"++ifc++concat hr)) (Where (z,e,dcls')) where
-          e = ECall z (ECons z ["Dict",ifc])
-                      (fromList $ map (EVar z) $ ifceToIds ifce)
-
-  dcls' = ifceImplToDecls ifces ifce dcls
-
-  ifce = fromJust $ L.find h ifces where
-          h :: Ifce -> Bool
-          h (Ifce (_,id,_,_)) = (id == ifc)
-
 -------------------------------------------------------------------------------
 
 ieq = [r|

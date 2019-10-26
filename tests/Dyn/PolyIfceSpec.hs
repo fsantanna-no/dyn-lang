@@ -95,15 +95,15 @@ main = (lt ((dIEq,dIOrdIXxx), (Xxx.True,Xxx.False)), gt ((dIEq,dIOrdIXxx), (Xxx.
 ;
 
 implementation of IOrd for a where a is IXxx with
-  lt :: (a,a) -> Bool
+  lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
-    lt (???, (f x, f y)) where
+    lt ((daIEq,daIOrd), f (daIXxx,x), f (daIXxx,y)) where
       (x,y) = ...
     ;
   ;
 ;
 
---ieq_ixxx = func -> -- ixxx -> ieq
+--dIEqIXxx = func -> -- ixxx -> ieq
   --Dict.IEq (eq,neq) where
     --eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
       --eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
@@ -118,6 +118,7 @@ implementation of IOrd for a where a is IXxx with
 
 interface IXxx for a with
   f :: (a -> Bool)
+;
 
 implementation of IXxx for Xxx with
   f :: (Xxx -> Bool)
@@ -128,7 +129,7 @@ implementation of IXxx for Xxx with
     ;
   ;
 ;
-|] ++ iord_bool ++ bool ++ ieq)
+|] ++ iord_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
 {-
