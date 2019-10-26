@@ -10,6 +10,7 @@ import Data.List as L     (find)
 import Text.RawString.QQ
 
 import Dyn.AST
+import Dyn.Classes
 
 -------------------------------------------------------------------------------
 

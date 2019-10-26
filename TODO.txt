@@ -1,3 +1,5 @@
+- git branch -D ifce.dicts
+- GDecl, GIface, GImpl
 - interface
     - passar "IOrd a where a is IEq" como constraint de a para baixo
 - typeclasses
