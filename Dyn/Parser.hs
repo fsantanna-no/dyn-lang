@@ -460,4 +460,4 @@ parseToString :: String -> String
 parseToString input =
   case parse input of
     (Left  v) -> v
-    (Right p) -> progToString p
+    (Right p) -> toString p

@@ -87,61 +87,61 @@ spec = do
   describe "toString:" $ do
     describe "expr_*:" $ do
       it "()" $
-        (exprToString 0 $ fromRight $ parse' expr_unit "()")
+        (toString $ fromRight $ parse' expr_unit "()")
           `shouldBe` "()"
       it "xxx" $
-        (exprToString 0 $ fromRight $ parse' expr_var "xxx")
+        (toString $ fromRight $ parse' expr_var "xxx")
           `shouldBe` "xxx"
       it "(xxx,yyy)" $
-        (exprToString 0 $ fromRight $ parse' expr_tuple "(xxx, yyy)")
+        (toString $ fromRight $ parse' expr_tuple "(xxx, yyy)")
           `shouldBe` "(xxx,yyy)"
     describe "decl:" $ do
       it "case" $
-        (declToString 0 $ head $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
+        (toString $ head $ fromRight $ parse' decl "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "where:" $ do
       it "case" $
-        (whereToString 0 $ fromRight $ parse' where_ "case x of Bool.True -> a\nBool.False -> b;case")
+        (toString $ fromRight $ parse' where_ "case x of Bool.True -> a\nBool.False -> b;case")
           `shouldBe` "case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "prog:" $ do
       it "case" $
-        (whereToString 0 $ fromRight $ parse' (prog) "main = case x of Bool.True -> a\nBool.False -> b;")
+        (toString $ fromRight $ parse' (prog) "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main where\n  main = case x of\n    Bool.True -> a\n    Bool.False -> b\n  ;\n;"
 
     describe "expr:" $ do
       it "()" $
-        (exprToString 0 $ fromRight $ parse' expr "()")
+        (toString $ fromRight $ parse' expr "()")
           `shouldBe` "()"
       it "(())" $
-        (exprToString 0 $ fromRight $ parse' expr "(())")
+        (toString $ fromRight $ parse' expr "(())")
           `shouldBe` "()"
       it "A.B" $
-        (exprToString 0 $ fromRight $ parse' expr "A.B")
+        (toString $ fromRight $ parse' expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func :: () -> xxx;func")
+        (toString $ fromRight $ parse' expr "func :: () -> xxx;func")
           `shouldBe` "func :: () ->\n  xxx\n;"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func :: () -> xxx where xxx=() where y=();\n  x=();;")
+        (toString $ fromRight $ parse' expr "func :: () -> xxx where xxx=() where y=();\n  x=();;")
           `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n    ;\n    x = ()\n  ;\n;"
       it "func" $
-        (exprToString 0 $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();where;where;func")
+        (toString $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();where;where;func")
           `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;"
       it "call" $
-        (exprToString 0 $ fromRight $ parse' expr "(a (b c)) d")
+        (toString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
       it "case x of ~y->t\n_->f" $
-        (exprToString 0 $ fromRight $ parse' expr "case x of ~y->t \n _->f;")
+        (toString $ fromRight $ parse' expr "case x of ~y->t \n _->f;")
           `shouldBe` "case x of\n  y -> t\n  _ -> f\n;"
     describe "prog:" $ do
       it "x where x :: () = ()" $
-        (progToString $ fromRight $ parse "main :: () = ()")
+        (toString $ fromRight $ parse "main :: () = ()")
           `shouldBe` "main where\n  main :: ()\n  main = ()\n;"
       it "x where x :: ()" $
-        (progToString $ fromRight $ parse "main :: ()")
+        (toString $ fromRight $ parse "main :: ()")
           `shouldBe` "main where\n  main :: ()\n;"
       it "x where x = ()" $
-        (progToString $ fromRight $ parse "main = ()")
+        (toString $ fromRight $ parse "main = ()")
           `shouldBe` "main where\n  main = ()\n;"
       it "x where x,y" $
         (parseToString "main::()=y  y::()=()")
@@ -150,13 +150,13 @@ spec = do
         (parseToString "main::()=y\ny::()=()")
           `shouldBe` "main where\n  main :: ()\n  main = y\n  y :: ()\n  y = ()\n;"
       it "where-newline" $
-        (progToString $ fromRight $ parse "main :: () = f ()\n")
+        (toString $ fromRight $ parse "main :: () = f ()\n")
           `shouldBe` "main where\n  main :: ()\n  main = (f ())\n;"
       it "Xx a = ()" $
-        (progToString $ fromRight $ parse "Xx main = ()")
+        (toString $ fromRight $ parse "Xx main = ()")
           `shouldBe` "main where\n  (Xx main) = ()\n;"
       it "func" $
-        (progToString $ fromRight $ parse
+        (toString $ fromRight $ parse
           [r|
 main :: () = f ()
 f :: () = func -> x where

@@ -1,11 +1,10 @@
+- typeclasses
+    - toList
+    - toString
+        - remove pattI
 - git branch -D ifce.dicts
-- GDecl, GIface, GImpl
 - interface
     - passar "IOrd a where a is IEq" como constraint de a para baixo
-- typeclasses
-    - getAnn
-    - toString
-    - toList
 - continuar com interface/implementation usando tipos
 - lists
     - vai permitir [a] where a is ...

@@ -90,7 +90,7 @@ match env (PRead  z e1) e2 = match env (toPatt $ evalExpr env e1) e2 where
                               toPatt (EUnit  z)       = PUnit  z
                               toPatt (EData  z hr st) = PCall  z (PCons z hr) (toPatt st)
                               toPatt (ETuple z es)    = PTuple z (map toPatt es)
-                              toPatt x = PError z $ "invalid pattern : " ++ show (exprToString 0 x)
+                              toPatt x = PError z $ "invalid pattern : " ++ show (toString x)
 
 match env (PTuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
   where
@@ -137,4 +137,4 @@ run :: String -> String
 run input =
   case parse input of
     Left  err -> err
-    Right exp -> exprToString 0 $ evalProg exp
+    Right exp -> toString $ evalProg exp

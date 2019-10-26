@@ -104,82 +104,96 @@ class IList a where
   toList   ::  a  -> [a]
   fromList :: [a] ->  a
 
--------------------------------------------------------------------------------
-
-typeToString :: Type -> String
-typeToString (Type (_,ttp,cs)) =
-  case cs of
-    [] -> ttypeToString ttp
-    l  -> ttypeToString ttp ++ " where (" ++ L.intercalate "," (map f l) ++ ")" where
-            f (var,[cls]) = var ++ " is " ++ cls
-            f (var,clss)  = var ++ " is (" ++ L.intercalate "," clss ++ ")"
-
-ttypeToString :: TType -> String
---ttypeToString TAny            = "?"
-ttypeToString TUnit            = "()"
-ttypeToString (TVar   id)      = id
-ttypeToString (TData  hr)      = L.intercalate "." hr
-ttypeToString (TTuple ttps)    = "(" ++ L.intercalate "," (map ttypeToString ttps) ++ ")"
-ttypeToString (TFunc  inp out) = "(" ++ ttypeToString inp ++ " -> " ++ ttypeToString out ++ ")"
---ttypeToString (TData ids [x]) = L.intercalate "." ids ++ " of " ++ ttypeToString x
---ttypeToString (TData ids ofs) = L.intercalate "." ids ++ " of " ++ "(" ++ L.intercalate "," (map ttypeToString ofs) ++ ")"
+class IString a where
+  toString  :: a -> String
+  toStringI :: Int -> a -> String
 
 -------------------------------------------------------------------------------
 
 rep spc = replicate spc ' '
 
-exprToString :: Int -> Expr -> String
-exprToString spc (EError z msg)         = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR : " ++ msg
-                                            where (ln,cl) = pos z
-exprToString spc (EVar   _ id)          = id
-exprToString spc (EUnit  _)             = "()"
-exprToString spc (ECons  _ h)           = L.intercalate "." h
-exprToString spc (EData  _ h (EUnit _)) = L.intercalate "." h
-exprToString spc (EData  _ h st)        = "(" ++ L.intercalate "." h ++ " " ++ exprToString 0 st ++ ")"
-exprToString spc (EArg   _)             = "..."
-exprToString spc (ETuple _ es)          = "(" ++ L.intercalate "," (map (exprToString 0) es) ++ ")"
-exprToString spc (EFunc  _ tp ups bd)   = "func :: " ++ typeToString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
-                                            whereToString (spc+2) bd ++ "\n" ++ rep spc ++ ";"
-                                           where
-                                            upsToString []  = ""
-                                            upsToString ups = "{" ++ (L.intercalate "," $ map fst ups) ++ "} "
-exprToString spc (ECall  _ e1 e2)       = "(" ++ exprToString 0 e1 ++ " " ++ exprToString 0 e2 ++ ")"
+-------------------------------------------------------------------------------
 
-exprToString spc (ECase  _ e cases)     =
-  "case " ++ exprToString 0 e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
-  where
-    f :: (Patt,Where) -> String
-    f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString 0 pat ++ " -> " ++ whereToString (spc+2) whe
---exprToString e                    = error $ show e
+instance IString Type where
+  toString (Type (_,ttp,cs)) =
+    case cs of
+      [] -> toString ttp
+      l  -> toString ttp ++ " where (" ++ L.intercalate "," (map f l) ++ ")" where
+              f (var,[cls]) = var ++ " is " ++ cls
+              f (var,clss)  = var ++ " is (" ++ L.intercalate "," clss ++ ")"
+  toStringI _ = error "TODO"
+
 
 -------------------------------------------------------------------------------
 
-pattToString :: Int -> Patt -> String
-pattToString spc (PArg   _)           = "..."
-pattToString spc (PAny   _)           = "_"
-pattToString spc (PWrite _ id)        = {-"=" ++-} id
-pattToString spc (PRead  _ e)         = {-"~" ++-} exprToString spc e
-pattToString spc (PUnit  _)           = "()"
-pattToString spc (PCons  _ hier)      = L.intercalate "." hier
-pattToString spc (PTuple _ es)        = "(" ++ L.intercalate "," (map (pattToString 0) es) ++ ")"
-pattToString spc (PCall  _ p1 p2)     = "(" ++ pattToString 0 p1 ++ " " ++ pattToString 0 p2 ++ ")"
+instance IString TType where
+  --toString TAny            = "?"
+  toString TUnit            = "()"
+  toString (TVar   id)      = id
+  toString (TData  hr)      = L.intercalate "." hr
+  toString (TTuple ttps)    = "(" ++ L.intercalate "," (map toString ttps) ++ ")"
+  toString (TFunc  inp out) = "(" ++ toString inp ++ " -> " ++ toString out ++ ")"
+  --toString (TData ids [x]) = L.intercalate "." ids ++ " of " ++ toString x
+  --toString (TData ids ofs) = L.intercalate "." ids ++ " of " ++ "(" ++ L.intercalate "," (map toString ofs) ++ ")"
+
+  toStringI _ = error "TODO"
 
 -------------------------------------------------------------------------------
 
-declToString :: Int -> Decl -> String
+instance IString Expr where
+  toString expr = toStringI 0 expr
 
-declToString spc (DSig _ var tp) = var ++ " :: " ++ typeToString tp
-declToString spc (DAtr _ pat wh) = pattToString spc pat ++ " = " ++ whereToString spc wh
+  toStringI spc (EError z msg)         = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR : " ++ msg
+                                              where (ln,cl) = pos z
+  toStringI spc (EVar   _ id)          = id
+  toStringI spc (EUnit  _)             = "()"
+  toStringI spc (ECons  _ h)           = L.intercalate "." h
+  toStringI spc (EData  _ h (EUnit _)) = L.intercalate "." h
+  toStringI spc (EData  _ h st)        = "(" ++ L.intercalate "." h ++ " " ++ toString st ++ ")"
+  toStringI spc (EArg   _)             = "..."
+  toStringI spc (ETuple _ es)          = "(" ++ L.intercalate "," (map toString es) ++ ")"
+  toStringI spc (EFunc  _ tp ups bd)   = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
+                                              toStringI (spc+2) bd ++ "\n" ++ rep spc ++ ";"
+                                             where
+                                              upsToString []  = ""
+                                              upsToString ups = "{" ++ (L.intercalate "," $ map fst ups) ++ "} "
+  toStringI spc (ECall  _ e1 e2)       = "(" ++ toString e1 ++ " " ++ toString e2 ++ ")"
+
+  toStringI spc (ECase  _ e cases)     =
+    "case " ++ toString e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
+    where
+      f :: (Patt,Where) -> String
+      f (pat,whe) = "\n" ++ rep (spc+2) ++ toString pat ++ " -> " ++ toStringI (spc+2) whe
+  --toStringI e                    = error $ show e
 
 -------------------------------------------------------------------------------
 
-whereToString :: Int -> Where -> String
+instance IString Patt where
+  toString patt = toStringI 0 patt
 
-whereToString spc (Where (_,e,[]))   = exprToString spc e
-whereToString spc (Where (_,e,dcls)) = exprToString spc e ++ " where" ++
-                                        (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (declToString (spc+2)) dcls))
-                                        ++ "\n" ++ rep spc ++ ";"
+  toStringI spc (PArg   _)           = "..."
+  toStringI spc (PAny   _)           = "_"
+  toStringI spc (PWrite _ id)        = {-"=" ++-} id
+  toStringI spc (PRead  _ e)         = {-"~" ++-} toStringI spc e
+  toStringI spc (PUnit  _)           = "()"
+  toStringI spc (PCons  _ hier)      = L.intercalate "." hier
+  toStringI spc (PTuple _ es)        = "(" ++ L.intercalate "," (map toString es) ++ ")"
+  toStringI spc (PCall  _ p1 p2)     = "(" ++ toString p1 ++ " " ++ toString p2 ++ ")"
 
 -------------------------------------------------------------------------------
 
-progToString = whereToString 0
+instance IString Decl where
+  toString decl = toStringI 0 decl
+
+  toStringI spc (DSig _ var tp) = var ++ " :: " ++ toString tp
+  toStringI spc (DAtr _ pat wh) = toStringI spc pat ++ " = " ++ toStringI spc wh
+
+-------------------------------------------------------------------------------
+
+instance IString Where where
+  toString whe = toStringI 0 whe
+
+  toStringI spc (Where (_,e,[]))   = toStringI spc e
+  toStringI spc (Where (_,e,dcls)) = toStringI spc e ++ " where"
+                                      ++ (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (toStringI (spc+2)) dcls))
+                                      ++ "\n" ++ rep spc ++ ";"
