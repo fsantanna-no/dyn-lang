@@ -67,8 +67,8 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 
     it "IEq/IOrd/IXxx" $
       run ([r|
-main = f ((dIEq,dIOrdBool,dIXxx),(Bool.True,Bool.False)) where
-  Dict.IXxx (f) = dIXxx
+main = f ((dIEq(),dIOrdBool(),dIXxx()),(Bool.True,Bool.False)) where
+  Dict.IXxx (f) = dIXxx()
 ;
 
 interface IXxx for a where a is IOrd with
@@ -80,8 +80,8 @@ interface IXxx for a where a is IOrd with
 
     it "f a where a is IOrd" $
       run ([r|
-main = (f ((dIEqBool,dIOrdBool), (Bool.True, Bool.False)),
-        f ((dIEqBool,dIOrdBool), (Bool.False,Bool.False))) where
+main = (f ((dIEqBool(),dIOrdBool()), (Bool.True, Bool.False)),
+        f ((dIEqBool(),dIOrdBool()), (Bool.False,Bool.False))) where
   f :: ((a,a) -> Bool)
   f = func :: ((a,a) -> Bool) -> gt ...;
 ;
@@ -90,8 +90,8 @@ main = (f ((dIEqBool,dIOrdBool), (Bool.True, Bool.False)),
 
     it "XXX-1: implementation of IEq for a where a is IXxx" $
       run ([r|
-main = (lt ((dIEq,dIOrdIXxx), (Xxx.True,Xxx.False)), gt ((dIEq,dIOrdIXxx), (Xxx.True,Xxx.False))) where
-  Dict.IOrd (eq,neq) = dIOrdIXxx
+main = (lt ((dIEq(),dIOrdIXxx ()), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIXxx ()), (Xxx.True,Xxx.False))) where
+  Dict.IOrd (lt,lte,gt,gte) = dIOrdIXxx()
 ;
 
 implementation of IOrd for a where a is IXxx with
