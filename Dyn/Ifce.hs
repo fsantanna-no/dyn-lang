@@ -53,7 +53,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (expandDecl ifces [id]) decls where
+  decls' = map (expandDecl ifces (id,[])) decls where
             Ifce (_,id,_,_) = me
 
 -------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] ++ decls' whe
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
-  decls' = map (expandDecl ifces (traceShowId $ id:ids)) decls where
+  decls' = map (expandDecl ifces (id,ids)) decls where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
             ids = case cs of          -- ids: from instance constraints
                     []      -> []
@@ -93,12 +93,14 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] ++ decls' whe
 --      (fN,...,gN) = dN                  -- : restore iface functions from dicts
 --      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
 
-expandDecl :: [Ifce] -> [ID_Ifce] -> Decl -> Decl
-expandDecl _     _    dsig@(DSig _ _ _) = dsig
-expandDecl ifces ifc_ids (DAtr z1 e1
-                          (Where (z2,
-                                  EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) ups3 (Where (z5,e5,ds5)),
-                                  ds2))) =
+expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
+expandDecl _ _ dsig@(DSig _ _ _) = dsig
+expandDecl ifces
+           (ifc_id,imp_ids)
+           (DAtr z1 e1
+            (Where (z2,
+              EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) ups3 (Where (z5,e5,ds5)),
+              ds2))) =
   DAtr z1 e1
     (Where (z2,
             EFunc z3 (Type (z4,TFunc inp4 out4,cs4')) ups3 (Where (z5,e5,ds5')),
@@ -106,7 +108,7 @@ expandDecl ifces ifc_ids (DAtr z1 e1
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
-    cs4' = ("a", sups ifces ifc_ids) : cs4
+    cs4' = ("a", sups ifces [ifc_id]) : cs4
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
