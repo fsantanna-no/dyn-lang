@@ -35,16 +35,8 @@ ifceToIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
 -------------------------------------------------------------------------------
 
 -- interface IEq for a
---
---  dIEq = Dict.IEq (eq,neq)          -- AUTO
---  eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq
---    ret where
---      <...>
---      -- AUTO
---      ... = (p1,...pN)
---      (f1,...,g1) = d1
---      (fN,...,gN) = dN
---      ((d1,...,dN), p1,...,pN) = ...
+--  dIEq = Dict.IEq (eq,neq)              -- : declare instance dict if all defaults are implemented
+--  <...>                                 -- : modify nested impls which become globals
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
 ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
@@ -60,22 +52,14 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (declToDecls ifces me) decls
+  decls' = map (expandDecl ifces me) decls
 
 -------------------------------------------------------------------------------
 
 -- implemenation of IEq for Bool
 -- implemenation of IEq for a where a is IXxx
---
---  dIEqBool = Dict.IEq (eq,neq) where
---    eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq/IXxx
---      ret where
---        <...>
---        -- AUTO
---        ... = (p1,...pN)
---        (f1,...,g1) = d1
---        (fN,...,gN) = dN
---        ((d1,...,dN), p1,...,pN) = ...
+--  dIEqBool = Dict.IEq (eq,neq) where    -- : declare instance dict with methods
+--              <...>                     -- :   with nested impls to follow only visible here
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
@@ -87,7 +71,7 @@ implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
-  decls' = map (declToDecls ifces ifce) decls
+  decls' = map (expandDecl ifces ifce) decls
 
   ifce = fromJust $ L.find h ifces where
           h :: Ifce -> Bool
@@ -95,9 +79,16 @@ implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
 
 -------------------------------------------------------------------------------
 
-declToDecls :: [Ifce] -> Ifce -> Decl -> Decl
-declToDecls _     _    dsig@(DSig _ _ _) = dsig
-declToDecls ifces ifce (DAtr z1 e1
+--  eq = func :: ((a,a) -> Bool) ->       -- : insert a is IEq/IXxx
+--    ret where
+--      <...>
+--      ... = (p1,...pN)                  -- : restore original args
+--      (fN,...,gN) = dN                  -- : restore iface functions from dicts
+--      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
+
+expandDecl :: [Ifce] -> Ifce -> Decl -> Decl
+expandDecl _     _    dsig@(DSig _ _ _) = dsig
+expandDecl ifces ifce (DAtr z1 e1
                         (Where (z2,
                                 EFunc z3 (Type (z4,TFunc inp4 out4,cs4))  ups3 (Where (z5,e5,ds5)),
                                 ds2))) =
@@ -150,7 +141,7 @@ declToDecls ifces ifce (DAtr z1 e1
       g :: ID_Ifce -> (ID_Ifce,[ID_Var])
       g ifc = (ifc, ifceToIds $ findIfce ifces ifc)
 
-declToDecls _ _ decl = error $ toString decl
+expandDecl _ _ decl = error $ toString decl
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
