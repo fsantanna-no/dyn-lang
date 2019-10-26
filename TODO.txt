@@ -1,3 +1,9 @@
+- na hora da *chamada*
+    - colocar um where em volta pegando o dict da implementacao que bate:
+        - Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
+    - inserir os dicts como argumentos iniciais:
+        - lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False)
+
 - git branch -D ifce.dicts
 - interface
     - passar "IOrd a where a is IEq" como constraint de a para baixo

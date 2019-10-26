@@ -18,7 +18,7 @@ spec = do
 
   describe "IEq" $ do
 
-    it "XXX: IEq: default eq" $
+    it "IEq: default eq" $
       run ([r|  -- neq (eq(T,T), F)
 main = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False) where
   Dict.IEq (eq,neq) = dIEq
@@ -35,7 +35,7 @@ main = (x,y) where
 ;
 
 implementation of IEq for Bool with
-  eq = func ->  -- (dieq_bool,Bool,Bool) -> Bool
+  eq = func ->
     or (and (x,y), (and (not x, not y))) where
       (_,x,y) = ...
     ;
@@ -53,7 +53,7 @@ main = v where  -- neq (eq(T,T), F)
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEq/IOrd" $
+    it "XXX: IEq/IOrd" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False),

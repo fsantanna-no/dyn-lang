@@ -35,6 +35,7 @@ ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict : dcls' where
   --      (fN,...,gN) = dN
   --      (d1,...,dN, p1,...,pN) = ...
   dcls' = map f dcls where
+            f dsig@(DSig _ _ _) = dsig
             f (DAtr z1 e1
                 (Where (z2,
                         EFunc z3 (Type (z4,TFunc inp4 out4,cs4))  ups3 (Where (z5,e5,ds5)),
@@ -98,15 +99,17 @@ ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict : dcls' where
                       incs :: [Int]
                       incs = 1 : map (+1) incs
 
+            --f decl = error $ toString decl
+
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
   -- dIEqBool = Dict.IEq (eq,neq) where eq=...
   dict = DAtr z (PWrite z ("d"++ifc++concat hr)) (Where (z,e,dcls))
   e    = ECall z (ECons z ["Dict",ifc]) (fromList $ map (EVar z) ids)
-  ids  = map getId $ getDecls $ head $ filter sameId ifcs where
+  ids  = map getId $ filter isDSig $ getDecls $ head $ filter sameId ifcs where
           sameId   (Ifce (_,id,_,_))   = (id == ifc)
           getDecls (Ifce (_,_,_,dcls)) = dcls
-          getId    (DAtr _ (PWrite _ id) _) = id
+          getId    (DSig _ id _) = id
   --dcls' = traceShow (map (declToString 0) dcls) $ map f dcls where
           --f (Decl (z,e,tp,Just wh)) = traceShow (whereToString 0 wh) $ Decl (z,e,tp,Just wh)
 
@@ -132,19 +135,23 @@ ieq = [r|
 
 iord = [r|
   interface IOrd for a with
-    lt  = ()
+    lt  :: ((a,a) -> Bool)
+    lte :: ((a,a) -> Bool)
+    gt  :: ((a,a) -> Bool)
+    gte :: ((a,a) -> Bool)
+
     lte = func :: ((a,a) -> Bool) ->
       or ( lt (daIEq,daIOrd,x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
       ;
     ;
-    gt = func:: ((a,a) -> Bool) ->
+    gt = func :: ((a,a) -> Bool) ->
       not (lte (daIEq,daIOrd,x,y)) where
         (x,y) = ...
       ;
     ;
-    gte = func:: ((a,a) -> Bool) ->
+    gte = func :: ((a,a) -> Bool) ->
       or ( gt (daIEq,daIOrd,x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
