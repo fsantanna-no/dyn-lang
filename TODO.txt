@@ -1,9 +1,7 @@
 - AUTO em impls
-- fazer final methods
-- passar todos os dicts em 1 unica tupla
-- generic fs
-    - w/o cs
-    - w/  cs
+- implementation
+    - recusar overriding
+        - final methods / fragile base class
 
 - na hora da *chamada*
     - colocar um where em volta pegando o dict da implementacao que bate:

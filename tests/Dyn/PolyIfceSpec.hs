@@ -35,9 +35,9 @@ main = (x,y) where
 ;
 
 implementation of IEq for Bool with
-  eq = func ->
+  eq = func :: ((Bool,Bool) -> Bool) ->
     or (and (x,y), (and (not x, not y))) where
-      (_,x,y) = ...
+      (x,y) = ...
     ;
   ;
 ;
