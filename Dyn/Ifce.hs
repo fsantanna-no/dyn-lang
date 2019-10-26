@@ -19,12 +19,13 @@ findIfce ifces ifc = fromJust $ L.find f ifces where
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
 -- [...] -> [(a,["IOrd"])] -> ["IEq","IOrd"]
-sups :: [Ifce] -> Ifce -> [ID_Ifce]
-sups ifces (Ifce (_,ifc,[],     _)) = [ifc]
-sups ifces (Ifce (_,ifc,[(_,l)],_)) = concatMap f l ++ [ifc] where
-                                        f sup = sups ifces $ findIfce ifces sup
-sups _ _ = error $ "TODO: multiple constraints"
---sups _ x = error $ "TODO: multiple constraints (" ++ show x ++ ")"
+sups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
+sups ifces []  = []
+sups ifces ids = sups ifces ids' ++ ids where
+                  ids' = concatMap (f . (findIfce ifces)) ids
+                  f (Ifce (_,ifc,[],     _)) = []
+                  f (Ifce (_,ifc,[(_,l)],_)) = l
+                  f _ = error $ "TODO: multiple constraints"
 
 -- IEq -> [eq,neq]
 ifceToIds :: Ifce -> [ID_Var]
@@ -52,7 +53,8 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (expandDecl ifces me) decls
+  decls' = map (expandDecl ifces [id]) decls where
+            Ifce (_,id,_,_) = me
 
 -------------------------------------------------------------------------------
 
@@ -71,7 +73,8 @@ implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
-  decls' = map (expandDecl ifces ifce) decls
+  decls' = map (expandDecl ifces [id]) decls where
+            Ifce (_,id,_,_) = ifce
 
   ifce = fromJust $ L.find h ifces where
           h :: Ifce -> Bool
@@ -86,12 +89,12 @@ implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
 --      (fN,...,gN) = dN                  -- : restore iface functions from dicts
 --      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
 
-expandDecl :: [Ifce] -> Ifce -> Decl -> Decl
+expandDecl :: [Ifce] -> [ID_Ifce] -> Decl -> Decl
 expandDecl _     _    dsig@(DSig _ _ _) = dsig
-expandDecl ifces ifce (DAtr z1 e1
-                        (Where (z2,
-                                EFunc z3 (Type (z4,TFunc inp4 out4,cs4))  ups3 (Where (z5,e5,ds5)),
-                                ds2))) =
+expandDecl ifces ifc_ids (DAtr z1 e1
+                          (Where (z2,
+                                  EFunc z3 (Type (z4,TFunc inp4 out4,cs4))  ups3 (Where (z5,e5,ds5)),
+                                  ds2))) =
   DAtr z1 e1
     (Where (z2,
             EFunc z3 (Type (z4,TFunc inp4 out4,cs4')) ups3 (Where (z5,e5,ds5')),
@@ -99,7 +102,7 @@ expandDecl ifces ifce (DAtr z1 e1
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
-    cs4' = ("a", sups ifces ifce) : cs4
+    cs4' = ("a", sups ifces ifc_ids) : cs4
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
