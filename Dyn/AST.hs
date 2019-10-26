@@ -89,7 +89,7 @@ data Decl = DSig Ann ID_Var Type
 newtype Ifce = Ifce (Ann, ID_Ifce, TCtrs, [Decl])
   deriving (Eq, Show)
 
-newtype Impl = Impl (Ann, (ID_Ifce,ID_Hier), [Decl])
+newtype Impl = Impl (Ann, ID_Ifce, ID_Hier, [Decl])
   deriving (Eq, Show)
 
 type Prog = Where

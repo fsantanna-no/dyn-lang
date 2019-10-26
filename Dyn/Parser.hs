@@ -419,7 +419,7 @@ impl = do
   void <- string ";"
   void <- optional $ try $ tk_key "implementation"
   spc
-  return $ Impl (az{pos=pos}, (cls,hr), ds)
+  return $ Impl (az{pos=pos}, cls, hr, ds)
 
 -------------------------------------------------------------------------------
 
