@@ -43,7 +43,7 @@ instance IList Expr where
   toList (ETuple _ es) = es
   toList e             = [e]
 
-  fromList []     = EUnit $ error "TODO: z"
+  fromList []     = EUnit az -- TODO: az{pos=?}
   fromList [x]    = x
   fromList (x:xs) = ETuple (getAnn x) (x:xs)
 
@@ -57,7 +57,7 @@ instance IList TType where
 instance IList Patt where
   toList x = error "TODO"
 
-  fromList []     = PUnit $ error "TODO: z"
+  fromList []     = PUnit $ error "TODO: fromList"
   fromList [x]    = x
   fromList (x:xs) = PTuple (getAnn x) (x:xs)
 

@@ -3,6 +3,7 @@
 module Dyn.Ifce where
 
 import Debug.Trace
+import Data.Bool          (bool)
 import Data.Maybe         (fromJust)
 import Data.List as L     (find)
 import Text.RawString.QQ
@@ -14,16 +15,22 @@ import Dyn.Classes
 
 -- IEq -> [eq,neq]
 ifceToIds :: Ifce -> [ID_Var]
-ifceToIds (Ifce (_,_,_,dcls)) = concatMap f dcls where
-                                  f (DAtr _ (PWrite _ id) _) = [id]
-                                  f _ = []
+ifceToIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
+                                  getId (DSig _ id _) = id
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict : dcls' where
+ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict ++ dcls' where
+
   -- dIEq = Dict.IEq (eq,neq)
-  dict = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
-    ids = ifceToIds me
-    e   = ECall z (ECons z ["Dict",ifc_id]) (fromList $ map (EVar z) ids)
+  -- (only if all methods are implemented)
+  dict :: [Decl]
+  dict = bool [] [datr] has_all_impls where
+          datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
+            e = ECall z (ECons z ["Dict",ifc_id])
+                        (fromList $ map (EVar z) $ ifceToIds me)
+
+          has_all_impls = (length dsigs == length datrs) where
+                            (dsigs, datrs) = declsSplit dcls
 
   --  interface IEq a
   --  eq = func :: ((a,a) -> Bool) ->   -- AUTO: a is IEq
@@ -117,7 +124,7 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
 
 ieq = [r|
   interface IEq for a with
-    eq = func :: ((a,a) -> Bool) ->
+    eq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
       case (x,y) of
         (~y,_) -> Bool.True
         _      -> Bool.False
@@ -125,7 +132,7 @@ ieq = [r|
         (x,y) = ...
       ;
     ;
-    neq = func :: ((a,a) -> Bool) ->
+    neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
       not (eq (daIEq,x,y)) where
         (x,y) = ...
       ;
@@ -134,7 +141,7 @@ ieq = [r|
 |]
 
 iord = [r|
-  interface IOrd for a with
+  interface IOrd for a where a is IEq with
     lt  :: ((a,a) -> Bool)
     lte :: ((a,a) -> Bool)
     gt  :: ((a,a) -> Bool)

@@ -402,7 +402,7 @@ ifce = do
   spc
   return $ let
     f []                 = [(var, [cls])]
-    f [(id,l)] | id==var = [(var, cls:l)]
+    f [(id,l)] | id==var = [(var, l++[cls])]
    in
     Ifce (az{pos=pos}, cls, f cs, ds)
 

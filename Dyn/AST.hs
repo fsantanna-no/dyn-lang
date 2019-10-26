@@ -106,3 +106,6 @@ isDAtr _            = False
 
 isEError (EError _ _) = True
 isEError _            = False
+
+declsSplit :: [Decl] -> ([Decl],[Decl])
+declsSplit decls = (filter isDSig decls, filter isDAtr decls)
