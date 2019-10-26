@@ -1,13 +1,18 @@
-- AUTO em impls
-- implementation
-    - recusar overriding
-        - final methods / fragile base class
+- transformar p1,p2 em (p1,p2)
+- precisa de class inheritance sim
+    - ...
+
+- implementation of IEq for **a where a is ...**
 
 - na hora da *chamada*
     - colocar um where em volta pegando o dict da implementacao que bate:
         - Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
     - inserir os dicts como argumentos iniciais:
         - lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False)
+
+- implementation
+    - recusar overriding
+        - final methods / fragile base class
 
 - typesys
     - typeclass

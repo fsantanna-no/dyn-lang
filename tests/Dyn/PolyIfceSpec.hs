@@ -20,7 +20,7 @@ spec = do
 
     it "IEq: default eq" $
       run ([r|  -- neq (eq(T,T), F)
-main = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False) where
+main = neq (dIEq, (eq (dIEq,(Bool.True,Bool.True)), Bool.False)) where
   Dict.IEq (eq,neq) = dIEq
 ;
 |] ++ bool ++ ieq)
@@ -29,8 +29,8 @@ main = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False) where
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
       run ([r|
 main = (x,y) where
-  x = eq (dIEq, (Bool.True,Bool.False), (Bool.False,Bool.True))
-  y = eq (dIEq, (Bool.True,Bool.False), (Bool.True,Bool.False))
+  x = eq (dIEq, ((Bool.True,Bool.False), (Bool.False,Bool.True)))
+  y = eq (dIEq, ((Bool.True,Bool.False), (Bool.True,Bool.False)))
   Dict.IEq (eq,neq) = dIEq
 ;
 
@@ -47,7 +47,7 @@ implementation of IEq for Bool with
     it "IEq: overrides eq (dieq_bool)" $
       run ([r|
 main = v where  -- neq (eq(T,T), F)
-  v = neq (dIEq, eq (dIEq,Bool.True,Bool.True), Bool.False)
+  v = neq (dIEq, (eq (dIEq,(Bool.True,Bool.True)), Bool.False))
   Dict.IEq (eq,neq) = dIEq
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
@@ -56,58 +56,82 @@ main = v where  -- neq (eq(T,T), F)
     it "IEq/IOrd" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte ((dIEqBool,dIOrdBool), Bool.True,  Bool.False),
-        gte ((dIEqBool,dIOrdBool), Bool.True,  Bool.True),
-        gt  ((dIEqBool,dIOrdBool), Bool.False, Bool.False),
-        lt  ((dIEqBool,dIOrdBool), Bool.False, Bool.True) )
-  Dict.IEq  (eq,neq)        = dIEqBool
+  v = ( lte ((dIEqBool,dIOrdBool), (Bool.True,  Bool.False)),
+        gte ((dIEqBool,dIOrdBool), (Bool.True,  Bool.True )),
+        gt  ((dIEqBool,dIOrdBool), (Bool.False, Bool.False)),
+        lt  ((dIEqBool,dIOrdBool), (Bool.False, Bool.True )) )
   Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
+    it "IEq/IOrd/IXxx" $
+      run ([r|
+main = f ((dIEq,dIOrdBool,dIXxx),(Bool.True,Bool.False)) where
+  Dict.IXxx (f) = dIXxx
+;
+
+interface IXxx for a where a is IOrd with
+  f :: ((a,a) -> Bool)
+  f = func :: ((a,a) -> Bool) -> lt ((daIEq,daIOrd),(x,y)) where (x,y)=...;;  
+;
+|] ++ iord_bool ++ bool ++ iord ++ ieq)
+        `shouldBe` "Bool.False"
+
     it "f a where a is IOrd" $
       run ([r|
-main = (f ((dIEqBool,dIOrdBool), Bool.True,Bool.False),
-        f ((dIEqBool,dIOrdBool), Bool.False,Bool.False)) where
+main = (f ((dIEqBool,dIOrdBool), (Bool.True, Bool.False)),
+        f ((dIEqBool,dIOrdBool), (Bool.False,Bool.False))) where
   f :: ((a,a) -> Bool)
   f = func :: ((a,a) -> Bool) -> gt ...;
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
-{-
-    it "implementation of IEq for a where a is IXxx" $
+    it "XXX-1: implementation of IEq for a where a is IXxx" $
       run ([r|
-main = eq (Dict.IEq (eq,neq),Xxx,Xxx) where
-  Dict.IEq (eq,neq) = ieq_ixxx ixxx_xxx      -- higher-kinded types (HKT)?
+main = (lt ((dIEq,dIOrdIXxx), (Xxx.True,Xxx.False)), gt ((dIEq,dIOrdIXxx), (Xxx.True,Xxx.False))) where
+  Dict.IOrd (eq,neq) = dIOrdIXxx
 ;
 
-ieq_ixxx = func -> -- ixxx -> ieq
-  Dict.IEq (eq,neq) where
-    eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
-      eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
-        Dict.IEq (eq,neq) = dieq_bool
-        (_,x,y)  = ...
-      ;
-    ; where
-      (f) = ...
+implementation of IOrd for a where a is IXxx with
+  lt :: (a,a) -> Bool
+  lt = func :: ((a,a) -> Bool) ->
+    lt (???, (f x, f y)) where
+      (x,y) = ...
     ;
   ;
 ;
 
-ixxx_xxx = f where
-  f = func -> -- :: (ixxx_xxx,X) -> Bool
-    case x of
-      Xxx -> Bool.True
-    ; where
-      (_,x) = ...
+--ieq_ixxx = func -> -- ixxx -> ieq
+  --Dict.IEq (eq,neq) where
+    --eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
+      --eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
+        --Dict.IEq (eq,neq) = dieq_bool
+        --(_,x,y)  = ...
+      --;
+    --; where
+      --(f) = ...
+    --;
+  --;
+--;
+
+interface IXxx for a with
+  f :: (a -> Bool)
+
+implementation of IXxx for Xxx with
+  f :: (Xxx -> Bool)
+  f = func :: (Xxx -> Bool) ->
+    case ... of
+      Xxx.True  -> Bool.True
+      Xxx.False -> Bool.False
     ;
   ;
 ;
-|] ++ ieq_bool ++ bool ++ ieq)
-        `shouldBe` "Bool.True"
+|] ++ iord_bool ++ bool ++ ieq)
+        `shouldBe` "(Bool.False,Bool.True)"
 
+{-
     it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
       run ([r|
 main = f (ieq_nat, one)
@@ -118,4 +142,5 @@ f = func ->
 ;
 |] ++ prelude)
           `shouldBe` "Bool.True"
+
 -}

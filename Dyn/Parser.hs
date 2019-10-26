@@ -401,8 +401,9 @@ ifce = do
   void <- optional $ try $ tk_key "interface"
   spc
   return $ let
-    f []                 = [(var, [cls])]
-    f [(id,l)] | id==var = [(var, l++[cls])]
+    f []                 = [(var, [])]
+    f [(id,l)] | id==var = [(var,  l)]
+    f _ = error $ "TODO: multiple vars or unmatching var"
    in
     Ifce (az{pos=pos}, cls, f cs, ds)
 
