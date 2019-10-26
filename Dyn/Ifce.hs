@@ -46,8 +46,9 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
   -- (only if all methods are implemented)
   dict :: [Decl]
   dict = bool [] [datr] has_all_impls where
-          datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
-            e = ECall z (ECons z ["Dict",ifc_id])
+          datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,f,[])) where
+            f = EFunc z tz [] (Where (z,d,[]))
+            d = ECall z (ECons z ["Dict",ifc_id])
                         (fromList $ map (EVar z) $ ifceToIds me)
 
           has_all_impls = (length dsigs == length datrs) where
@@ -64,10 +65,13 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
 --              <...>                     -- :   with nested impls to follow only visible here
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
-implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] ++ decls' where
-  -- dIEqBool = Dict.IEq (eq,neq) where eq=...
-  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,e,decls')) where
-          e = ECall z (ECons z ["Dict",ifc])
+implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
+
+  -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=... ;
+  -- func b/c of HKT that needs a closure with parametric dictionary
+  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,f,[])) where
+          f = EFunc z tz [] (Where (z,d,decls'))
+          d = ECall z (ECons z ["Dict",ifc])
                       (fromList $ map (EVar z) $ ifceToIds ifce)
 
   toString' (Type (_, TData hr, _      )) = concat hr
@@ -103,12 +107,13 @@ expandDecl ifces
               ds2))) =
   DAtr z1 e1
     (Where (z2,
-            EFunc z3 (Type (z4,TFunc inp4 out4,cs4')) ups3 (Where (z5,e5,ds5')),
+            EFunc z3 (Type (z4,TFunc inp4 out4,cs4NImps)) ups3 (Where (z5,e5,ds5')),
             ds2))
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
-    cs4' = ("a", sups ifces [ifc_id]) : cs4
+    cs4NImps = ("a", sups ifces [ifc_id])         : cs4
+    cs4YImps = ("a", sups ifces (ifc_id:imp_ids)) : cs4
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
@@ -122,7 +127,7 @@ expandDecl ifces
 
     -- [Dict.IEq (eq,neq) = daIEq]
     fsDicts5 :: [Decl]
-    fsDicts5 = map f dicts where
+    fsDicts5 = map f (dicts cs4YImps) where
       f :: (ID_Var,ID_Ifce,[ID_Var]) -> Decl
       f (var,ifc,ids) = DAtr z1 pat (Where (z1,exp,[])) where
         -- Dict.IEq (eq,neq)
@@ -133,13 +138,14 @@ expandDecl ifces
         exp = EVar z1 $ 'd':var++ifc
 
     -- (d1,...,dN)
+    -- csNImps: exclude implementation constraints since dicts come from closure
     dicts5 :: Patt
-    dicts5 = fromList $ map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) dicts
+    dicts5 = fromList $ map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps)
                                             -- [daIEq,daIShow,dbIEq,...]
 
     -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
-    dicts :: [(ID_Var,ID_Ifce,[ID_Var])]
-    dicts = concatMap f cs4' where
+    dicts :: TCtrs -> [(ID_Var,ID_Ifce,[ID_Var])]
+    dicts cs = concatMap f cs where
       -- (a,[IEq,IShow]) -> [(a,IEq,[eq,neq]), (a,IOrd,[lt,gt,lte,gte]]
       f :: (ID_Var,[ID_Ifce]) -> [(ID_Var,ID_Ifce,[ID_Var])]
       f (var,ifcs) = map h $ map g ifcs where

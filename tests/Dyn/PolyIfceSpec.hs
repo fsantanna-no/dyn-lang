@@ -20,8 +20,8 @@ spec = do
 
     it "IEq: default eq" $
       run ([r|  -- neq (eq(T,T), F)
-main = neq (dIEq, (eq (dIEq,(Bool.True,Bool.True)), Bool.False)) where
-  Dict.IEq (eq,neq) = dIEq
+main = neq (dIEq(), (eq (dIEq(),(Bool.True,Bool.True)), Bool.False)) where
+  Dict.IEq (eq,neq) = dIEq()
 ;
 |] ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -29,9 +29,9 @@ main = neq (dIEq, (eq (dIEq,(Bool.True,Bool.True)), Bool.False)) where
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
       run ([r|
 main = (x,y) where
-  x = eq (dIEq, ((Bool.True,Bool.False), (Bool.False,Bool.True)))
-  y = eq (dIEq, ((Bool.True,Bool.False), (Bool.True,Bool.False)))
-  Dict.IEq (eq,neq) = dIEq
+  x = eq (dIEq(), ((Bool.True,Bool.False), (Bool.False,Bool.True )))
+  y = eq (dIEq(), ((Bool.True,Bool.False), (Bool.True, Bool.False)))
+  Dict.IEq (eq,neq) = dIEq()
 ;
 
 implementation of IEq for Bool with
@@ -47,8 +47,8 @@ implementation of IEq for Bool with
     it "IEq: overrides eq (dieq_bool)" $
       run ([r|
 main = v where  -- neq (eq(T,T), F)
-  v = neq (dIEq, (eq (dIEq,(Bool.True,Bool.True)), Bool.False))
-  Dict.IEq (eq,neq) = dIEq
+  v = neq (dIEq(), (eq (dIEq(),(Bool.True,Bool.True)), Bool.False))
+  Dict.IEq (eq,neq) = dIEq()
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -56,11 +56,11 @@ main = v where  -- neq (eq(T,T), F)
     it "IEq/IOrd" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte ((dIEqBool,dIOrdBool), (Bool.True,  Bool.False)),
-        gte ((dIEqBool,dIOrdBool), (Bool.True,  Bool.True )),
-        gt  ((dIEqBool,dIOrdBool), (Bool.False, Bool.False)),
-        lt  ((dIEqBool,dIOrdBool), (Bool.False, Bool.True )) )
-  Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
+  v = ( lte ((dIEqBool(),dIOrdBool()), (Bool.True,  Bool.False)),
+        gte ((dIEqBool(),dIOrdBool()), (Bool.True,  Bool.True )),
+        gt  ((dIEqBool(),dIOrdBool()), (Bool.False, Bool.False)),
+        lt  ((dIEqBool(),dIOrdBool()), (Bool.False, Bool.True )) )
+  Dict.IOrd (lt,lte,gt,gte) = dIOrdBool()
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
@@ -103,17 +103,17 @@ implementation of IOrd for a where a is IXxx with
   ;
 ;
 
---dIEqIXxx = func -> -- ixxx -> ieq
-  --Dict.IEq (eq,neq) where
-    --eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
-      --eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
-        --Dict.IEq (eq,neq) = dieq_bool
-        --(_,x,y)  = ...
-      --;
-    --; where
-      --(f) = ...
-    --;
-  --;
+--dIOrdIXxx = func -> -- ixxx -> iord
+--  Dict.IOrd (eq,neq) where
+--    eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
+--      eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
+--        Dict.IEq (eq,neq) = dieq_bool
+--        (_,x,y)  = ...
+--      ;
+--    ; where
+--      (f) = ...
+--    ;
+--  ;
 --;
 
 interface IXxx for a with
