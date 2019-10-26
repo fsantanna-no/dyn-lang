@@ -64,7 +64,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
 --              <...>                     -- :   with nested impls to follow only visible here
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
-implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
+implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] ++ decls' where
   -- dIEqBool = Dict.IEq (eq,neq) where eq=...
   dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,e,decls')) where
           e = ECall z (ECons z ["Dict",ifc])
@@ -73,8 +73,12 @@ implToDecls ifces (Impl (z,ifc,tp,decls)) = [dict] ++ decls' where
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
-  decls' = map (expandDecl ifces [id]) decls where
-            Ifce (_,id,_,_) = ifce
+  decls' = map (expandDecl ifces (traceShowId $ id:ids)) decls where
+            Ifce (_,id,_,_) = ifce    -- id:  from interface
+            ids = case cs of          -- ids: from instance constraints
+                    []      -> []
+                    [(_,l)] -> l
+                    _       -> error "TODO: multiple vars"
 
   ifce = fromJust $ L.find h ifces where
           h :: Ifce -> Bool
@@ -93,7 +97,7 @@ expandDecl :: [Ifce] -> [ID_Ifce] -> Decl -> Decl
 expandDecl _     _    dsig@(DSig _ _ _) = dsig
 expandDecl ifces ifc_ids (DAtr z1 e1
                           (Where (z2,
-                                  EFunc z3 (Type (z4,TFunc inp4 out4,cs4))  ups3 (Where (z5,e5,ds5)),
+                                  EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) ups3 (Where (z5,e5,ds5)),
                                   ds2))) =
   DAtr z1 e1
     (Where (z2,
