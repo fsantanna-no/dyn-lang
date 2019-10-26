@@ -5,24 +5,27 @@ module Dyn.Ifce where
 -- TODO: Parser.keywords
 
 import Debug.Trace
+import Data.Maybe         (fromJust)
+import Data.List as L     (find)
 import Text.RawString.QQ
 
 import Dyn.AST
 
 -------------------------------------------------------------------------------
 
-ifceToDecls :: Ifce -> [Decl]
-ifceToDecls (Ifce (z, (ifc_id,ifc_var), dcls)) = dict : dcls' where
-  -- dIEq = Dict.IEq (eq,neq)
-  dict = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
-    ids = map (\(DAtr _ (PWrite _ id) _) -> id) $ filter isDAtr dcls
-    e   = ECall z (ECons z ["Dict",ifc_id]) (fromList $ map (EVar z) ids)
+-- IEq -> [eq,neq]
+ifceToIds :: Ifce -> [ID_Var]
+ifceToIds (Ifce (_,_,dcls)) = concatMap f dcls where
+                                f (DAtr _ (PWrite _ id) _) = [id]
+                                f _ = []
 
-  -- TODO:
-  --    - (da,...,dx)  -- respect generic constrained vars
-  --    - (fN,...,gN) = dN
-  --    - from types, discover pN, g, dN
-  --
+ifceToDecls :: [Ifce] -> Ifce -> [Decl]
+ifceToDecls ifces me@(Ifce (z, (ifc,_), dcls)) = dict : dcls' where
+  -- dIEq = Dict.IEq (eq,neq)
+  dict = DAtr z (PWrite z ("d"++ifc)) (Where (z,e,[])) where
+    ids = ifceToIds me
+    e   = ECall z (ECons z ["Dict",ifc]) (fromList $ map (EVar z) ids)
+
   --  eq = func ->
   --    ret where
   --      <...>
@@ -32,45 +35,66 @@ ifceToDecls (Ifce (z, (ifc_id,ifc_var), dcls)) = dict : dcls' where
   --      (fN,...,gN) = dN
   --      (d1,...,dN, p1,...,pN) = ...
   dcls' = map f dcls where
-    f (DAtr z1 pat1
-        (Where (z2,
-                EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) ups3 (Where (z5,e5,ds5)),
-                ds2))) =
+            f (DAtr z1 e1
+                (Where (z2,
+                        EFunc z3 tp3@(Type (_,TFunc inp3 _,cs3)) ups3 (Where (z4,e4,ds4)),
+                        ds2))) = --traceShow (map (declToString 0) dcls) $
 
-      DAtr z1 pat1
-        (Where (z2,
-                EFunc z3 (Type (z4,TFunc inp4 out4,cs4')) ups3 (Where (z5,e5,ds5')),
-                ds2))
-      where
-        -- interface IEq for a
-        --    eq :: ((a,a) -> Bool)
-        --    eq :: ((a,a) -> Bool) where a is IEq
-        cs4' = (ifc_var, [ifc_id]) :  cs4
+              DAtr z1 e1
+                (Where (z2,
+                        EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
+                        ds2))
+              where
+                ds4' = ds4 ++ fsDicts ++ [
+                          -- (fN,...,gN) = dN
+                          -- ... = (p1,...pN)
+                          DAtr z1 (PArg z1) (Where (z1,eps,[])),
+                          -- (d1,...,dN, p1,...,pN) = ...
+                          DAtr z1 pall      (Where (z1,EArg z1,[]))
+                         ]
 
-        ds5' = ds5 ++ [
-                  -- ... = (p1,...pN)
-                  DAtr z1 (PArg z1) (Where (z1,eps,[])),
-                  -- (d1,...,dN, p1,...,pN) = ...
-                  DAtr z1 pall      (Where (z1,EArg z1,[]))
-                 ]
+                -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
+                dicts :: [(ID_Var,ID_Ifce,[ID_Var])]
+                dicts = concatMap f cs3 where
+                  -- (a,[IEq,IShow]) -> [(a,IEq,[eq,neq]), (a,IOrd,[lt,gt,lte,gte]]
+                  f :: (ID_Var,[ID_Ifce]) -> [(ID_Var,ID_Ifce,[ID_Var])]
+                  f (var,ifcs) = map h $ map g ifcs where
+                                  h :: (ID_Ifce,[ID_Var]) -> (ID_Var,ID_Ifce,[ID_Var])
+                                  h (ifc,ids) = (var,ifc,ids)
 
-        -- [daIEq,daIShow,dbIEq,...]
-        dicts = concatMap f cs4' where
-                  f (var,ifcs) = map (('d':var)++) ifcs
+                  -- IEq -> (IEq, [eq,neq])
+                  g :: ID_Ifce -> (ID_Ifce,[ID_Var])
+                  g ifc = (ifc, ids) where
+                            ids = ifceToIds $ fromJust $ L.find h ifces where
+                                    h :: Ifce -> Bool
+                                    h (Ifce (_,(id,_),_)) = (id == ifc)
 
-        -- (p1,...,pN)
-        eps = fromList $ map (EVar z1) $ ps
+                -- [Dict.IEq (eq,neq) = daIEq]
+                fsDicts :: [Decl]
+                fsDicts = map f dicts where
+                  f :: (ID_Var,ID_Ifce,[ID_Var]) -> Decl
+                  f (var,ifc,ids) = DAtr z1 pat (Where (z1,exp,[])) where
+                    -- Dict.IEq (eq,neq)
+                    pat :: Patt
+                    pat = PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) ids)
+                    -- daIEq
+                    exp :: Expr
+                    exp = EVar z1 $ 'd':var++ifc
 
-        -- (d1,...,dN, p1,...,pN)
-        pall = fromList $ dicts' ++ ps' where
-          dicts' = map (PWrite z1) $ dicts
-          ps'    = map (PWrite z1) $ ps
+                -- (p1,...,pN)
+                eps = fromList $ map (EVar z1) $ ps
 
-        -- [p1,...,pN]
-        ps :: [ID_Var]
-        ps = map ('p':) $ map show $ take (length $ toList inp4) incs where
-              incs :: [Int]
-              incs = 1 : map (+1) incs
+                -- (d1,...,dN, p1,...,pN)
+                pall = fromList $ dicts' ++ ps' where
+                  ps'    = map (PWrite z1) $ ps
+                  dicts' = map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) dicts
+                                              -- [daIEq,daIShow,dbIEq,...]
+
+                -- [p1,...,pN]
+                ps :: [ID_Var]
+                ps = map ('p':) $ map show $ take (length $ toList inp3) incs where
+                      incs :: [Int]
+                      incs = 1 : map (+1) incs
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
@@ -88,7 +112,7 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
 
 ieq = [r|
   interface IEq for a with
-    eq = func :: ((a,a) -> Bool) ->
+    eq = func :: ((a,a) -> Bool) where a is IEq ->
       case (x,y) of
         (~y,_) -> Bool.True
         _      -> Bool.False
@@ -96,7 +120,7 @@ ieq = [r|
         (x,y) = ...
       ;
     ;
-    neq = func :: ((a,a) -> Bool) ->
+    neq = func :: ((a,a) -> Bool) where a is IEq ->
       not (eq (daIEq,x,y)) where
         (x,y) = ...
       ;
@@ -111,26 +135,17 @@ iord = [r|
       or ( lt (daIEq,daIOrd,x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
-        -- AUTO
-        Dict.IEq (eq,neq) = daIEq
-        Dict.IOrd (lt,lte,gt,gte) = daIOrd
       ;
     ;
     gt = func:: ((a,a) -> Bool) where a is (IEq,IOrd) ->
       not (lte (daIEq,daIOrd,x,y)) where
         (x,y) = ...
-        -- AUTO
-        Dict.IEq (eq,neq) = daIEq
-        Dict.IOrd (lt,lte,gt,gte) = daIOrd
-        ;
+      ;
     ;
     gte = func:: ((a,a) -> Bool) where a is (IEq,IOrd) ->
       or ( gt (daIEq,daIOrd,x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
-        -- AUTO
-        Dict.IEq (eq,neq) = daIEq
-        Dict.IOrd (lt,lte,gt,gte) = daIOrd
       ;
     ;
   ;

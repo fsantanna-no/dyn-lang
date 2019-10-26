@@ -434,7 +434,7 @@ prog = do
   return $
     let
       toDecl (GDecl dcl) = [dcl]
-      toDecl (GIfce ifc) = ifceToDecls ifc
+      toDecl (GIfce ifc) = ifceToDecls (plToIfcs pl) ifc
       toDecl (GImpl imp) = implToDecls (plToIfcs pl) imp
      in
       Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecl pl)
