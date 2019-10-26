@@ -16,6 +16,19 @@ type ID_Ifce = String
 
 -------------------------------------------------------------------------------
 
+class IAnn a where
+  getAnn :: a -> Ann
+
+class IList a where
+  toList   ::  a  -> [a]
+  fromList :: [a] ->  a
+
+class IString a where
+  toString  :: a -> String
+  toStringI :: Int -> a -> String
+
+-------------------------------------------------------------------------------
+
 newtype Type = Type (Ann, TType, TCtrs)
   deriving (Eq,Show)
 
@@ -92,18 +105,3 @@ isDAtr _            = False
 
 isEError (EError _ _) = True
 isEError _            = False
-
--------------------------------------------------------------------------------
-
--- Classes.hs
-
-class IAnn a where
-  getAnn :: a -> Ann
-
-class IList a where
-  toList   ::  a  -> [a]
-  fromList :: [a] ->  a
-
-class IString a where
-  toString  :: a -> String
-  toStringI :: Int -> a -> String
