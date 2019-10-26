@@ -134,7 +134,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,dcls)) = dict ++ dcls' where
 --        ((d1,...,dN), p1,...,pN) = ...
 
 implToDecls :: [Ifce] -> Impl -> [Decl]
-implToDecls ifces (Impl (z,ifc,hr,dcls)) = [dict] ++ dcls' where
+implToDecls ifces (Impl (z,ifc,Type (_,TData hr,_),dcls)) = [dict] ++ dcls' where
   -- dIEqBool = Dict.IEq (eq,neq) where eq=...
   dict = DAtr z (PWrite z ("d"++ifc++concat hr)) (Where (z,e,dcls')) where
           e = ECall z (ECons z ["Dict",ifc])

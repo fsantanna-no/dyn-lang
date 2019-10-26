@@ -414,13 +414,13 @@ impl = do
   void <- tk_key "of"
   cls  <- tk_ifce
   void <- tk_key "for"
-  hr   <- tk_hier
+  tp   <- type_
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "implementation"
   spc
-  return $ Impl (az{pos=pos}, cls, hr, ds)
+  return $ Impl (az{pos=pos}, cls, tp, ds)
 
 -------------------------------------------------------------------------------
 

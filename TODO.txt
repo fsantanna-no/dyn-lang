@@ -1,7 +1,3 @@
-- transformar p1,p2 em (p1,p2)
-- precisa de class inheritance sim
-    - ...
-
 - implementation of IEq for **a where a is ...**
 
 - na hora da *chamada*
