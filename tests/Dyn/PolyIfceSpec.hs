@@ -53,18 +53,28 @@ main = v where  -- neq (eq(T,T), F)
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "XXX: IEq/IOrd" $
+    it "IEq/IOrd" $
       run ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False),
-        gte (dIEqBool, dIOrdBool, Bool.True,  Bool.True),
-        gt  (dIEqBool, dIOrdBool, Bool.False, Bool.False),
-        lt  (dIEqBool, dIOrdBool, Bool.False, Bool.True) )
+  v = ( lte ((dIEqBool,dIOrdBool), Bool.True,  Bool.False),
+        gte ((dIEqBool,dIOrdBool), Bool.True,  Bool.True),
+        gt  ((dIEqBool,dIOrdBool), Bool.False, Bool.False),
+        lt  ((dIEqBool,dIOrdBool), Bool.False, Bool.True) )
   Dict.IEq  (eq,neq)        = dIEqBool
   Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
+
+    it "f a where a is IOrd" $
+      run ([r|
+main = (f ((dIEqBool,dIOrdBool), Bool.True,Bool.False),
+        f ((dIEqBool,dIOrdBool), Bool.False,Bool.False)) where
+  f :: ((a,a) -> Bool)
+  f = func :: ((a,a) -> Bool) -> gt ...;
+;
+|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+        `shouldBe` "(Bool.True,Bool.False)"
 
 {-
     it "implementation of IEq for a where a is IXxx" $

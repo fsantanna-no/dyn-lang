@@ -1,22 +1,16 @@
+- AUTO em impls
+- fazer final methods
+- passar todos os dicts em 1 unica tupla
+- generic fs
+    - w/o cs
+    - w/  cs
+
 - na hora da *chamada*
     - colocar um where em volta pegando o dict da implementacao que bate:
         - Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
     - inserir os dicts como argumentos iniciais:
         - lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False)
 
-- git branch -D ifce.dicts
-- interface
-    - passar "IOrd a where a is IEq" como constraint de a para baixo
-- continuar com interface/implementation usando tipos
-- lists
-    - vai permitir [a] where a is ...
-        - dinamico e estatico
-- typeclass
-    - dinamico manual
-    - multiplas vars manual
-
-- sintaxe de tipos, mas sem typesys
-- data
 - typesys
     - typeclass
         - trabalho vai ser:
@@ -25,9 +19,6 @@
             - achar o(s) dict(s) que casa(m) com a chamada (f(1,"a") -> ieq_nat,ishow_string)
             - inserir o(s) dict(s) como argumento(s)
     - inference?
-- generic fs
-    - w/o cs
-    - w/  cs
 - closure / upvs
     - verificar se funcao de fato escapa
         - senao, é um "nested" e não deve declarar upvs

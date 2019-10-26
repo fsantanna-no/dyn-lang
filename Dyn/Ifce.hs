@@ -40,7 +40,7 @@ ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict ++ dcls' where
   --      ... = (p1,...pN)
   --      (f1,...,g1) = d1
   --      (fN,...,gN) = dN
-  --      (d1,...,dN, p1,...,pN) = ...
+  --      ((d1,...,dN), p1,...,pN) = ...
   dcls' = map f dcls where
             f dsig@(DSig _ _ _) = dsig
             f (DAtr z1 e1
@@ -59,7 +59,7 @@ ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict ++ dcls' where
                           -- (fN,...,gN) = dN
                           -- ... = (p1,...pN)
                           DAtr z1 (PArg z1) (Where (z1,eps5,[])),
-                          -- (d1,...,dN, p1,...,pN) = ...
+                          -- ((d1,...,dN), p1,...,pN) = ...
                           DAtr z1 pall5     (Where (z1,EArg z1,[]))
                          ]
 
@@ -78,11 +78,13 @@ ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict ++ dcls' where
                 -- (p1,...,pN)
                 eps5 = fromList $ map (EVar z1) $ ps
 
-                -- (d1,...,dN, p1,...,pN)
-                pall5 = fromList $ dicts' ++ ps' where
+                -- ((d1,...,dN), p1,...,pN)
+                pall5 = fromList $ dicts' : ps' where
+                  ps' :: [Patt]
                   ps'    = map (PWrite z1) $ ps
-                  dicts' = map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) dicts
-                                              -- [daIEq,daIShow,dbIEq,...]
+                  dicts' :: Patt
+                  dicts' = fromList $ map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) dicts
+                                                        -- [daIEq,daIShow,dbIEq,...]
 
                 -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
                 dicts :: [(ID_Var,ID_Ifce,[ID_Var])]
@@ -148,18 +150,18 @@ iord = [r|
     gte :: ((a,a) -> Bool)
 
     lte = func :: ((a,a) -> Bool) ->
-      or ( lt (daIEq,daIOrd,x,y),
+      or ( lt ((daIEq,daIOrd),x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
       ;
     ;
     gt = func :: ((a,a) -> Bool) ->
-      not (lte (daIEq,daIOrd,x,y)) where
+      not (lte ((daIEq,daIOrd),x,y)) where
         (x,y) = ...
       ;
     ;
     gte = func :: ((a,a) -> Bool) ->
-      or ( gt (daIEq,daIOrd,x,y),
+      or ( gt ((daIEq,daIOrd),x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
       ;
@@ -194,7 +196,7 @@ iord_bool = [r|
         (x,y) = ...
         -- AUTO
         ... = (p1,p2)
-        (daIEq,daIOrd,p1,p2) = ...
+        ((daIEq,daIOrd),p1,p2) = ...
       ;
     ;
   ;
