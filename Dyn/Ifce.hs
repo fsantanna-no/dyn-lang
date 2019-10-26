@@ -14,12 +14,12 @@ import Dyn.Classes
 
 -- IEq -> [eq,neq]
 ifceToIds :: Ifce -> [ID_Var]
-ifceToIds (Ifce (_,_,dcls)) = concatMap f dcls where
-                                f (DAtr _ (PWrite _ id) _) = [id]
-                                f _ = []
+ifceToIds (Ifce (_,_,_,dcls)) = concatMap f dcls where
+                                  f (DAtr _ (PWrite _ id) _) = [id]
+                                  f _ = []
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z, (ifc_id,ifc_var), dcls)) = dict : dcls' where
+ifceToDecls ifces me@(Ifce (z, ifc_id, ifc_cs, dcls)) = dict : dcls' where
   -- dIEq = Dict.IEq (eq,neq)
   dict = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,e,[])) where
     ids = ifceToIds me
@@ -45,7 +45,7 @@ ifceToDecls ifces me@(Ifce (z, (ifc_id,ifc_var), dcls)) = dict : dcls' where
                         EFunc z3 (Type (z4,TFunc inp4 out4,cs4')) ups3 (Where (z5,e5,ds5')),
                         ds2))
               where
-                cs4' = (ifc_var, [ifc_id]) : cs4
+                cs4' = ifc_cs ++ cs4
 
                 ds5' = ds5 ++ fsDicts5 ++ [
                           -- (fN,...,gN) = dN
@@ -90,7 +90,7 @@ ifceToDecls ifces me@(Ifce (z, (ifc_id,ifc_var), dcls)) = dict : dcls' where
                   g ifc = (ifc, ids) where
                             ids = ifceToIds $ fromJust $ L.find h ifces where
                                     h :: Ifce -> Bool
-                                    h (Ifce (_,(id,_),_)) = (id == ifc)
+                                    h (Ifce (_,id,_,_)) = (id == ifc)
 
                 -- [p1,...,pN]
                 ps :: [ID_Var]
@@ -104,8 +104,8 @@ implToDecls ifcs (Impl (z, (ifc,hr), dcls)) = [dict] where
   dict = DAtr z (PWrite z ("d"++ifc++concat hr)) (Where (z,e,dcls))
   e    = ECall z (ECons z ["Dict",ifc]) (fromList $ map (EVar z) ids)
   ids  = map getId $ getDecls $ head $ filter sameId ifcs where
-          sameId   (Ifce (_, (id,_), _))    = (id == ifc)
-          getDecls (Ifce (_, (_,_), dcls))  = dcls
+          sameId   (Ifce (_,id,_,_))   = (id == ifc)
+          getDecls (Ifce (_,_,_,dcls)) = dcls
           getId    (DAtr _ (PWrite _ id) _) = id
   --dcls' = traceShow (map (declToString 0) dcls) $ map f dcls where
           --f (Decl (z,e,tp,Just wh)) = traceShow (whereToString 0 wh) $ Decl (z,e,tp,Just wh)

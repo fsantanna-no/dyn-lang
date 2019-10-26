@@ -35,7 +35,8 @@ newtype Type = Type (Ann, TType, TCtrs)
 cz = []
 tz = Type (az, TUnit, cz)
 
-type TCtrs = [(ID_Var, [ID_Ifce])]  -- [(a,[IEq,IOrd,IShow]), (b,[...])]
+type TCtr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
+type TCtrs = [TCtr]               -- [(a,[IEq,IOrd,IShow]), (b,[...])]
 
 data TType = --TAny                         -- bot/sup
              TUnit
@@ -85,7 +86,7 @@ data Decl = DSig Ann ID_Var Type
           | DAtr Ann Patt Where
   deriving (Eq, Show)
 
-newtype Ifce = Ifce (Ann, (ID_Ifce,ID_Var), [Decl])
+newtype Ifce = Ifce (Ann, ID_Ifce, TCtrs, [Decl])
   deriving (Eq, Show)
 
 newtype Impl = Impl (Ann, (ID_Ifce,ID_Hier), [Decl])

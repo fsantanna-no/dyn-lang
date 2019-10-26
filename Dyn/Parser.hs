@@ -394,12 +394,17 @@ ifce = do
   cls  <- tk_ifce
   void <- tk_key "for"
   var  <- tk_var
+  cs   <- option [] ctrs
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "interface"
   spc
-  return $ Ifce (az{pos=pos}, (cls,var), ds)
+  return $ let
+    f []                 = [(var, [cls])]
+    f [(id,l)] | id==var = [(var, cls:l)]
+   in
+    Ifce (az{pos=pos}, cls, f cs, ds)
 
 impl :: Parser Impl
 impl = do
