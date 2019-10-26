@@ -3,6 +3,7 @@ module Dyn.ASTSpec (main,spec) where
 import Test.Hspec
 
 import Dyn.AST
+import Dyn.Classes
 
 main :: IO ()
 main = hspec spec
