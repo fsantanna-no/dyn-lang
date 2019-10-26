@@ -423,7 +423,7 @@ prog = do
   return $
     let
       toDecl (PLDecl dcl) = [dcl]
-      toDecl (PLIfce ifc) = ifceToDecls ifc
+      toDecl (PLIfce ifc) = ifceToDecls (plToIfcs pl) ifc
       toDecl (PLImpl imp) = implToDecls (plToIfcs pl) imp
      in
       Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecl pl)

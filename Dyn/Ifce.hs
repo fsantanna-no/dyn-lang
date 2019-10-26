@@ -5,24 +5,26 @@ module Dyn.Ifce where
 -- TODO: Parser.keywords
 
 import Debug.Trace
+import Data.Maybe         (fromJust)
+import Data.List as L     (find)
 import Text.RawString.QQ
 
 import Dyn.AST
 
 -------------------------------------------------------------------------------
 
-ifceToDecls :: Ifce -> [Decl]
-ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
-  -- dIEq = Dict.IEq (eq,neq)
-  dict = Decl (z, PWrite z ("d"++cls), Nothing, Just $ Where (z,e,[])) where
-    ids = map (\(Decl (_,PWrite _ id,_,_)) -> id) dcls
-    e   = ECall z (ECons z ["Dict",cls]) (listToExpr $ map (EVar z) ids)
+-- IEq -> [eq,neq]
+ifceToIds :: Ifce -> [ID_Var]
+ifceToIds (Ifce (_,_,dcls)) = map f dcls where
+                                f (Decl (_,PWrite _ id,_,_)) = id
 
-  -- TODO:
-  --    - (da,...,dx)  -- respect generic constrained vars
-  --    - (fN,...,gN) = dN
-  --    - from types, discover pN, g, dN
-  --
+ifceToDecls :: [Ifce] -> Ifce -> [Decl]
+ifceToDecls ifces me@(Ifce (z, (ifc,_), dcls)) = dict : dcls' where
+  -- dIEq = Dict.IEq (eq,neq)
+  dict = Decl (z, PWrite z ("d"++ifc), Nothing, Just $ Where (z,e,[])) where
+    ids = ifceToIds me
+    e   = ECall z (ECons z ["Dict",ifc]) (listToExpr $ map (EVar z) ids)
+
   --  eq = func ->
   --    ret where
   --      <...>
@@ -35,31 +37,57 @@ ifceToDecls (Ifce (z, (cls,_), dcls)) = dict : dcls' where
             f (Decl (z1,e1,tp1,
                 Just (Where (z2,
                              EFunc z3 tp3@(Type (_,TFunc inp3 _,cs3)) ups3 (Where (z4,e4,ds4)),
-                             ds2)))) =
+                             ds2)))) = --traceShow (map (declToString 0) dcls) $
 
               Decl (z1,e1,tp1,
                 Just (Where (z2,
                              EFunc z3 tp3 ups3 (Where (z4,e4,ds4')),
                              ds2)))
               where
-                ds4' = ds4 ++ [
+                ds4' = ds4 ++ fsDicts ++ [
+                          -- (fN,...,gN) = dN
                           -- ... = (p1,...pN)
                           Decl (z1, PArg z1, Nothing, Just $ Where (z1,eps,[])),
                           -- (d1,...,dN, p1,...,pN) = ...
                           Decl (z1, pall, Nothing, Just $ Where (z1,EArg z1,[]))
                          ]
 
-                -- [daIEq,daIShow,dbIEq,...]
+                -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
+                dicts :: [(ID_Var,ID_Ifce,[ID_Var])]
                 dicts = concatMap f cs3 where
-                          f (var,ifcs) = map (('d':var)++) ifcs
+                  -- (a,[IEq,IShow]) -> [(a,IEq,[eq,neq]), (a,IOrd,[lt,gt,lte,gte]]
+                  f :: (ID_Var,[ID_Ifce]) -> [(ID_Var,ID_Ifce,[ID_Var])]
+                  f (var,ifcs) = map h $ map g ifcs where
+                                  h :: (ID_Ifce,[ID_Var]) -> (ID_Var,ID_Ifce,[ID_Var])
+                                  h (ifc,ids) = (var,ifc,ids)
+
+                  -- IEq -> (IEq, [eq,neq])
+                  g :: ID_Ifce -> (ID_Ifce,[ID_Var])
+                  g ifc = (ifc, ids) where
+                            ids = ifceToIds $ fromJust $ L.find h ifces where
+                                    h :: Ifce -> Bool
+                                    h (Ifce (_,(id,_),_)) = (id == ifc)
+
+                -- [Dict.IEq (eq,neq) = daIEq]
+                fsDicts :: [Decl]
+                fsDicts = map f dicts where
+                  f :: (ID_Var,ID_Ifce,[ID_Var]) -> Decl
+                  f (var,ifc,ids) = Decl (z1, pat, Nothing, Just $ Where (z1,exp,[])) where
+                    -- Dict.IEq (eq,neq)
+                    pat :: Patt
+                    pat = PCall z1 (PCons z1 ["Dict",ifc]) (listToPatt $ map (PWrite z1) ids)
+                    -- daIEq
+                    exp :: Expr
+                    exp = EVar z1 $ 'd':var++ifc
 
                 -- (p1,...,pN)
                 eps = listToExpr $ map (EVar z1) $ ps
 
                 -- (d1,...,dN, p1,...,pN)
                 pall = listToPatt $ dicts' ++ ps' where
-                  dicts' = map (PWrite z1) $ dicts
                   ps'    = map (PWrite z1) $ ps
+                  dicts' = map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) dicts
+                                              -- [daIEq,daIShow,dbIEq,...]
 
                 -- [p1,...,pN]
                 ps :: [ID_Var]
@@ -106,26 +134,17 @@ iord = [r|
       or ( lt (daIEq,daIOrd,x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
-        -- AUTO
-        Dict.IEq (eq,neq) = daIEq
-        Dict.IOrd (lt,lte,gt,gte) = daIOrd
       ;
     ;
     gt = func:: ((a,a) -> Bool) where a is (IEq,IOrd) ->
       not (lte (daIEq,daIOrd,x,y)) where
         (x,y) = ...
-        -- AUTO
-        Dict.IEq (eq,neq) = daIEq
-        Dict.IOrd (lt,lte,gt,gte) = daIOrd
-        ;
+      ;
     ;
     gte = func:: ((a,a) -> Bool) where a is (IEq,IOrd) ->
       or ( gt (daIEq,daIOrd,x,y),
            eq (daIEq,x,y) ) where
         (x,y) = ...
-        -- AUTO
-        Dict.IEq (eq,neq) = daIEq
-        Dict.IOrd (lt,lte,gt,gte) = daIOrd
       ;
     ;
   ;
