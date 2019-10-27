@@ -3,7 +3,7 @@ module Dyn.Ifce where
 import Debug.Trace
 import Data.Bool          (bool)
 import Data.Maybe         (fromJust)
-import Data.List as L     (find)
+import Data.List as L     (find, sort)
 import Text.RawString.QQ
 
 import Dyn.AST
@@ -16,10 +16,10 @@ findIfce ifces ifc = fromJust $ L.find f ifces where
                       f :: Ifce -> Bool
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
--- [...] -> [(a,["IOrd"])] -> ["IEq","IOrd"]
+-- [...] -> [(a,["IOrd"])] -> ["IEq","IOrd"] -- (sorted)
 sups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
 sups ifces []  = []
-sups ifces ids = sups ifces ids' ++ ids where
+sups ifces ids = sort $ sups ifces ids' ++ ids where
                   ids' = concatMap (f . (findIfce ifces)) ids
                   f (Ifce (_,ifc,[],     _)) = []
                   f (Ifce (_,ifc,[(_,l)],_)) = l
@@ -73,7 +73,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
                       (fromList $ map (EVar z) $ ifceToIds ifce)
 
   -- {daIXxx} // implementation of IOrd for a where a is IXxx
-  ups' = DAtr z (fromList $ map (\id -> PWrite z ("da"++id)) imp_ids)
+  ups' = DAtr z (fromList $ map (PWrite z) $ sort $ map ("da"++) imp_ids)
                 (Where (z,EArg z,[]))
 
   toString' (Type (_, TData hr, _      )) = concat hr
@@ -116,11 +116,12 @@ expandDecl ifces
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
+    -- TODO: ctrsUnion
     cs4NImps' = ("a", sups ifces [ifc_id])         : cs4
     cs4YImps  = ("a", sups ifces (ifc_id:imp_ids)) : cs4
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
-    ups3' = map (\id -> ("da"++id,EUnit az)) imp_ids
+    ups3' = map (\id -> (id,EUnit az)) $ sort $ map ("da"++) imp_ids
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
@@ -147,8 +148,8 @@ expandDecl ifces
     -- (d1,...,dN)
     -- csNImps: exclude implementation constraints since dicts come from closure
     dicts5 :: Patt
-    dicts5 = fromList $ map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps')
-                                            -- [daIEq,daIShow,dbIEq,...]
+    dicts5 = fromList $ map (PWrite z1) $ sort $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps')
+                                                  -- [daIEq,daIShow,dbIEq,...]
 
     -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
     dicts :: TCtrs -> [(ID_Var,ID_Ifce,[ID_Var])]

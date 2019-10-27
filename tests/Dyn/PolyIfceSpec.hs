@@ -65,13 +65,13 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-    it "IEq/IOrd/IXxx" $
+    it "IEq/IOrd/IAaa" $
       run ([r|
-main = f ((dIEq(),dIOrdBool(),dIXxx()),(Bool.True,Bool.False)) where
-  Dict.IXxx (f) = dIXxx()
+main = f ((dIAaa(),dIEq(),dIOrdBool()),(Bool.True,Bool.False)) where
+  Dict.IAaa (f) = dIAaa()
 ;
 
-interface IXxx for a where a is IOrd with
+interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
   f = func :: ((a,a) -> Bool) -> lt ((daIEq,daIOrd),(x,y)) where (x,y)=...;;  
 ;
@@ -88,27 +88,27 @@ main = (f ((dIEqBool(),dIOrdBool()), (Bool.True, Bool.False)),
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
-    it "XXX-1: implementation of IEq for a where a is IXxx" $
+    it "XXX-1: implementation of IEq for a where a is IAaa" $
       run ([r|
-main = (lt ((dIEq(),dIOrdIXxx (dIXxxXxx())), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIXxx (dIXxxXxx())), (Xxx.True,Xxx.False))) where
-  Dict.IOrd (lt,lte,gt,gte) = dIOrdIXxx (dIXxxXxx())
+main = (lt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False))) where
+  Dict.IOrd (lt,lte,gt,gte) = dIOrdIAaa (dIAaaXxx())
 ;
 
-implementation of IOrd for a where a is IXxx with
+implementation of IOrd for a where a is IAaa with
   lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
-    lt ((dIEq(),dIOrdBool()), (f (daIXxx,x), f (daIXxx,y))) where
+    lt ((dIEq(),dIOrdBool()), (f (daIAaa,x), f (daIAaa,y))) where
       Dict.IOrd (lt,lte,gt,gte) = dIOrdBool()
       (x,y) = ...
     ;
   ;
 ;
 
-interface IXxx for a with
+interface IAaa for a with
   f :: (a -> Bool)
 ;
 
-implementation of IXxx for Xxx with
+implementation of IAaa for Xxx with
   f :: (Xxx -> Bool)
   f = func :: (Xxx -> Bool) ->
     case ... of
