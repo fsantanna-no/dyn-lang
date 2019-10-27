@@ -4,7 +4,7 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
-prelude = iord_nat ++ iord_bool ++ ieq_bool ++ iord ++ ieq ++ nat ++ bool
+prelude = iord_nat ++ iord_bool ++ ieq_bool ++ ibounded_bool ++ iord ++ ieq ++ ibounded ++ nat ++ bool
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -85,6 +85,13 @@ nat = [r|
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+ibounded = [r|
+  interface IBounded for a with
+    minimum :: a
+    maximum :: a
+  ;
+|]
+
 ieq = [r|
   interface IEq for a with
     eq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
@@ -131,6 +138,13 @@ iord = [r|
 |]
 
 -------------------------------------------------------------------------------
+
+ibounded_bool = [r|
+  implementation of IBounded for Bool with
+    minimum :: Bool = Bool.False
+    maximum :: Bool = Bool.True
+  ;
+|]
 
 ieq_bool = [r|
   implementation of IEq for Bool with

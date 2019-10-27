@@ -16,6 +16,16 @@ main = hspec spec
 
 spec = do
 
+  describe "IBounded" $ do
+
+    it "Bool" $
+      run ([r|
+main = (maximum, minimum) where
+  Dict.IBounded (minimum,maximum) = dIBoundedBool()
+;
+|] ++ ibounded_bool ++ bool ++ ibounded)
+        `shouldBe` "(Bool.True,Bool.False)"
+
   describe "IEq" $ do
 
     it "IEq: default eq" $

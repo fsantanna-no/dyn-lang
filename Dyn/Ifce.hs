@@ -94,15 +94,24 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 
 -------------------------------------------------------------------------------
 
+expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
+
+expandDecl _ _ dsig@(DSig _ _ _) = dsig
+
+-- IBounded: minimum/maximum
+expandDecl _ _ decl@(DAtr _ _ (Where (_,econst,_))) | isConst econst = decl where
+  isConst (EUnit  _)      = True
+  isConst (ECons  _ _)    = True
+  isConst (ETuple _ es)   = all isConst es
+  isConst (ECall  _ f ps) = isConst f && isConst ps
+  isConst _               = False
+
 --  eq = func :: ((a,a) -> Bool) ->       -- : insert a is IEq/IXxx
 --    ret where
 --      <...>
 --      ... = (p1,...pN)                  -- : restore original args
 --      (fN,...,gN) = dN                  -- : restore iface functions from dicts
 --      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
-
-expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
-expandDecl _ _ dsig@(DSig _ _ _) = dsig
 expandDecl ifces
            (ifc_id,imp_ids)
            (DAtr z1 e1
