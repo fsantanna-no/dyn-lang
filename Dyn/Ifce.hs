@@ -11,24 +11,24 @@ import Dyn.Classes
 
 -------------------------------------------------------------------------------
 
-findIfce :: [Ifce] -> ID_Ifce -> Ifce
-findIfce ifces ifc = fromJust $ L.find f ifces where
+ifceFind :: [Ifce] -> ID_Ifce -> Ifce
+ifceFind ifces ifc = fromJust $ L.find f ifces where
                       f :: Ifce -> Bool
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
--- [...] -> [(a,["IOrd"])] -> ["IEq","IOrd"] -- (sorted)
-sups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
-sups ifces []  = []
-sups ifces ids = sort $ sups ifces ids' ++ ids where
-                  ids' = concatMap (f . (findIfce ifces)) ids
-                  f (Ifce (_,ifc,[],     _)) = []
-                  f (Ifce (_,ifc,[(_,l)],_)) = l
-                  f _ = error $ "TODO: multiple constraints"
-
 -- IEq -> [eq,neq]
-ifceToIds :: Ifce -> [ID_Var]
-ifceToIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
-                                  getId (DSig _ id _) = id
+ifceToDeclIds :: Ifce -> [ID_Var]
+ifceToDeclIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
+                                      getId (DSig _ id _) = id
+
+-- [...] -> ["IEq"] -> ["IEq","IOrd"] -- (sorted)
+ifcesSups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
+ifcesSups ifces []  = []
+ifcesSups ifces ids = sort $ ifcesSups ifces ids' ++ ids where
+                        ids' = concatMap (f . (ifceFind ifces)) ids
+                        f (Ifce (_,ifc,[],     _)) = []
+                        f (Ifce (_,ifc,[(_,l)],_)) = l
+                        f _ = error $ "TODO: multiple constraints"
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,f,[])) where
             f = EFunc z tz [] (Where (z,d,[]))
             d = ECall z (ECons z ["Dict",ifc_id])
-                        (fromList $ map (EVar z) $ ifceToIds me)
+                        (fromList $ map (EVar z) $ ifceToDeclIds me)
 
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
@@ -70,7 +70,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
   dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,f,[])) where
           f = EFunc z tz [] (Where (z,d,decls'++[ups']))
           d = ECall z (ECons z ["Dict",ifc])
-                      (fromList $ map (EVar z) $ ifceToIds ifce)
+                      (fromList $ map (EVar z) $ ifceToDeclIds ifce)
 
   -- {daIXxx} // implementation of IOrd for a where a is IXxx
   ups' = DAtr z (fromList $ map (PWrite z) $ sort $ map ("da"++) imp_ids)
@@ -126,8 +126,8 @@ expandDecl ifces
     --  a where a is (IEq,IOrd)
     -- TODO: a?
     -- TODO: ctrsUnion
-    cs4NImps' = ("a", sups ifces [ifc_id])         : cs4
-    cs4YImps  = ("a", sups ifces (ifc_id:imp_ids)) : cs4
+    cs4NImps' = ("a", ifcesSups ifces [ifc_id])         : cs4
+    cs4YImps  = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs4
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
     ups3' = map (\id -> (id,EUnit az)) $ sort $ map ("da"++) imp_ids
@@ -171,6 +171,6 @@ expandDecl ifces
 
       -- IEq -> (IEq, [eq,neq])
       g :: ID_Ifce -> (ID_Ifce,[ID_Var])
-      g ifc = (ifc, ifceToIds $ findIfce ifces ifc)
+      g ifc = (ifc, ifceToDeclIds $ ifceFind ifces ifc)
 
 expandDecl _ _ decl = error $ toString decl

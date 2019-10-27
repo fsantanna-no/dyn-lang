@@ -52,7 +52,7 @@ poly ifces env xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
                 -- ["daIEqBool",...]
                 dicts = map (\ifc -> "d"++tid++ifc++concat xhr) ifc_ids
                 -- [(eq,neq),...]
-                dclss = map ifceToIds $ map (findIfce ifces) ifc_ids
+                dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
       f (ifc,dict,dcls) =
         DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
                 (Where (z1, EVar z1 dict, []))
