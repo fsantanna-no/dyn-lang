@@ -182,8 +182,8 @@ main = (smallerc two) four
 smallerc =
   func ->
     func {x} ->
-      lt (ieq_nat,iord_nat,x,...) where
-        Dict.IOrd (lt,_,_,_) = iord_nat
+      lt ((dIEq(),dIOrdNat()),(x,...)) where
+        Dict.IOrd (lt,_,_,_) = dIOrdNat()
       ;
     ; where
       x = ...
@@ -207,7 +207,7 @@ twice = func ->
 
         it "twicec" $            -- pg 12
           run ([r|
-main   = eq (ieq_nat, (twicec square) two, mul(four,four))
+main   = eq (dIEq(), ((twicec square) two, mul(four,four)))
 square = func -> mul (...,...);
 twicec = func ->
   func {f} ->
@@ -216,12 +216,12 @@ twicec = func ->
     f = ...
   ;
 ;
-|] ++ ieq_nat ++ ieq ++ nat)
+|] ++ ieq ++ nat)
           `shouldBe` "Bool.True"
 
         it "quad" $            -- pg 12
           run ([r|
-main   = eq (ieq_nat, quad two, mul (four,four))
+main   = eq (dIEq(), (quad two, mul (four,four)))
 quad   = twicec square
 square = func -> mul (...,...);
 twicec = func ->
@@ -236,7 +236,7 @@ twicec = func ->
 
         it "curry" $            -- pg 13
           run ([r|
-main   = eq (ieq_nat, (twicec square) two, mul(four,four))
+main   = eq (dIEq(), ((twicec square) two, mul(four,four)))
 square = func -> mul (...,...);
 twicec = curry twice
 twice  = func ->
@@ -275,8 +275,8 @@ curry  = func ->
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
-    lt (ieq_nat,iord_nat,x,...) where
-      Dict.IOrd (lt,_,_,_) = iord_nat
+    lt ((dIEq(),dIOrdNat()),(x,...)) where
+      Dict.IOrd (lt,_,_,_) = dIOrdNat()
     ;
   ; where
     x = ...
@@ -298,7 +298,7 @@ uncurry = func ->
 
         it "compose" $         -- pg 15
           run ([r|
-main    = eq (ieq_nat, quad two, mul (four,four))
+main    = eq (dIEq(), (quad two, mul (four,four)))
 quad    = compose (square,square)
 square  = func -> mul (...,...);
 compose = func ->
@@ -1001,7 +1001,7 @@ impl = func ->
 
       it "fst/snd" $         -- pg 41
         run ([r|
-main = and (eq (ieq_nat, add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True))
+main = and (eq (dIEq(), (add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True)))
 fst = func -> x where (x,_)=... ;;
 snd = func -> y where (_,y)=... ;;
 |] ++ prelude)
@@ -1010,7 +1010,7 @@ snd = func -> y where (_,y)=... ;;
       it "pair" $         -- pg 42
         run ([r|
 main = pair ((f,g), one)
-f = func -> eq (ieq_nat, add (zero,...), ...) ;
+f = func -> eq (dIEq(), (add (zero,...), ...)) ;
 g = func -> mul (two, ...) ;
 pair = func -> (f x, g x) where
   ((f,g),x) = ...

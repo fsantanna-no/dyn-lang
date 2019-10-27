@@ -8,7 +8,7 @@ import Text.RawString.QQ
 import Dyn.AST
 import Dyn.Parser
 import Dyn.Eval
-import Dyn.Prelude hiding (ieq,iord,ieq_bool,iord_bool)
+import Dyn.Prelude
 import Dyn.Ifce
 
 main :: IO ()

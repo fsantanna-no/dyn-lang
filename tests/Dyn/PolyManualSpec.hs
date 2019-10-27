@@ -8,7 +8,7 @@ import Text.RawString.QQ
 import Dyn.AST
 import Dyn.Parser
 import Dyn.Eval
-import Dyn.Prelude
+import Dyn.Prelude (nat,bool)
 
 main :: IO ()
 main = hspec spec
@@ -102,3 +102,137 @@ f = func ->
 ;
 |] ++ prelude)
           `shouldBe` "Bool.True"
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+prelude = iord_nat ++ ieq_nat ++ iord_bool ++ ieq_bool ++ iord ++ ieq ++ nat ++ bool
+
+-- interface IEq(eq,neq)
+ieq = [r|
+  -- Methods are renamed to include "dict" param:
+  --  - eq_  has a default implentation
+  --  - neq_ has a default implentation
+  dieq = Dict.IEq (eq,neq)  -- IEq is an interface with all members instantiated, so it support all types
+  eq = func ->  -- (ieq_*,a,a) -> Bool
+    case (x,y) of
+      (~y,_) -> Bool.True
+      _      -> Bool.False
+    ; where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      (dieq,p1,p2) = ...
+    ;
+  ;
+  neq = func ->  -- (ieq_*,a,a) -> Bool
+    not (eq (dieq,x,y)) where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      (dieq,p1,p2) = ...
+    ;
+  ;
+|]
+
+-- interface IOrd(lt,lte,dt,gte)
+iord = [r|
+  -- lt_ = ???
+  lte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
+    or ( lt (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y),
+         eq (Dict.IEq (eq,neq),x,y) ) where
+      (Dict.IEq (eq,neq),Dict.IOrd (lt,lte,gt,gte),x,y) = ...
+    ;
+  ;
+  gt = func ->  -- (ieq_*,iord_*,a,a) -> Bool
+    not (lte (dieq,diord,x,y)) where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      Dict.IOrd (lt,lte,gt,gte) = diord
+      (dieq,diord,p1,p2) = ...
+    ;
+  ;
+  gte = func ->  -- (ieq_*,iord_*,a,a) -> Bool
+    or ( gt (dieq,diord,x,y),
+         eq (dieq,x,y) ) where
+      (x,y) = ...
+      -- AUTO
+      ... = (p1,p2)
+      Dict.IEq (eq,neq) = dieq
+      Dict.IOrd (lt,lte,gt,gte) = diord
+      (dieq,diord,p1,p2) = ...
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- instance IEq (Bool)
+ieq_bool = [r|
+  -- Dict receives eq/neq methods.
+  --  - implements eq, uses default neq
+  --  - methods receive extra dict
+  -- overrides default eq
+  dieq_bool = Dict.IEq (eq,neq) where
+    eq = func ->  -- (dieq_bool,Bool,Bool) -> Bool
+      or (and (x,y), (and (not x, not y))) where
+        (x,y) = ...
+        -- AUTO
+        ... = (p1,p2)
+        (dieq,p1,p2) = ...
+      ;
+    ;
+  ;
+|]
+
+-- implementation IOrd for Bool
+iord_bool = [r|
+  -- dict
+  diord_bool = Dict.IOrd (lt,lte,gt,gte) where
+    lt = func ->
+      case (x,y) of
+        (Bool.False, Bool.False) -> Bool.False
+        (Bool.False, Bool.True)  -> Bool.True
+        (Bool.True,  Bool.False) -> Bool.False
+        (Bool.True,  Bool.True)  -> Bool.False
+      ; where
+        (x,y) = ...
+        -- AUTO
+        ... = (p1,p2)
+        (dieq,diord,p1,p2) = ...
+      ;
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
+
+-- instance IEq (Int)
+ieq_nat = [r|
+  ieq_nat = Dict.IEq (eq,neq)
+|]
+
+-- implementation IOrd for Nat
+iord_nat = [r|
+  iord_nat = Dict.IOrd (lt,lte,gt,gte) where
+    lt = func ->
+      case (x,y) of
+        (Nat.Zero,     Nat.Zero)     -> Bool.False
+        (Nat.Zero,     _)            -> Bool.True
+        (Nat.Succ _,   Nat.Zero)     -> Bool.False
+        (Nat.Succ =x', Nat.Succ =y') -> lt (dieq,diord,x',y')
+      ; where
+        (x,y) = ...
+        -- AUTO
+        ... = (p1,p2)
+        Dict.IOrd (lt,_,_,_) = diord
+        (dieq,diord,p1,p2)   = ...
+      ;
+    ;
+  ;
+|]
