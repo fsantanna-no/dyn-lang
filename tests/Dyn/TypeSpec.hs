@@ -29,9 +29,20 @@ spec = do
         `shouldBe` Type (az, TVar "a", caieq)
 
   describe "poly:" $ do
-    it "x" $
-      poly [DSig az "x" (Type (az,TUnit,cz))] (EVar az "x") `shouldBe` ()
+    it "() vs ()" $
+      poly [] (Type (az,TUnit,cz)) (Where (az,EUnit az,[]))
+        `shouldBe` (Where (az,EUnit az,[]))
+{-
+    it "[] x" $
+      poly [DSig az "x" (Type (az,TUnit,cz))] cz (EVar az "x")
+        `shouldBe` False
+    it "[a] x" $
+      poly [DSig az "x" (Type (az,TUnit,cz))] caieq (EVar az "x")
+        `shouldBe` False
     it "x :: a" $
-      poly [DSig az "x" (Type (az,TVar "a",caieq))] (EVar az "x")
-        `shouldBe` ()
-
+      poly [DSig az "x" (Type (az,TVar "a",caieq))] cz (EVar az "x")
+        `shouldBe` True
+    it "[a] x :: a" $
+      poly [DSig az "x" (Type (az,TVar "a",caieq))] caieq (EVar az "x")
+        `shouldBe` False
+-}

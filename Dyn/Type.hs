@@ -7,15 +7,14 @@ import qualified Data.Map as M
 
 import Dyn.AST
 
--------------------------------------------------------------------------------
-
 type Env = [Decl]
 
---declsToEnv :: [Decls] -> Env
---declsToEnv decls = (filter isDSig decls)
-
 -------------------------------------------------------------------------------
 
+-- Env:   context of variables
+-- TCtrs: context of constraints
+-- Expr:  expression to get the type
+-- Type:  returned expression type
 getType :: Env -> TCtrs -> Expr -> Type
 getType _   cs  (EUnit z)      = Type (z,  TUnit, cs)
 getType env cs1 (EVar  z1 id1) = Type (z1, ttp2,  cs') where
@@ -25,9 +24,32 @@ getType env cs1 (EVar  z1 id1) = Type (z1, ttp2,  cs') where
 
 -------------------------------------------------------------------------------
 
-poly :: Env -> Expr -> ()
-poly env evar@(EVar _ id) = traceShow tp' () where
-  tp' = getType env cz evar
+-- Env:   context of variables
+-- Type:  expected type
+-- Where: expression (+ decls) to evaluate
+-- Where: transformed expression (+ decls) (maybe the same)
+--
+poly :: Env -> Type -> Where -> Where
+poly _   (Type (_,TUnit,_))  w@(Where (_,EUnit _,_))    = w -- () vs () --> ()
+poly _   (Type (_,TVar _,_)) w                          = w -- a  vs e  --> e
+poly env xtp                 w@(Where (z,EVar _ id,ds)) =
+  case (xtp,tp) of
+    _ | (xtp==tp) -> w                                     -- T  vs T  --> w
+    (_, Type (_,TVar id,_))  -> w                       -- T  vs x::a --> ???
+  where
+    DSig _ _ tp = fromJust $ find f env where
+                    f (DSig _ x _) = (id == x)
+
+{-
+poly env xtp expr =
+
+  if cs == cs' then
+    False
+  else
+    True
+  where
+    Type (_, _, cs') = getType env cs expr
+-}
 
 -------------------------------------------------------------------------------
 
