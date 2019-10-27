@@ -57,7 +57,7 @@ evalExpr env (ECase z e cs) =
 evalExpr env (ECall _ (EError z msg)  _)   = EError z msg
 evalExpr env (ECall z f arg) =
   case (evalExpr env f, evalExpr env arg) of
-    ((EData _ ["Show"] _) , x              ) -> traceShowId x
+    ((EData _ ["Show"] _) , x              ) -> traceShow (toString x) x
     (e1@(EError _ _)      , _              ) -> e1
     (_                    , e2@(EError _ _)) -> e2
     ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'

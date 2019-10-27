@@ -1,4 +1,4 @@
-- implementation of IEq for **a where a is ...**
+- stack trace
 
 - na hora da *chamada*
     - colocar um where em volta pegando o dict da implementacao que bate:

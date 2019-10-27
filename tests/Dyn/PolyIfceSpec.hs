@@ -90,31 +90,19 @@ main = (f ((dIEqBool(),dIOrdBool()), (Bool.True, Bool.False)),
 
     it "XXX-1: implementation of IEq for a where a is IXxx" $
       run ([r|
-main = (lt ((dIEq(),dIOrdIXxx ()), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIXxx ()), (Xxx.True,Xxx.False))) where
-  Dict.IOrd (lt,lte,gt,gte) = dIOrdIXxx()
+main = (lt ((dIEq(),dIOrdIXxx (dIXxxXxx())), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIXxx (dIXxxXxx())), (Xxx.True,Xxx.False))) where
+  Dict.IOrd (lt,lte,gt,gte) = dIOrdIXxx (dIXxxXxx())
 ;
 
 implementation of IOrd for a where a is IXxx with
   lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
-    lt ((daIEq,daIOrd), f (daIXxx,x), f (daIXxx,y)) where
+    lt ((dIEq(),dIOrdBool()), (f (daIXxx,x), f (daIXxx,y))) where
+      Dict.IOrd (lt,lte,gt,gte) = dIOrdBool()
       (x,y) = ...
     ;
   ;
 ;
-
---dIOrdIXxx = func -> -- ixxx -> iord
---  Dict.IOrd (eq,neq) where
---    eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
---      eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
---        Dict.IEq (eq,neq) = dieq_bool
---        (_,x,y)  = ...
---      ;
---    ; where
---      (f) = ...
---    ;
---  ;
---;
 
 interface IXxx for a with
   f :: (a -> Bool)
@@ -131,17 +119,3 @@ implementation of IXxx for Xxx with
 ;
 |] ++ iord_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
-
-{-
-    it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
-      run ([r|
-main = f (ieq_nat, one)
-f = func ->
-  eq (Dict.IEq (eq,neq),x,x) where
-    (Dict.IEq (eq,neq), x) = ...
-  ;
-;
-|] ++ prelude)
-          `shouldBe` "Bool.True"
-
--}

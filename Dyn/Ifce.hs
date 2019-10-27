@@ -67,22 +67,28 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
 implToDecls :: [Ifce] -> Impl -> [Decl]
 implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 
-  -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=... ;
+  -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=<...> daIXxx=...;
   -- func b/c of HKT that needs a closure with parametric dictionary
   dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,f,[])) where
-          f = EFunc z tz [] (Where (z,d,decls'))
+          f = EFunc z tz [] (Where (z,d,decls'++[ups']))
           d = ECall z (ECons z ["Dict",ifc])
                       (fromList $ map (EVar z) $ ifceToIds ifce)
+
+  -- {daIXxx} // implementation of IOrd for a where a is IXxx
+  ups' = DAtr z (fromList $ map (\id -> PWrite z ("da"++id)) imp_ids)
+                (Where (z,EArg z,[]))
 
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
-  decls' = map (expandDecl ifces (id,ids)) decls where
+  -- eq = <...>
+  decls' = map (expandDecl ifces (id,imp_ids)) decls where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
-            ids = case cs of          -- ids: from instance constraints
-                    []      -> []
-                    [(_,l)] -> l
-                    _       -> error "TODO: multiple vars"
+
+  imp_ids = case cs of          -- ids: from instance constraints
+              []      -> []
+              [(_,l)] -> l
+              _       -> error "TODO: multiple vars"
 
   ifce = fromJust $ L.find h ifces where
           h :: Ifce -> Bool
@@ -103,17 +109,20 @@ expandDecl ifces
            (ifc_id,imp_ids)
            (DAtr z1 e1
             (Where (z2,
-              EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) ups3 (Where (z5,e5,ds5)),
+              EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) [] (Where (z5,e5,ds5)),
               ds2))) =
   DAtr z1 e1
     (Where (z2,
-            EFunc z3 (Type (z4,TFunc inp4 out4,cs4NImps)) ups3 (Where (z5,e5,ds5')),
+            EFunc z3 (Type (z4,TFunc inp4 out4,cs4NImps')) ups3' (Where (z5,e5,ds5')),
             ds2))
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
-    cs4NImps = ("a", sups ifces [ifc_id])         : cs4
-    cs4YImps = ("a", sups ifces (ifc_id:imp_ids)) : cs4
+    cs4NImps' = ("a", sups ifces [ifc_id])         : cs4
+    cs4YImps  = ("a", sups ifces (ifc_id:imp_ids)) : cs4
+
+    -- {daIXxx} // implementation of IOrd for a where a is IXxx
+    ups3' = map (\id -> ("da"++id,EUnit az)) imp_ids
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
@@ -140,7 +149,7 @@ expandDecl ifces
     -- (d1,...,dN)
     -- csNImps: exclude implementation constraints since dicts come from closure
     dicts5 :: Patt
-    dicts5 = fromList $ map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps)
+    dicts5 = fromList $ map (PWrite z1) $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps')
                                             -- [daIEq,daIShow,dbIEq,...]
 
     -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
