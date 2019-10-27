@@ -1,5 +1,3 @@
-{-# LANGUAGE QuasiQuotes #-}
-
 module Dyn.Ifce where
 
 import Debug.Trace

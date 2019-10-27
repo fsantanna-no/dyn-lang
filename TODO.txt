@@ -1,3 +1,5 @@
+- TIPOS!
+- tambem guardar variaveis dentro de ifce/impl
 - na hora da *chamada*
     - colocar um where em volta pegando o dict da implementacao que bate:
         - Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
@@ -5,7 +7,6 @@
         - lte (dIEqBool, dIOrdBool, Bool.True,  Bool.False)
 
 - voltar ao Book
-    - Prelude hiding (...)
 
 - poli
     - multiplas variaveis
