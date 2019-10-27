@@ -3,6 +3,8 @@ module Dyn.AST where
 import Debug.Trace
 
 import qualified Data.List as L
+import qualified Data.Map  as M
+import qualified Data.Set  as S
 
 data Ann = Ann { pos :: (Int,Int) }
   deriving (Eq, Show)
@@ -45,6 +47,12 @@ data TType = --TAny                         -- bot/sup
            | TTuple [TType]               -- (len >= 2)
            | TFunc  {-FuncType-} TType TType  -- inp out
   deriving (Eq,Show)
+
+ctrsToMap :: TCtrs -> M.Map ID_Var (S.Set ID_Ifce)
+ctrsToMap cs = M.map S.fromAscList $ M.fromAscList cs
+
+ctrsFromMap :: M.Map ID_Var (S.Set ID_Ifce) -> TCtrs
+ctrsFromMap csmap = map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
 
 -------------------------------------------------------------------------------
 

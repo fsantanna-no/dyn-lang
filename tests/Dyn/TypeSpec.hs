@@ -26,7 +26,7 @@ spec = do
         `shouldBe` Type (az, TVar "a", caieq)
     it "x :: a" $
       getType [DSig az "x" (Type (az,TVar "a",caieq))] cz (EVar az "x")
-        `shouldBe` Type (az, TUnit, cz)
+        `shouldBe` Type (az, TVar "a", caieq)
 
   describe "poly:" $ do
     it "x" $
