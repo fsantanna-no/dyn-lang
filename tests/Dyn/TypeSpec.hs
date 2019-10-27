@@ -11,7 +11,9 @@ import Dyn.Type
 main :: IO ()
 main = hspec spec
 
-caieq = [("a",["IEq"])]
+caieq  = [("a",["IEq"])]
+caibnd = [("a",["IBounded"])]
+taibnd = Type (az,TVar "a",caibnd)
 
 spec = do
 
@@ -32,6 +34,9 @@ spec = do
     it "() vs ()" $
       poly [] (Type (az,TUnit,cz)) (Where (az,EUnit az,[]))
         `shouldBe` (Where (az,EUnit az,[]))
+    it "min: Bool vs a::IBounded" $
+      poly [DSig az "min" taibnd] (Type (az,TData ["Bool"],cz)) (Where (az,EVar az "min",[]))
+        `shouldBe` (Where (az,EVar az "min",[]))
 {-
     it "[] x" $
       poly [DSig az "x" (Type (az,TUnit,cz))] cz (EVar az "x")

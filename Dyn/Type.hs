@@ -32,10 +32,15 @@ getType env cs1 (EVar  z1 id1) = Type (z1, ttp2,  cs') where
 poly :: Env -> Type -> Where -> Where
 poly _   (Type (_,TUnit,_))  w@(Where (_,EUnit _,_))    = w -- () vs () --> ()
 poly _   (Type (_,TVar _,_)) w                          = w -- a  vs e  --> e
-poly env xtp                 w@(Where (z,EVar _ id,ds)) =
+                                                            -- T  vs T  --> w
+                                                            -- T  vs x::a --> ???
+poly env xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
   case (xtp,tp) of
-    _ | (xtp==tp) -> w                                     -- T  vs T  --> w
-    (_, Type (_,TVar id,_))  -> w                       -- T  vs x::a --> ???
+    _ | (xtp==tp)             -> w
+    (_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id,ds++ds') where
+                                  ds'  = traceShow dicts []
+                                  ifcs = snd $ head $ filter ((==tid).fst) cs
+                                  dicts = map (\ifc -> "d"++tid++ifc++concat xhr) ifcs
   where
     DSig _ _ tp = fromJust $ find f env where
                     f (DSig _ x _) = (id == x)
