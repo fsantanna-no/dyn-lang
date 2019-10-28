@@ -6,6 +6,10 @@ import qualified Data.List as L
 import qualified Data.Map  as M
 import qualified Data.Set  as S
 
+traceShowX v id = traceShow (v, "==>", id) id
+traceShowS v = traceShow (toString v) v
+traceShowSS vs = traceShow (map toString vs) vs
+
 data Ann = Ann { pos :: (Int,Int) }
   deriving (Eq, Show)
 
@@ -40,8 +44,8 @@ tz = Type (az, TUnit, cz)
 type TCtr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
 type TCtrs = [TCtr]               -- [(a,[IEq,IOrd,IShow]), (b,[...])]
 
-data TType = --TAny                         -- bot/sup
-             TUnit
+data TType = TAny
+           | TUnit
            | TVar   ID_Var
            | TData  ID_Hier {-[TType]-}       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
            | TTuple [TType]               -- (len >= 2)

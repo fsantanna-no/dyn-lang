@@ -14,6 +14,7 @@ import Dyn.Ifce
 caieq  = [("a",["IEq"])]
 caibnd = [("a",["IBounded"])]
 taibnd = Type (az,TVar "a",caibnd)
+tbool  = Type (az,TData ["Bool"],cz)
 
 ibnd = Ifce (az,"IBounded",[("a",[])],[DSig az "minimum" tz, DSig az "maximum" tz])
 
@@ -24,11 +25,18 @@ spec = do
 
   describe "IBounded" $ do
 
+    it "XXX: Bool" $
+      run ([r|
+main = maximum
+minimum :: Bool
+|] ++ ibounded_bool ++ bool ++ ibounded)
+        `shouldBe` "(Bool.True,Bool.False)"
+
     it "Bool" $
       run ([r|
-main = (maximum, minimum) where
-  Dict.IBounded (minimum,maximum) = dIBoundedBool()
-;
+main = (maximum, minimum) -- where Dict.IBounded (minimum,maximum) = dIBoundedBool() ;
+minimum :: Bool
+maximum :: Bool
 |] ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -104,7 +112,7 @@ main = (f ((dIEqBool(),dIOrdBool()), (Bool.True, Bool.False)),
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
-    it "XXX-1: implementation of IEq for a where a is IAaa" $
+    it "implementation of IEq for a where a is IAaa" $
       run ([r|
 main = (lt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False))) where
   Dict.IOrd (lt,lte,gt,gte) = dIOrdIAaa (dIAaaXxx())
@@ -143,3 +151,9 @@ implementation of IAaa for Xxx with
     it "minimum: Bool vs a::IBounded" $
       toString (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TData ["Bool"],cz)) (Where (az,EVar az "minimum",[])))
         `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = daIBoundedBool\n;"
+    it "Bool vs Bool" $
+      (poly [] [DSig az "x" tbool] tbool (Where (az,EVar az "x",[])))
+        `shouldBe` Where (az,EVar az "x",[])
+    it "minimum: a vs a::IBounded" $
+      (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TVar "a",cz)) (Where (az,EVar az "minimum",[])))
+        `shouldBe` Where (az,EVar az "minimum",[])

@@ -2,9 +2,10 @@ module Dyn.Parser where
 
 import Debug.Trace
 import Control.Monad          (void, when, guard)
-import Data.Maybe             (isJust)
+import Data.Maybe             (isJust,fromJust)
 import Data.Bool              (bool)
 import Data.Char              (isLower, isUpper)
+import Data.List              (find)
 
 import qualified Text.Parsec as P (parse,parserZero)
 import Text.Parsec.Prim       (many, try, (<|>), (<?>), unexpected, getPosition)
@@ -431,7 +432,7 @@ prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
   spc
-  pl   <- concat <$> list (tk_sym "") (
+  glbs <- concat <$> list (tk_sym "") (
             (fmap (GDecl<$>) (try decl)) <|>
             (singleton <$> GIfce <$> try ifce) <|>
             (singleton <$> GImpl <$> impl) -- <|>
@@ -439,17 +440,35 @@ prog = do
   void <- eof
   return $
     let
-      toDecl (GDecl dcl) = [dcl]
-      toDecl (GIfce ifc) = ifceToDecls (plToIfcs pl) ifc
-      toDecl (GImpl imp) = implToDecls (plToIfcs pl) imp
+      toDecls (GDecl dcl) = [dcl]
+      toDecls (GIfce ifc) = ifceToDecls ifces ifc
+      toDecls (GImpl imp) = implToDecls ifces imp
+      ifces = glbsToIfcs glbs
      in
-      Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecl pl)
+      Where (az{pos=pos}, EVar az{pos=pos} "main",
+              poly' ifces $ concatMap toDecls glbs)
 
-plToIfcs :: [GList] -> [Ifce]
-plToIfcs pl = map g $ filter f pl where
-                f (GIfce ifc) = True
-                f _           = False
-                g (GIfce ifc) = ifc
+glbsToIfcs :: [GList] -> [Ifce]
+glbsToIfcs glbs = map g $ filter f glbs where
+                    f (GIfce ifc) = True
+                    f _           = False
+                    g (GIfce ifc) = ifc
+
+poly' :: [Ifce] -> [Decl] -> [Decl]
+poly' ifces decls = foldr f [] decls where
+  f (DAtr z1 (PWrite z2 id2) whe1) decls = traceShowSS $
+    (DAtr z1 (PWrite z2 id2) whe1') : decls where
+      dsigs = filter isDSig decls
+      whe1' = poly ifces dsigs (dsigFind dsigs id2) whe1
+  f x decls = x : decls
+
+dsigFind :: [Decl] -> ID_Var -> Type
+dsigFind dsigs id = case find f dsigs of
+                      Nothing            -> Type (az,TAny,cz)
+                      Just (DSig _ _ tp) -> tp
+                    where
+                      f :: Decl -> Bool
+                      f (DSig _ x _) = (id == x)
 
 -------------------------------------------------------------------------------
 

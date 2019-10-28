@@ -185,11 +185,8 @@ expandDecl _ _ decl = error $ toString decl
 -- Where:  transformed expression (+ decls) (maybe the same)
 --
 poly :: [Ifce] -> [Decl] -> Type -> Where -> Where
-poly _ _ (Type (_,TUnit,_))  w@(Where (_,EUnit _,_)) = w -- () vs () --> ()
-poly _ _ (Type (_,TVar _,_)) w                       = w -- a  vs e  --> e
-                                                         -- T  vs T  --> w
-                                                         -- T  vs x::a --> ???
-poly ifces env xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
+
+poly ifces dsigs xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
   case (xtp,tp) of
     _ | (xtp==tp)             -> w
 
@@ -212,7 +209,7 @@ poly ifces env xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
                 (Where (z1, EVar z1 dict, []))
 
   where
-    DSig _ _ tp = fromJust $ find f env where
+    DSig _ _ tp = fromJust $ find f dsigs where
                     f (DSig _ x _) = (id == x)
 
-
+poly _ _ _ w = w
