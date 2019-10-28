@@ -11,6 +11,12 @@ import Dyn.Eval
 import Dyn.Prelude
 import Dyn.Ifce
 
+caieq  = [("a",["IEq"])]
+caibnd = [("a",["IBounded"])]
+taibnd = Type (az,TVar "a",caibnd)
+
+ibnd = Ifce (az,"IBounded",[("a",[])],[DSig az "minimum" tz, DSig az "maximum" tz])
+
 main :: IO ()
 main = hspec spec
 
@@ -129,3 +135,11 @@ implementation of IAaa for Xxx with
 ;
 |] ++ iord_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
+
+  describe "poly" $ do
+    it "() vs ()" $
+      poly [] [] (Type (az,TUnit,cz)) (Where (az,EUnit az,[]))
+        `shouldBe` (Where (az,EUnit az,[]))
+    it "minimum: Bool vs a::IBounded" $
+      toString (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TData ["Bool"],cz)) (Where (az,EVar az "minimum",[])))
+        `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = daIBoundedBool\n;"

@@ -25,42 +25,6 @@ getType env cs1 (EVar  z1 id1) = Type (z1, ttp2,  cs') where
 
 -------------------------------------------------------------------------------
 
--- Env:   context of variables
--- Type:  expected type
--- Where: expression (+ decls) to evaluate
--- Where: transformed expression (+ decls) (maybe the same)
---
-poly :: [Ifce] -> Env -> Type -> Where -> Where
-poly _ _ (Type (_,TUnit,_))  w@(Where (_,EUnit _,_)) = w -- () vs () --> ()
-poly _ _ (Type (_,TVar _,_)) w                       = w -- a  vs e  --> e
-                                                         -- T  vs T  --> w
-                                                         -- T  vs x::a --> ???
-poly ifces env xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
-  case (xtp,tp) of
-    _ | (xtp==tp)             -> w
-
-    (_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id,ds++ds') where
-
-      -- [("IEq",...)]
-      ifc_ids = snd $ fromJust $ find ((==tid).fst) cs
-
-      -- [Dict.IEq (eq,neq) = daIEqBool, ...]
-      ds' :: [Decl]
-      ds' = map f $
-              -- [("IEq", "daIEqBool", (eq,neq)),...]
-              zip3 ifc_ids dicts dclss where
-                -- ["daIEqBool",...]
-                dicts = map (\ifc -> "d"++tid++ifc++concat xhr) ifc_ids
-                -- [(eq,neq),...]
-                dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
-      f (ifc,dict,dcls) =
-        DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
-                (Where (z1, EVar z1 dict, []))
-
-  where
-    DSig _ _ tp = fromJust $ find f env where
-                    f (DSig _ x _) = (id == x)
-
 {-
 poly env xtp expr =
 

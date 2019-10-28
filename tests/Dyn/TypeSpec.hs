@@ -12,10 +12,6 @@ main :: IO ()
 main = hspec spec
 
 caieq  = [("a",["IEq"])]
-caibnd = [("a",["IBounded"])]
-taibnd = Type (az,TVar "a",caibnd)
-
-ibnd = Ifce (az,"IBounded",[("a",[])],[DSig az "minimum" tz, DSig az "maximum" tz])
 
 spec = do
 
@@ -31,14 +27,6 @@ spec = do
     it "x :: a" $
       getType [DSig az "x" (Type (az,TVar "a",caieq))] cz (EVar az "x")
         `shouldBe` Type (az, TVar "a", caieq)
-
-  describe "poly:" $ do
-    it "() vs ()" $
-      poly [] [] (Type (az,TUnit,cz)) (Where (az,EUnit az,[]))
-        `shouldBe` (Where (az,EUnit az,[]))
-    it "minimum: Bool vs a::IBounded" $
-      toString (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TData ["Bool"],cz)) (Where (az,EVar az "minimum",[])))
-        `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = daIBoundedBool\n;"
 {-
     it "[] x" $
       poly [DSig az "x" (Type (az,TUnit,cz))] cz (EVar az "x")
