@@ -78,7 +78,7 @@ instance IString Type where
 -------------------------------------------------------------------------------
 
 instance IString TType where
-  --toString TAny            = "?"
+  toString TAny             = "?"
   toString TUnit            = "()"
   toString (TVar   id)      = id
   toString (TData  hr)      = intercalate "." hr

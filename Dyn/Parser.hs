@@ -14,8 +14,8 @@ import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
-import Dyn.AST as A
-import Dyn.Ifce
+import Dyn.AST  as AST
+import qualified Dyn.Ifce as Ifce
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -178,7 +178,7 @@ expr_call = do
   pos <- toPos <$> getPosition
   e1  <- expr_one
   e2  <- expr_one
-  guard $ (fst $ A.pos $ getAnn e1) == (fst $ A.pos $ getAnn e2)  -- must be at the same line
+  guard $ (fst $ AST.pos $ getAnn e1) == (fst $ AST.pos $ getAnn e2)  -- must be at the same line
   return $ ECall az {pos=pos} e1 e2
 
 expr_one :: Parser Expr
@@ -441,34 +441,18 @@ prog = do
   return $
     let
       toDecls (GDecl dcl) = [dcl]
-      toDecls (GIfce ifc) = ifceToDecls ifces ifc
-      toDecls (GImpl imp) = implToDecls ifces imp
+      toDecls (GIfce ifc) = Ifce.ifceToDecls ifces ifc
+      toDecls (GImpl imp) = Ifce.implToDecls ifces imp
       ifces = glbsToIfcs glbs
      in
-      Where (az{pos=pos}, EVar az{pos=pos} "main",
-              poly' ifces $ concatMap toDecls glbs)
+      Ifce.poly ifces [] (Type (az,TData ["Bool"],cz)) $
+        Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecls glbs)
 
 glbsToIfcs :: [GList] -> [Ifce]
 glbsToIfcs glbs = map g $ filter f glbs where
                     f (GIfce ifc) = True
                     f _           = False
                     g (GIfce ifc) = ifc
-
-poly' :: [Ifce] -> [Decl] -> [Decl]
-poly' ifces decls = foldr f [] decls where
-  f (DAtr z1 (PWrite z2 id2) whe1) decls = traceShowSS $
-    (DAtr z1 (PWrite z2 id2) whe1') : decls where
-      dsigs = filter isDSig decls
-      whe1' = poly ifces dsigs (dsigFind dsigs id2) whe1
-  f x decls = x : decls
-
-dsigFind :: [Decl] -> ID_Var -> Type
-dsigFind dsigs id = case find f dsigs of
-                      Nothing            -> Type (az,TAny,cz)
-                      Just (DSig _ _ tp) -> tp
-                    where
-                      f :: Decl -> Bool
-                      f (DSig _ x _) = (id == x)
 
 -------------------------------------------------------------------------------
 

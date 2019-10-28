@@ -25,18 +25,13 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "XXX: Bool" $
-      run ([r|
-main = maximum
-minimum :: Bool
-|] ++ ibounded_bool ++ bool ++ ibounded)
+    it "main = maximum" $
+      run ("main = maximum" ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
-    it "Bool" $
+    it "(maximum,minimum)" $
       run ([r|
-main = (maximum, minimum) -- where Dict.IBounded (minimum,maximum) = dIBoundedBool() ;
-minimum :: Bool
-maximum :: Bool
+main = (maximum, minimum)
 |] ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 

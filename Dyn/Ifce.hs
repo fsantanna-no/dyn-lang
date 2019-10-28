@@ -186,9 +186,21 @@ expandDecl _ _ decl = error $ toString decl
 --
 poly :: [Ifce] -> [Decl] -> Type -> Where -> Where
 
-poly ifces dsigs xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
+poly ifces dsigs xtp (Where (z,expr,ds)) = poly' ifces dsigs xtp whe' where
+  whe' = Where (z,expr,ds')
+  ds'  = map f ds where
+          f d@(DSig _ _ _) = d
+          f (DAtr z1 (PWrite z2 id2) whe1) =
+            DAtr z1 (PWrite z2 id2) $ poly ifces dsigs' (dsigFind dsigs id2) whe1
+          f (DAtr z1 pat whe1) =
+            DAtr z1 pat $ poly ifces dsigs' (Type (az,TAny,cz)) whe1
+  dsigs' = dsigs ++ filter isDSig ds
+
+poly' :: [Ifce] -> [Decl] -> Type -> Where -> Where
+
+poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id,ds)) =
   case (xtp,tp) of
-    _ | (xtp==tp)             -> w
+    _ | (xtp==tp)             -> whe
 
     (_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id,ds++ds') where
 
@@ -204,12 +216,25 @@ poly ifces dsigs xtp@(Type (_,TData xhr,_)) w@(Where (z1,EVar z2 id,ds)) =
                 dicts = map (\ifc -> "d"++tid++ifc++concat xhr) ifc_ids
                 -- [(eq,neq),...]
                 dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
+      -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
       f (ifc,dict,dcls) =
         DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
                 (Where (z1, EVar z1 dict, []))
 
-  where
-    DSig _ _ tp = fromJust $ find f dsigs where
-                    f (DSig _ x _) = (id == x)
+    otherwise                 -> whe
 
-poly _ _ _ w = w
+  where
+    tp = dsigFind dsigs id
+
+poly' _ _ _ whe = whe
+
+-------------------------------------------------------------------------------
+
+dsigFind :: [Decl] -> ID_Var -> Type
+dsigFind dsigs id = case find f dsigs of
+                      Nothing            -> Type (az,TAny,cz)
+                      Just (DSig _ _ tp) -> tp
+                    where
+                      f :: Decl -> Bool
+                      f (DSig _ x _) = (id == x)
+
