@@ -104,10 +104,10 @@ newtype Ifce = Ifce (Ann, ID_Ifce, TCtrs, [Decl])
 newtype Impl = Impl (Ann, ID_Ifce, Type, [Decl])
   deriving (Eq, Show)
 
-newtype Prog = Prog [Global]
+newtype Prog = Prog [Glob]
 
 -- top-level global declarations
-data Global = GDecl Decl | GIfce Ifce | GImpl Impl
+data Glob = GDecl Decl | GIfce Ifce | GImpl Impl
 
 -------------------------------------------------------------------------------
 
@@ -124,3 +124,10 @@ isEError _            = False
 
 declsSplit :: [Decl] -> ([Decl],[Decl])
 declsSplit decls = (filter isDSig decls, filter isDAtr decls)
+
+globToDecl :: Glob -> Decl
+globToDecl (GDecl decl) = decl
+  -- refuse GIfce/GImpl
+
+globFromDecl :: Decl -> Glob
+globFromDecl decl = GDecl decl

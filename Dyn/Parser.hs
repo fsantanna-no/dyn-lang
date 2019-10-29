@@ -427,15 +427,15 @@ impl = do
 
 prog :: Parser Prog
 prog = do
-  pos  <- toPos <$> getPosition
+  pos   <- toPos <$> getPosition
   spc
-  glbs <- concat <$> list (tk_sym "") (
+  globs <- concat <$> list (tk_sym "") (
             (fmap (GDecl<$>) (try decl)) <|>
             (singleton <$> GIfce <$> try ifce) <|>
             (singleton <$> GImpl <$> impl) -- <|>
-          )
+           )
   void <- eof
-  return $ Prog glbs
+  return $ Prog globs
 
 -------------------------------------------------------------------------------
 
