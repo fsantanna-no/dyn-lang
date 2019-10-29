@@ -219,9 +219,12 @@ poly ifces dsigs decls = map poly' $ map rec decls where
 
       -------------------------------------------------------------------------
       -- pat1::Bool = id3(maximum)
-      EVar z3 id3 -> Where (z2, e2,  ds2'') where
+      EVar z3 id3 -> Where (z2, EVar z3 id3'',  ds2'') where
 
-        ds2'' = bool (ds2' ifc_ids xhr) ds2 (null tvars4)
+        (id3'',ds2'') = if null tvars4 then
+                          (id3, ds2)
+                        else
+                          (posid z3 id3, ds2' z3 ifc_ids xhr)
 
         -- x :: Bool = maximum
         Type (_,TData xhr,_) = pattToType dsigs' pat1
@@ -237,9 +240,12 @@ poly ifces dsigs decls = map poly' $ map rec decls where
 
       -------------------------------------------------------------------------
       -- pat1::B = id4(neq) e3::(B,B)
-      ECall z3 (EVar z4 id4) e3 -> Where (z2, (ECall z2 (EVar z4 id4) e3''), ds2'') where
+      ECall z3 (EVar z4 id4) e3 -> Where (z2, (ECall z2 (EVar z4 id4'') e3''), ds2'') where
 
-        (e3'',ds2'') = bool (e3',ds2' ifc_ids xhr) (e3,ds2) (null tvars4)
+        (id4'',e3'',ds2'') = if null tvars4 then
+                              (id4,e3,ds2)
+                             else
+                              (posid z4 id4, e3', ds2' z4 ifc_ids xhr)
 
         -- eq :: (a,a) -> Bool
         Type (_,ttp4,cs4) = dsigFind dsigs' id4
@@ -278,10 +284,10 @@ poly ifces dsigs decls = map poly' $ map rec decls where
       --  "Dict.IEq (eq,neq) = dIEqBool",
       --  ...
       -- ]
-      --ds2' :: [Decl]
-      ds2' ifc_ids xhr = concatMap f $
-                          -- [("IEq", "daIEqBool", (eq,neq)),...]
-                          zip3 ifc_ids dicts dclss
+      ds2' :: Pos -> [ID_Ifce] -> ID_Hier -> [Decl]
+      ds2' z ifc_ids xhr = concatMap f $
+                            -- [("IEq", "daIEqBool", (eq,neq)),...]
+                            zip3 ifc_ids dicts dclss
         where
           -- ["dIEqBool",...]
           dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
@@ -291,10 +297,10 @@ poly ifces dsigs decls = map poly' $ map rec decls where
           -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
           f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
           f (ifc,dict,dcls) = ds ++ [d] where
-            d  = DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
+            d  = DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) $ map (posid z) dcls))
                          (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
             ds = map g dcls where
-                  g id = DSig z1 id $ mapType f $ dsigFind dsigs' id where
+                  g id = DSig z1 (posid z id) $ mapType f $ dsigFind dsigs' id where
                           f (TVar "a") = TData xhr
                           f ttp        = ttp
 
@@ -317,6 +323,7 @@ toTType ds (ECall  _ f _) = case toTType ds f of
                               TFunc _ out -> out
 toTType _  e = error $ "toTType: " ++ toString e
 
+-- TODO: use mapType
 toVars :: TType -> [ID_Var]
 toVars ttp = S.toAscList $ aux ttp where
   aux TAny            = S.empty
@@ -342,8 +349,12 @@ pattToType dsigs (PWrite _ id) = dsigFind dsigs id
 
 mapType :: (TType -> TType) -> Type -> Type
 mapType f (Type (z,ttp,cs)) = Type (z, aux f ttp, cs) where
+  aux f TAny             = f $ TAny
   aux f (TVar   id)      = f $ TVar   id
   aux f (TData  hr)      = f $ TData  hr
   aux f (TTuple ts)      = f $ TTuple (map (aux f) ts)
   aux f (TFunc  inp out) = f $ TFunc  (aux f inp) (aux f out)
   aux _ x = error $ show x
+
+posid :: Pos -> ID_Var -> ID_Var
+posid (l,c) id = id ++ "_" ++ show l ++ "_" ++ show c
