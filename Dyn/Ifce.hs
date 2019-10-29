@@ -226,7 +226,7 @@ polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
 -- pat1::Bool = id3(maximum)
 polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3'',  ds2'') where
 
-  (id3'',ds2'') = if null tvars4 then
+  (id3'',ds2'') = if null cs4 then
                     (id3, [])
                   else
                     (posid z3 id3, declLocals ifces dsigs z3 ifc_ids xhr)
@@ -237,8 +237,7 @@ polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3'',  ds2'') where
   -- maximum :: a where a is IBounded
   Type (_,ttp4,cs4) = dsigFind dsigs id3
 
-  tvars4  = toVars ttp4 -- [a,...]
-  [tvar4] = tvars4      -- a
+  [tvar4] = toVars ttp4   -- [a]
 
   -- [("IBounded",...)]
   ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
@@ -248,7 +247,7 @@ polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3'',  ds2'') where
 -- pat1::B = id4(neq) e3::(B,B)
 polyExpr ifces dsigs _ (ECall z3 (EVar z4 id4) e3) = (ECall z3 (EVar z4 id4'') e3'', ds2'') where
 
-  (id4'',e3'',ds2'') = if null tvars4 then
+  (id4'',e3'',ds2'') = if null cs4 then
                         (id4,e3,[])
                        else
                         (posid z4 id4, e3', declLocals ifces dsigs z4 ifc_ids xhr)
@@ -256,8 +255,7 @@ polyExpr ifces dsigs _ (ECall z3 (EVar z4 id4) e3) = (ECall z3 (EVar z4 id4'') e
   -- eq :: (a,a) -> Bool
   Type (_,ttp4,cs4) = dsigFind dsigs id4
 
-  tvars4  = toVars ttp4 -- [a]
-  [tvar4] = tvars4      -- a
+  [tvar4] = toVars ttp4   -- [a]
 
   -- [("IEq",...)]
   -- a is IEq

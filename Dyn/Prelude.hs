@@ -4,9 +4,23 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
-prelude = iord_nat ++ iord_bool ++ ieq_bool ++ ibounded_bool ++ iord ++ ieq ++ ibounded ++ nat ++ bool
+prelude = iord_nat ++ iord_bool ++ ieq_bool ++ ibounded_bool ++ iord ++ ieq ++ ibounded ++ std ++ nat ++ bool
 
 -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+std = [r|
+  matches :: ((a,a) -> Bool)
+  matches = func ->
+    case (x,y) of
+      (~y,_) -> Bool.True
+      _      -> Bool.False
+    ; where
+      (x,y) = ...
+    ;
+  ;
+|]
+
 -------------------------------------------------------------------------------
 
 -- Bool type: not, and, or

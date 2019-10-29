@@ -207,7 +207,7 @@ twice = func ->
 
         it "twicec" $            -- pg 12
           evalString True ([r|
-main   = eq (dIEq(), ((twicec square) two, mul(four,four)))
+main   = matches ((twicec square) two, mul(four,four))
 square = func -> mul (...,...);
 twicec = func ->
   func {f} ->
@@ -216,12 +216,12 @@ twicec = func ->
     f = ...
   ;
 ;
-|] ++ ieq ++ nat)
+|] ++ nat ++ std)
           `shouldBe` "Bool.True"
 
         it "quad" $            -- pg 12
           evalString True ([r|
-main   = eq (dIEq(), (quad two, mul (four,four)))
+main   = matches (quad two, mul (four,four))
 quad   = twicec square
 square = func -> mul (...,...);
 twicec = func ->
@@ -236,7 +236,7 @@ twicec = func ->
 
         it "curry" $            -- pg 13
           evalString True ([r|
-main   = eq (dIEq(), ((twicec square) two, mul(four,four)))
+main   = matches ((twicec square) two, mul(four,four))
 square = func -> mul (...,...);
 twicec = curry twice
 twice  = func ->
@@ -298,7 +298,7 @@ uncurry = func ->
 
         it "compose" $         -- pg 15
           evalString True ([r|
-main    = eq (dIEq(), (quad two, mul (four,four)))
+main    = matches (quad two, mul (four,four))
 quad    = compose (square,square)
 square  = func -> mul (...,...);
 compose = func ->
