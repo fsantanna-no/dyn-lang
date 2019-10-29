@@ -9,6 +9,6 @@ import Dyn.Eval
 
 main :: IO ()
 main = do
-    src <- readFile "/tmp/x.tch"
+    src <- readFile "/tmp/x.dis"
     putStrLn $ evalString False src
     return ()
