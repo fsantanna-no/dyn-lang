@@ -208,13 +208,18 @@ poly' :: [Ifce] -> [Decl] -> Type -> Where -> Where
 
 --                Bool                       maximum
 poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id2,ds1)) =
-  case (xtp,tp) of
-    _ | (xtp==tp)             -> whe
+  if null tvars2 then
+    whe
+  else
+    Where (z1, EVar z2 id2,ds1++ds1')
+  where
+      Type (_,ttp2,cs2) = dsigFind dsigs id2
+      tvars2            = toVars ttp2
 
-    (_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id2,ds1++ds1') where
+      [tid] = tvars2
 
       -- [("IEq",...)]
-      ifc_ids = snd $ fromJust $ find ((==tid).fst) cs
+      ifc_ids = snd $ fromJust $ find ((==tid).fst) cs2
 
       -- [Dict.IEq (eq,neq) = daIEqBool, ...]
       ds1' :: [Decl]
@@ -230,13 +235,10 @@ poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id2,ds1)) =
         DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
                 (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
 
-    otherwise                 -> whe
-
-  where
-    tp = dsigFind dsigs id2
-
-poly' ifces dsigs xtp whe@(Where (z1,ECall z2 (EVar z3 id3) expr,ds1)) = whe
+poly' ifces dsigs xtp whe@(Where (z1,ECall z2 (EVar z3 id3) expr,ds1)) =
+  whe
   --case (xtp,tp) of
+    --(_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id2,ds1++ds1') where
   --traceShow ("XTP",toString xtp, "FUNC",toString $ dsigFind dsigs id3, "PS",toString $ toTType expr) whe
 
 poly' _ _ _ whe = whe
@@ -255,6 +257,9 @@ toTType :: Expr -> TType
 toTType (ECons  _ hr) = TData hr
 toTType (ETuple _ es) = TTuple $ map toTType es
 toTType e = error $ toString e
+
+toVars :: TType -> [ID_Var]
+toVars (TVar id) = [id]
 
 {-
 toType :: [Decl] -> Expr -> Type
