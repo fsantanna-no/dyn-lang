@@ -65,10 +65,10 @@ data Expr
   | ECons  Pos ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
   | ETuple Pos [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Pos Type Ups Where         -- (type,ups,body)
+  | EFunc  Pos Type Ups ExpWhere      -- (type,ups,body)
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | EArg   Pos
-  | ECase  Pos Expr [(Patt,Where)]    -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
+  | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   deriving (Eq, Show)
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
@@ -89,11 +89,11 @@ data Patt
 
 -------------------------------------------------------------------------------
 
-newtype Where = Where (Pos, Expr, [Decl])
+newtype ExpWhere = ExpWhere (Pos, Expr, [Decl])
   deriving (Eq, Show)
 
 data Decl = DSig Pos ID_Var Type
-          | DAtr Pos Patt Where
+          | DAtr Pos Patt ExpWhere
   deriving (Eq, Show)
 
 newtype Ifce = Ifce (Pos, ID_Ifce, TCtrs, [Decl])

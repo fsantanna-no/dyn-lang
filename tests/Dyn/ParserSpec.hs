@@ -48,7 +48,7 @@ spec = do
         `shouldBe` Right (EUnit (1,2))
     it "func" $
       parse' expr "func :: () -> ();"
-        `shouldBe` Right (EFunc (1,1) (Type ((1,9), TUnit, [])) [] (Where ((1,15), EUnit (1,15),[])))
+        `shouldBe` Right (EFunc (1,1) (Type ((1,9), TUnit, [])) [] (ExpWhere ((1,15), EUnit (1,15),[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
@@ -68,18 +68,18 @@ spec = do
   describe "where:" $ do
     it "x" $
       parse' where_ "x"
-        `shouldBe` Right (Where ((1,1), EVar (1,1) "x", []))
+        `shouldBe` Right (ExpWhere ((1,1), EVar (1,1) "x", []))
 
   describe "decl:" $ do
     it "x :: () = ()" $
       parse' decl "x :: () = ()"
-        `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, [])),DAtr (1,1) (PWrite (1,1) "x") (Where ((1,11), EUnit (1,11), []))]
+        `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, [])),DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,11), EUnit (1,11), []))]
     it "x :: ()" $
       parse' decl "x :: ()"
         `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, []))]
     it "x = ()" $
       parse' decl "x = ()"
-        `shouldBe` Right [DAtr (1,1) (PWrite (1,1) "x") (Where ((1,5),  EUnit (1,5),  []))]
+        `shouldBe` Right [DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,5),  EUnit (1,5),  []))]
     it "x" $
       parse' decl "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier or \"=\""

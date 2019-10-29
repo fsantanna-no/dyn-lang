@@ -94,10 +94,10 @@ interface IAaa for a where a is IOrd with
       evalString True ([r|
 main = (ff1 (lte, (Bool.True,Bool.False)),
         ff2 (gte, (Bool.True,Bool.True )) ) where
-  ff1 :: (((a,a)->Bool), -> Bool)             -- TODO: should work with previous
+  ff1 :: ((((a,a)->Bool),(a,a)) -> Bool) -- TODO: similar to above (but is out of iface)
   ff1 = func -> f (x,y) where (f,x,y)=... ;;
 
-  ff2 :: (((Bool,Bool)->Bool) -> Bool)        -- TODO: needs closures
+  ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closures
   ff2 = func -> f (x,y) where (f,x,y)=... ;;
 ;
 |] ++ prelude)

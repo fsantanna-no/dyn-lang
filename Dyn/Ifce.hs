@@ -46,8 +46,8 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
   -- (only if all methods are implemented)
   dict :: [Decl]
   dict = bool [] [datr] has_all_impls where
-          datr = DAtr z (PWrite z ("d"++ifc_id)) (Where (z,f,[])) where
-            f = EFunc z tz [] (Where (z,d,[]))
+          datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,[])) where
+            f = EFunc z tz [] (ExpWhere (z,d,[]))
             d = ECall z (ECons z ["Dict",ifc_id])
                         (fromList $ map (EVar z) $ ifceToDeclIds me)
 
@@ -68,14 +68,14 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 
   -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=<...> daIXxx=...;
   -- func b/c of HKT that needs a closure with parametric dictionary
-  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (Where (z,f,[])) where
-          f = EFunc z tz [] (Where (z,d,decls'++[ups']))
+  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (ExpWhere (z,f,[])) where
+          f = EFunc z tz [] (ExpWhere (z,d,decls'++[ups']))
           d = ECall z (ECons z ["Dict",ifc])
                       (fromList $ map (EVar z) $ ifceToDeclIds ifce)
 
   -- {daIXxx} // implementation of IOrd for a where a is IXxx
   ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) imp_ids)
-                (Where (z,EArg z,[]))
+                (ExpWhere (z,EArg z,[]))
 
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
@@ -107,7 +107,7 @@ expandDecl ifces (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
     cs2' = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
 
 -- IBounded: minimum/maximum
-expandDecl _ _ decl@(DAtr _ _ (Where (_,econst,_))) | isConst econst = decl where
+expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
   isConst (EUnit  _)      = True
   isConst (ECons  _ _)    = True
   isConst (ETuple _ es)   = all isConst es
@@ -123,13 +123,13 @@ expandDecl _ _ decl@(DAtr _ _ (Where (_,econst,_))) | isConst econst = decl wher
 expandDecl ifces
            (ifc_id,imp_ids)
            (DAtr z1 e1
-            (Where (z2,
-              EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) [] (Where (z5,e5,ds5)),
+            (ExpWhere (z2,
+              EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) [] (ExpWhere (z5,e5,ds5)),
               ds2))) =
   DAtr z1 e1
-    (Where (z2,
-            EFunc z3 (Type (z4,TFunc inp4 out4,cs4NImps')) ups3' (Where (z5,e5,ds5')),
-            ds2))
+    (ExpWhere (z2,
+               EFunc z3 (Type (z4,TFunc inp4 out4,cs4NImps')) ups3' (ExpWhere (z5,e5,ds5')),
+               ds2))
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
@@ -146,15 +146,15 @@ expandDecl ifces
     --  ... = args          -- AUTO
     --  ((d1,...,dN), args) = ...
     ds5' = ds5 ++ fsDicts5 ++ [
-      DAtr z1 (PArg z1)                             (Where (z1,EVar z1 "args",[])),
-      DAtr z1 (PTuple z1 [dicts5,PWrite z1 "args"]) (Where (z1,EArg z1,[]))
+      DAtr z1 (PArg z1)                             (ExpWhere (z1,EVar z1 "args",[])),
+      DAtr z1 (PTuple z1 [dicts5,PWrite z1 "args"]) (ExpWhere (z1,EArg z1,[]))
      ]
 
     -- [Dict.IEq (eq,neq) = daIEq]
     fsDicts5 :: [Decl]
     fsDicts5 = map f (dicts cs4YImps) where
       f :: (ID_Var,ID_Ifce,[ID_Var]) -> Decl
-      f (var,ifc,ids) = DAtr z1 pat (Where (z1,exp,[])) where
+      f (var,ifc,ids) = DAtr z1 pat (ExpWhere (z1,exp,[])) where
         -- Dict.IEq (eq,neq)
         pat :: Patt
         pat = PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) ids)
@@ -202,8 +202,8 @@ polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') $ map rec decls where
   -- TODO: pat1 recurse
   rec :: Decl -> Decl
   rec d@(DSig _ _ _) = d
-  rec (DAtr z1 pat1 (Where (z2,e2,ds2))) =
-    DAtr z1 pat1 (Where (z2,e2,ds2')) where
+  rec (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) =
+    DAtr z1 pat1 (ExpWhere (z2,e2,ds2')) where
       ds2' = polyDecls ifces dsigs' ds2
 
 -------------------------------------------------------------------------------
@@ -211,8 +211,8 @@ polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') $ map rec decls where
 polyDecl :: [Ifce] -> [Decl] -> Decl -> Decl
 
 polyDecl _     _     d@(DSig _ _ _) = d
-polyDecl ifces dsigs   (DAtr z1 pat1 (Where (z2, e2, ds2))) =
-                       (DAtr z1 pat1 (Where (z2, e2', e2ds'++ds2)))
+polyDecl ifces dsigs   (DAtr z1 pat1 (ExpWhere (z2, e2, ds2))) =
+                       (DAtr z1 pat1 (ExpWhere (z2, e2', e2ds'++ds2)))
   where
     (e2', e2ds') = polyExpr ifces dsigs (pattToType dsigs pat1) e2
 
@@ -306,7 +306,7 @@ declLocals ifces dsigs z ifc_ids xhr = concatMap f $
     f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
     f (ifc,dict,dcls) = ds ++ [d] where
       d  = DAtr z (PCall z (PCons z ["Dict",ifc]) (fromList $ map (PWrite z) $ map (posid z) dcls))
-                   (Where (z, ECall z (EVar z dict) (EUnit z), []))
+                   (ExpWhere (z, ECall z (EVar z dict) (EUnit z), []))
       ds = map g dcls where
             g id = DSig z (posid z id) $ mapType f $ dsigFind dsigs id where
                     f (TVar "a") = TData xhr

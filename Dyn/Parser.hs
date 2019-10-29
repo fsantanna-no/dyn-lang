@@ -374,7 +374,7 @@ decls = concat <$> list (tk_sym "") decl
 
 -------------------------------------------------------------------------------
 
-where_ :: Parser Where
+where_ :: Parser ExpWhere
 where_ = do
   pos <- toPos <$> getPosition
   e   <- expr
@@ -385,7 +385,7 @@ where_ = do
           void <- optional $ try $ tk_key "where"
           spc
           return ds
-  return $ Where (pos, e, ds)
+  return $ ExpWhere (pos, e, ds)
 
 -------------------------------------------------------------------------------
 

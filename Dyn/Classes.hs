@@ -113,7 +113,7 @@ instance IString Expr where
   toStringI spc (ECase  _ e cases)     =
     "case " ++ toString e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
     where
-      f :: (Patt,Where) -> String
+      f :: (Patt,ExpWhere) -> String
       f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString True pat ++ " -> " ++ toStringI (spc+2) whe
   --toStringI e                    = error $ show e
 
@@ -139,13 +139,13 @@ instance IString Decl where
 
 -------------------------------------------------------------------------------
 
-instance IString Where where
+instance IString ExpWhere where
   toString whe = toStringI 0 whe
 
-  toStringI spc (Where (_,e,[]))   = toStringI spc e
-  toStringI spc (Where (_,e,dcls)) = toStringI spc e ++ " where"
-                                      ++ (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (toStringI (spc+2)) dcls))
-                                      ++ "\n" ++ rep spc ++ ";"
+  toStringI spc (ExpWhere (_,e,[]))   = toStringI spc e
+  toStringI spc (ExpWhere (_,e,dcls)) = toStringI spc e ++ " where"
+                                        ++ (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (toStringI (spc+2)) dcls))
+                                        ++ "\n" ++ rep spc ++ ";"
 
 -------------------------------------------------------------------------------
 

@@ -19,24 +19,24 @@ spec = do
       toString (DSig pz "a" tz)
         `shouldBe` "a :: ()"
     it "a = b" $
-      toString (DAtr pz (PWrite pz "a") (Where (pz, EVar pz "b", [])))
+      toString (DAtr pz (PWrite pz "a") (ExpWhere (pz, EVar pz "b", [])))
         `shouldBe` "a = b"
     it "a = b where\n  b=()" $
       toString
         (DAtr pz (PWrite pz "a")
-          (Where (pz, EVar pz "b",
+          (ExpWhere (pz, EVar pz "b",
             [DSig pz "b" tz])))
         `shouldBe` "a = b where\n  b :: ()\n;"
 
   describe "declToString:" $ do
     it "b where b=a, a=()" $
       toString (
-        Where (pz, EVar pz "b", [
-          DAtr pz (PWrite pz "b") (Where (pz, EVar pz "a",[])),
-          DAtr pz (PWrite pz "a") (Where (pz, EUnit pz,[]))
+        ExpWhere (pz, EVar pz "b", [
+          DAtr pz (PWrite pz "b") (ExpWhere (pz, EVar pz "a",[])),
+          DAtr pz (PWrite pz "a") (ExpWhere (pz, EUnit pz,[]))
         ]))
         `shouldBe` "b where\n  b = a\n  a = ()\n;"
 
   describe "progToString:" $ do
     it "v" $
-      toString (Where (pz, EVar pz "v", [])) `shouldBe` "v"
+      toString (ExpWhere (pz, EVar pz "v", [])) `shouldBe` "v"

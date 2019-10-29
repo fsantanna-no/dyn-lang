@@ -47,8 +47,8 @@ evalExpr env (ECase z e cs) =
   where
     e' = evalExpr env e
 
-    g :: (Patt, Where) -> (Either Expr Bool, Expr)
-    g (pat,whe) = (ret, evalWhere env' whe) where
+    g :: (Patt, ExpWhere) -> (Either Expr Bool, Expr)
+    g (pat,whe) = (ret, evalExpWhere env' whe) where
                     (env',ret) = match env pat e'
 
     f :: (Either Expr Bool, Expr) -> Bool
@@ -62,7 +62,7 @@ evalExpr env (ECall z f arg) =
     (e1@(EError _ _)      , _              ) -> e1
     (_                    , e2@(EError _ _)) -> e2
     ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'
-    ((EFunc _ _ ups f')   , arg'           ) -> evalWhere env' f' where
+    ((EFunc _ _ ups f')   , arg'           ) -> evalExpWhere env' f' where
       env' = envWrite (ups++env) "..." arg'
     --(x,y) -> error $ show (x,y)
 
@@ -112,13 +112,13 @@ match env _ _ = (env, Right False)
 -------------------------------------------------------------------------------
 
 evalDecl :: Env -> Decl -> Match
-evalDecl env (DAtr _ p w) = match env p (evalWhere env w)
+evalDecl env (DAtr _ p w) = match env p (evalExpWhere env w)
 evalDecl env _            = (env, Right True)
 
 -------------------------------------------------------------------------------
 
-evalWhere :: Env -> Where -> Expr
-evalWhere env (Where (z, e, dcls)) =
+evalExpWhere :: Env -> ExpWhere -> Expr
+evalExpWhere env (ExpWhere (z, e, dcls)) =
   case foldr f (env, Right True) dcls of
     (env', Right True)  -> evalExpr env' e
     (_,    Right False) -> EError (getPos $ head dcls) "invalid assignment"
@@ -133,7 +133,7 @@ evalWhere env (Where (z, e, dcls)) =
 
 evalProg :: Bool -> Prog -> Expr
 evalProg shouldAnalyse prog =
-  evalWhere [] $ Where (pz, EVar pz "main", map globToDecl glbs') where
+  evalExpWhere [] $ ExpWhere (pz, EVar pz "main", map globToDecl glbs') where
 
     Prog glbs' = (bool id Ana.all shouldAnalyse) prog
 
