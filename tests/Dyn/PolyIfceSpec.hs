@@ -56,29 +56,10 @@ main = x where
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
-      evalString True ([r|
-main = (x,y) where
-  x = eq (dIEq(), ((Bool.True,Bool.False), (Bool.False,Bool.True )))
-  y = eq (dIEq(), ((Bool.True,Bool.False), (Bool.True, Bool.False)))
-  Dict.IEq (eq,neq) = dIEq()
-;
-
-implementation of IEq for Bool with
-  eq = func :: ((Bool,Bool) -> Bool) ->
-    or (and (x,y), (and (not x, not y))) where
-      (x,y) = ...
-    ;
-  ;
-;
-|] ++ bool ++ ieq)
-        `shouldBe` "(Bool.False,Bool.True)"
-
     it "IEq: overrides eq (dieq_bool)" $
       evalString True ([r|
 main = v where  -- neq (eq(T,T), F)
-  v = neq (dIEq(), (eq (dIEq(),(Bool.True,Bool.True)), Bool.False))
-  Dict.IEq (eq,neq) = dIEq()
+  v = neq ((eq (Bool.True,Bool.True), Bool.False))
 ;
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -86,26 +67,27 @@ main = v where  -- neq (eq(T,T), F)
     it "IEq/IOrd" $
       evalString True ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte ((dIEqBool(),dIOrdBool()), (Bool.True,  Bool.False)),
-        gte ((dIEqBool(),dIOrdBool()), (Bool.True,  Bool.True )),
-        gt  ((dIEqBool(),dIOrdBool()), (Bool.False, Bool.False)),
-        lt  ((dIEqBool(),dIOrdBool()), (Bool.False, Bool.True )) )
-  Dict.IOrd (lt,lte,gt,gte) = dIOrdBool()
+  v = ( lte (Bool.True,  Bool.False),
+        gte (Bool.True,  Bool.True ),
+        gt  (Bool.False, Bool.False),
+        lt  (Bool.False, Bool.True ) )
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-    it "IEq/IOrd/IAaa" $
-      evalString True ([r|
-main = f ((dIAaa(),dIEq(),dIOrdBool()),(Bool.True,Bool.False)) where
-  Dict.IAaa (f) = dIAaa()
+    it "XXX: IEq/IOrd/IAaa" $
+      parseToString True ([r|
+main = f (Bool.True,Bool.False)
+
+implementation of IAaa for Bool with
+  f :: ((Bool,Bool) -> Bool)
 ;
 
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
-  f = func :: ((a,a) -> Bool) -> lt ((daIEq,daIOrd),(x,y)) where (x,y)=...;;  
+  f = func :: ((a,a) -> Bool) -> lt ... ;
 ;
-|] ++ iord_bool ++ bool ++ iord ++ ieq)
+|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
     it "f a where a is IOrd" $
@@ -149,23 +131,3 @@ implementation of IAaa for Xxx with
 ;
 |] ++ iord_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
-
-{-
-  describe "poly" $ do
-    it "() vs ()" $
-      poly [] [] (Type (pz,TUnit,cz)) []
-        `shouldBe` []
-    it "() vs ()" $
-      poly [] [] (Type (pz,TUnit,cz)) [DAtr pz (PWrite pz "main") (Where (pz,EUnit pz,[]))]
-        `shouldBe` [DAtr pz (PWrite pz "main") (Where (pz,EUnit pz,[]))]
-    it "minimum: Bool vs a::IBounded" $
-      toString (poly [ibnd] [DSig pz "minimum" taibnd] (Type (pz,TData ["Bool"],cz))
-                  [DAtr pz (PWrite pz "main")(Where (pz,EVar pz "minimum",[])))
-        `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = (dIBoundedBool ())\n;"
-    it "Bool vs Bool" $
-      (poly [] [DSig pz "x" tbool] tbool (Where (pz,EVar pz "x",[])))
-        `shouldBe` Where (pz,EVar pz "x",[])
-    it "minimum: a vs a::IBounded" $
-      (poly [ibnd] [DSig pz "minimum" taibnd] (Type (pz,TVar "a",cz)) (Where (pz,EVar pz "minimum",[])))
-        `shouldBe` Where (pz,EVar pz "minimum",[])
--}
