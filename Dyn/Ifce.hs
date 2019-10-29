@@ -212,28 +212,66 @@ poly ifces dsigs decls = map poly' $ map rec decls where
   poly' :: Decl -> Decl
 
   poly' d@(DSig _ _ _) = d
+  poly' (DAtr z1 pat1 (Where (z2, e2, ds2))) =
+    DAtr z1 pat1 $ case e2 of
+      -- EVar:  pat1::B = id3(maximum)
+      -- ECall: pat1::B = id4(neq) $ e3::(B,B)
 
-  -- pat1 = id3
-  -- pat1::Bool id3=maximum
-  poly' (DAtr z1 pat1 (Where (z2,EVar z3 id3,ds2))) =
-    DAtr z1 pat1 (Where (z2,EVar z3 id3,ds2'')) where
-      ds2'' = bool ds2' ds2 (null tvars4)
+      -------------------------------------------------------------------------
+      -- pat1::Bool = id3(maximum)
+      EVar z3 id3 -> Where (z2, e2,  ds2'') where
 
-      -- x :: Bool = maximum
-      Type (_,TData xhr,_) = pattToType dsigs' pat1
+        ds2'' = bool (ds2' ifc_ids xhr) ds2 (null tvars4)
 
-      -- maximum :: a where a is IBounded
-      Type (_,ttp4,cs4) = dsigFind dsigs' id3
+        -- x :: Bool = maximum
+        Type (_,TData xhr,_) = pattToType dsigs' pat1
 
-      tvars4  = toVars ttp4 -- [a,...]
-      [tvar4] = tvars4      -- a
+        -- maximum :: a where a is IBounded
+        Type (_,ttp4,cs4) = dsigFind dsigs' id3
 
-      -- [("IBounded",...)]
-      ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+        tvars4  = toVars ttp4 -- [a,...]
+        [tvar4] = tvars4      -- a
+
+        -- [("IBounded",...)]
+        ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+
+      -------------------------------------------------------------------------
+      -- pat1::B = id4(neq) e3::(B,B)
+      ECall z3 (EVar z4 id4) e3 -> Where (z2, (ECall z2 (EVar z4 id4) e3''), ds2'') where
+
+        (e3'',ds2'') = bool (e3',ds2' ifc_ids xhr) (e3,ds2) (null tvars4)
+
+        -- eq :: (a,a) -> Bool
+        Type (_,ttp4,cs4) = dsigFind dsigs id4
+
+        tvars4  = toVars ttp4 -- [a]
+        [tvar4] = tvars4      -- a
+
+        -- [("IEq",...)]
+        -- a is IEq
+        ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+
+        -- ["dIEqBool",...]
+        dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
+
+        -- eq (Bool,Boot)
+        -- a is Bool
+        TFunc inp4 out4 = ttp4
+        [("a",xhr)] = ttpMatch inp4 (toTType e3)
+        -- TODO: pat1 vs out4
+
+        -- eq(dIEqBool,...)
+        e3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3]
+                  where z3=getAnn e3
+
+      -------------------------------------------------------------------------
+      otherwise -> Where (z2, e2,  ds2)
+
+    where
 
       -- ["Dict.IBounded (min,max) = dIBoundedBool", ...]
-      ds2' :: [Decl]
-      ds2' = map f $
+      --ds2' :: [Decl]
+      ds2' ifc_ids xhr = map f $
               -- [("IEq", "daIEqBool", (eq,neq)),...]
               zip3 ifc_ids dicts dclss
              where
@@ -246,49 +284,6 @@ poly ifces dsigs decls = map poly' $ map rec decls where
               f (ifc,dict,dcls) =
                 DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
                         (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
-
-  -- pat1 = id4 expr3
-  poly' (DAtr z1 pat1 (Where (z2, (ECall z3 (EVar z4 id4) expr3), ds2))) =
-    DAtr z1 pat1 (Where (z2, (ECall z2 (EVar z4 id4) expr3''), ds2'')) where
-      (expr3'',ds2'') = bool (expr3',ds2') (expr3,ds2) (null tvars4)
-
-      -- eq :: (a,a) -> Bool
-      Type (_,ttp4,cs4) = dsigFind dsigs id4
-
-      tvars4  = toVars ttp4 -- [a]
-      [tvar4] = tvars4      -- a
-
-      -- [("IEq",...)]
-      -- a is IEq
-      ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
-
-      -- ["dIEqBool",...]
-      dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
-
-      -- eq (Bool,Boot)
-      -- a is Bool
-      TFunc inp4 out4 = ttp4
-      [("a",xhr)] = ttpMatch inp4 (toTType expr3)
-      -- TODO: pat1 vs out4
-
-      -- eq(dIEqBool,...)
-      expr3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), expr3]
-                where z3=getAnn expr3
-
-      ds2' :: [Decl]
-      ds2' = map f $
-              -- [("IEq", "daIEqBool", (eq,neq)),...]
-              zip3 ifc_ids dicts dclss
-             where
-              -- [(eq,neq),...]
-              dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
-
-              -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
-              f (ifc,dict,dcls) =
-                DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
-                        (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
-
-  poly' d@(DAtr _ _ _) = d
 
 -------------------------------------------------------------------------------
 
