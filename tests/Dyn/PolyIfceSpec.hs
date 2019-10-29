@@ -48,10 +48,10 @@ main = x where
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEq: default eq" $
+    it "XXX: IEq: default eq" $
       evalString True ([r|  -- neq (eq(T,T), F)
-main = neq (dIEq(), (eq (dIEq(),(Bool.True,Bool.True)), Bool.False)) where
-  Dict.IEq (eq,neq) = dIEq()
+main = x where
+  x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
 ;
 |] ++ bool ++ ieq)
         `shouldBe` "Bool.True"

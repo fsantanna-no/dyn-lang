@@ -242,7 +242,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
         (e3'',ds2'') = bool (e3',ds2' ifc_ids xhr) (e3,ds2) (null tvars4)
 
         -- eq :: (a,a) -> Bool
-        Type (_,ttp4,cs4) = dsigFind dsigs id4
+        Type (_,ttp4,cs4) = dsigFind dsigs' id4
 
         tvars4  = toVars ttp4 -- [a]
         [tvar4] = tvars4      -- a
@@ -257,7 +257,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
         -- eq (Bool,Boot)
         -- a is Bool
         TFunc inp4 out4 = ttp4
-        [("a",xhr)] = ttpMatch inp4 (toTType e3)
+        [("a",xhr)] = ttpMatch inp4 (toTType dsigs' e3)
         -- TODO: pat1 vs out4
 
         -- eq(dIEqBool,...)
@@ -269,21 +269,34 @@ poly ifces dsigs decls = map poly' $ map rec decls where
 
     where
 
-      -- ["Dict.IBounded (min,max) = dIBoundedBool", ...]
+      -- [
+      --  "min :: Bool",
+      --  "max :: Bool",
+      --  "Dict.IBounded (min,max) = dIBoundedBool",
+      --  "eq :: ((Bool,Bool)->Bool)",
+      --  "neq ::((Bool,Bool)->Bool)",
+      --  "Dict.IEq (eq,neq) = dIEqBool",
+      --  ...
+      -- ]
       --ds2' :: [Decl]
-      ds2' ifc_ids xhr = map f $
-              -- [("IEq", "daIEqBool", (eq,neq)),...]
-              zip3 ifc_ids dicts dclss
-             where
-              -- ["dIEqBool",...]
-              dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
-              -- [(eq,neq),...]
-              dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
+      ds2' ifc_ids xhr = concatMap f $
+                          -- [("IEq", "daIEqBool", (eq,neq)),...]
+                          zip3 ifc_ids dicts dclss
+        where
+          -- ["dIEqBool",...]
+          dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
+          -- [(eq,neq),...]
+          dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
 
-              -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
-              f (ifc,dict,dcls) =
-                DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
-                        (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
+          -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
+          f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
+          f (ifc,dict,dcls) = ds ++ [d] where
+            d  = DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
+                         (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
+            ds = map g dcls where
+                  g id = DSig z1 id $ mapType f $ dsigFind dsigs' id where
+                          f (TVar "a") = TData xhr
+                          f ttp        = ttp
 
 -------------------------------------------------------------------------------
 
@@ -295,10 +308,14 @@ dsigFind dsigs id = case L.find f dsigs of
                       f :: Decl -> Bool
                       f (DSig _ x _) = (id == x)
 
-toTType :: Expr -> TType
-toTType (ECons  _ hr) = TData hr
-toTType (ETuple _ es) = TTuple $ map toTType es
-toTType e = error $ "toTType: " ++ toString e
+toTType :: [Decl] -> Expr -> TType
+toTType ds (EVar   _ id)  = ttp where Type (_,ttp,_) = dsigFind ds id
+toTType _  (ECons  _ hr)  = TData hr
+toTType ds (ETuple _ es)  = TTuple $ map (toTType ds) es
+toTType ds (ECall  _ f _) = case toTType ds f of
+                              TAny        -> TAny
+                              TFunc _ out -> out
+toTType _  e = error $ "toTType: " ++ toString e
 
 toVars :: TType -> [ID_Var]
 toVars ttp = S.toAscList $ aux ttp where
@@ -314,6 +331,7 @@ ttpMatch :: TType -> TType -> [(ID_Var,ID_Hier)]
 ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   aux :: TType -> TType -> M.Map ID_Var ID_Hier
   aux (TVar id)    (TData (hr:_)) = M.singleton id [hr]
+  --aux (TVar id)    _              = M.singleton id ["Bool"]
   aux (TTuple ts1) (TTuple ts2)   = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
                                       where f hr1 hr2 | hr1==hr2 = hr1
   aux x y = error $ show (x,y)
@@ -321,3 +339,11 @@ ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
 pattToType :: [Decl] -> Patt -> Type
 pattToType dsigs (PWrite _ id) = dsigFind dsigs id
 --pattToType _ x = error $ pattToString True x
+
+mapType :: (TType -> TType) -> Type -> Type
+mapType f (Type (z,ttp,cs)) = Type (z, aux f ttp, cs) where
+  aux f (TVar   id)      = f $ TVar   id
+  aux f (TData  hr)      = f $ TData  hr
+  aux f (TTuple ts)      = f $ TTuple (map (aux f) ts)
+  aux f (TFunc  inp out) = f $ TFunc  (aux f inp) (aux f out)
+  aux _ x = error $ show x
