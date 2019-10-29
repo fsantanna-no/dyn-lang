@@ -48,12 +48,12 @@ main = x where
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "XXX: IEq: default eq" $
-      parseToString True ([r|  -- neq (eq(T,T), F)
+    it "IEq: default eq" $
+      evalString True ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
 ;
-|] ++ bool ++ ieq)
+|] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $

@@ -1001,7 +1001,7 @@ impl = func ->
 
       it "fst/snd" $         -- pg 41
         evalString True ([r|
-main = and (eq (dIEq(), (add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True)))
+main = and (matches (add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True))
 fst = func -> x where (x,_)=... ;;
 snd = func -> y where (_,y)=... ;;
 |] ++ prelude)
@@ -1010,7 +1010,7 @@ snd = func -> y where (_,y)=... ;;
       it "pair" $         -- pg 42
         evalString True ([r|
 main = pair ((f,g), one)
-f = func -> eq (dIEq(), (add (zero,...), ...)) ;
+f = func -> matches (add (zero,...), ...) ;
 g = func -> mul (two, ...) ;
 pair = func -> (f x, g x) where
   ((f,g),x) = ...

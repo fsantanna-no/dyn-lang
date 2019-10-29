@@ -224,12 +224,12 @@ polyDecl ifces dsigs   (DAtr z1 pat1 (Where (z2, e2, ds2))) =
 polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
 
 -- pat1::Bool = id3(maximum)
-polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3'',  ds2'') where
+polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3',  ds2') where
 
-  (id3'',ds2'') = if null cs4 then
-                    (id3, [])
-                  else
-                    (posid z3 id3, declLocals ifces dsigs z3 ifc_ids xhr)
+  (id3',ds2') = if null cs4 then
+                  (id3, [])
+                else
+                  (posid z3 id3, declLocals ifces dsigs z3 ifc_ids xhr)
 
   -- x :: Bool = maximum
   Type (_,TData xhr,_) = xtp
@@ -245,12 +245,14 @@ polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3'',  ds2'') where
 -------------------------------------------------------------------------
 
 -- pat1::B = id4(neq) e3::(B,B)
-polyExpr ifces dsigs _ (ECall z3 (EVar z4 id4) e3) = (ECall z3 (EVar z4 id4'') e3'', ds2'') where
+polyExpr ifces dsigs _ (ECall z3 (EVar z4 id4) e3) = (ECall z3 (EVar z4 id4') e3''', e3ds' ++ ds2') where
 
-  (id4'',e3'',ds2'') = if null cs4 then
-                        (id4,e3,[])
-                       else
-                        (posid z4 id4, e3', declLocals ifces dsigs z4 ifc_ids xhr)
+  (e3', e3ds') = polyExpr ifces dsigs tz e3
+
+  (id4',e3''',ds2') = if null cs4 then
+                        (id4,e3',[])
+                      else
+                        (posid z4 id4, e3'', declLocals ifces dsigs z4 ifc_ids xhr)
 
   -- eq :: (a,a) -> Bool
   Type (_,ttp4,cs4) = dsigFind dsigs id4
@@ -271,11 +273,12 @@ polyExpr ifces dsigs _ (ECall z3 (EVar z4 id4) e3) = (ECall z3 (EVar z4 id4'') e
   -- TODO: pat1 vs out4
 
   -- eq(dIEqBool,...)
-  e3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3]
-            where z3=getPos e3
+  e3'' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3']
 
 -------------------------------------------------------------------------
 
+polyExpr ifces dsigs _ (ETuple z es) = (ETuple z es', concat ds') where
+                                        (es',ds') = unzip $ map (polyExpr ifces dsigs tz) es
 polyExpr _ _ _ e = (e, [])
 
 -------------------------------------------------------------------------
