@@ -185,7 +185,7 @@ expandDecl _ _ decl = error $ toString decl
 -------------------------------------------------------------------------------
 
 -- [Ifce]: known ifces
--- [Decl]: known decls
+-- [Decl]: known DSig decls
 -- Type:   expected type
 -- Where:  expression (+ decls) to evaluate
 -- Where:  transformed expression (+ decls) (maybe the same)
@@ -195,27 +195,30 @@ poly :: [Ifce] -> [Decl] -> Type -> Where -> Where
 poly ifces dsigs xtp (Where (z,expr,ds)) = poly' ifces dsigs xtp whe' where
   whe' = Where (z,expr,ds')
   ds'  = map f ds where
+          -- recurse poly into other Where's
           f d@(DSig _ _ _) = d
           f (DAtr z1 (PWrite z2 id2) whe1) =
             DAtr z1 (PWrite z2 id2) $ poly ifces dsigs' (dsigFind dsigs' id2) whe1
+          -- TODO: other cases
           f (DAtr z1 pat whe1) =
             DAtr z1 pat $ poly ifces dsigs' (Type (az,TAny,cz)) whe1
   dsigs' = dsigs ++ filter isDSig ds
 
 poly' :: [Ifce] -> [Decl] -> Type -> Where -> Where
 
-poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id,ds)) =
+--                Bool                       maximum
+poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id2,ds1)) =
   case (xtp,tp) of
     _ | (xtp==tp)             -> whe
 
-    (_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id,ds++ds') where
+    (_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id2,ds1++ds1') where
 
       -- [("IEq",...)]
       ifc_ids = snd $ fromJust $ find ((==tid).fst) cs
 
       -- [Dict.IEq (eq,neq) = daIEqBool, ...]
-      ds' :: [Decl]
-      ds' = map f $
+      ds1' :: [Decl]
+      ds1' = map f $
               -- [("IEq", "daIEqBool", (eq,neq)),...]
               zip3 ifc_ids dicts dclss where
                 -- ["dIEqBool",...]
@@ -230,7 +233,11 @@ poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id,ds)) =
     otherwise                 -> whe
 
   where
-    tp = dsigFind dsigs id
+    tp = dsigFind dsigs id2
+
+poly' ifces dsigs xtp whe@(Where (z1,ECall z2 (EVar z3 id3) expr,ds1)) = whe
+  --case (xtp,tp) of
+  --traceShow ("XTP",toString xtp, "FUNC",toString $ dsigFind dsigs id3, "PS",toString $ toTType expr) whe
 
 poly' _ _ _ whe = whe
 
@@ -244,3 +251,15 @@ dsigFind dsigs id = case find f dsigs of
                       f :: Decl -> Bool
                       f (DSig _ x _) = (id == x)
 
+toTType :: Expr -> TType
+toTType (ECons  _ hr) = TData hr
+toTType (ETuple _ es) = TTuple $ map toTType es
+toTType e = error $ toString e
+
+{-
+toType :: [Decl] -> Expr -> Type
+toType dsigs (EVar   _ id) = dsigFind dsigs id
+toType dsigs (ECons  _ hr) = (az, TData hr               , cz)
+toType dsigs (ETuple _ es) = (az, TTuple $ map toTType es, cz)
+toType e _ = error $ toString e
+-}

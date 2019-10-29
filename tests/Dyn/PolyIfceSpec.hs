@@ -40,6 +40,14 @@ main = (x,y) where
 
   describe "IEq" $ do
 
+    it "XXX: IEq: default eq" $
+      run ([r|  -- neq (eq(T,T), F)
+main = x where
+  x :: Bool = neq (Bool.True,Bool.False)
+;
+|] ++ bool ++ ieq)
+        `shouldBe` "Bool.True"
+
     it "IEq: default eq" $
       run ([r|  -- neq (eq(T,T), F)
 main = neq (dIEq(), (eq (dIEq(),(Bool.True,Bool.True)), Bool.False)) where
