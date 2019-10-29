@@ -14,7 +14,7 @@ import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
-import Dyn.AST as AST
+import Dyn.AST
 import Dyn.Classes
 import qualified Dyn.Analyse as Ana
 
@@ -135,38 +135,38 @@ pat only_write =
             pos  <- toPos <$> getPosition
             void <- tk_sym "..."
             guard only_write
-            return $ PArg az{pos=pos}
+            return $ PArg pos
   lany   = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "_"
-            return $ PAny az{pos=pos}
+            return $ PAny pos
   lwrite = do
             pos  <- toPos <$> getPosition
             void <- bool (tk_sym "=") (tk_sym "") only_write
             var  <- tk_var
-            return $ PWrite az{pos=pos} var
+            return $ PWrite pos var
   lread  = do
             pos  <- toPos <$> getPosition
             void <- bool (tk_sym "~") P.parserZero only_write
             exp  <- expr
-            return $ PRead az{pos=pos} exp
+            return $ PRead pos exp
   lcons  = do
             pos  <- toPos <$> getPosition
             cons <- tk_hier
             loc  <- optionMaybe $ try $ pat only_write
             return $ case loc of
-                      Nothing -> PCons az{pos=pos} cons
-                      Just l  -> PCall az{pos=pos} (PCons az{pos=pos} cons) l
+                      Nothing -> PCons pos cons
+                      Just l  -> PCall pos (PCons pos cons) l
   lunit  = do
             pos  <- toPos <$> getPosition
             void <- tk_sym "("
             void <- tk_sym ")"
-            return $ PUnit az{pos=pos}
+            return $ PUnit pos
   lparens = parens $ pat only_write
   ltuple = do
             pos  <- toPos <$> getPosition
             locs <- parens $ list (tk_sym ",") $ pat only_write
-            return (PTuple az{pos=pos} $ locs)
+            return (PTuple pos $ locs)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -179,8 +179,8 @@ expr_call = do
   pos <- toPos <$> getPosition
   e1  <- expr_one
   e2  <- expr_one
-  guard $ (fst $ AST.pos $ getAnn e1) == (fst $ AST.pos $ getAnn e2)  -- must be at the same line
-  return $ ECall az {pos=pos} e1 e2
+  guard $ (fst $ getPos e1) == (fst $ getPos e2)  -- must be at the same line
+  return $ ECall pos e1 e2
 
 expr_one :: Parser Expr
 expr_one =
@@ -203,38 +203,38 @@ expr_error :: Parser Expr
 expr_error = do
   pos  <- toPos <$> getPosition
   void <- tk_key "error"
-  return $ EError az{pos=pos} "<user>"
+  return $ EError pos "<user>"
 
 expr_arg :: Parser Expr
 expr_arg = do
   pos  <- toPos <$> getPosition
   void <- tk_sym "..."
-  return $ EArg az{pos=pos}
+  return $ EArg pos
 
 expr_var :: Parser Expr
 expr_var = do
   pos <- toPos <$> getPosition
   str <- tk_var
-  return $ EVar az{pos=pos} str
+  return $ EVar pos str
 
 expr_unit :: Parser Expr
 expr_unit = do
   pos  <- toPos <$> getPosition
   void <- tk_sym "("
   void <- tk_sym ")"
-  return $ EUnit az{pos=pos}
+  return $ EUnit pos
 
 expr_cons :: Parser Expr
 expr_cons = do
   pos  <- toPos <$> getPosition
   cons <- tk_hier
-  return $ ECons az{pos=pos} cons
+  return $ ECons pos cons
 
 expr_tuple :: Parser Expr
 expr_tuple = do
   pos  <- toPos <$> getPosition
   exps <- parens $ list (tk_sym ",") expr
-  return $ ETuple az{pos=pos} exps
+  return $ ETuple pos exps
 
 expr_func :: Parser Expr
 expr_func = do
@@ -249,7 +249,7 @@ expr_func = do
   void <- string ";"
   void <- optional $ try $ tk_key "func"
   spc
-  return $ EFunc az{pos=pos} tp (map (\id -> (id,EUnit az{pos=pos})) ups) body
+  return $ EFunc pos tp (map (\id -> (id,EUnit pos)) ups) body
 
 expr_case :: Parser Expr
 expr_case = do
@@ -265,7 +265,7 @@ expr_case = do
   void <- string ";"
   void <- optional $ try $ tk_key "case"
   spc
-  return $ ECase az{pos=pos} e cs
+  return $ ECase pos e cs
 
 expr_parens :: Parser Expr
 expr_parens = parens expr
@@ -278,7 +278,7 @@ type_ = do
   pos <- toPos <$> getPosition
   ttp <- ttype
   cs  <- option [] $ try ctrs
-  return $ Type (az{pos=pos}, ttp, cs)
+  return $ Type (pos, ttp, cs)
 
 ctrs :: Parser TCtrs
 ctrs = do
@@ -353,8 +353,8 @@ decl_sig = do
   atr  <- option [] $ do
             void <- tk_sym "="
             w    <- where_
-            return $ singleton $ DAtr az{pos=pos} (PWrite az{pos=pos} id) w
-  return $ (DSig az{pos=pos} id tp) : atr
+            return $ singleton $ DAtr pos (PWrite pos id) w
+  return $ (DSig pos id tp) : atr
 
 decl_atr :: Parser [Decl]
 decl_atr = do
@@ -364,7 +364,7 @@ decl_atr = do
           void <- tk_sym "="
           w    <- where_
           return w
-  return $ singleton $ DAtr az{pos=pos} pat whe
+  return $ singleton $ DAtr pos pat whe
 
 decl :: Parser [Decl]
 decl = try decl_sig <|> decl_atr
@@ -385,7 +385,7 @@ where_ = do
           void <- optional $ try $ tk_key "where"
           spc
           return ds
-  return $ Where (az{pos=pos}, e, ds)
+  return $ Where (pos, e, ds)
 
 -------------------------------------------------------------------------------
 
@@ -407,7 +407,7 @@ ifce = do
     f [(id,l)] | id==var = [(var,  l)]
     f _ = error $ "TODO: multiple vars or unmatching var"
    in
-    Ifce (az{pos=pos}, cls, f cs, ds)
+    Ifce (pos, cls, f cs, ds)
 
 impl :: Parser Impl
 impl = do
@@ -422,7 +422,7 @@ impl = do
   void <- string ";"
   void <- optional $ try $ tk_key "implementation"
   spc
-  return $ Impl (az{pos=pos}, cls, tp, ds)
+  return $ Impl (pos, cls, tp, ds)
 
 -------------------------------------------------------------------------------
 

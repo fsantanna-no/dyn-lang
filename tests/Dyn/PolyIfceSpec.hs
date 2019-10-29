@@ -13,10 +13,10 @@ import Dyn.Ifce
 
 caieq  = [("a",["IEq"])]
 caibnd = [("a",["IBounded"])]
-taibnd = Type (az,TVar "a",caibnd)
-tbool  = Type (az,TData ["Bool"],cz)
+taibnd = Type (pz,TVar "a",caibnd)
+tbool  = Type (pz,TData ["Bool"],cz)
 
-ibnd = Ifce (az,"IBounded",[("a",[])],[DSig az "minimum" tz, DSig az "maximum" tz])
+ibnd = Ifce (pz,"IBounded",[("a",[])],[DSig pz "minimum" tz, DSig pz "maximum" tz])
 
 main :: IO ()
 main = hspec spec
@@ -153,19 +153,19 @@ implementation of IAaa for Xxx with
 {-
   describe "poly" $ do
     it "() vs ()" $
-      poly [] [] (Type (az,TUnit,cz)) []
+      poly [] [] (Type (pz,TUnit,cz)) []
         `shouldBe` []
     it "() vs ()" $
-      poly [] [] (Type (az,TUnit,cz)) [DAtr az (PWrite az "main") (Where (az,EUnit az,[]))]
-        `shouldBe` [DAtr az (PWrite az "main") (Where (az,EUnit az,[]))]
+      poly [] [] (Type (pz,TUnit,cz)) [DAtr pz (PWrite pz "main") (Where (pz,EUnit pz,[]))]
+        `shouldBe` [DAtr pz (PWrite pz "main") (Where (pz,EUnit pz,[]))]
     it "minimum: Bool vs a::IBounded" $
-      toString (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TData ["Bool"],cz))
-                  [DAtr az (PWrite az "main")(Where (az,EVar az "minimum",[])))
+      toString (poly [ibnd] [DSig pz "minimum" taibnd] (Type (pz,TData ["Bool"],cz))
+                  [DAtr pz (PWrite pz "main")(Where (pz,EVar pz "minimum",[])))
         `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = (dIBoundedBool ())\n;"
     it "Bool vs Bool" $
-      (poly [] [DSig az "x" tbool] tbool (Where (az,EVar az "x",[])))
-        `shouldBe` Where (az,EVar az "x",[])
+      (poly [] [DSig pz "x" tbool] tbool (Where (pz,EVar pz "x",[])))
+        `shouldBe` Where (pz,EVar pz "x",[])
     it "minimum: a vs a::IBounded" $
-      (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TVar "a",cz)) (Where (az,EVar az "minimum",[])))
-        `shouldBe` Where (az,EVar az "minimum",[])
+      (poly [ibnd] [DSig pz "minimum" taibnd] (Type (pz,TVar "a",cz)) (Where (pz,EVar pz "minimum",[])))
+        `shouldBe` Where (pz,EVar pz "minimum",[])
 -}

@@ -12,7 +12,7 @@ import qualified Dyn.Analyse as Ana
 
 type Env = [(ID_Var,Expr)]
 
-envRead :: Env -> Ann -> ID_Var -> Expr
+envRead :: Env -> Pos -> ID_Var -> Expr
 envRead env z id =
   case filter ((==id).fst) env of
     []        -> EError z $ "unassigned variable '" ++ id ++ "'"
@@ -121,19 +121,19 @@ evalWhere :: Env -> Where -> Expr
 evalWhere env (Where (z, e, dcls)) =
   case foldr f (env, Right True) dcls of
     (env', Right True)  -> evalExpr env' e
-    (_,    Right False) -> EError (getAnn $ head dcls) "invalid assignment"
+    (_,    Right False) -> EError (getPos $ head dcls) "invalid assignment"
     (_,    Left  err)   -> err
   where
     f :: Decl -> Match -> Match
     f dcl (env, Right True)  = evalDecl env dcl
-    f dcl (env, Right False) = (env, Left $ EError (getAnn dcl) "invalid assignment")
+    f dcl (env, Right False) = (env, Left $ EError (getPos dcl) "invalid assignment")
     f dcl (env, Left  e)     = (env, Left e)           -- found error
 
 -------------------------------------------------------------------------------
 
 evalProg :: Bool -> Prog -> Expr
 evalProg shouldAnalyse prog =
-  evalWhere [] $ Where (az, EVar az "main", map globToDecl glbs') where
+  evalWhere [] $ Where (pz, EVar pz "main", map globToDecl glbs') where
 
     Prog glbs' = (bool id Ana.all shouldAnalyse) prog
 

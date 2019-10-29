@@ -35,51 +35,51 @@ spec = do
   describe "expr_*:" $ do
     it "xxx" $
       parse' expr_var "xxx"
-        `shouldBe` Right (EVar az{pos=(1,1)} "xxx")
+        `shouldBe` Right (EVar (1,1) "xxx")
     it "A" $
       parse' expr_cons "A"
-        `shouldBe` Right (ECons az{pos=(1,1)} ["A"])
+        `shouldBe` Right (ECons (1,1) ["A"])
     it "A.B" $
       parse' expr_cons "A.B"
-        `shouldBe` Right (ECons az{pos=(1,1)} ["A","B"])
+        `shouldBe` Right (ECons (1,1) ["A","B"])
   describe "expr:" $ do
     it "(())" $
       parse' expr "(())"
-        `shouldBe` Right (EUnit az{pos=(1,2)})
+        `shouldBe` Right (EUnit (1,2))
     it "func" $
       parse' expr "func :: () -> ();"
-        `shouldBe` Right (EFunc az{pos=(1,1)} (Type (az{pos=(1,9)}, TUnit, [])) [] (Where (az{pos=(1,15)}, EUnit az{pos=(1,15)},[])))
+        `shouldBe` Right (EFunc (1,1) (Type ((1,9), TUnit, [])) [] (Where ((1,15), EUnit (1,15),[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
     it "a b " $
       parse' expr "a b "
-        `shouldBe` Right (ECall az{pos=(1,1)} (EVar az{pos=(1,1)} "a") (EVar az{pos=(1,3)} "b"))
+        `shouldBe` Right (ECall (1,1) (EVar (1,1) "a") (EVar (1,3) "b"))
     it "error" $
       parse' expr "error"
-        `shouldBe` Right (EError az{pos=(1,1)} "<user>")
+        `shouldBe` Right (EError (1,1) "<user>")
     it "errors" $
       parse' expr "errors"
-        `shouldBe` Right (EVar az{pos=(1,1)} "errors")
+        `shouldBe` Right (EVar (1,1) "errors")
     it "arg" $
       parse' expr "..."
-        `shouldBe` Right (EArg az{pos=(1,1)})
+        `shouldBe` Right (EArg (1,1))
 
   describe "where:" $ do
     it "x" $
       parse' where_ "x"
-        `shouldBe` Right (Where (az{pos=(1,1)}, EVar az{pos=(1,1)} "x", []))
+        `shouldBe` Right (Where ((1,1), EVar (1,1) "x", []))
 
   describe "decl:" $ do
     it "x :: () = ()" $
       parse' decl "x :: () = ()"
-        `shouldBe` Right [DSig az{pos=(1,1)} "x" (Type (az{pos=(1,6)}, TUnit, [])),DAtr az{pos=(1,1)} (PWrite az{pos=(1,1)} "x") (Where (az{pos=(1,11)}, EUnit az{pos=(1,11)}, []))]
+        `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, [])),DAtr (1,1) (PWrite (1,1) "x") (Where ((1,11), EUnit (1,11), []))]
     it "x :: ()" $
       parse' decl "x :: ()"
-        `shouldBe` Right [DSig az{pos=(1,1)} "x" (Type (az{pos=(1,6)}, TUnit, []))]
+        `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, []))]
     it "x = ()" $
       parse' decl "x = ()"
-        `shouldBe` Right [DAtr az{pos=(1,1)} (PWrite az{pos=(1,1)} "x") (Where (az{pos=(1,5)},  EUnit az{pos=(1,5)},  []))]
+        `shouldBe` Right [DAtr (1,1) (PWrite (1,1) "x") (Where ((1,5),  EUnit (1,5),  []))]
     it "x" $
       parse' decl "x"
         `shouldBe` Left "(line 1, column 2):\nunexpected end of input\nexpecting identifier or \"=\""

@@ -10,31 +10,31 @@ rep spc = replicate spc ' '
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-instance IAnn Expr where
-  getAnn (EError z _)     = z
-  getAnn (EVar   z _)     = z
-  getAnn (EUnit  z)       = z
-  getAnn (ECons  z _)     = z
-  getAnn (EData  z _ _)   = z
-  getAnn (ETuple z _)     = z
-  getAnn (EFunc  z _ _ _) = z
-  getAnn (ECall  z _ _)   = z
-  getAnn (EArg   z)       = z
-  getAnn (ECase  z _ _)   = z
+instance IPos Expr where
+  getPos (EError z _)     = z
+  getPos (EVar   z _)     = z
+  getPos (EUnit  z)       = z
+  getPos (ECons  z _)     = z
+  getPos (EData  z _ _)   = z
+  getPos (ETuple z _)     = z
+  getPos (EFunc  z _ _ _) = z
+  getPos (ECall  z _ _)   = z
+  getPos (EArg   z)       = z
+  getPos (ECase  z _ _)   = z
 
-instance IAnn Patt where
-  getAnn (PError z _)     = z
-  getAnn (PArg   z)       = z
-  getAnn (PRead  z _)     = z
-  getAnn (PWrite z _)     = z
-  getAnn (PUnit  z)       = z
-  getAnn (PCons  z _)     = z
-  getAnn (PTuple z _)     = z
-  getAnn (PCall  z _ _)   = z
+instance IPos Patt where
+  getPos (PError z _)     = z
+  getPos (PArg   z)       = z
+  getPos (PRead  z _)     = z
+  getPos (PWrite z _)     = z
+  getPos (PUnit  z)       = z
+  getPos (PCons  z _)     = z
+  getPos (PTuple z _)     = z
+  getPos (PCall  z _ _)   = z
 
-instance IAnn Decl where
-  getAnn (DSig z _ _) = z
-  getAnn (DAtr z _ _) = z
+instance IPos Decl where
+  getPos (DSig z _ _) = z
+  getPos (DAtr z _ _) = z
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -44,9 +44,9 @@ instance IList Expr where
   toList (ETuple _ es) = es
   toList e             = [e]
 
-  fromList []     = EUnit az -- TODO: az{pos=?}
+  fromList []     = EUnit pz -- TODO: pz{pos=?}
   fromList [x]    = x
-  fromList (x:xs) = ETuple (getAnn x) (x:xs)
+  fromList (x:xs) = ETuple (getPos x) (x:xs)
 
 instance IList TType where
   toList TUnit         = []
@@ -60,7 +60,7 @@ instance IList Patt where
 
   fromList []     = PUnit $ error "TODO: fromList"
   fromList [x]    = x
-  fromList (x:xs) = PTuple (getAnn x) (x:xs)
+  fromList (x:xs) = PTuple (getPos x) (x:xs)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ instance IString Expr where
   toString expr = toStringI 0 expr
 
   toStringI spc (EError z msg)         = "(line=" ++ show ln ++ ", col=" ++ show cl ++ ") ERROR : " ++ msg
-                                              where (ln,cl) = pos z
+                                              where (ln,cl) = z
   toStringI spc (EVar   _ id)          = id
   toStringI spc (EUnit  _)             = "()"
   toStringI spc (ECons  _ h)           = intercalate "." h

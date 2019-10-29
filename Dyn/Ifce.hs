@@ -138,7 +138,7 @@ expandDecl ifces
     cs4YImps  = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs4
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
-    ups3' = map (\id -> (id,EUnit az)) $ L.sort $ map ("da"++) imp_ids
+    ups3' = map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
@@ -262,7 +262,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
 
         -- eq(dIEqBool,...)
         e3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3]
-                  where z3=getAnn e3
+                  where z3=getPos e3
 
       -------------------------------------------------------------------------
       otherwise -> Where (z2, e2,  ds2)
@@ -302,7 +302,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
 
 dsigFind :: [Decl] -> ID_Var -> Type
 dsigFind dsigs id = case L.find f dsigs of
-                      Nothing            -> Type (az,TAny,cz)
+                      Nothing            -> Type (pz,TAny,cz)
                       Just (DSig _ _ tp) -> tp
                     where
                       f :: Decl -> Bool

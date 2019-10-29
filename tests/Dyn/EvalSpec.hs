@@ -15,57 +15,57 @@ spec = do
 
   describe "evalExpr:" $ do
     it "()" $
-      evalExpr [] (EUnit az) `shouldBe` (EUnit az)
+      evalExpr [] (EUnit pz) `shouldBe` (EUnit pz)
     it "a" $
-      evalExpr [("a",EUnit az)] (EVar az "a") `shouldBe` (EUnit az)
+      evalExpr [("a",EUnit pz)] (EVar pz "a") `shouldBe` (EUnit pz)
 
   describe "evalWhere:" $ do
     it "()" $
       evalWhere []
-        (Where (az, EUnit az, []))
-        `shouldBe` (EUnit az)
+        (Where (pz, EUnit pz, []))
+        `shouldBe` (EUnit pz)
     it "b where b=a, a=()" $
       evalWhere []
-        (Where (az, EVar az "b", [
-          DAtr az (PWrite az "b") (Where (az, EVar az "a",[])),
-          DAtr az (PWrite az "a") (Where (az, EUnit az,[]))
+        (Where (pz, EVar pz "b", [
+          DAtr pz (PWrite pz "b") (Where (pz, EVar pz "a",[])),
+          DAtr pz (PWrite pz "a") (Where (pz, EUnit pz,[]))
         ]))
-        `shouldBe` (EUnit az)
+        `shouldBe` (EUnit pz)
     it "b where b::() b=()" $
       evalWhere []
-        (Where (az, EVar az "b", [
-          DSig az "b" tz,
-          DAtr az (PWrite az "b") (Where (az, EUnit az,[]))
+        (Where (pz, EVar pz "b", [
+          DSig pz "b" tz,
+          DAtr pz (PWrite pz "b") (Where (pz, EUnit pz,[]))
         ]))
-        `shouldBe` (EUnit az)
+        `shouldBe` (EUnit pz)
 
   describe "evalDecl:" $ do
     it "a=()" $
-      evalDecl [] (DAtr az (PWrite az "a") (Where (az, EUnit az,[])))
-        `shouldBe` ([("a", EUnit az)], Right True)
+      evalDecl [] (DAtr pz (PWrite pz "a") (Where (pz, EUnit pz,[])))
+        `shouldBe` ([("a", EUnit pz)], Right True)
 
   describe "parser:" $ do
     it "error" $
       (evalProg False $ fromRight $ parse "main = error")
-        `shouldBe` (EError az{pos=(1,8)} "<user>")
+        `shouldBe` (EError (1,8) "<user>")
     it "match-true" $
       (evalProg True $ fromRight $ parse "main = case () of () -> ()\n_ -> error;")
-        `shouldBe` (EUnit az{pos=(1,25)})
+        `shouldBe` (EUnit (1,25))
     it "match-false" $
       (evalProg False $ fromRight $ parse "main = case () of A -> error\n_ -> ();")
-        `shouldBe` (EUnit az{pos=(2,6)})
+        `shouldBe` (EUnit (2,6))
     it "match-error" $
       (evalProg True $ fromRight $ parse "main = case error of ()->() \n _->error;")
-        `shouldBe` (EError az{pos=(1,13)} "<user>")
+        `shouldBe` (EError (1,13) "<user>")
     it "match-error" $
       (evalProg False $ fromRight $ parse "main = case () of A->();")
-        `shouldBe` EError (Ann {pos = (1,8)}) "non-exhaustive patterns"
+        `shouldBe` EError (1,8) "non-exhaustive patterns"
     it "assign-var" $
       (evalProg True $ fromRight $ parse "main = a where a = A;")
-        `shouldBe` EData az{pos=(1,20)} ["A"] (EUnit az{pos=(1,20)})
+        `shouldBe` EData (1,20) ["A"] (EUnit (1,20))
     it "assign-tuple" $
       (evalProg False $ fromRight $ parse "main = (a,b) where (a,b) = (A,B);")
-        `shouldBe` ETuple az{pos=(1,8)} [EData az{pos=(1,29)} ["A"] (EUnit az{pos=(1,29)}),EData az{pos=(1,31)} ["B"] (EUnit az{pos=(1,31)})]
+        `shouldBe` ETuple (1,8) [EData (1,29) ["A"] (EUnit (1,29)),EData (1,31) ["B"] (EUnit (1,31))]
 
   describe "evalString:" $ do
     it "(" $
