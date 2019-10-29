@@ -192,9 +192,9 @@ expandDecl _ _ decl = error $ toString decl
 -- [Decl]: decls to transform
 -- [Decl]: transformed decls (maybe the same)
 --
-poly :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
+polyDecls :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
 
-poly ifces dsigs decls = map (polyDecl dsigs') $ map rec decls where
+polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') $ map rec decls where
 
   dsigs' = dsigs ++ filter isDSig decls
 
@@ -204,106 +204,106 @@ poly ifces dsigs decls = map (polyDecl dsigs') $ map rec decls where
   rec d@(DSig _ _ _) = d
   rec (DAtr z1 pat1 (Where (z2,e2,ds2))) =
     DAtr z1 pat1 (Where (z2,e2,ds2')) where
-      ds2' = poly ifces dsigs' ds2
+      ds2' = polyDecls ifces dsigs' ds2
 
-  -----------------------------------------------------------------------------
-  -- handle poly
+-------------------------------------------------------------------------------
 
-  polyDecl :: [Decl] -> Decl -> Decl
+polyDecl :: [Ifce] -> [Decl] -> Decl -> Decl
 
-  polyDecl _ d@(DSig _ _ _) = d
-  polyDecl dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
-    DAtr z1 pat1 $ case e2 of
-      -- EVar:  pat1::B = id3(maximum)
-      -- ECall: pat1::B = id4(neq) $ e3::(B,B)
+polyDecl _ _ d@(DSig _ _ _) = d
+polyDecl ifces dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
+  DAtr z1 pat1 $ case e2 of
+    -- EVar:  pat1::B = id3(maximum)
+    -- ECall: pat1::B = id4(neq) $ e3::(B,B)
 
-      -------------------------------------------------------------------------
-      -- pat1::Bool = id3(maximum)
-      EVar z3 id3 -> Where (z2, EVar z3 id3'',  ds2'') where
+    -------------------------------------------------------------------------
+    -- pat1::Bool = id3(maximum)
+    EVar z3 id3 -> Where (z2, EVar z3 id3'',  ds2'') where
 
-        (id3'',ds2'') = if null tvars4 then
-                          (id3, ds2)
-                        else
-                          (posid z3 id3, ds2' z3 ifc_ids xhr)
+      (id3'',ds2'') = if null tvars4 then
+                        (id3, ds2)
+                      else
+                        (posid z3 id3, ds2' z3 ifc_ids xhr)
 
-        -- x :: Bool = maximum
-        Type (_,TData xhr,_) = pattToType dsigs pat1
+      -- x :: Bool = maximum
+      Type (_,TData xhr,_) = pattToType dsigs pat1
 
-        -- maximum :: a where a is IBounded
-        Type (_,ttp4,cs4) = dsigFind dsigs id3
+      -- maximum :: a where a is IBounded
+      Type (_,ttp4,cs4) = dsigFind dsigs id3
 
-        tvars4  = toVars ttp4 -- [a,...]
-        [tvar4] = tvars4      -- a
+      tvars4  = toVars ttp4 -- [a,...]
+      [tvar4] = tvars4      -- a
 
-        -- [("IBounded",...)]
-        ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+      -- [("IBounded",...)]
+      ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
 
-      -------------------------------------------------------------------------
-      -- pat1::B = id4(neq) e3::(B,B)
-      ECall z3 (EVar z4 id4) e3 -> Where (z2, (ECall z2 (EVar z4 id4'') e3''), ds2'') where
+    -------------------------------------------------------------------------
+    -- pat1::B = id4(neq) e3::(B,B)
+    ECall z3 (EVar z4 id4) e3 -> Where (z2, (ECall z2 (EVar z4 id4'') e3''), ds2'') where
 
-        (id4'',e3'',ds2'') = if null tvars4 then
-                              (id4,e3,ds2)
-                             else
-                              (posid z4 id4, e3', ds2' z4 ifc_ids xhr)
+      (id4'',e3'',ds2'') = if null tvars4 then
+                            (id4,e3,ds2)
+                           else
+                            (posid z4 id4, e3', ds2' z4 ifc_ids xhr)
 
-        -- eq :: (a,a) -> Bool
-        Type (_,ttp4,cs4) = dsigFind dsigs id4
+      -- eq :: (a,a) -> Bool
+      Type (_,ttp4,cs4) = dsigFind dsigs id4
 
-        tvars4  = toVars ttp4 -- [a]
-        [tvar4] = tvars4      -- a
+      tvars4  = toVars ttp4 -- [a]
+      [tvar4] = tvars4      -- a
 
-        -- [("IEq",...)]
-        -- a is IEq
-        ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+      -- [("IEq",...)]
+      -- a is IEq
+      ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
 
+      -- ["dIEqBool",...]
+      dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
+
+      -- eq (Bool,Boot)
+      -- a is Bool
+      TFunc inp4 out4 = ttp4
+      [("a",xhr)] = ttpMatch inp4 (toTType dsigs e3)
+      -- TODO: pat1 vs out4
+
+      -- eq(dIEqBool,...)
+      e3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3]
+                where z3=getPos e3
+
+    -------------------------------------------------------------------------
+    otherwise -> Where (z2, e2,  ds2)
+
+  where
+
+    -- [
+    --  "min :: Bool",
+    --  "max :: Bool",
+    --  "Dict.IBounded (min,max) = dIBoundedBool",
+    --  "eq :: ((Bool,Bool)->Bool)",
+    --  "neq ::((Bool,Bool)->Bool)",
+    --  "Dict.IEq (eq,neq) = dIEqBool",
+    --  ...
+    -- ]
+    ds2' :: Pos -> [ID_Ifce] -> ID_Hier -> [Decl]
+    ds2' z ifc_ids xhr = concatMap f $
+                          -- [("IEq", "daIEqBool", (eq,neq)),...]
+                          zip3 ifc_ids dicts dclss
+      where
         -- ["dIEqBool",...]
         dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
+        -- [(eq,neq),...]
+        dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
 
-        -- eq (Bool,Boot)
-        -- a is Bool
-        TFunc inp4 out4 = ttp4
-        [("a",xhr)] = ttpMatch inp4 (toTType dsigs e3)
-        -- TODO: pat1 vs out4
+        -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
+        f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
+        f (ifc,dict,dcls) = ds ++ [d] where
+          d  = DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) $ map (posid z) dcls))
+                       (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
+          ds = map g dcls where
+                g id = DSig z1 (posid z id) $ mapType f $ dsigFind dsigs id where
+                        f (TVar "a") = TData xhr
+                        f ttp        = ttp
 
-        -- eq(dIEqBool,...)
-        e3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3]
-                  where z3=getPos e3
-
-      -------------------------------------------------------------------------
-      otherwise -> Where (z2, e2,  ds2)
-
-    where
-
-      -- [
-      --  "min :: Bool",
-      --  "max :: Bool",
-      --  "Dict.IBounded (min,max) = dIBoundedBool",
-      --  "eq :: ((Bool,Bool)->Bool)",
-      --  "neq ::((Bool,Bool)->Bool)",
-      --  "Dict.IEq (eq,neq) = dIEqBool",
-      --  ...
-      -- ]
-      ds2' :: Pos -> [ID_Ifce] -> ID_Hier -> [Decl]
-      ds2' z ifc_ids xhr = concatMap f $
-                            -- [("IEq", "daIEqBool", (eq,neq)),...]
-                            zip3 ifc_ids dicts dclss
-        where
-          -- ["dIEqBool",...]
-          dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
-          -- [(eq,neq),...]
-          dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
-
-          -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
-          f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
-          f (ifc,dict,dcls) = ds ++ [d] where
-            d  = DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) $ map (posid z) dcls))
-                         (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
-            ds = map g dcls where
-                  g id = DSig z1 (posid z id) $ mapType f $ dsigFind dsigs id where
-                          f (TVar "a") = TData xhr
-                          f ttp        = ttp
-
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 dsigFind :: [Decl] -> ID_Var -> Type
