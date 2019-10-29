@@ -117,9 +117,7 @@ ieq = [r|
       ;
     ;
     neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      not (eq (daIEq,(x,y))) where
-        (x,y) = ...
-      ;
+      not (eq ...)
     ;
   ;
 |]
@@ -132,21 +130,13 @@ iord = [r|
     gte :: ((a,a) -> Bool)
 
     lte = func :: ((a,a) -> Bool) ->
-      or ( lt ((daIEq,daIOrd),(x,y)),
-           eq (daIEq,(x,y)) ) where
-        (x,y) = ...
-      ;
+      or (lt ..., eq ...)
     ;
     gt = func :: ((a,a) -> Bool) ->
-      not (lte ((daIEq,daIOrd),(x,y))) where
-        (x,y) = ...
-      ;
+      not (lte ...)
     ;
     gte = func :: ((a,a) -> Bool) ->
-      or ( gt ((daIEq,daIOrd),(x,y)),
-           eq (daIEq,(x,y)) ) where
-        (x,y) = ...
-      ;
+      or (gt ..., eq ...)
     ;
   ;
 |]
@@ -192,7 +182,7 @@ iord_nat = [r|
         (Nat.Zero,     Nat.Zero)     -> Bool.False
         (Nat.Zero,     _)            -> Bool.True
         (Nat.Succ _,   Nat.Zero)     -> Bool.False
-        (Nat.Succ =x', Nat.Succ =y') -> lt ((daIEq,daIOrd),(x',y'))
+        (Nat.Succ =x', Nat.Succ =y') -> lt (x',y')
       ; where
         (x,y) = ...
       ;

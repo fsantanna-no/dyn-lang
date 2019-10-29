@@ -182,9 +182,7 @@ main = (smallerc two) four
 smallerc =
   func ->
     func {x} ->
-      lt ((dIEq(),dIOrdNat()),(x,...)) where
-        Dict.IOrd (lt,_,_,_) = dIOrdNat()
-      ;
+      lt (x,...)
     ; where
       x = ...
     ;
@@ -275,9 +273,7 @@ curry  = func ->
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
-    lt ((dIEq(),dIOrdNat()),(x,...)) where
-      Dict.IOrd (lt,_,_,_) = dIOrdNat()
-    ;
+    lt (x,...)
   ; where
     x = ...
   ;
