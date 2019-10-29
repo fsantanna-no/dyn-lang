@@ -194,7 +194,7 @@ expandDecl _ _ decl = error $ toString decl
 --
 poly :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
 
-poly ifces dsigs decls = map poly' $ map rec decls where
+poly ifces dsigs decls = map (polyDecl dsigs') $ map rec decls where
 
   dsigs' = dsigs ++ filter isDSig decls
 
@@ -209,10 +209,10 @@ poly ifces dsigs decls = map poly' $ map rec decls where
   -----------------------------------------------------------------------------
   -- handle poly
 
-  poly' :: Decl -> Decl
+  polyDecl :: [Decl] -> Decl -> Decl
 
-  poly' d@(DSig _ _ _) = d
-  poly' (DAtr z1 pat1 (Where (z2, e2, ds2))) =
+  polyDecl _ d@(DSig _ _ _) = d
+  polyDecl dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
     DAtr z1 pat1 $ case e2 of
       -- EVar:  pat1::B = id3(maximum)
       -- ECall: pat1::B = id4(neq) $ e3::(B,B)
@@ -227,10 +227,10 @@ poly ifces dsigs decls = map poly' $ map rec decls where
                           (posid z3 id3, ds2' z3 ifc_ids xhr)
 
         -- x :: Bool = maximum
-        Type (_,TData xhr,_) = pattToType dsigs' pat1
+        Type (_,TData xhr,_) = pattToType dsigs pat1
 
         -- maximum :: a where a is IBounded
-        Type (_,ttp4,cs4) = dsigFind dsigs' id3
+        Type (_,ttp4,cs4) = dsigFind dsigs id3
 
         tvars4  = toVars ttp4 -- [a,...]
         [tvar4] = tvars4      -- a
@@ -248,7 +248,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
                               (posid z4 id4, e3', ds2' z4 ifc_ids xhr)
 
         -- eq :: (a,a) -> Bool
-        Type (_,ttp4,cs4) = dsigFind dsigs' id4
+        Type (_,ttp4,cs4) = dsigFind dsigs id4
 
         tvars4  = toVars ttp4 -- [a]
         [tvar4] = tvars4      -- a
@@ -263,7 +263,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
         -- eq (Bool,Boot)
         -- a is Bool
         TFunc inp4 out4 = ttp4
-        [("a",xhr)] = ttpMatch inp4 (toTType dsigs' e3)
+        [("a",xhr)] = ttpMatch inp4 (toTType dsigs e3)
         -- TODO: pat1 vs out4
 
         -- eq(dIEqBool,...)
@@ -300,7 +300,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
             d  = DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) $ map (posid z) dcls))
                          (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
             ds = map g dcls where
-                  g id = DSig z1 (posid z id) $ mapType f $ dsigFind dsigs' id where
+                  g id = DSig z1 (posid z id) $ mapType f $ dsigFind dsigs id where
                           f (TVar "a") = TData xhr
                           f ttp        = ttp
 
@@ -323,7 +323,6 @@ toTType ds (ECall  _ f _) = case toTType ds f of
                               TFunc _ out -> out
 toTType _  e = error $ "toTType: " ++ toString e
 
--- TODO: use mapType
 toVars :: TType -> [ID_Var]
 toVars ttp = S.toAscList $ aux ttp where
   aux TAny            = S.empty
