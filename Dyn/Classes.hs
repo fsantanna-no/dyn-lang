@@ -72,7 +72,7 @@ instance IString Type where
       l  -> toString ttp ++ " where (" ++ intercalate "," (map f l) ++ ")" where
               f (var,[cls]) = var ++ " is " ++ cls
               f (var,clss)  = var ++ " is (" ++ intercalate "," clss ++ ")"
-  toStringI _ = error "TODO"
+  toStringI _ _ = error "TODO"
 
 
 -------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ instance IString TType where
   --toString (TData ids [x]) = intercalate "." ids ++ " of " ++ toString x
   --toString (TData ids ofs) = intercalate "." ids ++ " of " ++ "(" ++ intercalate "," (map toString ofs) ++ ")"
 
-  toStringI _ = error "TODO"
+  toStringI _ _ = error "TODO"
 
 -------------------------------------------------------------------------------
 
@@ -146,3 +146,12 @@ instance IString Where where
   toStringI spc (Where (_,e,dcls)) = toStringI spc e ++ " where"
                                       ++ (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (toStringI (spc+2)) dcls))
                                       ++ "\n" ++ rep spc ++ ";"
+
+-------------------------------------------------------------------------------
+
+instance IString Prog where
+  toString (Prog glbs) = concatMap f glbs where
+                          f (GDecl decl) = toString decl ++ "\n"
+                          f (GIfce ifce) = error "TODO"
+                          f (GImpl impl) = error "TODO"
+  toStringI _ _ = error "TODO"

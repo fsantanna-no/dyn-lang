@@ -106,7 +106,7 @@ spec = do
     describe "prog:" $ do
       it "case" $
         (toString $ fromRight $ parse' (prog) "main = case x of Bool.True -> a\nBool.False -> b;")
-          `shouldBe` "main where\n  main = case x of\n    Bool.True -> a\n    Bool.False -> b\n  ;\n;"
+          `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;\n"
 
     describe "expr:" $ do
       it "()" $
@@ -136,25 +136,25 @@ spec = do
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (toString $ fromRight $ parse "main :: () = ()")
-          `shouldBe` "main where\n  main :: ()\n  main = ()\n;"
+          `shouldBe` "main :: ()\nmain = ()\n"
       it "x where x :: ()" $
         (toString $ fromRight $ parse "main :: ()")
-          `shouldBe` "main where\n  main :: ()\n;"
+          `shouldBe` "main :: ()\n"
       it "x where x = ()" $
         (toString $ fromRight $ parse "main = ()")
-          `shouldBe` "main where\n  main = ()\n;"
+          `shouldBe` "main = ()\n"
       it "x where x,y" $
         (parseToString "main::()=y  y::()=()")
           `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", declaration, \"interface\", \"implementation\" or end of input"
       it "x where x,y" $
         (parseToString "main::()=y\ny::()=()")
-          `shouldBe` "main where\n  main :: ()\n  main = y\n  y :: ()\n  y = ()\n;"
+          `shouldBe` "main :: ()\nmain = y\ny :: ()\ny = ()\n"
       it "where-newline" $
         (toString $ fromRight $ parse "main :: () = f ()\n")
-          `shouldBe` "main where\n  main :: ()\n  main = (f ())\n;"
+          `shouldBe` "main :: ()\nmain = (f ())\n"
       it "Xx a = ()" $
         (toString $ fromRight $ parse "Xx main = ()")
-          `shouldBe` "main where\n  (Xx main) = ()\n;"
+          `shouldBe` "(Xx main) = ()\n"
       it "func" $
         (toString $ fromRight $ parse
           [r|
@@ -163,7 +163,7 @@ f :: () = func -> x where
             x :: () = ...;
           ;
 |])
-          `shouldBe` "main where\n  main :: ()\n  main = (f ())\n  f :: ()\n  f = func :: () ->\n    x where\n      x :: ()\n      x = ...\n    ;\n  ;\n;"
+          `shouldBe` "main :: ()\nmain = (f ())\nf :: ()\nf = func :: () ->\n  x where\n    x :: ()\n    x = ...\n  ;\n;\n"
 
       it "where-where" $
         (parseToString
@@ -174,16 +174,16 @@ main :: () = b d where
   ;
 d :: () = ()
 |])
-          `shouldBe` "main where\n  main :: ()\n  main = (b d) where\n    b :: ()\n    b = c\n    c :: ()\n    c = ()\n  ;\n  d :: ()\n  d = ()\n;"
+          `shouldBe` "main :: ()\nmain = (b d) where\n  b :: ()\n  b = c\n  c :: ()\n  c = ()\n;\nd :: ()\nd = ()\n"
 
     describe "parseToString:" $ do
 
       it "case" $
         parseToString "main = case x of Bool.True -> a\nBool.False -> b;"
-          `shouldBe` "main where\n  main = case x of\n    Bool.True -> a\n    Bool.False -> b\n  ;\n;"
+          `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;\n"
       it "case" $
         parseToString "main = case x of _ -> a;"
-          `shouldBe` "main where\n  main = case x of\n    _ -> a\n  ;\n;"
+          `shouldBe` "main = case x of\n  _ -> a\n;\n"
 
       it "Nat +" $
         parseToString [r|
@@ -198,4 +198,4 @@ add =
     ;
   ;
 |]
-        `shouldBe` "main where\n  main = (add (Nat.Zero,(Nat.Succ Nat.Zero)))\n  add = func :: () ->\n    case y of\n      Nat.Zero -> x\n      (Nat.Succ =z) -> (Nat.Succ (add (x,z)))\n    ; where\n      (x,y) = ...\n    ;\n  ;\n;"
+        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)))\nadd = func :: () ->\n  case y of\n    Nat.Zero -> x\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)))\n  ; where\n    (x,y) = ...\n  ;\n;\n"

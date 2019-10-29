@@ -1,9 +1,11 @@
 module Dyn.Ifce where
 
 import Debug.Trace
-import Data.Bool          (bool)
-import Data.Maybe         (fromJust)
-import Data.List as L     (find, sort)
+import Data.Bool                (bool)
+import Data.Maybe               (fromJust)
+import qualified Data.List as L (find, sort)
+import qualified Data.Set  as S
+import qualified Data.Map  as M
 import Text.RawString.QQ
 
 import Dyn.AST
@@ -24,7 +26,7 @@ ifceToDeclIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
 -- [...] -> ["IEq"] -> ["IEq","IOrd"] -- (sorted)
 ifcesSups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
 ifcesSups ifces []  = []
-ifcesSups ifces ids = sort $ ifcesSups ifces ids' ++ ids where
+ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
                         ids' = concatMap (f . (ifceFind ifces)) ids
                         f (Ifce (_,ifc,[],     _)) = []
                         f (Ifce (_,ifc,[(_,l)],_)) = l
@@ -72,7 +74,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
                       (fromList $ map (EVar z) $ ifceToDeclIds ifce)
 
   -- {daIXxx} // implementation of IOrd for a where a is IXxx
-  ups' = DAtr z (fromList $ map (PWrite z) $ sort $ map ("da"++) imp_ids)
+  ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) imp_ids)
                 (Where (z,EArg z,[]))
 
   toString' (Type (_, TData hr, _      )) = concat hr
@@ -136,7 +138,7 @@ expandDecl ifces
     cs4YImps  = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs4
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
-    ups3' = map (\id -> (id,EUnit az)) $ sort $ map ("da"++) imp_ids
+    ups3' = map (\id -> (id,EUnit az)) $ L.sort $ map ("da"++) imp_ids
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
@@ -163,7 +165,7 @@ expandDecl ifces
     -- (d1,...,dN)
     -- csNImps: exclude implementation constraints since dicts come from closure
     dicts5 :: Patt
-    dicts5 = fromList $ map (PWrite z1) $ sort $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps')
+    dicts5 = fromList $ map (PWrite z1) $ L.sort $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs4NImps')
                                                   -- [daIEq,daIShow,dbIEq,...]
 
     -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
@@ -187,66 +189,118 @@ expandDecl _ _ decl = error $ toString decl
 -- [Ifce]: known ifces
 -- [Decl]: known DSig decls
 -- Type:   expected type
--- Where:  expression (+ decls) to evaluate
--- Where:  transformed expression (+ decls) (maybe the same)
+-- [Decl]: decls to transform
+-- [Decl]: transformed decls (maybe the same)
 --
-poly :: [Ifce] -> [Decl] -> Type -> Where -> Where
+poly :: [Ifce] -> [Decl] -> Type -> [Decl] -> [Decl]
 
-poly ifces dsigs xtp (Where (z,expr,ds)) = poly' ifces dsigs xtp whe' where
-  whe' = Where (z,expr,ds')
-  ds'  = map f ds where
-          -- recurse poly into other Where's
-          f d@(DSig _ _ _) = d
-          f (DAtr z1 (PWrite z2 id2) whe1) =
-            DAtr z1 (PWrite z2 id2) $ poly ifces dsigs' (dsigFind dsigs' id2) whe1
-          -- TODO: other cases
-          f (DAtr z1 pat whe1) =
-            DAtr z1 pat $ poly ifces dsigs' (Type (az,TAny,cz)) whe1
-  dsigs' = dsigs ++ filter isDSig ds
+poly ifces dsigs xtp decls = map poly' $ map rec decls where
 
-poly' :: [Ifce] -> [Decl] -> Type -> Where -> Where
+  -- recurse poly into other Decls
+  rec :: Decl -> Decl
+  rec d@(DSig _ _ _) = d
+  rec (DAtr z1 (PWrite z2 id2) (Where (z3,e3,ds3))) =
+    DAtr z1 (PWrite z2 id2) (Where (z3,e3,ds3')) where
+      ds3' = poly ifces dsigs' (dsigFind dsigs' id2) ds3
+  -- TODO: other cases
+  rec (DAtr z1 pat2 (Where (z3,e3,ds3))) =
+    DAtr z1 pat2 (Where (z3,e3,ds3')) where
+      ds3' = poly ifces dsigs' (Type (az,TAny,cz)) ds3
 
---                Bool                       maximum
-poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id2,ds1)) =
-  if null tvars2 then
+  dsigs' = dsigs ++ filter isDSig decls
+
+  -- handle poly
+
+  poly' :: Decl -> Decl
+
+  poly' d@(DSig _ _ _) = d
+
+  -- xtp=Bool pat2=TODO e3=maximum 
+  poly' (DAtr z1 pat2 (Where (z3,EVar z4 id4,ds3))) =
+    DAtr z1 pat2 (Where (z3,EVar z4 id4,ds3'')) where
+      ds3'' = bool ds3' ds3 (null tvars4)
+
+      -- x :: Bool = maximum
+      Type (_,TData xhr,_) = xtp
+
+      -- maximum :: a where a is IBounded
+      Type (_,ttp4,cs4) = dsigFind dsigs id4
+
+      tvars4  = toVars ttp4 -- [a,...]
+      [tvar4] = tvars4      -- a
+
+      -- [("IBounded",...)]
+      ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+
+      -- ["Dict.IBounded (min,max) = dIBoundedBool", ...]
+      ds3' :: [Decl]
+      ds3' = map f $
+              -- [("IEq", "daIEqBool", (eq,neq)),...]
+              zip3 ifc_ids dicts dclss
+             where
+              -- ["dIEqBool",...]
+              dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
+              -- [(eq,neq),...]
+              dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
+
+              -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
+              f (ifc,dict,dcls) =
+                DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
+                        (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
+
+  poly' d@(DAtr _ _ _) = d
+
+{-
+poly' ifces dsigs xtp_out@(Type (_,xttp_out,_)) whe@(Where (z1,call@(ECall z2 (EVar z3 id3) expr2),ds1)) =
+  if null tvars3 then
     whe
   else
-    Where (z1, EVar z2 id2,ds1++ds1')
+    Where (z1, ECall z2 (EVar z3 id3) expr2', ds1++ds1')
   where
-      Type (_,ttp2,cs2) = dsigFind dsigs id2
-      tvars2            = toVars ttp2
+    -- eq :: (a,a) -> Bool
+    Type (_,ttp3,cs3) = dsigFind dsigs id3
 
-      [tid] = tvars2
+    tvars3  = toVars ttp3 -- [a]
+    [tvar3] = tvars3      -- a
 
-      -- [("IEq",...)]
-      ifc_ids = snd $ fromJust $ find ((==tid).fst) cs2
+    -- [("IEq",...)]
+    -- a is IEq
+    ifc_ids = snd $ fromJust $ L.find ((==tvar3).fst) cs3
 
-      -- [Dict.IEq (eq,neq) = daIEqBool, ...]
-      ds1' :: [Decl]
-      ds1' = map f $
-              -- [("IEq", "daIEqBool", (eq,neq)),...]
-              zip3 ifc_ids dicts dclss where
-                -- ["dIEqBool",...]
-                dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
-                -- [(eq,neq),...]
-                dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
-      -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
-      f (ifc,dict,dcls) =
-        DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
-                (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
+    -- ["dIEqBool",...]
+    dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
 
-poly' ifces dsigs xtp whe@(Where (z1,ECall z2 (EVar z3 id3) expr,ds1)) =
-  whe
-  --case (xtp,tp) of
-    --(_, Type (_,TVar tid,cs)) -> Where (z1, EVar z2 id2,ds1++ds1') where
-  --traceShow ("XTP",toString xtp, "FUNC",toString $ dsigFind dsigs id3, "PS",toString $ toTType expr) whe
+    -- eq (Bool,Boot)
+    -- a is Bool
+    TFunc inp3 out3 = ttp3
+    [("a",xhr)] = ttpMatch inp3 (toTType expr2)
+    -- TODO: xttp_out vs out3
+
+    -- eq(dIEqBool,...)
+    expr2' = ETuple z2 [(fromList $ map (EVar z2) dicts), expr2]
+
+    ds1' :: [Decl]
+    ds1' = map f $
+            -- [("IEq", "daIEqBool", (eq,neq)),...]
+            zip3 ifc_ids dicts dclss
+           where
+            -- [(eq,neq),...]
+            dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
+
+            -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
+            f (ifc,dict,dcls) =
+              DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
+                      (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
+
+
+    --traceShow ("XTP",toString xtp, "FUNC",toString $ dsigFind dsigs id3, "PS",toString $ toTType expr) whe
 
 poly' _ _ _ whe = whe
-
+-}
 -------------------------------------------------------------------------------
 
 dsigFind :: [Decl] -> ID_Var -> Type
-dsigFind dsigs id = case find f dsigs of
+dsigFind dsigs id = case L.find f dsigs of
                       Nothing            -> Type (az,TAny,cz)
                       Just (DSig _ _ tp) -> tp
                     where
@@ -256,15 +310,22 @@ dsigFind dsigs id = case find f dsigs of
 toTType :: Expr -> TType
 toTType (ECons  _ hr) = TData hr
 toTType (ETuple _ es) = TTuple $ map toTType es
-toTType e = error $ toString e
+toTType e = error $ "toTType: " ++ toString e
 
 toVars :: TType -> [ID_Var]
-toVars (TVar id) = [id]
+toVars ttp = S.toAscList $ aux ttp where
+  aux TAny            = S.empty
+  aux TUnit           = S.empty
+  aux (TData _)       = S.empty
+  aux (TVar id)       = S.singleton id
+  aux (TFunc inp out) = S.union (aux inp) (aux out)
+  aux (TTuple tps)    = S.unions (map aux tps)
 
-{-
-toType :: [Decl] -> Expr -> Type
-toType dsigs (EVar   _ id) = dsigFind dsigs id
-toType dsigs (ECons  _ hr) = (az, TData hr               , cz)
-toType dsigs (ETuple _ es) = (az, TTuple $ map toTType es, cz)
-toType e _ = error $ toString e
--}
+-- (a,a) vs (Bool.True,Bool.False)  -> [(a,Bool)]
+ttpMatch :: TType -> TType -> [(ID_Var,ID_Hier)]
+ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
+  aux :: TType -> TType -> M.Map ID_Var ID_Hier
+  aux (TVar id)    (TData (hr:_)) = M.singleton id [hr]
+  aux (TTuple ts1) (TTuple ts2)   = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
+                                      where f hr1 hr2 | hr1==hr2 = hr1
+  aux x y = error $ show (x,y)

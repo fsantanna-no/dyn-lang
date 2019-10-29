@@ -6,6 +6,7 @@ import Data.List    (find)
 
 import Dyn.AST
 import Dyn.Parser
+import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
 
@@ -130,11 +131,43 @@ evalWhere env (Where (z, e, dcls)) =
 
 -------------------------------------------------------------------------------
 
-evalProg :: Prog -> Expr
-evalProg w = evalWhere [] w
+toDecl :: Global -> Decl
+toDecl (GDecl decl) = decl
+  -- refuse GIfce/GImpl
 
-run :: String -> String
-run input =
+fromDecl :: Decl -> Global
+fromDecl decl = GDecl decl
+
+-------------------------------------------------------------------------------
+
+evalProg :: Bool -> Prog -> Expr
+evalProg shouldTransform prog =
+  evalWhere [] $ Where (az, EVar az "main", map toDecl glbs') where
+
+    Prog glbs' = (bool id transform shouldTransform) prog
+
+evalString :: Bool -> String -> String
+evalString shouldTransform input =
   case parse input of
-    Left  err -> err
-    Right exp -> toString $ evalProg exp
+    Left  err  -> err
+    Right prog -> toString $ evalProg shouldTransform prog
+
+transform :: Prog -> Prog
+transform (Prog glbs) =
+  Prog $
+    map fromDecl                           $
+    Ifce.poly ifces [] (Type (az,TAny,cz)) $
+    concatMap remGIfceGImpl                $
+    glbs
+  where
+    remGIfceGImpl :: Global -> [Decl]
+    remGIfceGImpl (GDecl dcl) = [dcl]
+    remGIfceGImpl (GIfce ifc) = Ifce.ifceToDecls ifces ifc
+    remGIfceGImpl (GImpl imp) = Ifce.implToDecls ifces imp
+    ifces = glbsToIfcs glbs
+
+    glbsToIfcs :: [Global] -> [Ifce]
+    glbsToIfcs glbs = map g $ filter f glbs where
+                        f (GIfce ifc) = True
+                        f _           = False
+                        g (GIfce ifc) = ifc

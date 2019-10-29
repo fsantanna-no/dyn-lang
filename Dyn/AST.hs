@@ -104,7 +104,10 @@ newtype Ifce = Ifce (Ann, ID_Ifce, TCtrs, [Decl])
 newtype Impl = Impl (Ann, ID_Ifce, Type, [Decl])
   deriving (Eq, Show)
 
-type Prog = Where
+newtype Prog = Prog [Global]
+
+-- top-level global declarations
+data Global = GDecl Decl | GIfce Ifce | GImpl Impl
 
 -------------------------------------------------------------------------------
 

@@ -14,8 +14,8 @@ import Text.Parsec.String     (Parser)
 import Text.Parsec.Char       (string, anyChar, newline, oneOf, satisfy, digit, letter, char)
 import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, option, optionMaybe)
 
-import Dyn.AST  as AST
-import qualified Dyn.Ifce as Ifce
+import Dyn.AST as AST
+import Dyn.Classes
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -425,9 +425,6 @@ impl = do
 
 -------------------------------------------------------------------------------
 
--- top-level global declarations
-data GList = GDecl Decl | GIfce Ifce | GImpl Impl
-
 prog :: Parser Prog
 prog = do
   pos  <- toPos <$> getPosition
@@ -438,21 +435,7 @@ prog = do
             (singleton <$> GImpl <$> impl) -- <|>
           )
   void <- eof
-  return $
-    let
-      toDecls (GDecl dcl) = [dcl]
-      toDecls (GIfce ifc) = Ifce.ifceToDecls ifces ifc
-      toDecls (GImpl imp) = Ifce.implToDecls ifces imp
-      ifces = glbsToIfcs glbs
-     in
-      Ifce.poly ifces [] (Type (az,TAny,cz)) $
-        Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecls glbs)
-
-glbsToIfcs :: [GList] -> [Ifce]
-glbsToIfcs glbs = map g $ filter f glbs where
-                    f (GIfce ifc) = True
-                    f _           = False
-                    g (GIfce ifc) = ifc
+  return $ Prog glbs
 
 -------------------------------------------------------------------------------
 
@@ -468,5 +451,5 @@ parse' rule input =
 parseToString :: String -> String
 parseToString input =
   case parse input of
-    (Left  v) -> v
-    (Right p) -> toString p
+    (Left  err)  -> err
+    (Right prog) -> toString prog
