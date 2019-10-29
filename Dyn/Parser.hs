@@ -445,7 +445,7 @@ prog = do
       toDecls (GImpl imp) = Ifce.implToDecls ifces imp
       ifces = glbsToIfcs glbs
      in
-      Ifce.poly ifces [] (Type (az,TData ["Bool"],cz)) $
+      Ifce.poly ifces [] (Type (az,TAny,cz)) $
         Where (az{pos=pos}, EVar az{pos=pos} "main", concatMap toDecls glbs)
 
 glbsToIfcs :: [GList] -> [Ifce]

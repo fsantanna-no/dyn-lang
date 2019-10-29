@@ -52,8 +52,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (expandDecl ifces (id,[])) decls where
-            Ifce (_,id,_,_) = me
+  decls' = map (expandDecl ifces (ifc_id,[])) decls
 
 -------------------------------------------------------------------------------
 
@@ -94,9 +93,16 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 
 -------------------------------------------------------------------------------
 
+-- [Ifce]:              known interfaces
+-- (ID_ifce,[ID_Ifce]): iface constraint // impl extra constraints
+-- Decl:                decl to expand
+-- Decl:                expanded decl
 expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
 
-expandDecl _ _ dsig@(DSig _ _ _) = dsig
+expandDecl ifces (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
+  DSig z1 id1 (Type (z2,ttp2,cs2')) where
+    -- TODO: a?
+    cs2' = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
 
 -- IBounded: minimum/maximum
 expandDecl _ _ decl@(DAtr _ _ (Where (_,econst,_))) | isConst econst = decl where
@@ -191,7 +197,7 @@ poly ifces dsigs xtp (Where (z,expr,ds)) = poly' ifces dsigs xtp whe' where
   ds'  = map f ds where
           f d@(DSig _ _ _) = d
           f (DAtr z1 (PWrite z2 id2) whe1) =
-            DAtr z1 (PWrite z2 id2) $ poly ifces dsigs' (dsigFind dsigs id2) whe1
+            DAtr z1 (PWrite z2 id2) $ poly ifces dsigs' (dsigFind dsigs' id2) whe1
           f (DAtr z1 pat whe1) =
             DAtr z1 pat $ poly ifces dsigs' (Type (az,TAny,cz)) whe1
   dsigs' = dsigs ++ filter isDSig ds
@@ -212,14 +218,14 @@ poly' ifces dsigs xtp@(Type (_,TData xhr,_)) whe@(Where (z1,EVar z2 id,ds)) =
       ds' = map f $
               -- [("IEq", "daIEqBool", (eq,neq)),...]
               zip3 ifc_ids dicts dclss where
-                -- ["daIEqBool",...]
-                dicts = map (\ifc -> "d"++tid++ifc++concat xhr) ifc_ids
+                -- ["dIEqBool",...]
+                dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
                 -- [(eq,neq),...]
                 dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
       -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
       f (ifc,dict,dcls) =
         DAtr z1 (PCall z1 (PCons z1 ["Dict",ifc]) (fromList $ map (PWrite z1) dcls))
-                (Where (z1, EVar z1 dict, []))
+                (Where (z1, ECall z1 (EVar z1 dict) (EUnit z1), []))
 
     otherwise                 -> whe
 

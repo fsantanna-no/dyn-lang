@@ -25,13 +25,16 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "main = maximum" $
-      run ("main = maximum" ++ ibounded_bool ++ bool ++ ibounded)
-        `shouldBe` "(Bool.True,Bool.False)"
+    it "main = x where x::Bool = maximum;" $
+      run ("main = x where x::Bool = maximum;" ++ ibounded_bool ++ bool ++ ibounded)
+        `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
       run ([r|
-main = (maximum, minimum)
+main = (x,y) where
+  x :: Bool = maximum
+  y :: Bool = minimum
+;
 |] ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -145,7 +148,7 @@ implementation of IAaa for Xxx with
         `shouldBe` (Where (az,EUnit az,[]))
     it "minimum: Bool vs a::IBounded" $
       toString (poly [ibnd] [DSig az "minimum" taibnd] (Type (az,TData ["Bool"],cz)) (Where (az,EVar az "minimum",[])))
-        `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = daIBoundedBool\n;"
+        `shouldBe` "minimum where\n  (Dict.IBounded (minimum,maximum)) = (dIBoundedBool ())\n;"
     it "Bool vs Bool" $
       (poly [] [DSig az "x" tbool] tbool (Where (az,EVar az "x",[])))
         `shouldBe` Where (az,EVar az "x",[])
