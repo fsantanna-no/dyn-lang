@@ -40,8 +40,8 @@ main = (x,y) where
 
   describe "IEq" $ do
 
-    it "XXX: IEq: default eq" $
-      parseToString True ([r|  -- neq (eq(T,T), F)
+    it "IEq: default eq" $
+      evalString True ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
 ;

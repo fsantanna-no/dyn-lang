@@ -272,7 +272,7 @@ poly ifces dsigs decls = map poly' $ map rec decls where
       -- TODO: pat1 vs out4
 
       -- eq(dIEqBool,...)
-      expr3' = ETuple z3 [(fromList $ map (EVar z3) dicts), expr3]
+      expr3' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), expr3]
                 where z3=getAnn expr3
 
       ds2' :: [Decl]
