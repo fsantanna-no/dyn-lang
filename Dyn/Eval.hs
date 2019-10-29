@@ -6,7 +6,7 @@ import Data.List    (find)
 
 import Dyn.AST
 import Dyn.Parser
-import qualified Dyn.Analyse as Analyse
+import qualified Dyn.Analyse as Ana
 
 -------------------------------------------------------------------------------
 
@@ -135,7 +135,7 @@ evalProg :: Bool -> Prog -> Expr
 evalProg shouldAnalyse prog =
   evalWhere [] $ Where (az, EVar az "main", map globToDecl glbs') where
 
-    Prog glbs' = (bool id Analyse.all shouldAnalyse) prog
+    Prog glbs' = (bool id Ana.all shouldAnalyse) prog
 
 evalString :: Bool -> String -> String
 evalString shouldAnalyse input =

@@ -16,6 +16,7 @@ import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, op
 
 import Dyn.AST as AST
 import Dyn.Classes
+import qualified Dyn.Analyse as Ana
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -448,8 +449,8 @@ parse' rule input =
     (Right v) -> Right v
     (Left  v) -> Left (show v)
 
-parseToString :: String -> String
-parseToString input =
+parseToString :: Bool -> String -> String
+parseToString shouldAnalyse input =
   case parse input of
     (Left  err)  -> err
-    (Right prog) -> toString prog
+    (Right prog) -> toString $ (bool id Ana.all shouldAnalyse) prog

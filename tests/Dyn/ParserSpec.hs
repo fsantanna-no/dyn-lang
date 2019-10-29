@@ -144,10 +144,10 @@ spec = do
         (toString $ fromRight $ parse "main = ()")
           `shouldBe` "main = ()\n"
       it "x where x,y" $
-        (parseToString "main::()=y  y::()=()")
+        (parseToString False "main::()=y  y::()=()")
           `shouldBe` "(line 1, column 14):\nunexpected ':'\nexpecting identifier, \"where\", declaration, \"interface\", \"implementation\" or end of input"
       it "x where x,y" $
-        (parseToString "main::()=y\ny::()=()")
+        (parseToString False "main::()=y\ny::()=()")
           `shouldBe` "main :: ()\nmain = y\ny :: ()\ny = ()\n"
       it "where-newline" $
         (toString $ fromRight $ parse "main :: () = f ()\n")
@@ -166,7 +166,7 @@ f :: () = func -> x where
           `shouldBe` "main :: ()\nmain = (f ())\nf :: ()\nf = func :: () ->\n  x where\n    x :: ()\n    x = ...\n  ;\n;\n"
 
       it "where-where" $
-        (parseToString
+        (parseToString False
           [r|
 main :: () = b d where
   b :: () = c
@@ -179,14 +179,14 @@ d :: () = ()
     describe "parseToString:" $ do
 
       it "case" $
-        parseToString "main = case x of Bool.True -> a\nBool.False -> b;"
+        parseToString False "main = case x of Bool.True -> a\nBool.False -> b;"
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;\n"
       it "case" $
-        parseToString "main = case x of _ -> a;"
+        parseToString False "main = case x of _ -> a;"
           `shouldBe` "main = case x of\n  _ -> a\n;\n"
 
       it "Nat +" $
-        parseToString [r|
+        parseToString False [r|
 main = add (Nat.Zero, Nat.Succ Nat.Zero)
 add =
   func :: () ->
