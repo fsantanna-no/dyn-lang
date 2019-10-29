@@ -155,9 +155,9 @@ evalString shouldTransform input =
 transform :: Prog -> Prog
 transform (Prog glbs) =
   Prog $
-    map fromDecl                           $
-    Ifce.poly ifces [] (Type (az,TAny,cz)) $
-    concatMap remGIfceGImpl                $
+    map fromDecl            $
+    Ifce.poly ifces []      $
+    concatMap remGIfceGImpl $
     glbs
   where
     remGIfceGImpl :: Global -> [Decl]

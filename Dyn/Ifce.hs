@@ -192,39 +192,38 @@ expandDecl _ _ decl = error $ toString decl
 -- [Decl]: decls to transform
 -- [Decl]: transformed decls (maybe the same)
 --
-poly :: [Ifce] -> [Decl] -> Type -> [Decl] -> [Decl]
+poly :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
 
-poly ifces dsigs xtp decls = map poly' $ map rec decls where
-
-  -- recurse poly into other Decls
-  rec :: Decl -> Decl
-  rec d@(DSig _ _ _) = d
-  rec (DAtr z1 (PWrite z2 id2) (Where (z3,e3,ds3))) =
-    DAtr z1 (PWrite z2 id2) (Where (z3,e3,ds3')) where
-      ds3' = poly ifces dsigs' (dsigFind dsigs' id2) ds3
-  -- TODO: other cases
-  rec (DAtr z1 pat2 (Where (z3,e3,ds3))) =
-    DAtr z1 pat2 (Where (z3,e3,ds3')) where
-      ds3' = poly ifces dsigs' (Type (az,TAny,cz)) ds3
+poly ifces dsigs decls = map poly' $ map rec decls where
 
   dsigs' = dsigs ++ filter isDSig decls
 
+  -- recurse poly into other Decls
+  -- TODO: pat1 recurse
+  rec :: Decl -> Decl
+  rec d@(DSig _ _ _) = d
+  rec (DAtr z1 pat1 (Where (z2,e2,ds2))) =
+    DAtr z1 pat1 (Where (z2,e2,ds2')) where
+      ds2' = poly ifces dsigs' ds2
+
+  -----------------------------------------------------------------------------
   -- handle poly
 
   poly' :: Decl -> Decl
 
   poly' d@(DSig _ _ _) = d
 
-  -- xtp=Bool pat2=TODO e3=maximum 
-  poly' (DAtr z1 pat2 (Where (z3,EVar z4 id4,ds3))) =
-    DAtr z1 pat2 (Where (z3,EVar z4 id4,ds3'')) where
-      ds3'' = bool ds3' ds3 (null tvars4)
+  -- pat1 = e3
+  -- pat1::Bool e3=maximum
+  poly' (DAtr z1 pat1 (Where (z2,EVar z3 id3,ds2))) =
+    DAtr z1 pat1 (Where (z2,EVar z3 id3,ds2'')) where
+      ds2'' = bool ds2' ds2 (null tvars4)
 
       -- x :: Bool = maximum
-      Type (_,TData xhr,_) = xtp
+      Type (_,TData xhr,_) = pattToType dsigs' pat1
 
       -- maximum :: a where a is IBounded
-      Type (_,ttp4,cs4) = dsigFind dsigs id4
+      Type (_,ttp4,cs4) = dsigFind dsigs' id3
 
       tvars4  = toVars ttp4 -- [a,...]
       [tvar4] = tvars4      -- a
@@ -233,8 +232,8 @@ poly ifces dsigs xtp decls = map poly' $ map rec decls where
       ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
 
       -- ["Dict.IBounded (min,max) = dIBoundedBool", ...]
-      ds3' :: [Decl]
-      ds3' = map f $
+      ds2' :: [Decl]
+      ds2' = map f $
               -- [("IEq", "daIEqBool", (eq,neq)),...]
               zip3 ifc_ids dicts dclss
              where
@@ -329,3 +328,7 @@ ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   aux (TTuple ts1) (TTuple ts2)   = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
                                       where f hr1 hr2 | hr1==hr2 = hr1
   aux x y = error $ show (x,y)
+
+pattToType :: [Decl] -> Patt -> Type
+pattToType dsigs (PWrite _ id) = dsigFind dsigs id
+--pattToType _ x = error $ pattToString True x
