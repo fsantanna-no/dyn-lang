@@ -49,7 +49,7 @@ main = x where
         `shouldBe` "Bool.True"
 
     it "XXX: IEq: default eq" $
-      evalString True ([r|  -- neq (eq(T,T), F)
+      parseToString True ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
 ;

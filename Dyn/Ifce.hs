@@ -210,20 +210,24 @@ polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') $ map rec decls where
 
 polyDecl :: [Ifce] -> [Decl] -> Decl -> Decl
 
-polyDecl _ _ d@(DSig _ _ _) = d
-polyDecl ifces dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
-  DAtr z1 pat1 $ case e2 of
+polyDecl _     _     d@(DSig _ _ _) = d
+polyDecl ifces dsigs   (DAtr z1 pat1 (Where (z2, e2, ds2))) =
+                       (DAtr z1 pat1 (Where (z2, e2', e2ds'++ds2)))
+  where
+    (e2', e2ds') = polyExpr e2
+
     -- EVar:  pat1::B = id3(maximum)
     -- ECall: pat1::B = id4(neq) $ e3::(B,B)
 
     -------------------------------------------------------------------------
+
     -- pat1::Bool = id3(maximum)
-    EVar z3 id3 -> Where (z2, EVar z3 id3'',  ds2'') where
+    polyExpr (EVar z3 id3) = (EVar z3 id3'',  ds2'') where
 
       (id3'',ds2'') = if null tvars4 then
                         (id3, ds2)
                       else
-                        (posid z3 id3, ds2' z3 ifc_ids xhr)
+                        (posid z3 id3, xxx z3 ifc_ids xhr)
 
       -- x :: Bool = maximum
       Type (_,TData xhr,_) = pattToType dsigs pat1
@@ -238,13 +242,14 @@ polyDecl ifces dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
       ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
 
     -------------------------------------------------------------------------
+
     -- pat1::B = id4(neq) e3::(B,B)
-    ECall z3 (EVar z4 id4) e3 -> Where (z2, (ECall z2 (EVar z4 id4'') e3''), ds2'') where
+    polyExpr (ECall z3 (EVar z4 id4) e3) = (ECall z2 (EVar z4 id4'') e3'', ds2'') where
 
       (id4'',e3'',ds2'') = if null tvars4 then
                             (id4,e3,ds2)
                            else
-                            (posid z4 id4, e3', ds2' z4 ifc_ids xhr)
+                            (posid z4 id4, e3', xxx z4 ifc_ids xhr)
 
       -- eq :: (a,a) -> Bool
       Type (_,ttp4,cs4) = dsigFind dsigs id4
@@ -270,10 +275,11 @@ polyDecl ifces dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
                 where z3=getPos e3
 
     -------------------------------------------------------------------------
-    otherwise -> Where (z2, e2,  ds2)
 
-  where
+    polyExpr e = (e, [])
 
+    -------------------------------------------------------------------------
+    -------------------------------------------------------------------------
     -- [
     --  "min :: Bool",
     --  "max :: Bool",
@@ -283,8 +289,8 @@ polyDecl ifces dsigs (DAtr z1 pat1 (Where (z2, e2, ds2))) =
     --  "Dict.IEq (eq,neq) = dIEqBool",
     --  ...
     -- ]
-    ds2' :: Pos -> [ID_Ifce] -> ID_Hier -> [Decl]
-    ds2' z ifc_ids xhr = concatMap f $
+    xxx :: Pos -> [ID_Ifce] -> ID_Hier -> [Decl]
+    xxx z ifc_ids xhr = concatMap f $
                           -- [("IEq", "daIEqBool", (eq,neq)),...]
                           zip3 ifc_ids dicts dclss
       where
