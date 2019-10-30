@@ -176,7 +176,7 @@ multiply =
 
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
-        it "XXX: smallerc" $            -- pg 11
+        it "smallerc" $            -- pg 11
           evalString True ([r|
 main = (smallerc two) four
 smallerc =

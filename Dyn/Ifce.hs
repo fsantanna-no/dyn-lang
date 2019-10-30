@@ -228,17 +228,13 @@ polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
 -- pat::Bool = id(maximum)
 polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
 
-  (id',ds') = if null cs then                 -- [normal] max :: Bool
-                (id, [])
-{-
-              else if null (toVars ttp) then  -- [impl]   max :: Bool where a is IBounded
-                (id, [])
--}
-              else                            -- [poly]   max :: a    where a is IBounded
-                (posid z id, declLocals ifces dsigs z ifc_ids xhr)
-
-  -- x :: Bool = maximum
-  Type (_,TData xhr,_) = xtp
+  (id',ds') =
+    if null cs then
+      (id, [])          -- var is not poly, nothing to do
+    else                -- var is poly ...
+      case xtp of       --   ... and xtp is concrete -> resolve!
+        Type (_,TData xhr,_) -> (posid z id, declLocals ifces dsigs z ifc_ids xhr)
+        otherwise            -> (id, []) -- xtp is not concrete yet
 
   -- maximum :: a where a is IBounded
   Type (_,ttp,cs) = dsigFind dsigs id
@@ -257,11 +253,11 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
 
   (id2',e2''',ds2') =
     if null cs2 then
-      (id2,e2',[])
-    else
-      case xhr of
-        Nothing  -> (id2,e2A'',[])
+      (id2,e2',[])                  -- f is not poly, nothing to do
+    else                            -- f is poly ...
+      case xhr of                   --   ... and xtp is concrete -> resolve!
         Just xhr -> (posid z2 id2, e2T'', declLocals ifces dsigs z2 ifc_ids xhr)
+        Nothing  -> (id2,e2A'',[])  --   ... but xtp is not concrete
 
   -- eq :: (a,a) -> Bool
   Type (_,ttp2,cs2) = dsigFind dsigs id2

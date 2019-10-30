@@ -40,7 +40,7 @@ main = (x,y) where
 
   describe "IRec-IInd" $ do
 
-    it "IInd" $
+    it "XXX: IInd" $
       evalString True ([r|
 main = f Bool.True
 

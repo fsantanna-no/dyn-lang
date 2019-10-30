@@ -7,7 +7,7 @@ all :: Prog -> Prog
 all (Prog globs) =
   Prog $
     map globFromDecl        $
-    Ifce.polyDecls ifces [] $
+    Ifce.polyDecls ifces [] $ --traceShowSS $
     concatMap remGIfceGImpl $
     globs
   where
