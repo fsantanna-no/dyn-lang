@@ -2,12 +2,13 @@ module Dyn.Analyse where
 
 import Dyn.AST
 import qualified Dyn.Ifce as Ifce
+import qualified Dyn.Poly as Poly
 
 all :: Prog -> Prog
 all (Prog globs) =
   Prog $
     map globFromDecl        $
-    Ifce.polyDecls ifces [] $ --traceShowSS $
+    Poly.polyDecls ifces [] $ --traceShowSS $
     Ifce.inline    ifces    $
     globs
   where
