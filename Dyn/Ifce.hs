@@ -81,7 +81,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
   -- eq = <...>
-  decls' = map (expandDecl ifces (id,imp_ids)) (traceShowSS decls) where
+  decls' = map (expandDecl ifces (id,imp_ids)) decls where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
 
   imp_ids = case cs of          -- ids: from instance constraints
@@ -104,7 +104,7 @@ expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
 expandDecl ifces (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
   DSig z1 id1 (Type (z2,ttp2,cs2')) where
     -- TODO: a?
-    cs2' = traceShowX id1 $ ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
+    cs2' = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
 
 -- IBounded: minimum/maximum
 expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
@@ -227,9 +227,11 @@ polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
 -- pat::Bool = id(maximum)
 polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
 
-  (id',ds') = if null cs then
+  (id',ds') = if null cs then                 -- max :: Bool
                 (id, [])
-              else
+              else if null (toVars ttp) then  -- max :: Bool where a is IBounded
+                (id, [])
+              else                            -- max :: a    where a is IBounded
                 (posid z id, declLocals ifces dsigs z ifc_ids xhr)
 
   -- x :: Bool = maximum
@@ -238,7 +240,7 @@ polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
   -- maximum :: a where a is IBounded
   Type (_,ttp,cs) = dsigFind dsigs id
 
-  [tvar] = traceShowX (id,ttp) $ toVars ttp   -- [a]
+  [tvar] = toVars ttp   -- [a]
 
   -- [("IBounded",...)]
   ifc_ids = snd $ fromJust $ L.find ((==tvar).fst) cs
