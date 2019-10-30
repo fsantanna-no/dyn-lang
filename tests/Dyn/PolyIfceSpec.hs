@@ -155,7 +155,7 @@ implementation of IAaa for Bool with
 
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
-  f = func :: ((a,a) -> Bool) -> lt ... ;     -- TODO: dispatch
+  f = func :: ((a,a) -> Bool) -> lt (x,y) where x::a y::a (x,y)=... ;;
 ;
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
@@ -164,23 +164,23 @@ interface IAaa for a where a is IOrd with
       evalString True ([r|
 main = (ff1 (lte, (Bool.True,Bool.False)),
         ff2 (gte, (Bool.True,Bool.True )) ) where
-  ff1 :: ((((a,a)->Bool),(a,a)) -> Bool) -- TODO: similar to above (but is out of iface)
-  ff1 = func -> f (x,y) where (f,x,y)=... ;;
+  ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
+  ff1 = func -> f (x,y) where x::a y::a (f,x,y)=... ;;
 
   ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closures
-  ff2 = func -> f (x,y) where (f,x,y)=... ;;
+  ff2 = func -> f (x,y) where x::a y::a (f,x,y)=... ;;
 ;
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
 
-    it "f a where a is IOrd" $
+    it "XXX: f a where a is IOrd" $
       evalString True ([r|
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False)) where
-  f :: ((a,a) -> Bool)
-  f = func :: ((a,a) -> Bool) -> gt ...;
+  f :: ((a,a) -> Bool) where a is IOrd
+  f = func :: ((a,a) -> Bool) -> gt (x,y) where x::a y::a (x,y)=...;;
 ;
-|] ++ prelude)
+|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
     it "implementation of IEq for a where a is IAaa" $

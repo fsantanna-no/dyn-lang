@@ -166,6 +166,8 @@ ieq_bool = [r|
   implementation of IEq for Bool with
     eq = func :: ((Bool,Bool) -> Bool) ->
       or (and (x,y), (and (not x, not y))) where
+        x :: Bool
+        y :: a
         (x,y) = ...
       ;
     ;
@@ -181,6 +183,8 @@ iord_bool = [r|
         (Bool.True,  Bool.False) -> Bool.False
         (Bool.True,  Bool.True)  -> Bool.False
       ; where
+        x :: Bool
+        y :: a
         (x,y) = ...
       ;
     ;

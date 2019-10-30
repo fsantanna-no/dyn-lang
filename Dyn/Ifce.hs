@@ -271,7 +271,7 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
   -- eq (Bool,Boot)
   -- a is Bool
   TFunc inp2 out2 = ttp2
-  xhr = case ttpMatch inp2 (toTType dsigs e2) of
+  xhr = case ttpMatch inp2 ({-traceShowX id2 $-} toTType dsigs e2) of
           [("a", TVar  "a")] -> Nothing
           [("a", TData xhr)] -> Just xhr
   -- TODO: pat1 vs out2
