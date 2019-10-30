@@ -37,7 +37,7 @@ newtype Type = Type (Pos, TType, TCtrs)
   deriving (Eq,Show)
 
 cz = []
-tz = Type (pz, TUnit, cz)
+tz = Type (pz, TAny, cz)
 
 type TCtr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
 type TCtrs = [TCtr]               -- [(a,[IEq,IOrd,IShow]), (b,[...])]

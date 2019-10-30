@@ -25,7 +25,7 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "XXX: main = x where x::Bool = maximum;" $
+    it "main = x where x::Bool = maximum;" $
       evalString True ("main = x where x::Bool = maximum;" ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
@@ -42,7 +42,7 @@ main = (x,y) where
 
     it "IInd" $
       evalString True ([r|
-main = g Bool.True
+main = f Bool.True
 
 implementation of IInd for Bool with
   g :: (Bool -> ()) = func :: (Bool -> ()) -> () ;

@@ -126,7 +126,7 @@ spec = do
           `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n    ;\n    x = ()\n  ;\n;"
       it "func" $
         (toString $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();where;where;func")
-          `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;"
+          `shouldBe` "func :: ? ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;"
       it "call" $
         (toString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
@@ -163,7 +163,7 @@ f :: () = func -> x where
             x :: () = ...;
           ;
 |])
-          `shouldBe` "main :: ()\nmain = (f ())\nf :: ()\nf = func :: () ->\n  x where\n    x :: ()\n    x = ...\n  ;\n;\n"
+          `shouldBe` "main :: ()\nmain = (f ())\nf :: ()\nf = func :: ? ->\n  x where\n    x :: ()\n    x = ...\n  ;\n;\n"
 
       it "where-where" $
         (parseToString False

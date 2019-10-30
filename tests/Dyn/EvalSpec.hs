@@ -79,7 +79,7 @@ spec = do
     it "patt - (x)" $
       evalString False "main = x where (x) = ();" `shouldBe` "()"
     it "patt - read - fail" $
-      evalString True "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"func :: () ->\\n  ()\\n;\""
+      evalString True "main = case () of ~func->(); -> ();" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"func :: ? ->\\n  ()\\n;\""
     it "patt - read - ok" $
       evalString False "main = case () of ~() -> ();" `shouldBe` "()"
     it "patt - fail" $
