@@ -4,7 +4,10 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
-prelude = iord_nat ++ iord_bool ++ ieq_bool ++ ibounded_bool ++ iord ++ ieq ++ ibounded ++ std ++ nat ++ bool
+prelude = iord_nat  ++ ieq_nat
+       ++ iord_bool ++ ieq_bool ++ ibounded_bool
+       ++ iord      ++ ieq      ++ ibounded
+       ++ std       ++ nat      ++ bool
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -108,18 +111,12 @@ ibounded = [r|
 
 ieq = [r|
   interface IEq for a with
-    eq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      case (x,y) of
-        (~y,_) -> Bool.True
-        _      -> Bool.False
-      ; where
-        (x,y) = ...
-      ;
-    ;
+    eq  :: ((a,a) -> Bool)
     neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
       not (eq (x,y)) where
         x :: a
         y :: a
+        (x,y) = ...
       ;
     ;
   ;
@@ -178,9 +175,17 @@ iord_bool = [r|
   ;
 |]
 
+ieq_nat = [r|
+  implementation of IEq for Nat with
+    eq = func :: ((Nat,Nat) -> Bool) ->
+      matches ...
+    ;
+  ;
+|]
+
 iord_nat = [r|
   implementation of IOrd for Nat with
-    lt = func :: ((Bool,Bool) -> Bool) ->
+    lt = func :: ((Nat,Nat) -> Bool) ->
       case (x,y) of
         (Nat.Zero,     Nat.Zero)     -> Bool.False
         (Nat.Zero,     _)            -> Bool.True

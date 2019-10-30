@@ -68,7 +68,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 
   -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=<...> daIXxx=...;
   -- func b/c of HKT that needs a closure with parametric dictionary
-  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) (ExpWhere (z,f,[])) where
+  dict = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,f,[])) where
           f = EFunc z tz [] (ExpWhere (z,d,decls'++[ups']))
           d = ECall z (ECons z ["Dict",ifc])
                       (fromList $ map (EVar z) $ ifceToDeclIds ifce)
@@ -249,10 +249,13 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
 
   (e2', e2ds') = polyExpr ifces dsigs tz e2
 
-  (id2',e2''',ds2') = if null cs2 then
-                        (id2,e2',[])
-                      else
-                        (posid z2 id2, e2'', declLocals ifces dsigs z2 ifc_ids xhr)
+  (id2',e2''',ds2') =
+    if null cs2 then
+      (id2,e2',[])
+    else
+      case xhr of
+        Nothing  -> (id2,e2A'',[])
+        Just xhr -> (posid z2 id2, e2T'', declLocals ifces dsigs z2 ifc_ids xhr)
 
   -- eq :: (a,a) -> Bool
   Type (_,ttp2,cs2) = dsigFind dsigs id2
@@ -263,17 +266,26 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
   -- a is IEq
   ifc_ids = snd $ fromJust $ L.find ((==tvar2).fst) cs2
 
-  -- ["dIEqBool",...]
-  dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
-
   -- eq (Bool,Boot)
   -- a is Bool
   TFunc inp2 out2 = ttp2
-  [("a", TData xhr)] = traceShow (id2,inp2,e2) ttpMatch inp2 (traceShowX e2 $ toTType dsigs e2)
+  xhr = case ttpMatch inp2 (toTType dsigs e2) of
+          [("a", TVar  "a")] -> Nothing
+          [("a", TData xhr)] -> Just xhr
   -- TODO: pat1 vs out2
 
-  -- eq(dIEqBool,...)
-  e2'' = ETuple z1 [(fromList $ map (\d-> ECall z1 (EVar z1 d) (EUnit z1)) dicts), e2']
+  -- eq(dBoolIEq,...)
+  e2T'' = ETuple z1 [(fromList $ map (\d-> ECall z1 (EVar z1 d) (EUnit z1)) dicts), e2']
+          where
+            -- ["dBoolIEq",...]
+            dicts = map (\ifc -> "d"++concat (fromJust xhr)++ifc) ifc_ids
+
+  -- eq(daIEq,...)
+  e2A'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2']
+          where
+            -- ["daIEq",...]
+            dicts = map (\ifc -> "d"++tvar2++ifc) ifc_ids
+
 
 -------------------------------------------------------------------------
 
@@ -304,7 +316,7 @@ declLocals ifces dsigs z ifc_ids xhr = concatMap f $
                       zip3 ifc_ids dicts dclss
   where
     -- ["dIEqBool",...]
-    dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
+    dicts = map (\ifc -> "d"++concat xhr++ifc) ifc_ids
     -- [(eq,neq),...]
     dclss = map ifceToDeclIds $ map (ifceFind ifces) ifc_ids
 
@@ -352,10 +364,10 @@ toVars ttp = S.toAscList $ aux ttp where
 ttpMatch :: TType -> TType -> [(ID_Var,TType)]
 ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   aux :: TType -> TType -> M.Map ID_Var TType
-  aux (TVar id)    (TData (hr:_)) = M.singleton id (TData [hr])
-  --aux (TVar id)    (TVar  id)     = M.singleton id ["Bool"]
-  --aux (TVar id)    _              = M.singleton id ["Bool"]
-  aux (TTuple ts1) (TTuple ts2)   = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
+  aux (TVar id)    (TData (hr:_))          = M.singleton id (TData [hr])
+  aux (TVar id)    (TVar  id') | (id==id') = M.singleton id (TVar  id')
+  --aux (TVar id)    _                     = M.singleton id ["Bool"]
+  aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
                                       where f hr1 hr2 | hr1==hr2 = hr1
   aux x y = error $ "ttpMatch: " ++ show (x,y)
 
