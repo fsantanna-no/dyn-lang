@@ -54,7 +54,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (expandDecl ifces (ifc_id,[])) decls
+  decls' = map (expandDecl ifces False (ifc_id,[])) decls
 
 -------------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
   -- eq = <...>
-  decls' = map (expandDecl ifces (id,imp_ids)) decls where
+  decls' = map (expandDecl ifces True (id,imp_ids)) decls where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
 
   imp_ids = case cs of          -- ids: from instance constraints
@@ -96,18 +96,20 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 -------------------------------------------------------------------------------
 
 -- [Ifce]:              known interfaces
+-- Bool:                is implementation (or interface)
 -- (ID_ifce,[ID_Ifce]): iface constraint // impl extra constraints
 -- Decl:                decl to expand
 -- Decl:                expanded decl
-expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
+expandDecl :: [Ifce] -> Bool -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
 
-expandDecl ifces (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
+expandDecl ifces True _ (DSig z id _) = DSig z id tz -- isImpl: prevent clashes w/ poly
+expandDecl ifces False (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
   DSig z1 id1 (Type (z2,ttp2,cs2')) where
     -- TODO: a?
     cs2' = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
 
 -- IBounded: minimum/maximum
-expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
+expandDecl _ _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
   isConst (EUnit  _)      = True
   isConst (ECons  _ _)    = True
   isConst (ETuple _ es)   = all isConst es
@@ -120,8 +122,7 @@ expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl w
 --      ... = (p1,...pN)                  -- : restore original args
 --      (fN,...,gN) = dN                  -- : restore iface functions from dicts
 --      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
-expandDecl ifces
-           (ifc_id,imp_ids)
+expandDecl ifces _ (ifc_id,imp_ids)
            (DAtr z1 e1
             (ExpWhere (z2,
               EFunc z3 (Type (z4,TFunc inp4 out4,cs4)) [] (ExpWhere (z5,e5,ds5)),
@@ -181,7 +182,7 @@ expandDecl ifces
       g :: ID_Ifce -> (ID_Ifce,[ID_Var])
       g ifc = (ifc, ifceToDeclIds $ ifceFind ifces ifc)
 
-expandDecl _ _ decl = error $ toString decl
+expandDecl _ _ _ decl = error $ toString decl
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -227,11 +228,13 @@ polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
 -- pat::Bool = id(maximum)
 polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
 
-  (id',ds') = if null cs then                 -- max :: Bool
+  (id',ds') = if null cs then                 -- [normal] max :: Bool
                 (id, [])
-              else if null (toVars ttp) then  -- max :: Bool where a is IBounded
+{-
+              else if null (toVars ttp) then  -- [impl]   max :: Bool where a is IBounded
                 (id, [])
-              else                            -- max :: a    where a is IBounded
+-}
+              else                            -- [poly]   max :: a    where a is IBounded
                 (posid z id, declLocals ifces dsigs z ifc_ids xhr)
 
   -- x :: Bool = maximum
@@ -289,8 +292,9 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
             -- ["daIEq",...]
             dicts = map (\ifc -> "d"++tvar2++ifc) ifc_ids
 
-polyExpr ifces dsigs _ (ECall z c@(ECons _ _) e2) =
-  (ECall z c e2', e2ds') where
+polyExpr ifces dsigs _ (ECall z e1 e2) =
+  (ECall z e1' e2', e1ds'++e2ds') where
+    (e1',e1ds') = polyExpr ifces dsigs tz e1
     (e2',e2ds') = polyExpr ifces dsigs tz e2
 
 -------------------------------------------------------------------------
@@ -309,9 +313,10 @@ polyExpr ifces dsigs _ (ECase z e cses) =
     whes'     = map (polyExpWhere ifces dsigs tz) whes
     (pats,whes) = unzip cses -- TODO pats
 
-polyExpr _ _ _ e@(ECons  _ _)  = (e, [])
-polyExpr _ _ _ e@(EUnit _)     = (e, [])
-polyExpr _ _ _ e@(EArg  _)     = (e, [])
+polyExpr _ _ _ e@(ECons  _ _) = (e, [])
+polyExpr _ _ _ e@(EUnit  _)   = (e, [])
+polyExpr _ _ _ e@(EArg   _)   = (e, [])
+polyExpr _ _ _ e@(EError _ _) = (e, [])
 polyExpr _ _ _ e = error $ toString e
 --polyExpr _ _ _ e = (e, [])
 
