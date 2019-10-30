@@ -40,7 +40,7 @@ main = (x,y) where
 
   describe "IEq" $ do
 
-    it "IEq: default eq" $
+    it "XXX: IEq: default eq" $
       evalString True ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
@@ -75,7 +75,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-    it "XXX: IEq/IOrd/IAaa" $
+    it "IEq/IOrd/IAaa" $
       evalString True ([r|
 main = f (Bool.True,Bool.False)
 

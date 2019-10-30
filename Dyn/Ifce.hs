@@ -213,7 +213,7 @@ polyExpWhere :: [Ifce] -> [Decl] -> Type -> ExpWhere -> ExpWhere
 
 polyExpWhere ifces dsigs tp (ExpWhere (z,e,ds)) =
   ExpWhere (z,e',eds'++ds') where
-    (e',eds') = polyExpr  ifces dsigs tp e
+    (e',eds') = polyExpr  ifces (filter isDSig ds++dsigs) tp e
     ds'       = polyDecls ifces dsigs ds
 
 -------------------------------------------------------------------------
@@ -269,7 +269,7 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
   -- eq (Bool,Boot)
   -- a is Bool
   TFunc inp2 out2 = ttp2
-  [("a",xhr)] = ttpMatch inp2 (toTType dsigs e2)
+  [("a",xhr)] = traceShow (id2,inp2,e2) ttpMatch inp2 (traceShowX e2 $ toTType dsigs e2)
   -- TODO: pat1 vs out2
 
   -- eq(dIEqBool,...)
@@ -330,6 +330,7 @@ dsigFind dsigs id = case L.find f dsigs of
                       f (DSig _ x _) = (id == x)
 
 toTType :: [Decl] -> Expr -> TType
+toTType _  (EArg   _)     = TAny
 toTType ds (EVar   _ id)  = ttp where Type (_,ttp,_) = dsigFind ds id
 toTType _  (ECons  _ hr)  = TData hr
 toTType ds (ETuple _ es)  = TTuple $ map (toTType ds) es
@@ -355,7 +356,7 @@ ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   --aux (TVar id)    _              = M.singleton id ["Bool"]
   aux (TTuple ts1) (TTuple ts2)   = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
                                       where f hr1 hr2 | hr1==hr2 = hr1
-  aux x y = error $ show (x,y)
+  aux x y = error $ "ttpMatch: " ++ show (x,y)
 
 pattToType :: [Decl] -> Patt -> Type
 pattToType dsigs (PWrite _ id) = dsigFind dsigs id

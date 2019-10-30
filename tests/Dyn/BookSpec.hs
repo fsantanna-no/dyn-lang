@@ -176,15 +176,18 @@ multiply =
 
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
-        it "smallerc" $            -- pg 11
+        it "XXX: smallerc" $            -- pg 11
           evalString True ([r|
 main = (smallerc two) four
 smallerc =
   func ->
     func {x} ->
-      lt (x,...)
+      lt (x',y) where
+        x' :: Nat = x
+        y  :: Nat = ...
+      ;
     ; where
-      x = ...
+      x :: Nat = ...
     ;
   ;
 |] ++ prelude)
@@ -268,12 +271,15 @@ curry  = func ->
           `shouldBe` Right (EData ["Int","6"] EUnit)
 -}
 
-        it "uncurry" $            -- pg 11
+        it "XXX: uncurry" $            -- pg 11
           evalString True ([r|
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
-    lt (x,...)
+    lt (x,y) where
+      x' :: Nat = x
+      y  :: Nat = ...
+    ;
   ; where
     x = ...
   ;

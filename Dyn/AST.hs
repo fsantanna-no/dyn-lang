@@ -8,7 +8,7 @@ import qualified Data.Set  as S
 
 traceShowX v id = traceShow (v, "==>", id) id
 traceShowS v = traceShow (toString v) v
-traceShowSS vs = traceShow (map toString vs) vs
+traceShowSS vs = traceShow (concatMap (++"\n") $ map toString vs) vs
 
 type Pos = (Int,Int)
 pz = (0,0)
