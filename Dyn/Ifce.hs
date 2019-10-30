@@ -369,6 +369,7 @@ ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   --aux (TVar id)    _                     = M.singleton id ["Bool"]
   aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
                                       where f hr1 hr2 | hr1==hr2 = hr1
+  --aux x y = M.singleton "a" (TData ["Bool"])
   aux x y = error $ "ttpMatch: " ++ show (x,y)
 
 pattToType :: [Decl] -> Patt -> Type
