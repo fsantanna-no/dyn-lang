@@ -40,7 +40,7 @@ main = (x,y) where
 
   describe "IRec-IInd" $ do
 
-    it "XXX: IInd" $
+    it "IInd" $
       evalString True ([r|
 main = f Bool.True
 
@@ -50,13 +50,18 @@ implementation of IInd for Bool with
 
 interface IInd for a with
   g :: (a -> ())
-  f :: (a -> ()) = func :: (a -> ()) -> g ... ;
+  f :: (a -> ()) =
+    func :: (a -> ()) ->
+      g x where
+        x :: a = ...
+      ;
+    ;
 ;
 |])
         `shouldBe` "()"
 
     it "IRec-rec" $
-      parseToString True ([r|
+      evalString True ([r|
 main = rec (Nat.Succ Nat.Zero)
 
 implementation of IRec for Nat with
@@ -64,7 +69,7 @@ implementation of IRec for Nat with
   rec = func :: (Nat -> ()) ->
     case ... of
       Nat.Zero    -> ()
-      Nat.Succ =x -> rec x
+      Nat.Succ =x -> rec x where x::Nat;
     ;
   ;
 ;
@@ -84,7 +89,7 @@ implementation of IRec for Nat with
   rec = func :: (Nat -> ()) ->
     case ... of
       Nat.Zero    -> ()
-      Nat.Succ =x -> rec x
+      Nat.Succ =x -> rec x where x::Nat;
     ;
   ;
 ;
@@ -92,7 +97,7 @@ implementation of IRec for Nat with
 interface IRec for a with
   rec :: (a -> ())
   f :: (a -> ())
-  f = func :: (a -> ()) -> rec ... ;
+  f = func :: (a -> ()) -> rec x where x::a = ... ;;
 ;
 |])
         `shouldBe` "()"
@@ -123,7 +128,7 @@ main = v where  -- neq (eq(T,T), F)
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEq/IOrd" $
+    it "XXX: IEq/IOrd" $
       evalString True ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( lte (Bool.True,  Bool.False),

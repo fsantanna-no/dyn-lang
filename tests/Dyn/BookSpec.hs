@@ -271,12 +271,12 @@ curry  = func ->
           `shouldBe` Right (EData ["Int","6"] EUnit)
 -}
 
-        it "XXX: uncurry" $            -- pg 11
+        it "uncurry" $            -- pg 11
           evalString True ([r|
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
-    lt (x,y) where
+    lt (x',y) where
       x' :: Nat = x
       y  :: Nat = ...
     ;
