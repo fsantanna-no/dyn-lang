@@ -38,9 +38,14 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 inline :: [Ifce] -> [Glob] -> [Decl]
 inline ifces globs = concatMap globToDecl globs where
                       globToDecl :: Glob -> [Decl]
-                      globToDecl (GDecl dcl) = [dcl]
+                      globToDecl (GDecl dcl) = [declToDecl ifces dcl]
                       globToDecl (GIfce ifc) = ifceToDecls ifces ifc
                       globToDecl (GImpl imp) = implToDecls ifces imp
+
+-------------------------------------------------------------------------------
+
+declToDecl :: [Ifce] -> Decl -> Decl
+declToDecl _ decl = decl
 
 -------------------------------------------------------------------------------
 
