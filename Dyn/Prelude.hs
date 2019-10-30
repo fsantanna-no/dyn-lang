@@ -130,13 +130,25 @@ iord = [r|
     gte :: ((a,a) -> Bool)
 
     lte = func :: ((a,a) -> Bool) ->
-      or (lt ..., eq ...)
+      or (lt (x,y), eq (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
     ;
     gt = func :: ((a,a) -> Bool) ->
-      not (lte ...)
+      not (lte (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
     ;
     gte = func :: ((a,a) -> Bool) ->
-      or (gt ..., eq ...)
+      or (gt (x,y), eq (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
     ;
   ;
 |]

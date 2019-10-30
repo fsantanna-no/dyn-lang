@@ -128,7 +128,13 @@ main = v where  -- neq (eq(T,T), F)
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "XXX: IEq/IOrd" $
+    it "IEq/IOrd" $
+      evalString True ([r|
+main = gt (Bool.False,Bool.True)
+|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+        `shouldBe` "Bool.False"
+
+    it "IEq/IOrd" $
       evalString True ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( lte (Bool.True,  Bool.False),
