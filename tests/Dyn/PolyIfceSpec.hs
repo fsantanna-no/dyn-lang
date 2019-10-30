@@ -25,7 +25,7 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "main = x where x::Bool = maximum;" $
+    it "XXX: main = x where x::Bool = maximum;" $
       evalString True ("main = x where x::Bool = maximum;" ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
@@ -38,9 +38,68 @@ main = (x,y) where
 |] ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
+  describe "IRec-IInd" $ do
+
+    it "IInd" $
+      evalString True ([r|
+main = g Bool.True
+
+implementation of IInd for Bool with
+  g :: (Bool -> ()) = func :: (Bool -> ()) -> () ;
+;
+
+interface IInd for a with
+  g :: (a -> ())
+  f :: (a -> ()) = func :: (a -> ()) -> g ... ;
+;
+|])
+        `shouldBe` "()"
+
+    it "IRec-rec" $
+      parseToString True ([r|
+main = rec (Nat.Succ Nat.Zero)
+
+implementation of IRec for Nat with
+  rec :: (Nat -> ())
+  rec = func :: (Nat -> ()) ->
+    case ... of
+      Nat.Zero    -> ()
+      Nat.Succ =x -> rec x
+    ;
+  ;
+;
+
+interface IRec for a with
+  rec :: (a -> ())
+;
+|])
+        `shouldBe` "()"
+
+    it "IRec-ind" $
+      evalString True ([r|
+main = f (Nat.Succ Nat.Zero)
+
+implementation of IRec for Nat with
+  rec :: (Nat -> ())
+  rec = func :: (Nat -> ()) ->
+    case ... of
+      Nat.Zero    -> ()
+      Nat.Succ =x -> rec x
+    ;
+  ;
+;
+
+interface IRec for a with
+  rec :: (a -> ())
+  f :: (a -> ())
+  f = func :: (a -> ()) -> rec ... ;
+;
+|])
+        `shouldBe` "()"
+
   describe "IEq" $ do
 
-    it "XXX: IEq: default eq" $
+    it "IEq: default eq" $
       evalString True ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)

@@ -81,7 +81,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
   -- eq = <...>
-  decls' = map (expandDecl ifces (id,imp_ids)) decls where
+  decls' = map (expandDecl ifces (id,imp_ids)) (traceShowSS decls) where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
 
   imp_ids = case cs of          -- ids: from instance constraints
@@ -104,7 +104,7 @@ expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
 expandDecl ifces (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
   DSig z1 id1 (Type (z2,ttp2,cs2')) where
     -- TODO: a?
-    cs2' = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
+    cs2' = traceShowX id1 $ ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
 
 -- IBounded: minimum/maximum
 expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
@@ -206,6 +206,7 @@ polyDecl _  _ d@(DSig _ _ _) = d
 
 polyDecl ifces dsigs (DAtr z pat whe) =
   DAtr z pat $ polyExpWhere ifces dsigs (pattToType dsigs pat) whe
+  -- TODO: pat
 
 -------------------------------------------------------------------------
 
@@ -237,7 +238,7 @@ polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
   -- maximum :: a where a is IBounded
   Type (_,ttp,cs) = dsigFind dsigs id
 
-  [tvar] = toVars ttp   -- [a]
+  [tvar] = traceShowX (id,ttp) $ toVars ttp   -- [a]
 
   -- [("IBounded",...)]
   ifc_ids = snd $ fromJust $ L.find ((==tvar).fst) cs
@@ -286,6 +287,9 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
             -- ["daIEq",...]
             dicts = map (\ifc -> "d"++tvar2++ifc) ifc_ids
 
+polyExpr ifces dsigs _ (ECall z c@(ECons _ _) e2) =
+  (ECall z c e2', e2ds') where
+    (e2',e2ds') = polyExpr ifces dsigs tz e2
 
 -------------------------------------------------------------------------
 
@@ -293,11 +297,21 @@ polyExpr ifces dsigs _ (ETuple z es) =
   (ETuple z es', concat ds') where
     (es',ds') = unzip $ map (polyExpr ifces dsigs tz) es
 
-polyExpr ifces dsigs _ (EFunc  z tp ups whe) =
+polyExpr ifces dsigs _ (EFunc z tp ups whe) =
   (EFunc z tp ups whe', []) where
     whe' = polyExpWhere ifces dsigs tz whe
 
-polyExpr _ _ _ e = (e, [])
+polyExpr ifces dsigs _ (ECase z e cses) =
+  (ECase z e' (zip pats whes'), eds') where
+    (e',eds') = polyExpr     ifces dsigs tz e
+    whes'     = map (polyExpWhere ifces dsigs tz) whes
+    (pats,whes) = unzip cses -- TODO pats
+
+polyExpr _ _ _ e@(ECons  _ _)  = (e, [])
+polyExpr _ _ _ e@(EUnit _)     = (e, [])
+polyExpr _ _ _ e@(EArg  _)     = (e, [])
+polyExpr _ _ _ e = error $ toString e
+--polyExpr _ _ _ e = (e, [])
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -349,6 +363,7 @@ toTType ds (ETuple _ es)  = TTuple $ map (toTType ds) es
 toTType ds (ECall  _ f _) = case toTType ds f of
                               TAny        -> TAny
                               TFunc _ out -> out
+                              TData hr    -> TData hr
 toTType _  e = error $ "toTType: " ++ toString e
 
 toVars :: TType -> [ID_Var]
@@ -379,11 +394,11 @@ pattToType dsigs (PWrite _ id) = dsigFind dsigs id
 mapType :: (TType -> TType) -> Type -> Type
 mapType f (Type (z,ttp,cs)) = Type (z, aux f ttp, cs) where
   aux f TAny             = f $ TAny
+  aux f TUnit            = f $ TUnit
   aux f (TVar   id)      = f $ TVar   id
   aux f (TData  hr)      = f $ TData  hr
   aux f (TTuple ts)      = f $ TTuple (map (aux f) ts)
   aux f (TFunc  inp out) = f $ TFunc  (aux f inp) (aux f out)
-  aux _ x = error $ show x
 
 posid :: Pos -> ID_Var -> ID_Var
 posid (l,c) id = id ++ "_" ++ show l ++ "_" ++ show c
