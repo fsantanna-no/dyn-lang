@@ -117,7 +117,10 @@ ieq = [r|
       ;
     ;
     neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      not (eq ...)
+      not (eq (x,y)) where
+        x :: a
+        y :: a
+      ;
     ;
   ;
 |]

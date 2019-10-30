@@ -269,7 +269,7 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
   -- eq (Bool,Boot)
   -- a is Bool
   TFunc inp2 out2 = ttp2
-  [("a",xhr)] = traceShow (id2,inp2,e2) ttpMatch inp2 (traceShowX e2 $ toTType dsigs e2)
+  [("a", TData xhr)] = traceShow (id2,inp2,e2) ttpMatch inp2 (traceShowX e2 $ toTType dsigs e2)
   -- TODO: pat1 vs out2
 
   -- eq(dIEqBool,...)
@@ -349,10 +349,11 @@ toVars ttp = S.toAscList $ aux ttp where
   aux (TTuple tps)    = S.unions (map aux tps)
 
 -- (a,a) vs (Bool.True,Bool.False)  -> [(a,Bool)]
-ttpMatch :: TType -> TType -> [(ID_Var,ID_Hier)]
+ttpMatch :: TType -> TType -> [(ID_Var,TType)]
 ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
-  aux :: TType -> TType -> M.Map ID_Var ID_Hier
-  aux (TVar id)    (TData (hr:_)) = M.singleton id [hr]
+  aux :: TType -> TType -> M.Map ID_Var TType
+  aux (TVar id)    (TData (hr:_)) = M.singleton id (TData [hr])
+  --aux (TVar id)    (TVar  id)     = M.singleton id ["Bool"]
   --aux (TVar id)    _              = M.singleton id ["Bool"]
   aux (TTuple ts1) (TTuple ts2)   = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
                                       where f hr1 hr2 | hr1==hr2 = hr1
