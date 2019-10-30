@@ -35,6 +35,15 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+inline :: [Ifce] -> [Glob] -> [Decl]
+inline ifces globs = concatMap globToDecl globs where
+                      globToDecl :: Glob -> [Decl]
+                      globToDecl (GDecl dcl) = [dcl]
+                      globToDecl (GIfce ifc) = ifceToDecls ifces ifc
+                      globToDecl (GImpl imp) = implToDecls ifces imp
+
+-------------------------------------------------------------------------------
+
 -- interface IEq for a
 --  dIEq = Dict.IEq (eq,neq)              -- : declare instance dict if all defaults are implemented
 --  <...>                                 -- : modify nested impls which become globals

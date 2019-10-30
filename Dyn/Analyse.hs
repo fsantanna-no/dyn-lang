@@ -8,13 +8,10 @@ all (Prog globs) =
   Prog $
     map globFromDecl        $
     Ifce.polyDecls ifces [] $ --traceShowSS $
-    concatMap remGIfceGImpl $
+    Ifce.inline    ifces    $
     globs
   where
-    remGIfceGImpl :: Glob -> [Decl]
-    remGIfceGImpl (GDecl dcl) = [dcl]
-    remGIfceGImpl (GIfce ifc) = Ifce.ifceToDecls ifces ifc
-    remGIfceGImpl (GImpl imp) = Ifce.implToDecls ifces imp
+    ifces :: [Ifce]
     ifces = globsToIfcs globs
 
     globsToIfcs :: [Glob] -> [Ifce]
