@@ -186,6 +186,8 @@ expandDecl _ _ decl = error $ toString decl
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+-- TODO: polyPatt
+
 -- [Ifce]: known ifces
 -- [Decl]: known DSig decls
 -- Type:   expected type
@@ -193,92 +195,96 @@ expandDecl _ _ decl = error $ toString decl
 -- [Decl]: transformed decls (maybe the same)
 --
 polyDecls :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
-
-polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') $ map rec decls where
-
+polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') decls where
   dsigs' = dsigs ++ filter isDSig decls
-
-  -- recurse poly into other Decls
-  -- TODO: pat1 recurse
-  rec :: Decl -> Decl
-  rec d@(DSig _ _ _) = d
-  rec (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) =
-    DAtr z1 pat1 (ExpWhere (z2,e2,ds2')) where
-      ds2' = polyDecls ifces dsigs' ds2
 
 -------------------------------------------------------------------------------
 
 polyDecl :: [Ifce] -> [Decl] -> Decl -> Decl
 
-polyDecl _     _     d@(DSig _ _ _) = d
-polyDecl ifces dsigs   (DAtr z1 pat1 (ExpWhere (z2, e2, ds2))) =
-                       (DAtr z1 pat1 (ExpWhere (z2, e2', e2ds'++ds2)))
-  where
-    (e2', e2ds') = polyExpr ifces dsigs (pattToType dsigs pat1) e2
+polyDecl _  _ d@(DSig _ _ _) = d
+
+polyDecl ifces dsigs (DAtr z pat whe) =
+  DAtr z pat $ polyExpWhere ifces dsigs (pattToType dsigs pat) whe
 
 -------------------------------------------------------------------------
 
--- EVar:  pat1::B = id3(maximum)
--- ECall: pat1::B = id4(neq) $ e3::(B,B)
+polyExpWhere :: [Ifce] -> [Decl] -> Type -> ExpWhere -> ExpWhere
+
+polyExpWhere ifces dsigs tp (ExpWhere (z,e,ds)) =
+  ExpWhere (z,e',eds'++ds') where
+    (e',eds') = polyExpr  ifces dsigs tp e
+    ds'       = polyDecls ifces dsigs ds
+
+-------------------------------------------------------------------------
+
+-- EVar:  pat::B = id(maximum)
+-- ECall: pat::B = id2(neq) $ e2::(B,B)
 
 polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
 
--- pat1::Bool = id3(maximum)
-polyExpr ifces dsigs xtp (EVar z3 id3) = (EVar z3 id3',  ds2') where
+-- pat::Bool = id(maximum)
+polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
 
-  (id3',ds2') = if null cs4 then
-                  (id3, [])
-                else
-                  (posid z3 id3, declLocals ifces dsigs z3 ifc_ids xhr)
+  (id',ds') = if null cs then
+                (id, [])
+              else
+                (posid z id, declLocals ifces dsigs z ifc_ids xhr)
 
   -- x :: Bool = maximum
   Type (_,TData xhr,_) = xtp
 
   -- maximum :: a where a is IBounded
-  Type (_,ttp4,cs4) = dsigFind dsigs id3
+  Type (_,ttp,cs) = dsigFind dsigs id
 
-  [tvar4] = toVars ttp4   -- [a]
+  [tvar] = toVars ttp   -- [a]
 
   -- [("IBounded",...)]
-  ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+  ifc_ids = snd $ fromJust $ L.find ((==tvar).fst) cs
 
 -------------------------------------------------------------------------
 
--- pat1::B = id4(neq) e3::(B,B)
-polyExpr ifces dsigs _ (ECall z3 (EVar z4 id4) e3) = (ECall z3 (EVar z4 id4') e3''', e3ds' ++ ds2') where
+-- pat1::B = id2(neq) e2::(B,B)
+polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2''', e2ds' ++ ds2') where
 
-  (e3', e3ds') = polyExpr ifces dsigs tz e3
+  (e2', e2ds') = polyExpr ifces dsigs tz e2
 
-  (id4',e3''',ds2') = if null cs4 then
-                        (id4,e3',[])
+  (id2',e2''',ds2') = if null cs2 then
+                        (id2,e2',[])
                       else
-                        (posid z4 id4, e3'', declLocals ifces dsigs z4 ifc_ids xhr)
+                        (posid z2 id2, e2'', declLocals ifces dsigs z2 ifc_ids xhr)
 
   -- eq :: (a,a) -> Bool
-  Type (_,ttp4,cs4) = dsigFind dsigs id4
+  Type (_,ttp2,cs2) = dsigFind dsigs id2
 
-  [tvar4] = toVars ttp4   -- [a]
+  [tvar2] = toVars ttp2   -- [a]
 
   -- [("IEq",...)]
   -- a is IEq
-  ifc_ids = snd $ fromJust $ L.find ((==tvar4).fst) cs4
+  ifc_ids = snd $ fromJust $ L.find ((==tvar2).fst) cs2
 
   -- ["dIEqBool",...]
   dicts = map (\ifc -> "d"++ifc++concat xhr) ifc_ids
 
   -- eq (Bool,Boot)
   -- a is Bool
-  TFunc inp4 out4 = ttp4
-  [("a",xhr)] = ttpMatch inp4 (toTType dsigs e3)
-  -- TODO: pat1 vs out4
+  TFunc inp2 out2 = ttp2
+  [("a",xhr)] = ttpMatch inp2 (toTType dsigs e2)
+  -- TODO: pat1 vs out2
 
   -- eq(dIEqBool,...)
-  e3'' = ETuple z3 [(fromList $ map (\d-> ECall z3 (EVar z3 d) (EUnit z3)) dicts), e3']
+  e2'' = ETuple z1 [(fromList $ map (\d-> ECall z1 (EVar z1 d) (EUnit z1)) dicts), e2']
 
 -------------------------------------------------------------------------
 
-polyExpr ifces dsigs _ (ETuple z es) = (ETuple z es', concat ds') where
-                                        (es',ds') = unzip $ map (polyExpr ifces dsigs tz) es
+polyExpr ifces dsigs _ (ETuple z es) =
+  (ETuple z es', concat ds') where
+    (es',ds') = unzip $ map (polyExpr ifces dsigs tz) es
+
+polyExpr ifces dsigs _ (EFunc  z tp ups whe) =
+  (EFunc z tp ups whe', []) where
+    whe' = polyExpWhere ifces dsigs tz whe
+
 polyExpr _ _ _ e = (e, [])
 
 -------------------------------------------------------------------------
