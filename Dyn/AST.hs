@@ -60,14 +60,14 @@ ctrsFromMap csmap = map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
 
 data Expr
   = EError Pos String                 -- (msg)        -- error "bug found"
-  | EVar   Pos ID_Var                 -- (id)         -- a ; xs
+  | EArg   Pos
   | EUnit  Pos                        -- ()           -- ()
+  | EVar   Pos ID_Var                 -- (id)         -- a ; xs
   | ECons  Pos ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
   | ETuple Pos [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
   | EFunc  Pos Type Ups ExpWhere      -- (type,ups,body)
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
-  | EArg   Pos
   | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   deriving (Eq, Show)
 
@@ -79,10 +79,10 @@ data Patt
   = PError Pos String                 -- (msg)        -- error "bug found"
   | PArg   Pos                        -- ()           -- ...
   | PAny   Pos                        -- ()           -- _
-  | PWrite Pos ID_Var                 -- (id)         -- =a ; =xs
-  | PRead  Pos Expr                   -- (exp)        -- ~a ; ~xs
   | PUnit  Pos                        -- ()           -- ()
   | PCons  Pos ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
+  | PWrite Pos ID_Var                 -- (id)         -- =a ; =xs
+  | PRead  Pos Expr                   -- (exp)        -- ~a ; ~xs
   | PTuple Pos [Patt]                 -- (patts)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
   | PCall  Pos Patt Patt              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   deriving (Eq, Show)
@@ -129,3 +129,58 @@ globToDecl (GDecl decl) = decl
 
 globFromDecl :: Decl -> Glob
 globFromDecl decl = GDecl decl
+
+-------------------------------------------------------------------------------
+
+type MapFs = ( ([Ifce]->[Decl]->Decl->[Decl]),
+               ([Ifce]->[Decl]->Expr->(Expr,[Decl])),
+               ([Ifce]->[Decl]->Patt->Patt) )
+
+mapDecls :: MapFs -> [Ifce] -> [Decl] -> [Decl] -> [Decl]
+mapDecls fs ifces dsigs decls = concatMap (mapDecl fs ifces dsigs') decls
+  where
+    dsigs' = dsigs ++ filter isDSig decls
+
+mapDecl :: MapFs -> [Ifce] -> [Decl] -> Decl -> [Decl]
+mapDecl fs@(fD,_,_) ifces dsigs decl@(DSig _ _ _) = fD ifces dsigs decl
+mapDecl fs@(fD,_,_) ifces dsigs (DAtr z pat whe)  = (fD ifces dsigs $ DAtr z pat' whe') ++ dsPat'
+  where
+    (pat',dsPat') = mapPatt  fs ifces dsigs pat
+    whe'          = mapWhere fs ifces dsigs whe
+
+mapWhere :: MapFs -> [Ifce] -> [Decl] -> ExpWhere -> ExpWhere
+mapWhere fs ifces dsigs (ExpWhere (z,e,ds)) = ExpWhere (z, e', dsE'++ds')
+  where
+    (e',dsE') = mapExpr  fs ifces dsigs e
+    ds'       = mapDecls fs ifces dsigs ds
+
+mapPatt :: MapFs -> [Ifce] -> [Decl] -> Patt -> (Patt, [Decl])
+mapPatt fs@(_,_,fP) ifces dsigs p = (fP ifces dsigs p', dsP') where
+  (p',dsP') = aux p
+  aux (PRead  z e)     = (PRead  z $ e', dsE') where
+                          (e',dsE') = mapExpr fs ifces dsigs e
+  aux (PTuple z ps)    = (PTuple z ps', concat dsPs') where
+                          (ps',dsPs') = unzip $ map (mapPatt fs ifces dsigs) ps
+  aux (PCall  z p1 p2) = (PCall  z p1' p2', dsP1'++dsP2') where
+                          (p1',dsP1') = mapPatt fs ifces dsigs p1
+                          (p2',dsP2') = mapPatt fs ifces dsigs p2
+  aux p                = (p, [])
+
+mapExpr :: MapFs -> [Ifce] -> [Decl] -> Expr -> (Expr, [Decl])
+mapExpr fs@(_,fE,_) ifces dsigs e = (e'', dsE'++dsE'') where
+  (e'',dsE'') = fE ifces dsigs e'
+  (e', dsE') = aux e
+  aux (EFunc  z tp ups whe) = (EFunc z tp ups $ mapWhere fs ifces dsigs whe, [])
+  aux (EData  z hr e)       = (EData z hr e', dsE') where
+                                (e',dsE') = mapExpr fs ifces dsigs e
+  aux (ETuple z es)         = (ETuple z es', concat dsEs') where
+                                (es',dsEs') = unzip $ map (mapExpr fs ifces dsigs) es
+  aux (ECall  z e1 e2)      = (ECall  z e1' e2', dsE1'++dsE2') where
+                                (e1',dsE1') = mapExpr fs ifces dsigs e1
+                                (e2',dsE2') = mapExpr fs ifces dsigs e2
+  aux (ECase  z e l)        = (ECase z e' l', dsE'++concat dsPs') where
+                                (ps, ws)    = unzip l
+                                (ps',dsPs') = unzip $ map (mapPatt fs ifces dsigs) ps
+                                ws'         = map (mapWhere fs ifces dsigs) ws
+                                l'          = zip ps' ws'
+  aux e                     = (e, [])
