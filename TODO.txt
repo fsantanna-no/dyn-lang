@@ -1,3 +1,4 @@
+- generic function tem que declarar o EFunc s/ o constraint!
 - Ifce.inline tentar unificar funcs dentro de ifces e funcs genericas
 - TIPOS!
     - ir tirando as anotacoes de tipos

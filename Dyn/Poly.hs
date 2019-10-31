@@ -39,8 +39,9 @@ fE xtp ifces dsigs (EVar z id) = (EVar z id', ds') where
       (id, [])          -- var is not poly, nothing to do
     else                -- var is poly ...
       case xtp of       --   ... and xtp is concrete -> resolve!
-        Type (_,TData xhr,_) -> (posid z id, declLocals ifces dsigs z ifc_ids xhr)
-        otherwise            -> (id, []) -- xtp is not concrete yet
+        Type (_,TData xhr,_) -> case ifceOrGen ifces cs id of
+          Just ifc -> (posid z id, declLocals ifces dsigs z ifc xhr)
+        otherwise  -> (id, []) -- xtp is not concrete yet
 
   -- maximum :: a where a is IBounded
   Type (_,ttp,cs) = dsigFind dsigs id
@@ -58,10 +59,12 @@ fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2
   (id2',e2',ds2') =
     if null cs2 then
       (id2,e2,[])                  -- f is not poly, nothing to do
-    else                            -- f is poly ...
-      case xhr of                   --   ... and xtp is concrete -> resolve!
-        Just xhr -> (posid z2 id2, e2T'', declLocals ifces dsigs z2 ifc_ids xhr)
-        Nothing  -> (id2,e2A'',[])  --   ... but xtp is not concrete
+    else                           -- f is poly ...
+      case xhr of                  --   ... and xtp is concrete -> resolve!
+        Just xhr -> case ifceOrGen ifces cs2 id2 of
+          Nothing  -> (id2, e2T'', [])
+          Just ifc -> (posid z2 id2, e2T'', declLocals ifces dsigs z2 ifc xhr)
+        Nothing    -> (id2, e2A'', [])  --   ... but xtp is not concrete
 
   -- eq :: (a,a) -> Bool
   Type (_,ttp2,cs2) = dsigFind dsigs id2
@@ -94,6 +97,15 @@ fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2
 
 fE _ _ _ e = (e, [])
 
+-- lt (x,y)   // ifce call to IOrd
+-- f  (x,y)   // gen  call that uses IOrd inside it
+ifceOrGen :: [Ifce] -> TCtrs -> ID_Var -> Maybe ID_Ifce
+ifceOrGen ifces [("a",ifc_ids)] var_id = fmap fst $ L.find (f var_id) l where
+  -- [("IEq",(eq,neq)),...] $ [(eq,neq),...]         $ [IEq,...]                 $ ["IEq",...]
+  l :: [(ID_Ifce,[ID_Var])]
+  l = zip ifc_ids           $ map Ifce.ifceToDeclIds $ map (Ifce.ifceFind ifces) $ ifc_ids
+  f field (_,fields) = elem field fields
+
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 -- [
@@ -105,15 +117,14 @@ fE _ _ _ e = (e, [])
 --  "Dict.IEq (eq,neq) = dIEqBool",
 --  ...
 -- ]
-declLocals :: [Ifce] -> [Decl] -> Pos -> [ID_Ifce] -> ID_Hier -> [Decl]
-declLocals ifces dsigs z ifc_ids xhr = concatMap f $
-                      -- [("IEq", "daIEqBool", (eq,neq)),...]
-                      zip3 ifc_ids dicts dclss
+declLocals :: [Ifce] -> [Decl] -> Pos -> ID_Ifce -> ID_Hier -> [Decl]
+declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
+                      -- ("IEq", "daIEqBool", (eq,neq))
   where
-    -- ["dIEqBool",...]
-    dicts = map (\ifc -> "d"++concat xhr++ifc) ifc_ids
+    -- "dIEqBool"
+    dict = "d" ++ concat xhr ++ ifc_id
     -- [(eq,neq),...]
-    dclss = map Ifce.ifceToDeclIds $ map (Ifce.ifceFind ifces) ifc_ids
+    dcls = Ifce.ifceToDeclIds $ Ifce.ifceFind ifces ifc_id
 
     -- ("IEq", "daIEqBool", (eq,neq)) -> Dict.IEq (eq,neq) = daIEqBool
     f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]

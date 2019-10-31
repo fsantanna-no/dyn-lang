@@ -42,13 +42,20 @@ inline ifces globs = concatMap globToDecl globs where
 
   declToDecls ifces dcl = mapDecl (fD,fEz,fPz) ifces [] dcl where
 
+    -- f :: ((a,a) -> Bool) where a is IOrd
+
     fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
 
-    -- f :: ((a,a) -> Bool) where a is IOrd
+    fD ifces dsigs d@(DSig z1 id1 (Type (z2,ttp2,cs))) =
+      case cs of
+        []            -> [d]   -- no constraints on declaration
+        [("a",[ifc])] -> [expandDecl ifces False (ifc,[]) (DSig z1 id1 (Type (z2,ttp2,[])))]
+        otherwise     -> error $ "TODO: multiple vars/ctrs"
+
     fD ifces dsigs d@(DAtr z pat@(PWrite _ id) whe) =
-      case traceShowId $ dsigFind dsigs id of
+      case dsigFind dsigs id of
         Type (_,_,[])            -> [d]   -- no constraints on declaration
-        Type (_,_,[("a",[ifc])]) -> [traceShowS $ expandDecl ifces True (ifc,[]) d]
+        Type (_,_,[("a",[ifc])]) -> [expandDecl ifces False (ifc,[]) d]
         otherwise                -> error $ "TODO: multiple vars/ctrs"
 
     fD _ _ d = [d]
