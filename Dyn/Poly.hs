@@ -20,38 +20,23 @@ import qualified Dyn.Ifce as Ifce
 -- [Decl]: decls to transform
 -- [Decl]: transformed decls (maybe the same)
 --
-polyDecls :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
-polyDecls ifces dsigs decls = map (polyDecl ifces dsigs') decls where
-  dsigs' = dsigs ++ filter isDSig decls
-
--------------------------------------------------------------------------------
-
-polyDecl :: [Ifce] -> [Decl] -> Decl -> Decl
-
-polyDecl _  _ d@(DSig _ _ _) = d
-
-polyDecl ifces dsigs (DAtr z pat whe) =
-  DAtr z pat $ polyExpWhere ifces dsigs (pattToType dsigs pat) whe
-  -- TODO: pat
-
--------------------------------------------------------------------------
-
-polyExpWhere :: [Ifce] -> [Decl] -> Type -> ExpWhere -> ExpWhere
-
-polyExpWhere ifces dsigs tp (ExpWhere (z,e,ds)) =
-  ExpWhere (z,e',eds'++ds') where
-    (e',eds') = polyExpr  ifces (filter isDSig ds++dsigs) tp e
-    ds'       = polyDecls ifces dsigs ds
+poly :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
+poly x y z = mapDecls (fD,fE tz,fPz) x y z where
+  fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
+  fD ifces dsigs d@(DSig _ _ _)   = [d]
+  fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
+    d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
+    (e2',dsE2') = fE (pattToType dsigs pat1) ifces dsigs e2
 
 -------------------------------------------------------------------------
 
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-polyExpr :: [Ifce] -> [Decl] -> Type -> Expr -> (Expr,[Decl])
+fE :: Type -> [Ifce] -> [Decl] -> Expr -> (Expr,[Decl])
 
 -- pat::Bool = id(maximum)
-polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
+fE xtp ifces dsigs (EVar z id) = (EVar z id', ds') where
 
   (id',ds') =
     if null cs then
@@ -72,13 +57,11 @@ polyExpr ifces dsigs xtp (EVar z id) = (EVar z id', ds') where
 -------------------------------------------------------------------------
 
 -- pat1::B = id2(neq) e2::(B,B)
-polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2''', e2ds' ++ ds2') where
+fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2') where
 
-  (e2', e2ds') = polyExpr ifces dsigs tz e2
-
-  (id2',e2''',ds2') =
+  (id2',e2',ds2') =
     if null cs2 then
-      (id2,e2',[])                  -- f is not poly, nothing to do
+      (id2,e2,[])                  -- f is not poly, nothing to do
     else                            -- f is poly ...
       case xhr of                   --   ... and xtp is concrete -> resolve!
         Just xhr -> (posid z2 id2, e2T'', declLocals ifces dsigs z2 ifc_ids xhr)
@@ -102,44 +85,18 @@ polyExpr ifces dsigs _ (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2
   -- TODO: pat1 vs out2
 
   -- eq(dBoolIEq,...)
-  e2T'' = ETuple z1 [(fromList $ map (\d-> ECall z1 (EVar z1 d) (EUnit z1)) dicts), e2']
+  e2T'' = ETuple z1 [(fromList $ map (\d-> ECall z1 (EVar z1 d) (EUnit z1)) dicts), e2]
           where
             -- ["dBoolIEq",...]
             dicts = map (\ifc -> "d"++concat (fromJust xhr)++ifc) ifc_ids
 
   -- eq(daIEq,...)
-  e2A'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2']
+  e2A'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2]
           where
             -- ["daIEq",...]
             dicts = map (\ifc -> "d"++tvar2++ifc) ifc_ids
 
-polyExpr ifces dsigs _ (ECall z e1 e2) =
-  (ECall z e1' e2', e1ds'++e2ds') where
-    (e1',e1ds') = polyExpr ifces dsigs tz e1
-    (e2',e2ds') = polyExpr ifces dsigs tz e2
-
--------------------------------------------------------------------------
-
-polyExpr ifces dsigs _ (ETuple z es) =
-  (ETuple z es', concat ds') where
-    (es',ds') = unzip $ map (polyExpr ifces dsigs tz) es
-
-polyExpr ifces dsigs _ (EFunc z tp ups whe) =
-  (EFunc z tp ups whe', []) where
-    whe' = polyExpWhere ifces dsigs tz whe
-
-polyExpr ifces dsigs _ (ECase z e cses) =
-  (ECase z e' (zip pats whes'), eds') where
-    (e',eds') = polyExpr     ifces dsigs tz e
-    whes'     = map (polyExpWhere ifces dsigs tz) whes
-    (pats,whes) = unzip cses -- TODO pats
-
-polyExpr _ _ _ e@(ECons  _ _) = (e, [])
-polyExpr _ _ _ e@(EUnit  _)   = (e, [])
-polyExpr _ _ _ e@(EArg   _)   = (e, [])
-polyExpr _ _ _ e@(EError _ _) = (e, [])
-polyExpr _ _ _ e = error $ toString e
---polyExpr _ _ _ e = (e, [])
+fE _ _ _ e = (e, [])
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------

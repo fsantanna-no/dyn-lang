@@ -7,9 +7,9 @@ import qualified Dyn.Poly as Poly
 all :: Prog -> Prog
 all (Prog globs) =
   Prog $
-    map globFromDecl        $
-    Poly.polyDecls ifces [] $ --traceShowSS $
-    Ifce.inline    ifces    $
+    map globFromDecl      $
+    Poly.poly ifces []    $ --traceShowSS $
+    Ifce.inline    ifces  $
     globs
   where
     ifces :: [Ifce]
