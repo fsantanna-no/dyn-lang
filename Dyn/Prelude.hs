@@ -54,6 +54,20 @@ bool = [r|
 -------------------------------------------------------------------------------
 
 nat = [r|
+  thousand = mul (ten,ten)
+  hundred  = mul (ten,ten)
+  ten      = Nat.Succ nine
+  nine     = Nat.Succ eight
+  eight    = Nat.Succ seven
+  seven    = Nat.Succ six
+  six      = Nat.Succ five
+  five     = Nat.Succ four
+  four     = Nat.Succ three
+  three    = Nat.Succ two
+  two      = Nat.Succ one
+  one      = Nat.Succ zero
+  zero     = Nat.Zero
+
   mul =
     func ->
       case ... of
@@ -70,6 +84,14 @@ nat = [r|
       ;
     ;
 
+  sub =
+    func ->
+      case ... of
+        (=x, Nat.Zero)             -> x
+        (Nat.Succ =x, Nat.Succ =y) -> sub (x,y)
+      ;
+    ;
+
   dec =
     func ->
       case ... of
@@ -77,26 +99,26 @@ nat = [r|
       ;
     ;
 
-  lte =
+  rem =
+    func ->
+      case lt (x,y) of
+        Bool.True  -> x
+        Bool.False -> rem (sub (x,y), y)
+      ; where
+        x :: Nat
+        y :: Nat
+        (x,y) = ...
+      ;
+    ;
+
+  nlte =
     func ->
       case ... of
         (Nat.Zero,_) -> Bool.True
         (_,Nat.Zero) -> Bool.False
-        (Nat.Succ =x, Nat.Succ =y) -> lte (x,y)
+        (Nat.Succ =x, Nat.Succ =y) -> nlte (x,y)
       ;
     ;
-
-  ten   = Nat.Succ nine
-  nine  = Nat.Succ eight
-  eight = Nat.Succ seven
-  seven = Nat.Succ six
-  six   = Nat.Succ five
-  five  = Nat.Succ four
-  four  = Nat.Succ three
-  three = Nat.Succ two
-  two   = Nat.Succ one
-  one   = Nat.Succ zero
-  zero  = Nat.Zero
 |]
 
 -------------------------------------------------------------------------------

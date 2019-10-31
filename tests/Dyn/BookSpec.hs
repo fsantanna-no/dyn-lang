@@ -22,9 +22,15 @@ spec = do
     it "Nat +" $
       evalString True ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ Nat.Zero)"
+    it "Nat -" $
+      evalString True ("main = sub (Nat.Succ Nat.Zero, Nat.Zero)\n" ++ nat)
+        `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat *" $
       evalString True ("main = mul (two,three)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
+    it "Nat %" $
+      evalString True ("main = rem (two,three)\n" ++ prelude)
+        `shouldBe` "(Nat.Succ (Nat.Succ Nat.Zero))"
 
 -------------------------------------------------------------------------------
 
@@ -50,7 +56,7 @@ square =
 
       it "lt" $
         evalString True ([r|
-main = (lte (three,two), lte (three,three))
+main = (nlte (three,two), nlte (three,three))
 |] ++ nat)
           `shouldBe` "(Bool.False,Bool.True)"
 
@@ -59,7 +65,7 @@ main = (lte (three,two), lte (three,three))
 main = add (smaller (ten,five) , smaller (one,four))
 smaller =
   func ->
-    case lte (x,y) of
+    case nlte (x,y) of
       Bool.True  -> x
       Bool.False -> y
     ;case
@@ -82,7 +88,7 @@ square =
   ;
 smaller =
   func ->
-    case lte (x,y) of
+    case nlte (x,y) of
       Bool.True  -> x
       Bool.False -> y
     ;case
@@ -495,58 +501,30 @@ neq = func ->
 |] ++ bool)
           `shouldBe` "Bool.True"
 
-{-
-      -- TODO: typeclass
-      it "IEqualable: default =/=" $   -- pg 32
-        (run True $
-          unlines [
-            "interface IEqualable for a with",
-            "   func ===       : ((a,a) -> Bool)",
-            "   func =/= (x,y) : ((a,a) -> Bool) do return not (x === y) end",
-            "end",
-            "",
-            "implementation of IEqualable for Bool with",
-            "   func === (x,y) : ((Bool,Bool) -> Bool) do",
-            "     return (x and y) or ((not x) and (not y))",
-            "   end",
-            "end",
-            "return ((Bool.True) === (Bool.True)) =/= Bool.False"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
-
-      it "IOrderable" $        -- pg 32
-        (run True $
-          pre ++ unlines [
-            "return ((((Bool.True)  @>  (Bool.False))  and ((Bool.True) @>= (Bool.True))) and",
-            "         ((Bool.False) @<= (Bool.False))) and ((Bool.False) @< (Bool.True))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
-
       it "@<=" $
-        (run True $
-          pre ++ unlines [
-            "data Xx",
-            "data Xx.Aa",
-            "data Xx.Bb",
-            "return (Xx.Aa) @<= (Xx.Bb)"
-           ])
-        `shouldBe` Left "(line 78, column 16):\nvariable '@<=' has no associated implementation for '((Xx.Aa,Xx.Bb) -> ?)'\n"
+        evalString True ([r|
+main = lte (Xx.Aa,Xx.Bb)
+--data Xx
+--data Xx.Aa
+--data Xx.Bb
+|] ++ iord ++ ieq)
+        `shouldBe` "(line=2, col=8) ERROR : unassigned variable 'dXxIOrd'"
 
-      -- TODO: modulus operator
-      it "leap years" $         -- pg 33
-        (run True $
-          pre ++ unlines [
-            "func leapyear (y) : (Int -> Bool) do",
-            "   if (y rem 100) == 0 then",
-            "     return (y rem 400) == 0",
-            "   else",
-            "     return (y rem 4) == 0",
-            "   end",
-            "end",
-            "return (((not (leapyear 1979)) and (leapyear 1980)) and (not (leapyear 100))) and (leapyear 400)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
--}
+      it "XXX: leap years" $         -- pg 33
+        evalString True ([r|
+main = and (not (leapyear y1979), and (leapyear y1980, and (not (leapyear hundred), leapyear (mul (four,hundred)))))
+leapyear :: (Int->Bool) = func ->
+  case rem (y,hundred) of
+    Nat.Zero -> eq(rem (y, mul(four,hundred)), Nat.Zero)
+    _        -> eq(rem (y, four),              Nat.Zero)
+  ; where
+    y = ...
+  ;
+;
+y1979 = sub (y1980, one)
+y1980 = add (thousand, add (mul(five,hundred), mul(eight,ten)))
+|] ++ prelude)
+        `shouldBe` "Bool.True"
 
       it "analyse triangles" $         -- pg 33
         evalString True ([r|
@@ -556,7 +534,7 @@ main = (analyse (ten, twenty, mul(ten,three)),
         analyse (ten, ten,    ten))
 twenty = add (ten,ten)
 analyse = func ->
-  case lte (add (x,y), z) of
+  case nlte (add (x,y), z) of
     Bool.True -> Tri.Fail
     _ -> case (x,y,z) of
       (~z,_,_) -> Tri.Equi

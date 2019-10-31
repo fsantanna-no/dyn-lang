@@ -1,8 +1,6 @@
-- generic function tem que declarar o EFunc s/ o constraint!
-- Ifce.inline tentar unificar funcs dentro de ifces e funcs genericas
+- voltar ao Book
 - TIPOS!
     - ir tirando as anotacoes de tipos
-- voltar ao Book
 
 - poli
     - multiplas variaveis
