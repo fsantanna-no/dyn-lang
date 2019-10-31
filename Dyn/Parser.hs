@@ -402,7 +402,7 @@ where_ = do
   pos <- toPos <$> getPosition
   e   <- expr
   ds  <- option [] $ do
-          void <- tk_key "where"
+          void <- try $ tk_key "where"
           ds   <- decls
           void <- string ";"
           void <- optional $ try $ tk_key "where"
