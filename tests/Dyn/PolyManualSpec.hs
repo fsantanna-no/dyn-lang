@@ -41,7 +41,7 @@ main = v where  -- neq (eq(T,T), F)
   v = neq (dieq, eq (dieq,Bool.True,Bool.True), Bool.False)
   Dict.IEq (eq,neq) = dieq
 ;
-|] ++ ieq_bool ++ bool ++ ieq)
+|] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
   describe "IEq/IOrd" $ do
@@ -56,7 +56,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
   Dict.IEq  (eq,neq)        = dieq_bool
   Dict.IOrd (lt,lte,gt,gte) = diord_bool
 ;
-|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
   describe "HKT" $ do
@@ -89,12 +89,12 @@ dixxx_xxx = f where
     ;
   ;
 ;
-|] ++ ieq_bool ++ bool ++ ieq)
+|] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
       evalString False ([r|
-main = f (ieq_nat, one)
+main = f (nat_ieq, one)
 f = func ->
   eq (Dict.IEq (eq,neq),x,x) where
     (Dict.IEq (eq,neq), x) = ...
@@ -106,7 +106,7 @@ f = func ->
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-prelude = iord_nat ++ ieq_nat ++ iord_bool ++ ieq_bool ++ iord ++ ieq ++ nat ++ bool
+prelude = nat_iord ++ nat_ieq ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool
 
 -- interface IEq(eq,neq)
 ieq = [r|
@@ -173,7 +173,7 @@ iord = [r|
 -------------------------------------------------------------------------------
 
 -- instance IEq (Bool)
-ieq_bool = [r|
+bool_ieq = [r|
   -- Dict receives eq/neq methods.
   --  - implements eq, uses default neq
   --  - methods receive extra dict
@@ -191,7 +191,7 @@ ieq_bool = [r|
 |]
 
 -- implementation IOrd for Bool
-iord_bool = [r|
+bool_iord = [r|
   -- dict
   diord_bool = Dict.IOrd (lt,lte,gt,gte) where
     lt = func ->
@@ -213,13 +213,13 @@ iord_bool = [r|
 -------------------------------------------------------------------------------
 
 -- instance IEq (Int)
-ieq_nat = [r|
-  ieq_nat = Dict.IEq (eq,neq)
+nat_ieq = [r|
+  nat_ieq = Dict.IEq (eq,neq)
 |]
 
 -- implementation IOrd for Nat
-iord_nat = [r|
-  iord_nat = Dict.IOrd (lt,lte,gt,gte) where
+nat_iord = [r|
+  nat_iord = Dict.IOrd (lt,lte,gt,gte) where
     lt = func ->
       case (x,y) of
         (Nat.Zero,     Nat.Zero)     -> Bool.False

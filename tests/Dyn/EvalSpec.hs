@@ -107,10 +107,10 @@ spec = do
       it "chr" $
         evalString True ("main = chr one"    ++char++nat) `shouldBe` "Char.AA"
       it "eq" $
-        evalString True ("main = eq (Char.AA,Char.AA)"++ieq_char++char++nat++ieq++std)
+        evalString True ("main = eq (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
           `shouldBe` "Bool.True"
       it "eq" $
-        evalString True ("main = eq (Char.AA,Char.Aa)"++ieq_char++char++nat++ieq++std)
+        evalString True ("main = eq (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
            `shouldBe` "Bool.False"
       it "gte" $
         evalString True ("main = gte (Char.AA,Char.Aa)"++prelude)

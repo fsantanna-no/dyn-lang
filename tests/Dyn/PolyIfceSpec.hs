@@ -26,7 +26,7 @@ spec = do
   describe "IBounded" $ do
 
     it "main = x where x::Bool = maximum;" $
-      evalString True ("main = x where x::Bool = maximum;" ++ ibounded_bool ++ bool ++ ibounded)
+      evalString True ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
@@ -35,7 +35,7 @@ main = (x,y) where
   x :: Bool = maximum
   y :: Bool = minimum
 ;
-|] ++ ibounded_bool ++ bool ++ ibounded)
+|] ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
   describe "IEq" $ do
@@ -45,7 +45,7 @@ main = (x,y) where
 main = x where
   x :: Bool = eq (Bool.False,Bool.False)
 ;
-|] ++ ieq_bool ++ bool ++ ieq)
+|] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: neq" $
@@ -53,7 +53,7 @@ main = x where
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
 ;
-|] ++ ieq_bool ++ bool ++ ieq)
+|] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: default eq" $
@@ -61,7 +61,7 @@ main = x where
 main = x where
   x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
 ;
-|] ++ ieq_bool ++ bool ++ ieq)
+|] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
   describe "IRec-IInd" $ do
@@ -133,7 +133,7 @@ interface IRec for a with
     it "IEq/IOrd" $
       evalString True ([r|
 main = gt (Bool.False,Bool.True)
-|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
     it "IEq/IOrd" $
@@ -144,7 +144,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         gt  (Bool.False, Bool.False),
         lt  (Bool.False, Bool.True ) )
 ;
-|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
     it "IEq/IOrd/IAaa" $
@@ -159,7 +159,7 @@ interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
   f = func :: ((a,a) -> Bool) -> lt (x,y) where x::a y::a (x,y)=... ;;
 ;
-|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
     it "f a where a is IOrd" $
@@ -169,7 +169,7 @@ main = (f (Bool.True, Bool.False),
   f :: ((a,a) -> Bool) where a is IOrd
   f = func :: ((a,a) -> Bool) -> gt (x,y) where x::a y::a (x,y)=...;;
 ;
-|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
     it "TODO-dict-closure: ff1/ff2" $
@@ -212,7 +212,7 @@ implementation of IAaa for Xxx with
     ;
   ;
 ;
-|] ++ iord_bool ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
 {-

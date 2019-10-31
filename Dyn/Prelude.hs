@@ -4,9 +4,9 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
-prelude = iord_nat  ++ ieq_nat
-       ++ iord_bool ++ ieq_bool ++ ibounded_bool
-       ++ iord_char ++ ieq_char
+prelude = nat_iord  ++ nat_ieq
+       ++ bool_iord ++ bool_ieq ++ bool_ibounded
+       ++ char_iord ++ char_ieq
        ++ iord      ++ ieq      ++ ibounded
        ++ nat       ++ char     ++ bool
        ++ std
@@ -26,6 +26,58 @@ std = [r|
   ;
 |]
 
+ibounded = [r|
+  interface IBounded for a with
+    minimum :: a
+    maximum :: a
+  ;
+|]
+
+ieq = [r|
+  interface IEq for a with
+    eq  :: ((a,a) -> Bool)
+    neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
+      not (eq (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+iord = [r|
+  interface IOrd for a where a is IEq with
+    lt  :: ((a,a) -> Bool)
+    lte :: ((a,a) -> Bool)
+    gt  :: ((a,a) -> Bool)
+    gte :: ((a,a) -> Bool)
+
+    lte = func :: ((a,a) -> Bool) ->
+      or (lt (x,y), eq (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
+    ;
+    gt = func :: ((a,a) -> Bool) ->
+      not (lte (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
+    ;
+    gte = func :: ((a,a) -> Bool) ->
+      or (gt (x,y), eq (x,y)) where
+        x :: a
+        y :: a
+        (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 -- Bool type: not, and, or
@@ -53,6 +105,43 @@ bool = [r|
   ;
 |]
 
+bool_ibounded = [r|
+  implementation of IBounded for Bool with
+    minimum :: Bool = Bool.False
+    maximum :: Bool = Bool.True
+  ;
+|]
+
+bool_ieq = [r|
+  implementation of IEq for Bool with
+    eq = func :: ((Bool,Bool) -> Bool) ->
+      or (and (x,y), (and (not x, not y))) where
+        x :: Bool
+        y :: a
+        (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+bool_iord = [r|
+  implementation of IOrd for Bool with
+    lt = func :: ((Bool,Bool) -> Bool) ->
+      case (x,y) of
+        (Bool.False, Bool.False) -> Bool.False
+        (Bool.False, Bool.True)  -> Bool.True
+        (Bool.True,  Bool.False) -> Bool.False
+        (Bool.True,  Bool.True)  -> Bool.False
+      ; where
+        x :: Bool
+        y :: a
+        (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 char = [r|
@@ -126,6 +215,25 @@ char = [r|
   ;
 |]
 
+char_ieq = [r|
+  implementation of IEq for Char with
+    eq = func :: ((Char,Char) -> Bool) ->
+      matches ...
+    ;
+  ;
+|]
+
+char_iord = [r|
+  implementation of IOrd for Char with
+    lt = func :: ((Char,Char) -> Bool) ->
+      lt (ord x, ord y) where
+        (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 nat = [r|
@@ -196,119 +304,7 @@ nat = [r|
     ;
 |]
 
-iord_char = [r|
-  implementation of IOrd for Char with
-    lt = func :: ((Char,Char) -> Bool) ->
-      lt (ord x, ord y) where
-        (x,y) = ...
-      ;
-    ;
-  ;
-|]
-
-ieq_char = [r|
-  implementation of IEq for Char with
-    eq = func :: ((Char,Char) -> Bool) ->
-      matches ...
-    ;
-  ;
-|]
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-
-ibounded = [r|
-  interface IBounded for a with
-    minimum :: a
-    maximum :: a
-  ;
-|]
-
-ieq = [r|
-  interface IEq for a with
-    eq  :: ((a,a) -> Bool)
-    neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      not (eq (x,y)) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
-    ;
-  ;
-|]
-
-iord = [r|
-  interface IOrd for a where a is IEq with
-    lt  :: ((a,a) -> Bool)
-    lte :: ((a,a) -> Bool)
-    gt  :: ((a,a) -> Bool)
-    gte :: ((a,a) -> Bool)
-
-    lte = func :: ((a,a) -> Bool) ->
-      or (lt (x,y), eq (x,y)) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
-    ;
-    gt = func :: ((a,a) -> Bool) ->
-      not (lte (x,y)) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
-    ;
-    gte = func :: ((a,a) -> Bool) ->
-      or (gt (x,y), eq (x,y)) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
-    ;
-  ;
-|]
-
--------------------------------------------------------------------------------
-
-ibounded_bool = [r|
-  implementation of IBounded for Bool with
-    minimum :: Bool = Bool.False
-    maximum :: Bool = Bool.True
-  ;
-|]
-
-ieq_bool = [r|
-  implementation of IEq for Bool with
-    eq = func :: ((Bool,Bool) -> Bool) ->
-      or (and (x,y), (and (not x, not y))) where
-        x :: Bool
-        y :: a
-        (x,y) = ...
-      ;
-    ;
-  ;
-|]
-
-iord_bool = [r|
-  implementation of IOrd for Bool with
-    lt = func :: ((Bool,Bool) -> Bool) ->
-      case (x,y) of
-        (Bool.False, Bool.False) -> Bool.False
-        (Bool.False, Bool.True)  -> Bool.True
-        (Bool.True,  Bool.False) -> Bool.False
-        (Bool.True,  Bool.True)  -> Bool.False
-      ; where
-        x :: Bool
-        y :: a
-        (x,y) = ...
-      ;
-    ;
-  ;
-|]
-
--------------------------------------------------------------------------------
-
-ieq_nat = [r|
+nat_ieq = [r|
   implementation of IEq for Nat with
     eq = func :: ((Nat,Nat) -> Bool) ->
       matches ...
@@ -316,7 +312,7 @@ ieq_nat = [r|
   ;
 |]
 
-iord_nat = [r|
+nat_iord = [r|
   implementation of IOrd for Nat with
     lt = func :: ((Nat,Nat) -> Bool) ->
       case (x,y) of
