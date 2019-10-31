@@ -79,7 +79,7 @@ fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2
   -- eq (Bool,Boot)
   -- a is Bool
   TFunc inp2 out2 = ttp2
-  xhr = case ttpMatch inp2 ({-traceShowX id2 $-} toTType dsigs e2) of
+  xhr = case ttpMatch inp2 ({-traceShowX (id2,toString e2,dsigs,inp2) $-} toTType dsigs e2) of
           [("a", TVar  "a")] -> Nothing
           [("a", TData xhr)] -> Just xhr
   -- TODO: pat1 vs out2
@@ -164,11 +164,14 @@ toVars ttp = S.toAscList $ aux ttp where
 ttpMatch :: TType -> TType -> [(ID_Var,TType)]
 ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   aux :: TType -> TType -> M.Map ID_Var TType
+  aux (TVar id)    TAny                    = M.singleton id TAny
   aux (TVar id)    (TData (hr:_))          = M.singleton id (TData [hr])
   aux (TVar id)    (TVar  id') | (id==id') = M.singleton id (TVar  id')
-  --aux (TVar id)    _                     = M.singleton id ["Bool"]
-  aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2)
-                                      where f hr1 hr2 | hr1==hr2 = hr1
+  --aux (TVar id)    _                       = M.singleton id ["Bool"]
+  aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2) where
+                                              f TAny ttp2              = ttp2
+                                              f ttp1 TAny              = ttp1
+                                              f ttp1 ttp2 | ttp1==ttp2 = ttp1
   --aux x y = M.singleton "a" (TData ["Bool"])
   aux x y = error $ "ttpMatch: " ++ show (x,y)
 

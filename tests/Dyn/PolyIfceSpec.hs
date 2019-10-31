@@ -64,14 +64,6 @@ main = x where
 |] ++ ieq_bool ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEq: overrides eq (dieq_bool)" $
-      evalString True ([r|
-main = v where  -- neq (eq(T,T), F)
-  v = neq ((eq (Bool.True,Bool.True), Bool.False))
-;
-|] ++ ieq_bool ++ bool ++ ieq)
-        `shouldBe` "Bool.True"
-
   describe "IRec-IInd" $ do
 
     it "IInd" $
