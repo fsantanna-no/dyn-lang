@@ -154,8 +154,9 @@ mapDecl fs@(fD,_,_) ifces dsigs (DAtr z pat whe)  = (fD ifces dsigs $ DAtr z pat
 mapWhere :: MapFs -> [Ifce] -> [Decl] -> ExpWhere -> ExpWhere
 mapWhere fs ifces dsigs (ExpWhere (z,e,ds)) = ExpWhere (z, e', dsE'++ds')
   where
-    (e',dsE') = mapExpr  fs ifces dsigs e
-    ds'       = mapDecls fs ifces dsigs ds
+    dsigs'    = dsigs ++ filter isDSig ds
+    (e',dsE') = mapExpr  fs ifces dsigs' e
+    ds'       = mapDecls fs ifces dsigs' ds
 
 mapPatt :: MapFs -> [Ifce] -> [Decl] -> Patt -> (Patt, [Decl])
 mapPatt fs@(_,_,fP) ifces dsigs p = (fP ifces dsigs p', dsP') where
