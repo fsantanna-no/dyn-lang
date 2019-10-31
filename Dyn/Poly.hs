@@ -57,7 +57,7 @@ fE xtp ifces dsigs (EVar z id) = (EVar z id', ds') where
 fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2') where
 
   (id2',e2',ds2') =
-    if null cs2 then
+    if null cs2 || err then
       (id2,e2,[])                  -- f is not poly, nothing to do
     else                           -- f is poly ...
       case xhr of                  --   ... and xtp is concrete -> resolve!
@@ -80,15 +80,17 @@ fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', d
   TFunc inp2 out2 = ttp2
   Type (_,xttp,_) = xtp
 
-  -- TODO: inp2 or out2 or both have cs?
-  -- currently inp2 or out2
-  xhr = case ttpMatch (TTuple [inp2,out2])
-                      ({-traceShowX (id2,inp2,out2) $-} TTuple [toTType dsigs e2,xttp])
+  -- TODO: `err` is required b/c of fE that executes 2x per Expr
+  -- the first execution, which fails, must keep `e2` the same
+  -- (will fix when fE is called only by parents and once)
+  (xhr,err) = case ttpMatch (TTuple [inp2,out2])
+                      ({-traceShowX (id2,toString e2,inp2,out2) $-} TTuple [toTType dsigs e2,xttp])
         of
-          [("a", TData xhr)] -> Just xhr
-          [("a", TVar  "a")] -> Nothing
-          --_ -> Nothing
-          x -> error $ show x
+          [("a", TData xhr)] -> (Just xhr, False)
+          [("a", TVar  "a")] -> (Nothing,  False)
+
+          _ -> (Nothing, True)    -- TODO: b/c of err
+          --x -> error $ show x
   -- TODO: pat1 vs out2
 
   -- eq(dBoolIEq,...)

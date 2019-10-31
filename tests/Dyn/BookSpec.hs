@@ -663,7 +663,7 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
 
     describe "Chapter 2.2 - Characters:" $ do                 -- pg 35
 
-      it "XXX: char" $         -- pg 36
+      it "char" $         -- pg 36
         evalString True ([r|
 main = (xeq,xgt,cs,low,cp1,cp2,nx,ok)
 
@@ -689,9 +689,11 @@ c2  :: Char = Char.BB
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
-      it "enum" $         -- pg 38
+      it "XXX: enum" $         -- pg 38
         evalString True ([r|
-main = (xeq, xgt, matches (sum,ten), matches (fromEnum (toEnum Day.Sat),Day.Sat), not wd1, wd2, aft)
+main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
+
+dsat :: Day = fromEnum (toEnum Day.Sat)
 
 --data Day
 --data Day.Sun
@@ -702,7 +704,7 @@ main = (xeq, xgt, matches (sum,ten), matches (fromEnum (toEnum Day.Sat),Day.Sat)
 --data Day.Fri
 --data Day.Sat
 
-xeq :: Bool = not (match (d1,d2))
+xeq :: Bool = not (matches (d1,d2))
 xgt :: Bool = lt  (d1, d2)
 wd1 :: Bool = workday Day.Sun
 wd2 :: Bool = workday Day.Fri
@@ -759,12 +761,22 @@ implementation of IOrd for Day with
       y :: Day
       (x,y) = ...
     in
-      lt (toEnum x, toEnum y)
+      lt (x', y') where
+        x' :: Nat = toEnum x
+        y' :: Nat = toEnum y
+      ;
     ;
   ;
 ;
+
+implementation of IEq for Day with
+  eq = func :: ((Day,Day) -> Bool) ->
+    matches ...
+  ;
+;
 |] ++ prelude)
-        `shouldBe` "Bool.True"
+        `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
+
 {-
       TODO: typeclass
 
