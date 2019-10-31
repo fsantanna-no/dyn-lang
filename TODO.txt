@@ -1,3 +1,4 @@
+- adicionar let dcls in exp
 - voltar ao Book
 - TIPOS!
     - ir tirando as anotacoes de tipos

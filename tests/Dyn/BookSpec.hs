@@ -510,7 +510,7 @@ main = lte (Xx.Aa,Xx.Bb)
 |] ++ iord ++ ieq)
         `shouldBe` "(line=2, col=8) ERROR : unassigned variable 'dXxIOrd'"
 
-      it "XXX: leap years" $         -- pg 33
+      it "leap years" $         -- pg 33
         evalString True ([r|
 main = and (not (leapyear y1979), and (leapyear y1980, and (not (leapyear hundred), leapyear (mul (four,hundred)))))
 leapyear :: (Int->Bool) = func ->
@@ -564,113 +564,110 @@ impl = func ->
 |] ++ bool)
           `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True)"
 
-{-
-      TODO: typeclass
       it "analyse triangles" $         -- pg 35
-        (run True $
-          pre ++ unlines [
-            "data Triangle",
-            "data Triangle.Failure",
-            "data Triangle.Isosceles",
-            "data Triangle.Equilateral",
-            "data Triangle.Scalene",
-            "",
-            "implementation of IEqualable for Triangle with",
-            "end",
-            "",
-            "func analyse (x,y,z) : ((Int,Int,Int) -> Triangle) do",
-            "   if (x + y) @<= z then",
-            "     return Triangle.Failure",
-            "   else/if x === z then",
-            "     return Triangle.Equilateral",
-            "   else/if (x === y) or (y === z) then",
-            "     return Triangle.Isosceles",
-            "   else",
-            "     return Triangle.Scalene",
-            "   end",
-            "end",
-            "",
-            "func analyse2 (x,y,z) : ((Int,Int,Int) -> Triangle) do",
-            "   if (x @<= y) and (x @<= z) then",
-            "     if y @<= z then",
-            "       return analyse(x,y,z)",
-            "     else",
-            "       return analyse(x,z,y)",
-            "     end",
-            "   else/if (y @<= x) and (y @< z) then",
-            "     if x @<= z then",
-            "       return analyse(y,x,z)",
-            "     else",
-            "       return analyse(y,z,x)",
-            "     end",
-            "   else",
-            "     if x @<= y then",
-            "       return analyse(z,x,y)",
-            "     else",
-            "       return analyse(z,y,x)",
-            "     end",
-            "   end",
-            "end",
-            "return ((((analyse2 (30,20,10)) === (Triangle.Failure)) and ((analyse2 (10,25,20)) === (Triangle.Scalene)))",
-            "   and ((analyse2 (10,20,20)) === (Triangle.Isosceles))) and ((analyse2 (10,10,10)) === (Triangle.Equilateral))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        evalString True ([r|
+main = ( analyse2 (add(twenty,ten),twenty,ten)  ,
+         analyse2 (ten,add(twenty,five),twenty) ,
+         analyse2 (ten,twenty,twenty)           ,
+         analyse2 (ten,ten,ten)                 )
+
+twenty = mul (two,ten)
+
+--data Triangle
+--data Triangle.Failure
+--data Triangle.Isosceles
+--data Triangle.Equilateral
+--data Triangle.Scalene
+
+analyse2 :: ((Int,Int,Int) -> Triangle) = func ->
+  case (lte(x,y),  lte(x,z),  lte(y,x),  lte(y,z) ) of
+       (Bool.True, Bool.True, _,         Bool.True)  -> analyse (x,y,z)
+       (Bool.True, Bool.True, _,         Bool.False) -> analyse (x,z,y)
+       (_,         Bool.True, Bool.True, Bool.True)  -> analyse (y,x,z)
+       (_,         Bool.False,Bool.True, Bool.True)  -> analyse (y,z,x)
+       (Bool.True, _,         _,         _)          -> analyse (z,x,y)
+       _                                             -> analyse (z,y,x)
+  ; where
+    x :: Nat
+    y :: Nat
+    z :: Nat
+    (x,y,z) = ...
+  ;
+;
+
+analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
+  case lte (add (x,y), z) of
+    Bool.True  -> Triangle.Failure
+    Bool.False -> case (x,y,z) of
+      (~z,_,_) -> Triangle.Equilateral
+      (~y,_,_) -> Triangle.Isosceles
+      (_,~z,_) -> Triangle.Isosceles
+      _        -> Triangle.Scalene
+    ;
+  ; where
+    x :: Nat
+    y :: Nat
+    z :: Nat
+    (x,y,z) = ...
+  ;
+;
+|] ++ prelude)
+        `shouldBe` "(Triangle.Failure,Triangle.Scalene,Triangle.Isosceles,Triangle.Equilateral)"
 
       it "sort3" $         -- pg 35
-        (run True $
-          pre ++ unlines [
-            "data Triangle",
-            "data Triangle.Failure",
-            "data Triangle.Isosceles",
-            "data Triangle.Equilateral",
-            "data Triangle.Scalene",
-            "",
-            "implementation of IEqualable for Triangle with",
-            "end",
-            "",
-            "func analyse (x,y,z) : ((Int,Int,Int) -> Triangle) do",
-            "   if (x + y) @<= z then",
-            "     return Triangle.Failure",
-            "   else/if x === z then",
-            "     return Triangle.Equilateral",
-            "   else/if (x === y) or (y === z) then",
-            "     return Triangle.Isosceles",
-            "   else",
-            "     return Triangle.Scalene",
-            "   end",
-            "end",
-            "",
-            "func sort3 (x,y,z) : ((Int,Int,Int) -> (Int,Int,Int)) do",
-            "   if (x @<= y) and (x @<= z) then",
-            "     if y @<= z then",
-            "       return (x,y,z)",
-            "     else",
-            "       return (x,z,y)",
-            "     end",
-            "   else/if (y @<= x) and (y @< z) then",
-            "     if x @<= z then",
-            "       return (y,x,z)",
-            "     else",
-            "       return (y,z,x)",
-            "     end",
-            "   else",
-            "     if x @<= y then",
-            "       return (z,x,y)",
-            "     else",
-            "       return (z,y,x)",
-            "     end",
-            "   end",
-            "end",
-            "",
-            "return ((((analyse (sort3 (30,20,10))) === (Triangle.Failure))  and",
-            "         ((analyse (sort3 (10,25,20))) === (Triangle.Scalene))) and",
-            "         ((analyse (sort3 (10,20,20))) === (Triangle.Isosceles))) and",
-            "         ((analyse (sort3 (10,10,10))) === (Triangle.Equilateral))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        evalString True ([r|
+main = ( analyse (sort3 (add(twenty,ten),twenty,ten))  ,
+         analyse (sort3 (ten,add(twenty,five),twenty)) ,
+         analyse (sort3 (ten,twenty,twenty))           ,
+         analyse (sort3 (ten,ten,ten))                 )
+
+twenty = mul (two,ten)
+
+--data Triangle
+--data Triangle.Failure
+--data Triangle.Isosceles
+--data Triangle.Equilateral
+--data Triangle.Scalene
+
+sort3 :: ((Nat,Nat,Nat) -> (Nat,Nat,Nat)) = func ->
+  case ( lt(x,y) , lt(x,z) , lt(y,x) , lt(y,z) ) of
+    (Bool.True, Bool.True, _, Bool.True)  -> (x,y,z)
+    (Bool.True, Bool.True, _, Bool.False) -> (x,z,y)
+    (_, Bool.True,  Bool.True, Bool.True) -> (y,x,z)
+    (_, Bool.False, Bool.True, Bool.True) -> (y,z,x)
+    (Bool.True,  _, _, _)                 -> (z,x,y)
+    (Bool.False, _, _, _)                 -> (z,y,x)
+  ; where
+    x :: Nat
+    y :: Nat
+    z :: Nat
+    (x,y,z) = ...
+  ;
+;
+
+analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
+  case lte (add (x,y), z) of
+    Bool.True  -> Triangle.Failure
+    Bool.False -> case (x,y,z) of
+      (~z,_,_) -> Triangle.Equilateral
+      (~y,_,_) -> Triangle.Isosceles
+      (_,~z,_) -> Triangle.Isosceles
+      _        -> Triangle.Scalene
+    ;
+  ; where
+    x :: Nat
+    y :: Nat
+    z :: Nat
+    (x,y,z) = ...
+  ;
+;
+|] ++ prelude)
+        `shouldBe` "(Triangle.Failure,Triangle.Scalene,Triangle.Isosceles,Triangle.Equilateral)"
 
 -------------------------------------------------------------------------------
 
+{-
+      TODO: typeclass
     describe "Chapter 2.2 - Characters:" $ do                 -- pg 35
 
       it "char" $         -- pg 36
