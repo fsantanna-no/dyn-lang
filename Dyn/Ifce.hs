@@ -48,7 +48,7 @@ inline ifces globs = concatMap globToDecl globs where
     fD ifces dsigs d@(DAtr z pat@(PWrite _ id) whe) =
       case traceShowId $ dsigFind dsigs id of
         Type (_,_,[])            -> [d]   -- no constraints on declaration
-        Type (_,_,[("a",[ifc])]) -> [traceShowS $ expandDecl ifces True ([ifc],[]) d]
+        Type (_,_,[("a",[ifc])]) -> [traceShowS $ expandDecl ifces True (ifc,[]) d]
         otherwise                -> error $ "TODO: multiple vars/ctrs"
 
     fD _ _ d = [d]
@@ -74,7 +74,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (expandDecl ifces False ([ifc_id],[])) decls
+  decls' = map (expandDecl ifces False (ifc_id,[])) decls
 
 -------------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
   toString' (Type (_, TVar _,   [(_,l)])) = concat l
 
   -- eq = <...>
-  decls' = map (expandDecl ifces True ([id],imp_ids)) decls where
+  decls' = map (expandDecl ifces True (id,imp_ids)) decls where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
 
   imp_ids = case cs of          -- ids: from instance constraints
@@ -124,13 +124,13 @@ implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
 --                              - it is already on its type explicitly
 -- Decl:                decl to expand
 -- Decl:                expanded decl
-expandDecl :: [Ifce] -> Bool -> ([ID_Ifce],[ID_Ifce]) -> Decl -> Decl
+expandDecl :: [Ifce] -> Bool -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
 
 expandDecl ifces True _ (DSig z id _) = DSig z id tz -- isImpl: prevent clashes w/ poly
 expandDecl ifces False (ifc_id,imp_ids) (DSig z1 id1 (Type (z2,ttp2,cs2))) =
   DSig z1 id1 (Type (z2,ttp2,cs2')) where
     -- TODO: a?
-    cs2' = ("a", ifcesSups ifces (ifc_id++imp_ids)) : cs2
+    cs2' = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs2
 
 -- IBounded: minimum/maximum
 expandDecl _ _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
@@ -159,8 +159,8 @@ expandDecl ifces _ (ifc_id,imp_ids)
     --  a where a is (IEq,IOrd)
     -- TODO: a?
     -- TODO: ctrsUnion
-    cs4NImps' = ("a", ifcesSups ifces ifc_id)            : cs4
-    cs4YImps  = ("a", ifcesSups ifces (ifc_id++imp_ids)) : cs4
+    cs4NImps' = ("a", ifcesSups ifces [ifc_id])         : cs4
+    cs4YImps  = ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs4
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
     ups3' = map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
