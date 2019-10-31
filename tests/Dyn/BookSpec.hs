@@ -685,95 +685,88 @@ c2  :: Char = Char.BB
 |] ++ prelude)
         `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
 
-{-
-      TODO: typeclass
 -------------------------------------------------------------------------------
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
       it "enum" $         -- pg 38
-        (run True $
-          pre ++ unlines [
-            "interface IEnumerable for a with",
-            "   func toEnum   : (a -> Int)",
-            "   func fromEnum : (Int -> a)",
-            "end",
-            "",
-            "data Day",
-            "data Day.Sun",
-            "data Day.Mon",
-            "data Day.Tue",
-            "data Day.Wed",
-            "data Day.Thu",
-            "data Day.Fri",
-            "data Day.Sat",
-            "",
-            "implementation of IEqualable for Day with end",
-            "",
-            "implementation of IEnumerable for Day with",
-            "   func toEnum day : (Day -> Int) do",
-            "     if day === Day.Sun then",
-            "       return 0",
-            "     else/if day === Day.Mon then",
-            "       return 1",
-            "     else/if day === Day.Tue then",
-            "       return 2",
-            "     else/if day === Day.Wed then",
-            "       return 3",
-            "     else/if day === Day.Thu then",
-            "       return 4",
-            "     else/if day === Day.Fri then",
-            "       return 5",
-            "     else/if day === Day.Sat then",
-            "       return 6",
-            "     end",
-            "   end",
-            "",
-            "   func fromEnum int : (Int -> Day) do",
-            "     if int === 0 then",
-            "       return Day.Sun",
-            "     else/if int === 1 then",
-            "       return Day.Mon",
-            "     else/if int === 2 then",
-            "       return Day.Tue",
-            "     else/if int === 3 then",
-            "       return Day.Wed",
-            "     else/if int === 4 then",
-            "       return Day.Thu",
-            "     else/if int === 5 then",
-            "       return Day.Fri",
-            "     else/if int === 6 then",
-            "       return Day.Sat",
-            "     end",
-            "   end",
-            "end",
-            "",
-            "implementation of IOrderable for Day with",
-            "  func @< (x,y) : ((Day,Day) -> Bool) do",
-            "    return (toEnum x) < (toEnum y)",
-            "  end",
-            "end",
-            "",
-            "func workday (day) : (Day -> Bool) do",
-            "  return (day @>= (Day.Mon)) and (day @<= (Day.Fri))",
-            "end",
-            "",
-            "func dayAfter (day) : (Day -> Day) do",
-            "  return fromEnum (((toEnum day) + 1) rem 7)",
-            "end",
-            "",
-            "var d1 : Day = Day.Sun",
-            "var d2 : Day = Day.Mon",
-            "",
-            "var eq  : Bool = d1 =/= d2",
-            "var gt  : Bool = d1 @< d2",
-            "var wd1 : Bool = workday (Day.Sun)",
-            "var wd2 : Bool = workday (Day.Fri)",
-            "var aft : Bool = ((dayAfter (Day.Sun)) === (Day.Mon)) and ((dayAfter (Day.Sat)) === (Day.Sun))",
-            "var sum : Int  = (((toEnum d1) + (toEnum d2)) + (toEnum (Day.Sat))) + (toEnum (Day.Wed))",
-            "return ((((eq and gt) and (sum == 10)) and ((fromEnum(toEnum(Day.Sat))) === Day.Sat)) and ((not wd1) and wd2)) and aft"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        evalString True ([r|
+main = (xeq, xgt, matches (sum,ten), matches (fromEnum (toEnum Day.Sat),Day.Sat), not wd1, wd2, aft)
+
+--data Day
+--data Day.Sun
+--data Day.Mon
+--data Day.Tue
+--data Day.Wed
+--data Day.Thu
+--data Day.Fri
+--data Day.Sat
+
+xeq :: Bool = not (match (d1,d2))
+xgt :: Bool = lt  (d1, d2)
+wd1 :: Bool = workday Day.Sun
+wd2 :: Bool = workday Day.Fri
+aft :: Bool = and (matches (dayAfter Day.Sun,Day.Mon), matches (dayAfter Day.Sat, Day.Sun))
+sum :: Nat  = add (add (add (toEnum d1,toEnum d2),toEnum Day.Sat), toEnum Day.Wed)
+
+d1 :: Day = Day.Sun
+d2 :: Day = Day.Mon
+
+workday = func :: (Day -> Bool) ->
+  let day :: Day = ... in
+    and (gte (day,Day.Mon), lte(day,Day.Fri))
+  ;
+;
+
+dayAfter = func :: (Day -> Day) ->
+  let day :: Day = ... in
+    ret where
+      ret :: Day = fromEnum (rem (add (toEnum day,one), seven))
+    ;
+  ;
+;
+
+implementation of IEnum for Day with
+  toEnum = func :: (Day -> Nat) ->
+    case ... of
+      Day.Sun -> zero
+      Day.Mon -> one
+      Day.Tue -> two
+      Day.Wed -> three
+      Day.Thu -> four
+      Day.Fri -> five
+      Day.Sat -> six
+    ;
+  ;
+
+  fromEnum = func :: (Nat -> Day) ->
+    case ... of
+      ~zero  -> Day.Sun
+      ~one   -> Day.Mon
+      ~two   -> Day.Tue
+      ~three -> Day.Wed
+      ~four  -> Day.Thu
+      ~five  -> Day.Fri
+      ~six   -> Day.Sat
+    ;
+  ;
+;
+
+implementation of IOrd for Day with
+  lt = func :: ((Day,Day) -> Bool) ->
+    let
+      x :: Day
+      y :: Day
+      (x,y) = ...
+    in
+      lt (toEnum x, toEnum y)
+    ;
+  ;
+;
+|] ++ prelude)
+        `shouldBe` "Bool.True"
+{-
+      TODO: typeclass
 
       it "direction" $         -- pg 41
         (run True $

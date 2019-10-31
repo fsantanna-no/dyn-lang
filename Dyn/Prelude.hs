@@ -7,7 +7,7 @@ import Text.RawString.QQ
 prelude = nat_iord  ++ nat_ieq
        ++ bool_iord ++ bool_ieq ++ bool_ibounded
        ++ char_iord ++ char_ieq
-       ++ iord      ++ ieq      ++ ibounded
+       ++ ienum     ++ iord     ++ ieq      ++ ibounded
        ++ nat       ++ char     ++ bool
        ++ std
 
@@ -74,6 +74,13 @@ iord = [r|
         (x,y) = ...
       ;
     ;
+  ;
+|]
+
+ienum = [r|
+  interface IEnum for a with
+    toEnum   :: (a -> Nat)
+    fromEnum :: (Nat -> a)
   ;
 |]
 

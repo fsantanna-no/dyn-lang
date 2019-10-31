@@ -18,7 +18,7 @@ poly x y z = mapDecls (fD,fE tz,fPz) x y z where
   fD ifces dsigs d@(DSig _ _ _)   = [d]
   fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
     d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
-    (e2',dsE2') = fE (pattToType dsigs pat1) ifces dsigs e2
+    (e2',dsE2') = fE (traceShowX ("XXX",pat1) $ pattToType dsigs pat1) ifces dsigs e2
 
     pattToType :: [Decl] -> Patt -> Type
     pattToType dsigs (PWrite _ id) = dsigFind dsigs id
@@ -54,7 +54,7 @@ fE xtp ifces dsigs (EVar z id) = (EVar z id', ds') where
 -------------------------------------------------------------------------
 
 -- pat1::B = id2(neq) e2::(B,B)
-fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2') where
+fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2') where
 
   (id2',e2',ds2') =
     if null cs2 then
@@ -78,11 +78,17 @@ fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2
   -- eq (Bool,Boot)
   -- a is Bool
   TFunc inp2 out2 = ttp2
-  xhr = case ttpMatch inp2 ({-traceShowX (id2,toString e2,dsigs,inp2) $-} toTType dsigs e2) of
+  Type (_,xttp,_) = xtp
+
+  -- TODO: inp2 or out2 or both have cs?
+  -- currently inp2 or out2
+  xhr = case ttpMatch (TTuple [inp2,out2])
+                      ({-traceShowX (id2,inp2,out2) $-} TTuple [toTType dsigs e2,xttp])
+        of
           [("a", TData xhr)] -> Just xhr
           [("a", TVar  "a")] -> Nothing
           --_ -> Nothing
-          --x -> error $ show x
+          x -> error $ show x
   -- TODO: pat1 vs out2
 
   -- eq(dBoolIEq,...)
@@ -173,8 +179,8 @@ ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
                                               f TAny ttp2              = ttp2
                                               f ttp1 TAny              = ttp1
                                               f ttp1 ttp2 | ttp1==ttp2 = ttp1
-  --aux x y = M.singleton "a" (TData ["Bool"])
-  aux x y = error $ "ttpMatch: " ++ show (x,y)
+  aux x y = M.empty
+  --aux x y = error $ "ttpMatch: " ++ show (x,y)
 
 mapType :: (TType -> TType) -> Type -> Type
 mapType f (Type (z,ttp,cs)) = Type (z, aux f ttp, cs) where
