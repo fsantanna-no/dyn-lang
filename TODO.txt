@@ -1,4 +1,3 @@
-- sintaxe ? para TAny
 - adicionar let dcls in exp
 - voltar ao Book
 - TIPOS!

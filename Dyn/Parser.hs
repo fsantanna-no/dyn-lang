@@ -297,9 +297,14 @@ ctr = do
 
 ttype :: Parser TType
 ttype = do
-  ttp <- try ttype_D      <|> try ttype_V <|> try ttype_0 <|>
+  ttp <- try ttype_A <|> try ttype_D <|> try ttype_V <|> try ttype_0 <|>
          try ttype_parens <|> try ttype_N <|> ttype_F <?> "type"
   return ttp
+
+ttype_A :: Parser TType
+ttype_A = do
+  void <- tk_sym "?"
+  return TAny
 
 ttype_0 :: Parser TType
 ttype_0 = do

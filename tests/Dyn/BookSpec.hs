@@ -669,7 +669,7 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
     describe "Chapter 2.2 - Characters:" $ do                 -- pg 35
 
       it "XXX: char" $         -- pg 36
-        evalString True ([r|
+        parseToString True ([r|
 main = (xeq,xgt,cs,low,cp1,cp2,nx,ok)
 
 xeq :: Bool = not (matches (c1,c2))
