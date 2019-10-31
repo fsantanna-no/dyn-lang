@@ -822,40 +822,12 @@ reverse = func ->
 ;
 |] ++ prelude)
         `shouldBe` "(Nat.Zero,Dir.S,Bool.True,Bool.True)"
-{-
-      TODO: typeclass
-
 
       it "bool enum" $         -- pg 41
-        (run True $
-          pre ++ unlines [
-            "interface IEnumerable for a with",
-            "   func toEnum   : (a -> Int)",
-            "   func fromEnum : (Int -> a)",
-            "end",
-            "",
-            "implementation of IEnumerable for Bool with",
-            "   func toEnum bool : (Bool -> Int) do",
-            "     if bool === (Bool.False) then",
-            "       return 0",
-            "     else/if bool === (Bool.True) then",
-            "       return 1",
-            "     end",
-            "   end",
-            "",
-            "   func fromEnum int : (Int -> Bool) do",
-            "     if int === 0 then",
-            "       return Bool.False",
-            "     else/if int === 1 then",
-            "       return Bool.True",
-            "     end",
-            "   end",
-            "end",
-            "",
-            "return fromEnum ((toEnum (Bool.False)) + 1)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
--}
+        evalString True ([r|
+main :: Bool = fromEnum (add (toEnum Bool.False, one))
+|] ++ prelude)
+        `shouldBe` "Bool.True"
 
 -------------------------------------------------------------------------------
 

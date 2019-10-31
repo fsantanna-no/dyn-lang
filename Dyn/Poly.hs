@@ -18,7 +18,7 @@ poly x y z = mapDecls (fD,fE tz,fPz) x y z where
   fD ifces dsigs d@(DSig _ _ _)   = [d]
   fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
     d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
-    (e2',dsE2') = fE (traceShowX ("XXX",pat1) $ pattToType dsigs pat1) ifces dsigs e2
+    (e2',dsE2') = fE (pattToType dsigs pat1) ifces dsigs e2
 
     pattToType :: [Decl] -> Patt -> Type
     pattToType dsigs (PWrite _ id) = dsigFind dsigs id

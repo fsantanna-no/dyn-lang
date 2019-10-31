@@ -4,11 +4,11 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
-prelude = nat_iord  ++ nat_ieq
-       ++ bool_iord ++ bool_ieq ++ bool_ibounded
-       ++ char_iord ++ char_ieq
-       ++ ienum     ++ iord     ++ ieq      ++ ibounded
-       ++ nat       ++ char     ++ bool
+prelude = nat_iord   ++ nat_ieq
+       ++ bool_ienum ++ bool_iord ++ bool_ieq ++ bool_ibounded
+       ++ char_iord  ++ char_ieq
+       ++ ienum      ++ iord      ++ ieq      ++ ibounded
+       ++ nat        ++ char      ++ bool
        ++ std
 
 -------------------------------------------------------------------------------
@@ -143,6 +143,24 @@ bool_iord = [r|
         x :: Bool
         y :: a
         (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+bool_ienum = [r|
+  implementation of IEnum for Bool with
+    toEnum = func :: (Bool -> Nat) ->
+      case ... of
+        Bool.False -> Nat.Zero
+        Bool.True  -> Nat.Succ Nat.Zero
+      ;
+    ;
+
+    fromEnum = func :: (Nat -> Bool) ->
+      case ... of
+        Nat.Zero          -> Bool.False
+        Nat.Succ Nat.Zero -> Bool.True
       ;
     ;
   ;
