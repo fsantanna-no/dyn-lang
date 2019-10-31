@@ -135,6 +135,9 @@ globFromDecl decl = GDecl decl
 type MapFs = ( ([Ifce]->[Decl]->Decl->[Decl]),
                ([Ifce]->[Decl]->Expr->(Expr,[Decl])),
                ([Ifce]->[Decl]->Patt->Patt) )
+fDz _ _ d = [d]
+fEz _ _ e = (e,[])
+fPz _ _ p = p
 
 mapDecls :: MapFs -> [Ifce] -> [Decl] -> [Decl] -> [Decl]
 mapDecls fs ifces dsigs decls = concatMap (mapDecl fs ifces dsigs') decls
@@ -179,6 +182,7 @@ mapExpr fs@(_,fE,_) ifces dsigs e = (e'', dsE'++dsE'') where
                                 (e1',dsE1') = mapExpr fs ifces dsigs e1
                                 (e2',dsE2') = mapExpr fs ifces dsigs e2
   aux (ECase  z e l)        = (ECase z e' l', dsE'++concat dsPs') where
+                                (e', dsE')  = mapExpr fs ifces dsigs e
                                 (ps, ws)    = unzip l
                                 (ps',dsPs') = unzip $ map (mapPatt fs ifces dsigs) ps
                                 ws'         = map (mapWhere fs ifces dsigs) ws
