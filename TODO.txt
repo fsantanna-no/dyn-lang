@@ -1,11 +1,15 @@
-- adicionar let dcls in exp
+- poli
+    - TODO em Poly:
+        - indireto
+        - impl w/ extra constraint
+    - multiplas variaveis
+
 - voltar ao Book
+    - terminei TODO:typeclass
+        - achar o proximo
+
 - TIPOS!
     - ir tirando as anotacoes de tipos
-
-- poli
-    - multiplas variaveis
-    - por retorno
 
 - stack trace
 

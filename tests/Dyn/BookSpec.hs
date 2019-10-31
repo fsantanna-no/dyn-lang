@@ -689,7 +689,7 @@ c2  :: Char = Char.BB
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
-      it "XXX: enum" $         -- pg 38
+      it "enum" $         -- pg 38
         evalString True ([r|
 main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
 
@@ -777,66 +777,54 @@ implementation of IEq for Day with
 |] ++ prelude)
         `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
 
+      it "direction" $         -- pg 41
+        evalString True ([r|
+main = (toEnum Dir.N, ses, matches (lel, Dir.L), matches (reverse Dir.O, Dir.L))
+
+ses :: Dir = fromEnum one
+
+lel :: Dir = fromEnum (toEnum l)
+l   :: Dir = Dir.L
+
+--data Dir
+--data Dir.N
+--data Dir.S
+--data Dir.L
+--data Dir.O
+
+implementation of IEnum for Dir with
+  toEnum = func :: (Dir -> Nat) ->
+    case ... of
+      Dir.N -> zero
+      Dir.S -> one
+      Dir.L -> two
+      Dir.O -> three
+    ;
+  ;
+
+  fromEnum = func :: (Nat -> Dir) ->
+    case ... of
+      ~zero  -> Dir.N
+      ~one   -> Dir.S
+      ~two   -> Dir.L
+      ~three -> Dir.O
+    ;
+  ;
+;
+
+reverse = func ->
+   case ... of
+    Dir.N -> Dir.S
+    Dir.S -> Dir.N
+    Dir.L -> Dir.O
+    Dir.O -> Dir.L
+  ;
+;
+|] ++ prelude)
+        `shouldBe` "(Nat.Zero,Dir.S,Bool.True,Bool.True)"
 {-
       TODO: typeclass
 
-      it "direction" $         -- pg 41
-        (run True $
-          pre ++ unlines [
-            "interface IEnumerable for a with",
-            "   func toEnum   : (a -> Int)",
-            "   func fromEnum : (Int -> a)",
-            "end",
-            "",
-            "data Dir",
-            "data Dir.N",
-            "data Dir.S",
-            "data Dir.L",
-            "data Dir.O",
-            "",
-            "implementation of IEqualable for Dir with end",
-            "",
-            "implementation of IEnumerable for Dir with",
-            "   func toEnum dir : (Dir -> Int) do",
-            "     if dir === Dir.N then",
-            "       return 0",
-            "     else/if dir === Dir.S then",
-            "       return 1",
-            "     else/if dir === Dir.L then",
-            "       return 2",
-            "     else/if dir === Dir.O then",
-            "       return 3",
-            "     end",
-            "   end",
-            "",
-            "   func fromEnum int : (Int -> Dir) do",
-            "     if int === 0 then",
-            "       return Dir.N",
-            "     else/if int === 1 then",
-            "       return Dir.S",
-            "     else/if int === 2 then",
-            "       return Dir.L",
-            "     else/if int === 3 then",
-            "       return Dir.O",
-            "     end",
-            "   end",
-            "end",
-            "",
-            "func reverse (dir) : (Dir -> Dir) do",
-            "   if dir === (Dir.N) then",
-            "     return Dir.S",
-            "   else/if dir === (Dir.S) then",
-            "     return Dir.N",
-            "   else/if dir === (Dir.L) then",
-            "     return Dir.O",
-            "   else/if dir === (Dir.O) then",
-            "     return Dir.L",
-            "   end",
-            "end",
-            "",
-            "return (reverse (Dir.O)) === (Dir.L)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
 
       it "bool enum" $         -- pg 41
         (run True $
