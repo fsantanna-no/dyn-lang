@@ -6,8 +6,10 @@ import Text.RawString.QQ
 
 prelude = iord_nat  ++ ieq_nat
        ++ iord_bool ++ ieq_bool ++ ibounded_bool
+       ++ iord_char ++ ieq_char
        ++ iord      ++ ieq      ++ ibounded
-       ++ std       ++ nat      ++ bool
+       ++ nat       ++ char     ++ bool
+       ++ std
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -47,6 +49,78 @@ bool = [r|
     case ... of
       (Bool.True, _)  -> Bool.True
       (_,         =y) -> y
+    ;
+  ;
+|]
+
+-------------------------------------------------------------------------------
+
+char = [r|
+  --data Char
+  --data Char.AA
+  --data Char.BB
+  --data Char.CC
+  --data Char.DD
+  --data Char.Aa
+  --data Char.Bb
+  --data Char.Cc
+  --data Char.Dd
+
+  ord :: (Char -> Nat) = func ->
+    case ... of
+      Char.AA -> one
+      Char.BB -> two
+      Char.CC -> three
+      Char.DD -> four
+      Char.Aa -> add (ten, one)
+      Char.Bb -> add (ten, two)
+      Char.Cc -> add (ten, three)
+      Char.Dd -> add (ten, four)
+    ;
+  ;
+
+  chr :: (Nat -> Char) = func ->
+    case ... of
+      ~ one                -> Char.AA
+      ~ two                -> Char.BB
+      ~ three              -> Char.CC
+      ~ four               -> Char.DD
+      ~ (add (ten, one))   -> Char.Aa
+      ~ (add (ten, two))   -> Char.Bb
+      ~ (add (ten, three)) -> Char.Cc
+      ~ (add (ten, four))  -> Char.Dd
+    ;
+  ;
+
+  isLower :: (Char -> Bool) = func ->
+    and (gte (c,Char.Aa), lte (c,Char.Dd)) where
+      c :: Char
+      c = ...
+    ;
+  ;
+
+  capitalize :: (Char -> Char) = func ->
+    case isLower c of
+      Bool.True  -> chr (sub (ord c, off))
+      Bool.False -> c
+    ; where
+      c :: Char
+      c = ...
+      off :: Nat = sub (ord Char.Aa, ord Char.AA)
+    ;
+  ;
+
+  nextlet :: (Char -> Char) = func ->
+    chr (add (rem (add (sub (ord c,min), one),
+                   add (sub (max,min), one)),
+         min))
+     --return chr (((((ord c) - min) + 1) rem ((max-min)+1)) + min)
+    where
+      (min,max) = case isLower c of
+        Bool.True  -> (ord Char.Aa, ord Char.Dd)
+        Bool.False -> (ord Char.AA, ord Char.DD)
+      ;
+      c = ...
     ;
   ;
 |]
@@ -119,6 +193,24 @@ nat = [r|
         (Nat.Succ =x, Nat.Succ =y) -> nlte (x,y)
       ;
     ;
+|]
+
+iord_char = [r|
+  implementation of IOrd for Char with
+    lt = func :: ((Char,Char) -> Bool) ->
+      lt (ord x, ord y) where
+        (x,y) = ...
+      ;
+    ;
+  ;
+|]
+
+ieq_char = [r|
+  implementation of IEq for Char with
+    eq = func :: ((Char,Char) -> Bool) ->
+      matches ...
+    ;
+  ;
 |]
 
 -------------------------------------------------------------------------------
@@ -212,6 +304,8 @@ iord_bool = [r|
     ;
   ;
 |]
+
+-------------------------------------------------------------------------------
 
 ieq_nat = [r|
   implementation of IEq for Nat with

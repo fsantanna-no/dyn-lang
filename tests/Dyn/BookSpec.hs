@@ -666,118 +666,32 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
 
 -------------------------------------------------------------------------------
 
-{-
-      TODO: typeclass
     describe "Chapter 2.2 - Characters:" $ do                 -- pg 35
 
-      it "char" $         -- pg 36
-        (run True $
-          pre ++ unlines [
-            "data Char",
-            "data Char.AA",
-            "data Char.BB",
-            "data Char.CC",
-            "data Char.DD",
-            "data Char.Aa",
-            "data Char.Bb",
-            "data Char.Cc",
-            "data Char.Dd",
-            "",
-            "implementation of IEqualable for Char with",
-            "end",
-            "",
-            "func ord c : (Char -> Int) do",
-            " if c === Char.AA then",
-            "   return 1",
-            " else/if c === Char.BB then",
-            "   return 2",
-            " else/if c === Char.CC then",
-            "   return 3",
-            " else/if c === Char.DD then",
-            "   return 4",
-            " else/if c === Char.Aa then",
-            "   return 11",
-            " else/if c === Char.Bb then",
-            "   return 12",
-            " else/if c === Char.Cc then",
-            "   return 13",
-            " else/if c === Char.Dd then",
-            "   return 14",
-            " else",
-            "   return 0",
-            " end",
-            "end",
-            "",
-            "func chr c : (Int -> Char) do",
-            " if c === 1 then",
-            "   return Char.AA",
-            " else/if c === 2 then",
-            "   return Char.BB",
-            " else/if c === 3 then",
-            "   return Char.CC",
-            " else/if c === 4 then",
-            "   return Char.DD",
-            " else/if c === 11 then",
-            "   return Char.Aa",
-            " else/if c ===  12then",
-            "   return Char.Bb",
-            " else/if c === 13 then",
-            "   return Char.Cc",
-            " else/if c === 14 then",
-            "   return Char.Dd",
-            " else",
-            "   error 0",
-            " end",
-            "end",
-            "",
-            "implementation of IOrderable for Char with",
-            "  func @< (x,y) : ((Char,Char) -> Bool) do",
-            "    return (ord x) < (ord y)",
-            "  end",
-            "end",
-            "",
-            "func isLower c : (Char -> Bool) do",
-            "   return (c @>= Char.Aa) and (c @<= Char.Dd)",
-            "end",
-            "",
-            "func capitalize c : (Char -> Char) do",
-            "   var off : Int = (ord (Char.AA)) - (ord (Char.Aa))",
-            "   if isLower c then",
-            "     return chr (off + (ord c))",
-            "   else",
-            "     return c",
-            "   end",
-            "end",
-            "",
-            "func nextlet c : (Char -> Char) do",
-            "   var (min,max) : (Int,Int)",
-            "   if isLower c then",
-            "     set (min,max) = (ord Char.Aa, ord Char.Dd)",
-            "   else",
-            "     set (min,max) = (ord Char.AA, ord Char.DD)",
-            "   end",
-            "   return chr (((((ord c) - min) + 1) rem ((max-min)+1)) + min)",
-            "end",
-            "",
-            "var c1 : Char = Char.AA",
-            "var c2 : Char = Char.BB",
-            "",
-            "var eq  : Bool = c1 =/= c2",
-            "var gt  : Bool = c1 @< c2",
-            "var cs  : Bool = (Char.AA) @< (Char.Aa)",
-            "var low : Bool = (not (isLower (Char.AA))) and (isLower (Char.Dd))",
-            "var cp1 : Bool = (capitalize (Char.BB)) === (Char.BB)",
-            "var cp2 : Bool = (capitalize (Char.Cc)) === (Char.CC)",
-            "var nx1 : Bool = (nextlet (Char.Cc)) === (Char.Dd)",
-            "var nx2 : Bool = (nextlet (Char.AA)) === (Char.BB)",
-            "var nx3 : Bool = (nextlet (Char.DD)) === (Char.AA)",
-            "var nx4 : Bool = (nextlet (Char.Dd)) === (Char.Aa)",
-            "var nx  : Bool = (nx1 and nx2) and (nx3 and nx4)",
-            "var sum : Int  = (((ord c1) + (ord c2)) + (ord (Char.CC))) + (ord (Char.DD))",
-            "return (((((eq and gt) and cs) and low) and (cp1 and cp2)) and nx) and (sum == 10)"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+      it "XXX: char" $         -- pg 36
+        evalString True ([r|
+main = (xeq,xgt,cs,low,cp1,cp2,nx,ok)
 
+xeq :: Bool = not (matches (c1,c2))
+xgt :: Bool = lt (c1,c2)
+cs  :: Bool = lt (Char.AA, Char.Aa)
+low :: Bool = and (not (isLower Char.AA), isLower Char.Dd)
+cp1 :: Bool = matches (capitalize Char.BB, Char.BB)
+cp2 :: Bool = matches (capitalize Char.Cc, Char.CC)
+nx  :: Bool = and (and (nx1,nx2) , and (nx3,nx4))
+nx1 :: Bool = matches (nextlet Char.Cc, Char.Dd)
+nx2 :: Bool = matches (nextlet Char.AA, Char.BB)
+nx3 :: Bool = matches (nextlet Char.DD, Char.AA)
+nx4 :: Bool = matches (nextlet Char.Dd, Char.Aa)
+ok  :: Bool = matches (sum,ten)
+sum :: Nat  = add (add (add (ord c1,ord c2), ord Char.CC), ord Char.DD)
+c1  :: Char = Char.AA
+c2  :: Char = Char.BB
+|] ++ prelude)
+        `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
+
+{-
+      TODO: typeclass
 -------------------------------------------------------------------------------
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
