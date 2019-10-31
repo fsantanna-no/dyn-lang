@@ -130,6 +130,14 @@ globToDecl (GDecl decl) = decl
 globFromDecl :: Decl -> Glob
 globFromDecl decl = GDecl decl
 
+dsigFind :: [Decl] -> ID_Var -> Type
+dsigFind dsigs id = case L.find f dsigs of
+                      Nothing            -> Type (pz,TAny,cz)
+                      Just (DSig _ _ tp) -> tp
+                    where
+                      f :: Decl -> Bool
+                      f (DSig _ x _) = (id == x)
+
 -------------------------------------------------------------------------------
 
 type MapFs = ( ([Ifce]->[Decl]->Decl->[Decl]),

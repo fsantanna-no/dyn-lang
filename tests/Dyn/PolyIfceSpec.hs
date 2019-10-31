@@ -162,6 +162,16 @@ interface IAaa for a where a is IOrd with
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
+    it "XXX: f a where a is IOrd" $
+      evalString True ([r|
+main = (f (Bool.True, Bool.False),
+        f (Bool.False,Bool.False)) where
+  f :: ((a,a) -> Bool) where a is IOrd
+  f = func :: ((a,a) -> Bool) -> gt (x,y) where x::a y::a (x,y)=...;;
+;
+|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
+        `shouldBe` "(Bool.True,Bool.False)"
+
     it "ff1/ff2" $
       evalString True ([r|
 main = (ff1 (lte, (Bool.True,Bool.False)),
@@ -174,16 +184,6 @@ main = (ff1 (lte, (Bool.True,Bool.False)),
 ;
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
-
-    it "f a where a is IOrd" $
-      evalString True ([r|
-main = (f (Bool.True, Bool.False),
-        f (Bool.False,Bool.False)) where
-  f :: ((a,a) -> Bool) where a is IOrd
-  f = func :: ((a,a) -> Bool) -> gt (x,y) where x::a y::a (x,y)=...;;
-;
-|] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
-        `shouldBe` "(Bool.True,Bool.False)"
 
     it "implementation of IEq for a where a is IAaa" $
       evalString True ([r|

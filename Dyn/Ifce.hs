@@ -34,15 +34,24 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 
 inline :: [Ifce] -> [Glob] -> [Decl]
 inline ifces globs = concatMap globToDecl globs where
-                      globToDecl :: Glob -> [Decl]
-                      globToDecl (GDecl dcl) = [declToDecl ifces dcl]
-                      globToDecl (GIfce ifc) = ifceToDecls ifces ifc
-                      globToDecl (GImpl imp) = implToDecls ifces imp
 
--------------------------------------------------------------------------------
+  globToDecl :: Glob -> [Decl]
+  globToDecl (GDecl dcl) = declToDecls ifces dcl
+  globToDecl (GIfce ifc) = ifceToDecls ifces ifc
+  globToDecl (GImpl imp) = implToDecls ifces imp
 
-declToDecl :: [Ifce] -> Decl -> Decl
-declToDecl _ decl = decl
+  declToDecls ifces dcl = mapDecl (fD,fEz,fPz) ifces [] dcl where
+
+    fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
+
+    -- f :: ((a,a) -> Bool) where a is IOrd
+    fD ifces dsigs d@(DAtr z pat@(PWrite _ id) whe) =
+      case traceShowId $ dsigFind dsigs id of
+        Type (_,_,[])            -> [d]   -- no constraints on declaration
+        Type (_,_,[("a",[ifc])]) -> [traceShowS $ expandDecl ifces True ([ifc],[]) d]
+        otherwise                -> error $ "TODO: multiple vars/ctrs"
+
+    fD _ _ d = [d]
 
 -------------------------------------------------------------------------------
 

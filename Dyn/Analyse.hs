@@ -8,8 +8,8 @@ all :: Prog -> Prog
 all (Prog globs) =
   Prog $
     map globFromDecl      $
-    Poly.poly ifces []    $ --traceShowSS $
-    Ifce.inline    ifces  $
+    Poly.poly   ifces []  $ --traceShowSS $
+    Ifce.inline ifces     $ -- [Decl] w/o Ifce/Impl/Gens
     globs
   where
     ifces :: [Ifce]

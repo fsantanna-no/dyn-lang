@@ -1,5 +1,6 @@
-- - tentar unificar funcs dentro de ifces e funcs genericas
+- Ifce.inline tentar unificar funcs dentro de ifces e funcs genericas
 - TIPOS!
+    - ir tirando as anotacoes de tipos
 - voltar ao Book
 
 - poli

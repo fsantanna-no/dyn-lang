@@ -12,14 +12,6 @@ import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
 
--- TODO: polyPatt
-
--- [Ifce]: known ifces
--- [Decl]: known DSig decls
--- Type:   expected type
--- [Decl]: decls to transform
--- [Decl]: transformed decls (maybe the same)
---
 poly :: [Ifce] -> [Decl] -> [Decl] -> [Decl]
 poly x y z = mapDecls (fD,fE tz,fPz) x y z where
   fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
@@ -27,6 +19,10 @@ poly x y z = mapDecls (fD,fE tz,fPz) x y z where
   fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
     d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
     (e2',dsE2') = fE (pattToType dsigs pat1) ifces dsigs e2
+
+    pattToType :: [Decl] -> Patt -> Type
+    pattToType dsigs (PWrite _ id) = dsigFind dsigs id
+    --pattToType _ x = error $ pattToString True x
 
 -------------------------------------------------------------------------
 
@@ -132,14 +128,6 @@ declLocals ifces dsigs z ifc_ids xhr = concatMap f $
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-dsigFind :: [Decl] -> ID_Var -> Type
-dsigFind dsigs id = case L.find f dsigs of
-                      Nothing            -> Type (pz,TAny,cz)
-                      Just (DSig _ _ tp) -> tp
-                    where
-                      f :: Decl -> Bool
-                      f (DSig _ x _) = (id == x)
-
 toTType :: [Decl] -> Expr -> TType
 toTType _  (EArg   _)     = TAny
 toTType ds (EVar   _ id)  = ttp where Type (_,ttp,_) = dsigFind ds id
@@ -174,10 +162,6 @@ ttpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
                                               f ttp1 ttp2 | ttp1==ttp2 = ttp1
   --aux x y = M.singleton "a" (TData ["Bool"])
   aux x y = error $ "ttpMatch: " ++ show (x,y)
-
-pattToType :: [Decl] -> Patt -> Type
-pattToType dsigs (PWrite _ id) = dsigFind dsigs id
---pattToType _ x = error $ pattToString True x
 
 mapType :: (TType -> TType) -> Type -> Type
 mapType f (Type (z,ttp,cs)) = Type (z, aux f ttp, cs) where
