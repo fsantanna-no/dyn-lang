@@ -69,6 +69,15 @@ spec = do
     it "x" $
       parse' where_ "x"
         `shouldBe` Right (ExpWhere ((1,1), EVar (1,1) "x", []))
+    it "x" $
+      parse' where_let "x"
+        `shouldBe` Right (ExpWhere ((1,1), EVar (1,1) "x", []))
+    it "let x=() in x" $
+      parse' where_let "let x=() in x;"
+        `shouldBe` Right (ExpWhere ((1,1),EVar (1,13) "x",[DAtr (1,5) (PWrite (1,5) "x") (ExpWhere ((1,7),EUnit (1,7),[]))]))
+    it "let x=() in y where y=x" $
+      parse' where_let "let x=() in y where y=x;;"
+        `shouldBe` Right (ExpWhere ((1,1),EVar (1,13) "y",[DAtr (1,21) (PWrite (1,21) "y") (ExpWhere ((1,23),EVar (1,23) "x",[])),DAtr (1,5) (PWrite (1,5) "x") (ExpWhere ((1,7),EUnit (1,7),[]))]))
 
   describe "decl:" $ do
     it "x :: () = ()" $

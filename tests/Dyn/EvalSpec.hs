@@ -64,6 +64,9 @@ spec = do
     it "assign-var" $
       (evalProg True $ fromRight $ parse "main = a where a = A;")
         `shouldBe` EData (1,20) ["A"] (EUnit (1,20))
+    it "assign-var" $
+      (evalProg True $ fromRight $ parse "main = let a=A in a;")
+        `shouldBe` EData (1,14) ["A"] (EUnit (1,14))
     it "assign-tuple" $
       (evalProg False $ fromRight $ parse "main = (a,b) where (a,b) = (A,B);")
         `shouldBe` ETuple (1,8) [EData (1,29) ["A"] (EUnit (1,29)),EData (1,31) ["B"] (EUnit (1,31))]

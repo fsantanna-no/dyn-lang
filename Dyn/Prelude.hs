@@ -111,16 +111,17 @@ char = [r|
   ;
 
   nextlet :: (Char -> Char) = func ->
-    chr (add (rem (add (sub (ord c,min), one),
-                   add (sub (max,min), one)),
-         min))
-     --return chr (((((ord c) - min) + 1) rem ((max-min)+1)) + min)
-    where
-      (min,max) = case isLower c of
-        Bool.True  -> (ord Char.Aa, ord Char.Dd)
-        Bool.False -> (ord Char.AA, ord Char.DD)
+    let c = ... in
+      chr (add (rem (add (sub (ord c,min), one),
+                     add (sub (max,min), one)),
+           min))
+       --return chr (((((ord c) - min) + 1) rem ((max-min)+1)) + min)
+      where
+        (min,max) = case isLower c of
+          Bool.True  -> (ord Char.Aa, ord Char.Dd)
+          Bool.False -> (ord Char.AA, ord Char.DD)
+        ;
       ;
-      c = ...
     ;
   ;
 |]

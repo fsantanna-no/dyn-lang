@@ -46,11 +46,9 @@ spec = do
         evalString True ([r|
 main = square two
 square =
-  func ->
-    mul (x,x) where
-      x = ...
-    ;
-  ;
+  func -> let x = ... in
+    mul (x,x)
+  ;;
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
 
@@ -65,13 +63,12 @@ main = (nlte (three,two), nlte (three,three))
 main = add (smaller (ten,five) , smaller (one,four))
 smaller =
   func ->
-    case nlte (x,y) of
-      Bool.True  -> x
-      Bool.False -> y
-    ;case
-      where
-        (x,y) = ...
-      ;where
+    let (x,y) = ... in
+      case nlte (x,y) of
+        Bool.True  -> x
+        Bool.False -> y
+      ;case
+    ;let
   ;func
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
@@ -81,11 +78,9 @@ smaller =
         evalString True ([r|
 main = square (smaller (four, two))
 square =
-  func ->
-    mul (x,x) where
-      x = ...
-    ;
-  ;
+  func -> let x=... in
+    mul (x,x)
+  ;;
 smaller =
   func ->
     case nlte (x,y) of
@@ -669,7 +664,7 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
     describe "Chapter 2.2 - Characters:" $ do                 -- pg 35
 
       it "XXX: char" $         -- pg 36
-        parseToString True ([r|
+        evalString True ([r|
 main = (xeq,xgt,cs,low,cp1,cp2,nx,ok)
 
 xeq :: Bool = not (matches (c1,c2))

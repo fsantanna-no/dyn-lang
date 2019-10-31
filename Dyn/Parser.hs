@@ -60,8 +60,10 @@ keywords = [
     "where",
 
     -- Xtensions
+    "let",
     "for",
     "implementation",
+    "in",
     "interface",
     "with"
   ]
@@ -245,7 +247,7 @@ expr_func = do
             parensWith (tk_sym "{", tk_sym "}") $
               list (tk_sym ",") tk_var    -- {x}, {x,y}
   void <- tk_sym "->"
-  body <- where_
+  body <- where_let
   void <- string ";"
   void <- optional $ try $ tk_key "func"
   spc
@@ -260,7 +262,7 @@ expr_case = do
   cs   <- list (tk_sym "") $ do
             p    <- pat False
             void <- tk_sym "->"
-            w    <- where_
+            w    <- where_let
             return (p,w)
   void <- string ";"
   void <- optional $ try $ tk_key "case"
@@ -357,7 +359,7 @@ decl_sig = do
   tp   <- type_
   atr  <- option [] $ do
             void <- tk_sym "="
-            w    <- where_
+            w    <- where_let
             return $ singleton $ DAtr pos (PWrite pos id) w
   return $ (DSig pos id tp) : atr
 
@@ -367,7 +369,7 @@ decl_atr = do
   pat <- pat True <?> "declaration"
   whe <- do
           void <- tk_sym "="
-          w    <- where_
+          w    <- where_let
           return w
   return $ singleton $ DAtr pos pat whe
 
@@ -378,6 +380,22 @@ decls :: Parser [Decl]
 decls = concat <$> list (tk_sym "") decl
 
 -------------------------------------------------------------------------------
+
+where_let :: Parser ExpWhere
+where_let = try let_ <|> where_
+
+let_ :: Parser ExpWhere
+let_ = do
+  pos  <- toPos <$> getPosition
+  void <- tk_key "let"
+  ds   <- decls
+  void <- tk_key "in"
+  whe  <- where_
+  void <- string ";"
+  void <- optional $ try $ tk_key "let"
+  spc
+  let ExpWhere (_,e',ds') = whe
+  return $ ExpWhere (pos, e', ds'++reverse ds)
 
 where_ :: Parser ExpWhere
 where_ = do
