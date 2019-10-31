@@ -79,8 +79,10 @@ fE _ ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2
   -- a is Bool
   TFunc inp2 out2 = ttp2
   xhr = case ttpMatch inp2 ({-traceShowX (id2,toString e2,dsigs,inp2) $-} toTType dsigs e2) of
-          [("a", TVar  "a")] -> Nothing
           [("a", TData xhr)] -> Just xhr
+          [("a", TVar  "a")] -> Nothing
+          --_ -> Nothing
+          --x -> error $ show x
   -- TODO: pat1 vs out2
 
   -- eq(dBoolIEq,...)

@@ -162,7 +162,7 @@ interface IAaa for a where a is IOrd with
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
-    it "XXX: f a where a is IOrd" $
+    it "f a where a is IOrd" $
       evalString True ([r|
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False)) where
@@ -172,30 +172,28 @@ main = (f (Bool.True, Bool.False),
 |] ++ iord_bool ++ ieq_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
-    it "ff1/ff2" $
+    it "TODO-dict-closure: ff1/ff2" $
       evalString True ([r|
 main = (ff1 (lte, (Bool.True,Bool.False)),
-        ff2 (gte, (Bool.True,Bool.True )) ) where
+        ff2 (gte, (Bool.True,Bool.True )) ) where           -- gte must become closure
   ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
   ff1 = func -> f (x,y) where x::a y::a (f,x,y)=... ;;
 
-  ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closures
+  ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closure to hold actual dict
   ff2 = func -> f (x,y) where x::a y::a (f,x,y)=... ;;
 ;
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
 
-    it "implementation of IEq for a where a is IAaa" $
+    -- TODO: dIOrd(dIAaaXxx())
+    it "TODO-impl-with-ctrs: implementation of IEq for a where a is IAaa" $
       evalString True ([r|
-main = (lt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False))) where
-  Dict.IOrd (lt,lte,gt,gte) = dIOrdIAaa (dIAaaXxx())
-;
+main = (lt (Xxx.True,Xxx.False), gt (Xxx.True,Xxx.False))
 
 implementation of IOrd for a where a is IAaa with
   lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
-    lt ((dIEq(),dIOrdBool()), (f (daIAaa,x), f (daIAaa,y))) where
-      Dict.IOrd (lt,lte,gt,gte) = dIOrdBool()
+    lt (f x, f y) where
       (x,y) = ...
     ;
   ;
@@ -216,3 +214,30 @@ implementation of IAaa for Xxx with
 ;
 |] ++ iord_bool ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
+
+{-
+main = (lt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False)), gt ((dIEq(),dIOrdIAaa (dIAaaXxx())), (Xxx.True,Xxx.False))) where
+  Dict.IOrd (lt,lte,gt,gte) = dIOrdIAaa (dIAaaXxx())
+;
+implementation of IOrd for a where a is IAaa with
+  lt :: ((a,a) -> Bool)
+  lt = func :: ((a,a) -> Bool) ->
+    lt ((dIEq(),dIOrdBool()), (f (daIAaa,x), f (daIAaa,y))) where
+      Dict.IOrd (lt,lte,gt,gte) = dIOrdBool()
+      (x,y) = ...
+    ;
+  ;
+;
+interface IAaa for a with
+  f :: (a -> Bool)
+;
+implementation of IAaa for Xxx with
+  f :: (Xxx -> Bool)
+  f = func :: (Xxx -> Bool) ->
+    case ... of
+      Xxx.True  -> Bool.True
+      Xxx.False -> Bool.False
+    ;
+  ;
+;
+-}
