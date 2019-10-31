@@ -38,6 +38,40 @@ main = (x,y) where
 |] ++ ibounded_bool ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
+  describe "IEq" $ do
+
+    it "IEq: eq" $
+      evalString True ([r|  -- neq (eq(T,T), F)
+main = x where
+  x :: Bool = eq (Bool.False,Bool.False)
+;
+|] ++ ieq_bool ++ bool ++ ieq)
+        `shouldBe` "Bool.True"
+
+    it "IEq: neq" $
+      evalString True ([r|  -- neq (eq(T,T), F)
+main = x where
+  x :: Bool = neq (Bool.True,Bool.False)
+;
+|] ++ ieq_bool ++ bool ++ ieq)
+        `shouldBe` "Bool.True"
+
+    it "IEq: default eq" $
+      evalString True ([r|  -- neq (eq(T,T), F)
+main = x where
+  x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
+;
+|] ++ ieq_bool ++ bool ++ ieq)
+        `shouldBe` "Bool.True"
+
+    it "IEq: overrides eq (dieq_bool)" $
+      evalString True ([r|
+main = v where  -- neq (eq(T,T), F)
+  v = neq ((eq (Bool.True,Bool.True), Bool.False))
+;
+|] ++ ieq_bool ++ bool ++ ieq)
+        `shouldBe` "Bool.True"
+
   describe "IRec-IInd" $ do
 
     it "IInd" $
@@ -102,31 +136,7 @@ interface IRec for a with
 |])
         `shouldBe` "()"
 
-  describe "IEq" $ do
-
-    it "IEq: default eq" $
-      evalString True ([r|  -- neq (eq(T,T), F)
-main = x where
-  x :: Bool = neq (Bool.True,Bool.False)
-;
-|] ++ ieq_bool ++ bool ++ ieq)
-        `shouldBe` "Bool.True"
-
-    it "IEq: default eq" $
-      evalString True ([r|  -- neq (eq(T,T), F)
-main = x where
-  x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
-;
-|] ++ ieq_bool ++ bool ++ ieq)
-        `shouldBe` "Bool.True"
-
-    it "IEq: overrides eq (dieq_bool)" $
-      evalString True ([r|
-main = v where  -- neq (eq(T,T), F)
-  v = neq ((eq (Bool.True,Bool.True), Bool.False))
-;
-|] ++ ieq_bool ++ bool ++ ieq)
-        `shouldBe` "Bool.True"
+  describe "IOrd" $ do
 
     it "IEq/IOrd" $
       evalString True ([r|
@@ -173,7 +183,7 @@ main = (ff1 (lte, (Bool.True,Bool.False)),
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
 
-    it "XXX: f a where a is IOrd" $
+    it "f a where a is IOrd" $
       evalString True ([r|
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False)) where
