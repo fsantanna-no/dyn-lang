@@ -1,19 +1,11 @@
-module Dyn.Poly where
-
-import Debug.Trace
-import Data.Maybe               (fromJust)
-import qualified Data.List as L (find)
-import qualified Data.Set  as S
-import qualified Data.Map  as M
+module Dyn.Type where
 
 import Dyn.AST
-import Dyn.Classes
-import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
 
-poly :: [Ifce] -> [Decl] -> [Decl]
-poly x y = mapDecls (fD,fE tz,fPz) x [] y where
+apply :: [Ifce] -> [Decl] -> [Decl]
+apply x y = mapDecls (fDz,fEz,fPz) x [] y {- where
   fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
   fD ifces dsigs d@(DSig _ _ _)   = [d]
   fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
@@ -185,3 +177,4 @@ mapType f (Type (z,ttp,cs)) = Type (z, aux f ttp, cs) where
 
 posid :: Pos -> ID_Var -> ID_Var
 posid (l,c) id = id ++ "_" ++ show l ++ "_" ++ show c
+-}

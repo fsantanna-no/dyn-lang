@@ -1,6 +1,7 @@
 module Dyn.Analyse where
 
 import Dyn.AST
+import qualified Dyn.Type as Type
 import qualified Dyn.Ifce as Ifce
 import qualified Dyn.Poly as Poly
 
@@ -8,8 +9,9 @@ all :: Prog -> Prog
 all (Prog globs) =
   Prog $
     map globFromDecl        $
-    Poly.poly   ifces []    $ --traceShowSS $
-    Ifce.inline ifces impls $ -- [Decl] w/o Ifce/Impl/Gens
+    Poly.poly   ifces       $ --traceShowSS $ -- [Decl] w/ polys resolved
+    Type.apply  ifces       $                 -- [Decl] with types applied/inferred
+    Ifce.inline ifces impls $                 -- [Decl] w/o Ifce/Impl/Gens
     globs
   where
     ifces :: [Ifce]
