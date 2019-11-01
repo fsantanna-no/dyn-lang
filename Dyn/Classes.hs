@@ -99,8 +99,6 @@ instance IString Expr where
   toStringI spc (EVar   _ id)          = id
   toStringI spc (EUnit  _)             = "()"
   toStringI spc (ECons  _ h)           = intercalate "." h
-  toStringI spc (EData  _ h (EUnit _)) = intercalate "." h
-  toStringI spc (EData  _ h st)        = "(" ++ intercalate "." h ++ " " ++ toString st ++ ")"
   toStringI spc (EArg   _)             = "..."
   toStringI spc (ETuple _ es)          = "(" ++ intercalate "," (map toString es) ++ ")"
   toStringI spc (EFunc  _ tp ups bd)   = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
@@ -115,6 +113,9 @@ instance IString Expr where
     where
       f :: (Patt,ExpWhere) -> String
       f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString True pat ++ " -> " ++ toStringI (spc+2) whe
+  toStringI spc (EData  _ h (EUnit _)) = intercalate "." h
+  toStringI spc (EData  _ h st)        = "(" ++ intercalate "." h ++ " " ++ toString st ++ ")"
+  toStringI spc (ETType _ ttp)         = "(TType " ++ toString ttp ++ ")"
   --toStringI e                    = error $ show e
 
 -------------------------------------------------------------------------------

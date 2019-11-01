@@ -1,11 +1,18 @@
 module Dyn.Type where
 
 import Dyn.AST
+import Dyn.Classes
 
 -------------------------------------------------------------------------------
 
 apply :: [Ifce] -> [Decl] -> [Decl]
-apply x y = mapDecls (fDz,fEz,fPz) x [] y {- where
+apply x y = mapDecls (fDz,fE,fPz) x [] y
+
+fE :: [Ifce] -> [Decl] -> Expr -> (Expr,[Decl])
+fE _ dsigs (ECall z (ECons z1 ["TType"]) e2) = (ETType z $ toTType dsigs e2, [])
+fE _ _ e = (e,[])
+
+ {- where
   fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
   fD ifces dsigs d@(DSig _ _ _)   = [d]
   fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where

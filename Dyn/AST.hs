@@ -67,11 +67,12 @@ data Expr
   | EUnit  Pos                        -- ()           -- ()
   | EVar   Pos ID_Var                 -- (id)         -- a ; xs
   | ECons  Pos ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
-  | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
   | ETuple Pos [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
   | EFunc  Pos Type Ups ExpWhere      -- (type,ups,body)
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
+  | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
+  | ETType Pos TType
   deriving (Eq, Show)
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
