@@ -6,7 +6,6 @@ import Data.List    (find)
 
 import Dyn.AST
 import Dyn.Parser
-import qualified Dyn.Analyse as Ana
 
 -------------------------------------------------------------------------------
 
@@ -30,7 +29,7 @@ evalExpr env (EVar   z id)  = envRead env z id
 evalExpr env (EArg   z)     = envRead env z "..."
 evalExpr env (ECons  z hr)  = EData z hr (EUnit z)
 
-evalExpr env (EFunc  z tp ups bdy) = EFunc z tp (map f ups) bdy where
+evalExpr env (EFunc  z tp cs ups bdy) = EFunc z tp cs (map f ups) bdy where
   f (id,_) = (id, evalExpr env (EVar z id))
 
 evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
@@ -62,7 +61,7 @@ evalExpr env (ECall z f arg) =
     (e1@(EError _ _)      , _              ) -> e1
     (_                    , e2@(EError _ _)) -> e2
     ((EData z1 hr _)      , arg'           ) -> EData z1 hr arg'
-    ((EFunc _ _ ups f')   , arg'           ) -> evalExpWhere env' f' where
+    ((EFunc _ _ _ ups f') , arg'           ) -> evalExpWhere env' f' where
       env' = envWrite (ups++env) "..." arg'
     --(x,y) -> error $ show (x,y)
 
@@ -134,8 +133,7 @@ evalExpWhere env (ExpWhere (z, e, dcls)) =
 evalProg :: Bool -> Prog -> Expr
 evalProg shouldAnalyse prog =
   evalExpWhere [] $ ExpWhere (pz, EVar pz "main", map globToDecl glbs') where
-
-    Prog glbs' = (bool id Ana.all shouldAnalyse) prog
+    Prog glbs' = prog
 
 evalString :: Bool -> String -> String
 evalString shouldAnalyse input =

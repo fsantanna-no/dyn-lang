@@ -16,7 +16,6 @@ import Text.Parsec.Combinator (manyTill, eof, optional, many1, notFollowedBy, op
 
 import Dyn.AST
 import Dyn.Classes
-import qualified Dyn.Analyse as Ana
 
 toPos :: SourcePos -> (Int,Int)
 toPos pos = (sourceLine pos, sourceColumn pos)
@@ -242,7 +241,8 @@ expr_func :: Parser Expr
 expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
-  tp   <- option tz (tk_sym "::" *> type_)
+  (tp,cs) <- option (TAny,TCtrs [])
+                    (tk_sym "::" *> ((,) <$> type_ <*> (option (TCtrs []) ctrs)))
   ups  <- option [] $
             parensWith (tk_sym "{", tk_sym "}") $
               list (tk_sym ",") tk_var    -- {x}, {x,y}
@@ -251,7 +251,7 @@ expr_func = do
   void <- string ";"
   void <- optional $ try $ tk_key "func"
   spc
-  return $ EFunc pos tp (map (\id -> (id,EUnit pos)) ups) body
+  return $ EFunc pos tp cs (map (\id -> (id,EUnit pos)) ups) body
 
 expr_case :: Parser Expr
 expr_case = do
@@ -275,18 +275,11 @@ expr_parens = parens expr
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-type_ :: Parser Type
-type_ = do
-  pos <- toPos <$> getPosition
-  ttp <- ttype
-  cs  <- option [] $ try ctrs
-  return $ Type (pos, ttp, cs)
-
 ctrs :: Parser TCtrs
 ctrs = do
   void <- try $ tk_key "where"
   cs   <- (singleton <$> ctr) <|> (parens $ list (tk_sym ",") $ ctr)
-  return cs
+  return $ TCtrs cs
 
 ctr :: Parser (ID_Var,[ID_Ifce])
 ctr = do
@@ -297,43 +290,43 @@ ctr = do
 
 -------------------------------------------------------------------------------
 
-ttype :: Parser TType
-ttype = do
+type_ :: Parser Type
+type_ = do
   ttp <- try ttype_A <|> try ttype_D <|> try ttype_V <|> try ttype_0 <|>
          try ttype_parens <|> try ttype_N <|> ttype_F <?> "type"
   return ttp
 
-ttype_A :: Parser TType
+ttype_A :: Parser Type
 ttype_A = do
   void <- tk_sym "?"
   return TAny
 
-ttype_0 :: Parser TType
+ttype_0 :: Parser Type
 ttype_0 = do
   void <- tk_sym "("
   void <- tk_sym ")"
   return TUnit
 
-ttype_D :: Parser TType
+ttype_D :: Parser Type
 ttype_D = do
   hier <- tk_hier
   return $ TData hier {-(f ofs)-}
 
-ttype_N :: Parser TType
+ttype_N :: Parser Type
 ttype_N = do
-  ttps <- parens $ list (tk_sym ",") $ ttype
+  ttps <- parens $ list (tk_sym ",") $ type_
   return $ TTuple ttps
 
-ttype_F :: Parser TType
+ttype_F :: Parser Type
 ttype_F = do
   void <- tk_sym "("
-  inp  <- ttype
+  inp  <- type_
   void <- tk_sym "->"
-  out  <- ttype
+  out  <- type_
   void <- tk_sym ")"
   return $ TFunc inp out
 
-ttype_V :: Parser TType
+ttype_V :: Parser Type
 ttype_V = do
   ref <- option False $ do
           void <- try $ tk_key "ref"
@@ -341,10 +334,10 @@ ttype_V = do
   var <- tk_var
   return $ TVar var
 
-ttype_parens :: Parser TType
+ttype_parens :: Parser Type
 ttype_parens = do
   void <- tk_sym "("
-  tp   <- ttype
+  tp   <- type_
   void <- tk_sym ")"
   return tp
 
@@ -419,15 +412,15 @@ ifce = do
   cls  <- tk_ifce
   void <- tk_key "for"
   var  <- tk_var
-  cs   <- option [] ctrs
+  cs   <- option (TCtrs []) ctrs
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "interface"
   spc
   return $ let
-    f []                 = [(var, [])]
-    f [(id,l)] | id==var = [(var,  l)]
+    f (TCtrs [])                 = TCtrs [(var, [])]
+    f (TCtrs [(id,l)]) | id==var = TCtrs [(var,  l)]
     f _ = error $ "TODO: multiple vars or unmatching var"
    in
     Ifce (pos, cls, f cs, ds)
@@ -439,13 +432,13 @@ impl = do
   void <- tk_key "of"
   cls  <- tk_ifce
   void <- tk_key "for"
-  tp   <- type_
+  (tp,cs) <- (,) <$> type_ <*> (option (TCtrs []) ctrs)
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "implementation"
   spc
-  return $ Impl (pos, cls, tp, ds)
+  return $ Impl (pos, cls, tp, cs, ds)
 
 -------------------------------------------------------------------------------
 
@@ -476,4 +469,4 @@ parseToString :: Bool -> String -> String
 parseToString shouldAnalyse input =
   case parse input of
     (Left  err)  -> err
-    (Right prog) -> toString $ (bool id Ana.all shouldAnalyse) prog
+    (Right prog) -> toString prog

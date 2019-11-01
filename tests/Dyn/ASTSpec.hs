@@ -16,7 +16,7 @@ spec = do
 
   describe "declToString:" $ do
     it "a :: ?" $
-      toString (DSig pz "a" tz)
+      toString (DSig pz "a" TAny)
         `shouldBe` "a :: ?"
     it "a = b" $
       toString (DAtr pz (PWrite pz "a") (ExpWhere (pz, EVar pz "b", [])))
@@ -25,7 +25,7 @@ spec = do
       toString
         (DAtr pz (PWrite pz "a")
           (ExpWhere (pz, EVar pz "b",
-            [DSig pz "b" tz])))
+            [DSig pz "b" TAny])))
         `shouldBe` "a = b where\n  b :: ?\n;"
 
   describe "declToString:" $ do

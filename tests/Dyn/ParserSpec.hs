@@ -48,7 +48,7 @@ spec = do
         `shouldBe` Right (EUnit (1,2))
     it "func" $
       parse' expr "func :: () -> ();"
-        `shouldBe` Right (EFunc (1,1) (Type ((1,9), TUnit, [])) [] (ExpWhere ((1,15), EUnit (1,15),[])))
+        `shouldBe` Right (EFunc (1,1) TUnit (TCtrs []) [] (ExpWhere ((1,15), EUnit (1,15),[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"
@@ -82,10 +82,10 @@ spec = do
   describe "decl:" $ do
     it "x :: () = ()" $
       parse' decl "x :: () = ()"
-        `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, [])),DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,11), EUnit (1,11), []))]
+        `shouldBe` Right [DSig (1,1) "x" TUnit,DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,11), EUnit (1,11), []))]
     it "x :: ()" $
       parse' decl "x :: ()"
-        `shouldBe` Right [DSig (1,1) "x" (Type ((1,6), TUnit, []))]
+        `shouldBe` Right [DSig (1,1) "x" TUnit]
     it "x = ()" $
       parse' decl "x = ()"
         `shouldBe` Right [DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,5),  EUnit (1,5),  []))]

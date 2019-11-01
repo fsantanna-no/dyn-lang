@@ -17,7 +17,7 @@ instance IPos Expr where
   getPos (ECons  z _)     = z
   getPos (EData  z _ _)   = z
   getPos (ETuple z _)     = z
-  getPos (EFunc  z _ _ _) = z
+  getPos (EFunc  z _ _ _ _) = z
   getPos (ECall  z _ _)   = z
   getPos (EArg   z)       = z
   getPos (ECase  z _ _)   = z
@@ -48,10 +48,10 @@ instance IList Expr where
   fromList [x]    = x
   fromList (x:xs) = ETuple (getPos x) (x:xs)
 
-instance IList TType where
-  toList TUnit         = []
-  toList (TTuple ttps) = ttps
-  toList ttp           = [ttp]
+instance IList Type where
+  toList TUnit        = []
+  toList (TTuple tps) = tps
+  toList tp           = [tp]
 
   fromList x = error "TODO"
 
@@ -66,18 +66,6 @@ instance IList Patt where
 -------------------------------------------------------------------------------
 
 instance IString Type where
-  toString (Type (_,ttp,cs)) =
-    case cs of
-      [] -> toString ttp
-      l  -> toString ttp ++ " where (" ++ intercalate "," (map f l) ++ ")" where
-              f (var,[cls]) = var ++ " is " ++ cls
-              f (var,clss)  = var ++ " is (" ++ intercalate "," clss ++ ")"
-  toStringI _ _ = error "TODO"
-
-
--------------------------------------------------------------------------------
-
-instance IString TType where
   toString TAny             = "?"
   toString TUnit            = "()"
   toString (TVar   id)      = id
@@ -89,7 +77,15 @@ instance IString TType where
 
   toStringI _ _ = error "TODO"
 
--------------------------------------------------------------------------------
+instance IString TCtrs where
+  toString (TCtrs []) = ""
+  toString (TCtrs cs) = " where (" ++ intercalate "," (map f cs) ++ ")" where
+    f (var,[cls]) = var ++ " is " ++ cls
+    f (var,clss)  = var ++ " is (" ++ intercalate "," clss ++ ")"
+
+  toStringI _ _ = error "TODO"
+
+ -------------------------------------------------------------------------------
 
 instance IString Expr where
   toString expr = toStringI 0 expr
@@ -101,7 +97,7 @@ instance IString Expr where
   toStringI spc (ECons  _ h)           = intercalate "." h
   toStringI spc (EArg   _)             = "..."
   toStringI spc (ETuple _ es)          = "(" ++ intercalate "," (map toString es) ++ ")"
-  toStringI spc (EFunc  _ tp ups bd)   = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
+  toStringI spc (EFunc  _ tp cs ups bd)  = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
                                               toStringI (spc+2) bd ++ "\n" ++ rep spc ++ ";"
                                              where
                                               upsToString []  = ""
@@ -161,12 +157,12 @@ instance IString Prog where
 -------------------------------------------------------------------------------
 
 instance IType Expr where
-  toTType _  (EArg   _)     = TAny
-  toTType ds (EVar   _ id)  = ttp where Type (_,ttp,_) = dsigFind ds id
-  toTType _  (ECons  _ hr)  = TData hr
-  toTType ds (ETuple _ es)  = TTuple $ map (toTType ds) es
-  toTType ds (ECall  _ f _) = case toTType ds f of
+  toType _  (EArg   _)     = TAny
+  toType ds (EVar   _ id)  = dsigFind ds id
+  toType _  (ECons  _ hr)  = TData hr
+  toType ds (ETuple _ es)  = TTuple $ map (toType ds) es
+  toType ds (ECall  _ f _) = case toType ds f of
                                 TAny        -> TAny
                                 TFunc _ out -> out
                                 TData hr    -> TData hr
-  toTType _  e = error $ "toTType: " ++ toString e
+  toType _  e = error $ "toType: " ++ toString e

@@ -1,9 +1,25 @@
 module Dyn.Analyse where
 
 import Dyn.AST
+import Dyn.Parser (parse)
 import qualified Dyn.Type as Type
 import qualified Dyn.Ifce as Ifce
 import qualified Dyn.Poly as Poly
+
+-------------------------------------------------------------------------------
+
+parseToString :: Bool -> String -> String
+parseToString shouldAnalyse input =
+  case parse input of
+    (Left  err)  -> err
+    (Right prog) -> toString $ (bool id all shouldAnalyse) prog
+
+evalProg :: Bool -> Prog -> Expr
+evalProg shouldAnalyse prog =
+  evalExpWhere [] $ ExpWhere (pz, EVar pz "main", map globToDecl glbs') where
+    Prog glbs' = (bool id Ana.all shouldAnalyse) prog
+
+-------------------------------------------------------------------------------
 
 all :: Prog -> Prog
 all (Prog globs) =

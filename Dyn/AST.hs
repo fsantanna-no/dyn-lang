@@ -11,6 +11,7 @@ traceShowS v = traceShow (toString v) v
 traceShowSS vs = traceShow (concatMap (++"\n") $ map toString vs) vs
 
 type Pos = (Int,Int)
+pz :: Pos
 pz = (0,0)
 
 type ID_Var  = String
@@ -32,32 +33,27 @@ class IString a where
   toStringI :: Int -> a -> String
 
 class IType a where
-  toTType :: [Decl] -> a -> TType
+  toType :: [Decl] -> a -> Type
 
 -------------------------------------------------------------------------------
 
-newtype Type = Type (Pos, TType, TCtrs)
-  deriving (Eq,Show)
+type    TCtr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
+newtype TCtrs = TCtrs [TCtr]         -- [(a,[IEq,IOrd,IShow]), (b,[...])]
+  deriving (Show,Eq)
 
-cz = []
-tz = Type (pz, TAny, cz)
-
-type TCtr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
-type TCtrs = [TCtr]               -- [(a,[IEq,IOrd,IShow]), (b,[...])]
-
-data TType = TAny
-           | TUnit
-           | TVar   ID_Var
-           | TData  ID_Hier {-[TType]-}       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
-           | TTuple [TType]               -- (len >= 2)
-           | TFunc  {-FuncType-} TType TType  -- inp out
+data Type = TAny
+          | TUnit
+          | TVar   ID_Var
+          | TData  ID_Hier {-[Type]-}       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
+          | TTuple [Type]               -- (len >= 2)
+          | TFunc  {-FuncType-} Type Type  -- inp out
   deriving (Eq,Show)
 
 ctrsToMap :: TCtrs -> M.Map ID_Var (S.Set ID_Ifce)
-ctrsToMap cs = M.map S.fromAscList $ M.fromAscList cs
+ctrsToMap (TCtrs cs) = M.map S.fromAscList $ M.fromAscList cs
 
 ctrsFromMap :: M.Map ID_Var (S.Set ID_Ifce) -> TCtrs
-ctrsFromMap csmap = map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
+ctrsFromMap csmap = TCtrs $ map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
 
 -------------------------------------------------------------------------------
 
@@ -68,11 +64,11 @@ data Expr
   | EVar   Pos ID_Var                 -- (id)         -- a ; xs
   | ECons  Pos ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | ETuple Pos [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Pos Type Ups ExpWhere      -- (type,ups,body)
+  | EFunc  Pos Type TCtrs Ups ExpWhere -- (type,ups,body)
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
-  | ETType Pos TType
+  | ETType Pos Type
   deriving (Eq, Show)
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
@@ -103,7 +99,7 @@ data Decl = DSig Pos ID_Var Type
 newtype Ifce = Ifce (Pos, ID_Ifce, TCtrs, [Decl])
   deriving (Eq, Show)
 
-newtype Impl = Impl (Pos, ID_Ifce, Type, [Decl])
+newtype Impl = Impl (Pos, ID_Ifce, Type, TCtrs, [Decl])
   deriving (Eq, Show)
 
 newtype Prog = Prog [Glob]
@@ -136,7 +132,7 @@ globFromDecl decl = GDecl decl
 
 dsigFind :: [Decl] -> ID_Var -> Type
 dsigFind dsigs id = case L.find f dsigs of
-                      Nothing            -> Type (pz,TAny,cz)
+                      Nothing            -> TAny
                       Just (DSig _ _ tp) -> tp
                     where
                       f :: Decl -> Bool
@@ -186,7 +182,7 @@ mapExpr :: MapFs -> [Ifce] -> [Decl] -> Expr -> ([Decl], Expr)
 mapExpr fs@(_,fE,_) ifces dsigs e = (dsE'++dsE'', e'') where
   (dsE'',e'') = fE ifces dsigs e'
   (dsE', e')  = aux e
-  aux (EFunc  z tp ups whe) = ([], EFunc z tp ups $ mapWhere fs ifces dsigs whe)
+  aux (EFunc  z tp cs ups whe) = ([], EFunc z tp cs ups $ mapWhere fs ifces dsigs whe)
   aux (EData  z hr e)       = (dsE', EData z hr e') where
                                 (dsE',e') = mapExpr fs ifces dsigs e
   aux (ETuple z es)         = (concat dsEs', ETuple z es') where
