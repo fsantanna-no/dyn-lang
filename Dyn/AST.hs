@@ -145,10 +145,10 @@ dsigFind dsigs id = case L.find f dsigs of
 -------------------------------------------------------------------------------
 
 type MapFs = ( ([Ifce]->[Decl]->Decl->[Decl]),
-               ([Ifce]->[Decl]->Expr->(Expr,[Decl])),
+               ([Ifce]->[Decl]->Expr->([Decl],Expr)),
                ([Ifce]->[Decl]->Patt->Patt) )
 fDz _ _ d = [d]
-fEz _ _ e = (e,[])
+fEz _ _ e = ([],e)
 fPz _ _ p = p
 
 mapDecls :: MapFs -> [Ifce] -> [Decl] -> [Decl] -> [Decl]
@@ -160,44 +160,44 @@ mapDecl :: MapFs -> [Ifce] -> [Decl] -> Decl -> [Decl]
 mapDecl fs@(fD,_,_) ifces dsigs decl@(DSig _ _ _) = fD ifces dsigs decl
 mapDecl fs@(fD,_,_) ifces dsigs (DAtr z pat whe)  = (fD ifces dsigs $ DAtr z pat' whe') ++ dsPat'
   where
-    (pat',dsPat') = mapPatt  fs ifces dsigs pat
+    (dsPat',pat') = mapPatt  fs ifces dsigs pat
     whe'          = mapWhere fs ifces dsigs whe
 
 mapWhere :: MapFs -> [Ifce] -> [Decl] -> ExpWhere -> ExpWhere
 mapWhere fs ifces dsigs (ExpWhere (z,e,ds)) = ExpWhere (z, e', dsE'++ds')
   where
     dsigs'    = dsigs ++ filter isDSig ds
-    (e',dsE') = mapExpr  fs ifces dsigs' e
+    (dsE',e') = mapExpr  fs ifces dsigs' e
     ds'       = mapDecls fs ifces dsigs' ds
 
-mapPatt :: MapFs -> [Ifce] -> [Decl] -> Patt -> (Patt, [Decl])
-mapPatt fs@(_,_,fP) ifces dsigs p = (fP ifces dsigs p', dsP') where
-  (p',dsP') = aux p
-  aux (PRead  z e)     = (PRead  z $ e', dsE') where
-                          (e',dsE') = mapExpr fs ifces dsigs e
-  aux (PTuple z ps)    = (PTuple z ps', concat dsPs') where
-                          (ps',dsPs') = unzip $ map (mapPatt fs ifces dsigs) ps
-  aux (PCall  z p1 p2) = (PCall  z p1' p2', dsP1'++dsP2') where
-                          (p1',dsP1') = mapPatt fs ifces dsigs p1
-                          (p2',dsP2') = mapPatt fs ifces dsigs p2
-  aux p                = (p, [])
+mapPatt :: MapFs -> [Ifce] -> [Decl] -> Patt -> ([Decl], Patt)
+mapPatt fs@(_,_,fP) ifces dsigs p = (dsP', fP ifces dsigs p') where
+  (dsP',p') = aux p
+  aux (PRead  z e)     = (dsE', PRead  z $ e') where
+                          (dsE',e') = mapExpr fs ifces dsigs e
+  aux (PTuple z ps)    = (concat dsPs', PTuple z ps') where
+                          (dsPs',ps') = unzip $ map (mapPatt fs ifces dsigs) ps
+  aux (PCall  z p1 p2) = (dsP1'++dsP2', PCall  z p1' p2') where
+                          (dsP1',p1') = mapPatt fs ifces dsigs p1
+                          (dsP2',p2') = mapPatt fs ifces dsigs p2
+  aux p                = ([], p)
 
-mapExpr :: MapFs -> [Ifce] -> [Decl] -> Expr -> (Expr, [Decl])
-mapExpr fs@(_,fE,_) ifces dsigs e = (e'', dsE'++dsE'') where
-  (e'',dsE'') = fE ifces dsigs e'
-  (e', dsE') = aux e
-  aux (EFunc  z tp ups whe) = (EFunc z tp ups $ mapWhere fs ifces dsigs whe, [])
-  aux (EData  z hr e)       = (EData z hr e', dsE') where
-                                (e',dsE') = mapExpr fs ifces dsigs e
-  aux (ETuple z es)         = (ETuple z es', concat dsEs') where
-                                (es',dsEs') = unzip $ map (mapExpr fs ifces dsigs) es
-  aux (ECall  z e1 e2)      = (ECall  z e1' e2', dsE1'++dsE2') where
-                                (e1',dsE1') = mapExpr fs ifces dsigs e1
-                                (e2',dsE2') = mapExpr fs ifces dsigs e2
-  aux (ECase  z e l)        = (ECase z e' l', dsE'++concat dsPs') where
-                                (e', dsE')  = mapExpr fs ifces dsigs e
+mapExpr :: MapFs -> [Ifce] -> [Decl] -> Expr -> ([Decl], Expr)
+mapExpr fs@(_,fE,_) ifces dsigs e = (dsE'++dsE'', e'') where
+  (dsE'',e'') = fE ifces dsigs e'
+  (dsE', e')  = aux e
+  aux (EFunc  z tp ups whe) = ([], EFunc z tp ups $ mapWhere fs ifces dsigs whe)
+  aux (EData  z hr e)       = (dsE', EData z hr e') where
+                                (dsE',e') = mapExpr fs ifces dsigs e
+  aux (ETuple z es)         = (concat dsEs', ETuple z es') where
+                                (dsEs',es') = unzip $ map (mapExpr fs ifces dsigs) es
+  aux (ECall  z e1 e2)      = (dsE1'++dsE2', ECall  z e1' e2') where
+                                (dsE1',e1') = mapExpr fs ifces dsigs e1
+                                (dsE2',e2') = mapExpr fs ifces dsigs e2
+  aux (ECase  z e l)        = (dsE'++concat dsPs', ECase z e' l') where
+                                (dsE', e')  = mapExpr fs ifces dsigs e
                                 (ps, ws)    = unzip l
-                                (ps',dsPs') = unzip $ map (mapPatt fs ifces dsigs) ps
+                                (dsPs',ps') = unzip $ map (mapPatt fs ifces dsigs) ps
                                 ws'         = map (mapWhere fs ifces dsigs) ws
                                 l'          = zip ps' ws'
-  aux e                     = (e, [])
+  aux e                     = ([], e)

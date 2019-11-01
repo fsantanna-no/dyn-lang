@@ -18,7 +18,7 @@ poly x y = mapDecls (fD,fE tz,fPz) x [] y where
   fD ifces dsigs d@(DSig _ _ _)   = [d]
   fD ifces dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
     d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
-    (e2',dsE2') = fE (pattToType dsigs pat1) ifces dsigs e2
+    (dsE2',e2') = fE (pattToType dsigs pat1) ifces dsigs e2
 
     pattToType :: [Decl] -> Patt -> Type
     pattToType dsigs (PWrite _ id) = dsigFind dsigs id
@@ -29,10 +29,10 @@ poly x y = mapDecls (fD,fE tz,fPz) x [] y where
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-fE :: Type -> [Ifce] -> [Decl] -> Expr -> (Expr,[Decl])
+fE :: Type -> [Ifce] -> [Decl] -> Expr -> ([Decl],Expr)
 
 -- pat::Bool = id(maximum)
-fE xtp ifces dsigs (EVar z id) = (EVar z id', ds') where
+fE xtp ifces dsigs (EVar z id) = (ds', EVar z id') where
 
   (id',ds') =
     if null cs then
@@ -54,7 +54,7 @@ fE xtp ifces dsigs (EVar z id) = (EVar z id', ds') where
 -------------------------------------------------------------------------
 
 -- pat1::B = id2(neq) e2::(B,B)
-fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', ds2') where
+fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2') e2') where
 
   (id2',e2',ds2') =
     if null cs2 || err then
@@ -106,7 +106,7 @@ fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', d
             -- ["daIEq",...]
             dicts = map (\ifc -> "d"++tvar2++ifc) ifc_ids
 
-fE _ _ _ e = (e, [])
+fE _ _ _ e = ([], e)
 
 -- lt (x,y)   // ifce call to IOrd
 -- f  (x,y)   // gen  call that uses IOrd inside it
