@@ -84,7 +84,8 @@ fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', d
   -- the first execution, which fails, must keep `e2` the same
   -- (will fix when fE is called only by parents and once)
   (xhr,err) = case ttpMatch (TTuple [inp2,out2])
-                      ({-traceShowX (id2,toString e2,inp2,out2) $-} TTuple [toTType dsigs e2,xttp])
+                      ({-traceShowX (id2,toString e2,inp2,out2) $-}
+                        TTuple [toTType dsigs e2,xttp])
         of
           [("a", TData xhr)] -> (Just xhr, False)
           [("a", TVar  "a")] -> (Nothing,  False)
@@ -148,17 +149,6 @@ declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-
-toTType :: [Decl] -> Expr -> TType
-toTType _  (EArg   _)     = TAny
-toTType ds (EVar   _ id)  = ttp where Type (_,ttp,_) = dsigFind ds id
-toTType _  (ECons  _ hr)  = TData hr
-toTType ds (ETuple _ es)  = TTuple $ map (toTType ds) es
-toTType ds (ECall  _ f _) = case toTType ds f of
-                              TAny        -> TAny
-                              TFunc _ out -> out
-                              TData hr    -> TData hr
-toTType _  e = error $ "toTType: " ++ toString e
 
 toVars :: TType -> [ID_Var]
 toVars ttp = S.toAscList $ aux ttp where

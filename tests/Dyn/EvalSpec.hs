@@ -124,6 +124,6 @@ spec = do
       it "capitalize" $
         evalString True ("main = (capitalize Char.CC, capitalize Char.Cc)"++prelude)
            `shouldBe` "(Char.CC,Char.CC)"
-      it "XXX: nextlet" $
+      it "nextlet" $
         evalString True ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
            `shouldBe` "(Char.Dd,Char.AA)"

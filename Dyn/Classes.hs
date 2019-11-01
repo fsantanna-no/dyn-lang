@@ -155,3 +155,17 @@ instance IString Prog where
                           f (GIfce ifce) = error "TODO"
                           f (GImpl impl) = error "TODO"
   toStringI _ _ = error "TODO"
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+instance IType Expr where
+  toTType _  (EArg   _)     = TAny
+  toTType ds (EVar   _ id)  = ttp where Type (_,ttp,_) = dsigFind ds id
+  toTType _  (ECons  _ hr)  = TData hr
+  toTType ds (ETuple _ es)  = TTuple $ map (toTType ds) es
+  toTType ds (ECall  _ f _) = case toTType ds f of
+                                TAny        -> TAny
+                                TFunc _ out -> out
+                                TData hr    -> TData hr
+  toTType _  e = error $ "toTType: " ++ toString e

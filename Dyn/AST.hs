@@ -31,6 +31,9 @@ class IString a where
   toString  :: a -> String
   toStringI :: Int -> a -> String
 
+class IType a where
+  toTType :: [Decl] -> a -> TType
+
 -------------------------------------------------------------------------------
 
 newtype Type = Type (Pos, TType, TCtrs)
