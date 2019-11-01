@@ -110,24 +110,28 @@ implToDecls ifces impls (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = ctrDicts++[dic
 
     getTp (Impl (_,_,tp,_)) = tp                -- Xxx
 
-    -- dXxxIOrd = func -> dIAaaIOrd (dXxxIAaa ()) ;
+    -- dXxxIOrd = dIAaaIOrd dXxxIAaa
     -- tp = Xxx
     toDict :: Type -> Decl
-    toDict tp = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,f,[])) where
-                  f = EFunc z tz [] (ExpWhere (z,d,[]))
-                  d = ECall z (EVar z $ "d"++head ctr++ifc)
-                        (ECall z (EVar z $ "d"++toString' tp++head ctr) (EUnit z))
+    toDict tp = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,e,[])) where
+                  e = ECall z (EVar z $ "d"++head ctr++ifc)
+                        (EVar z $ "d"++toString' tp++head ctr)
 
-  -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=<...> daIXxx=...;
-  -- func b/c of HKT that needs a closure with parametric dictionary
-  dict = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,f,[])) where
-          f = EFunc z tz [] (ExpWhere (z,d,decls'++[ups']))
-          d = ECall z (ECons z ["Dict",ifc])
-                      (fromList $ map (EVar z) $ ifceToDeclIds ifce)
+  -- dIEqBool = Dict.IEq (eq,neq) where eq=<...> daIXxx=... ;
+  dict = DAtr z (PWrite z ("d"++toString' tp++ifc)) d where
+          d = case imp_ids of
+                []        -> ExpWhere (z,d1,decls')
+                otherwise -> ExpWhere (z,d2,[])
 
-  -- {daIXxx} // implementation of IOrd for a where a is IXxx
-  ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) imp_ids)
-                (ExpWhere (z,EArg z,[]))
+          d1 = ECall z (ECons z ["Dict",ifc])
+                       (fromList $ map (EVar z) $ ifceToDeclIds ifce)
+
+          -- func b/c needs a closure with parametric dictionary
+          d2 = EFunc z tz [] $ ExpWhere (z,d1,decls'++[ups'])
+
+          -- {daIXxx} // implementation of IOrd for a where a is IXxx
+          ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) imp_ids)
+                    (ExpWhere (z,EArg z,[]))
 
   toString' (Type (_, TData hr, _      )) = concat hr
   toString' (Type (_, TVar _,   [(_,l)])) = concat l

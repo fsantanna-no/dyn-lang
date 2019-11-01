@@ -94,7 +94,7 @@ fE xtp ifces dsigs (ECall z1 (EVar z2 id2) e2) = (ECall z1 (EVar z2 id2') e2', d
   -- TODO: pat1 vs out2
 
   -- eq(dBoolIEq,...)
-  e2T'' = ETuple z1 [(fromList $ map (\d-> ECall z1 (EVar z1 d) (EUnit z1)) dicts), e2]
+  e2T'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2]
           where
             -- ["dBoolIEq",...]
             dicts = map (\ifc -> "d"++concat (fromJust xhr)++ifc) ifc_ids
@@ -140,7 +140,7 @@ declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
     f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
     f (ifc,dict,dcls) = ds ++ [d] where
       d  = DAtr z (PCall z (PCons z ["Dict",ifc]) (fromList $ map (PWrite z) $ map (posid z) dcls))
-                   (ExpWhere (z, ECall z (EVar z dict) (EUnit z), []))
+                   (ExpWhere (z, EVar z dict, []))
       ds = map g dcls where
             g id = DSig z (posid z id) $ mapType f $ dsigFind dsigs id where
                     f (TVar "a") = TData xhr
