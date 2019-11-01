@@ -1,15 +1,15 @@
-- poli
+- TIPOS!
+    - ir tirando as anotacoes de tipos
+    - necessario p/ TODO de poly
+- poly
     - TODO em Poly:
-        - indireto
-        - impl w/ extra constraint
+        - passando poly fc para concrete precisa de closure
+            - precisa da parte de tipos para comparar a f passada com a f esperada
     - multiplas variaveis
 
 - voltar ao Book
     - terminei TODO:typeclass
         - achar o proximo
-
-- TIPOS!
-    - ir tirando as anotacoes de tipos
 
 - stack trace
 

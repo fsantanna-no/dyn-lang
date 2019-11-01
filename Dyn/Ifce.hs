@@ -32,13 +32,13 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-inline :: [Ifce] -> [Glob] -> [Decl]
-inline ifces globs = concatMap globToDecl globs where
+inline :: [Ifce] -> [Impl] -> [Glob] -> [Decl]
+inline ifces impls globs = concatMap globToDecl globs where
 
   globToDecl :: Glob -> [Decl]
   globToDecl (GDecl dcl) = declToDecls ifces dcl
   globToDecl (GIfce ifc) = ifceToDecls ifces ifc
-  globToDecl (GImpl imp) = implToDecls ifces imp
+  globToDecl (GImpl imp) = implToDecls ifces impls imp
 
   declToDecls ifces dcl = mapDecl (fD,fEz,fPz) ifces [] dcl where
 
@@ -90,8 +90,33 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
 --  dIEqBool = Dict.IEq (eq,neq) where    -- : declare instance dict with methods
 --              <...>                     -- :   with nested impls to follow only visible here
 
-implToDecls :: [Ifce] -> Impl -> [Decl]
-implToDecls ifces (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = [dict] where
+implToDecls :: [Ifce] -> [Impl] -> Impl -> [Decl]
+implToDecls ifces impls (Impl (z,ifc,tp@(Type (_,_,cs)),decls)) = ctrDicts++[dict] where
+
+  -- implementation of IOrd for a where a is IAaa with
+  -- implementation of IAaa for Xxx with
+  -- find all implementations of IAaa ([IXxx,...])
+  ctrDicts :: [Decl]
+  ctrDicts = map toDict $ map getTp $ concatMap findImpls ctr where
+    ctr :: [ID_Ifce]
+    ctr = case cs of
+            []            -> []
+            [("a",[ifc])] -> [ifc]              -- IAaa
+
+    -- find all implementations of IAaa
+    findImpls :: ID_Ifce -> [Impl]
+    findImpls ifc1 = filter isSame impls where  -- IAaa == IAaa
+                      isSame (Impl (_,ifc2,_,_)) = (ifc1 == ifc2)
+
+    getTp (Impl (_,_,tp,_)) = tp                -- Xxx
+
+    -- dXxxIOrd = func -> dIAaaIOrd (dXxxIAaa ()) ;
+    -- tp = Xxx
+    toDict :: Type -> Decl
+    toDict tp = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,f,[])) where
+                  f = EFunc z tz [] (ExpWhere (z,d,[]))
+                  d = ECall z (EVar z $ "d"++head ctr++ifc)
+                        (ECall z (EVar z $ "d"++toString' tp++head ctr) (EUnit z))
 
   -- dIEqBool = func -> Dict.IEq (eq,neq) where eq=<...> daIXxx=...;
   -- func b/c of HKT that needs a closure with parametric dictionary

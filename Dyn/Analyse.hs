@@ -7,16 +7,24 @@ import qualified Dyn.Poly as Poly
 all :: Prog -> Prog
 all (Prog globs) =
   Prog $
-    map globFromDecl      $
-    Poly.poly   ifces []  $ --traceShowSS $
-    Ifce.inline ifces     $ -- [Decl] w/o Ifce/Impl/Gens
+    map globFromDecl        $
+    Poly.poly   ifces []    $ --traceShowSS $
+    Ifce.inline ifces impls $ -- [Decl] w/o Ifce/Impl/Gens
     globs
   where
     ifces :: [Ifce]
-    ifces = globsToIfcs globs
+    ifces = globsToIfces globs
+    impls :: [Impl]
+    impls = globsToImpls globs
 
-    globsToIfcs :: [Glob] -> [Ifce]
-    globsToIfcs globs = map g $ filter f globs where
+    globsToIfces :: [Glob] -> [Ifce]
+    globsToIfces globs = map g $ filter f globs where
                           f (GIfce ifc) = True
                           f _           = False
                           g (GIfce ifc) = ifc
+
+    globsToImpls :: [Glob] -> [Impl]
+    globsToImpls globs = map g $ filter f globs where
+                          f (GImpl ifc) = True
+                          f _           = False
+                          g (GImpl ifc) = ifc

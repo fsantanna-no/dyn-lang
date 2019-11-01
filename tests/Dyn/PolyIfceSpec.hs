@@ -177,10 +177,10 @@ main = (f (Bool.True, Bool.False),
 main = (ff1 (lte, (Bool.True,Bool.False)),
         ff2 (gte, (Bool.True,Bool.True )) ) where           -- gte must become closure
   ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
-  ff1 = func -> f (x,y) where x::a y::a (f,x,y)=... ;;
+  ff1 = func -> f (x,y) where x::a y::a (f,(x,y))=... ;;
 
   ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closure to hold actual dict
-  ff2 = func -> f (x,y) where x::a y::a (f,x,y)=... ;;
+  ff2 = func -> f ps where (f,ps)=... ;;
 ;
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
@@ -190,10 +190,18 @@ main = (ff1 (lte, (Bool.True,Bool.False)),
       evalString True ([r|
 main = (lt (Xxx.True,Xxx.False), gt (Xxx.True,Xxx.False))
 
+implementation of IEq for a where a is IAaa with
+  eq = func :: ((a,a) -> Bool) ->
+    matches ...
+  ;
+;
+
 implementation of IOrd for a where a is IAaa with
   lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
     lt (f x, f y) where
+      x :: a
+      y :: a
       (x,y) = ...
     ;
   ;
@@ -212,7 +220,7 @@ implementation of IAaa for Xxx with
     ;
   ;
 ;
-|] ++ bool_iord ++ bool ++ iord ++ ieq)
+|] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq ++ std)
         `shouldBe` "(Bool.False,Bool.True)"
 
 {-
