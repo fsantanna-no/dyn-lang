@@ -79,9 +79,14 @@ instance IString Type where
 
 instance IString Ctrs where
   toString (Ctrs []) = ""
+  toString (Ctrs cs) = " where (" ++ f cs ++ ")" where
+    f [ifc] = "a" ++ " is " ++ ifc
+    f ifcs  = "a" ++ " is (" ++ intercalate "," ifcs ++ ")"
+{-
   toString (Ctrs cs) = " where (" ++ intercalate "," (map f cs) ++ ")" where
     f (var,[cls]) = var ++ " is " ++ cls
     f (var,clss)  = var ++ " is (" ++ intercalate "," clss ++ ")"
+-}
 
   toStringI _ _ = error "TODO"
 

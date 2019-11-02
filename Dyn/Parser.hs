@@ -279,11 +279,13 @@ ctrs :: Parser Ctrs
 ctrs = do
   void <- try $ tk_key "where"
   cs   <- (singleton <$> ctr) <|> (parens $ list (tk_sym ",") $ ctr)
-  return $ Ctrs cs
+  let [("a",ifcs)] = cs
+  return $ Ctrs ifcs
 
 ctr :: Parser (ID_Var,[ID_Ifce])
 ctr = do
   var  <- tk_var
+  guard (var == "a")
   void <- tk_key "is"
   ifcs <- (singleton <$> tk_ifce) <|> (parens $ list (tk_sym ",") $ tk_ifce)
   return (var,ifcs)
@@ -412,18 +414,22 @@ ifce = do
   cls  <- tk_ifce
   void <- tk_key "for"
   var  <- tk_var
+  guard (var == "a")
   cs   <- option (Ctrs []) ctrs
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "interface"
   spc
-  return $ let
+  let
+    f (Ctrs []) = Ctrs []
+    f (Ctrs l)  = Ctrs l
+{-
     f (Ctrs [])                 = Ctrs [(var, [])]
     f (Ctrs [(id,l)]) | id==var = Ctrs [(var,  l)]
     f _ = error $ "TODO: multiple vars or unmatching var"
-   in
-    Ifce (pos, cls, f cs, ds)
+-}
+  return $ Ifce (pos, cls, f cs, ds)
 
 impl :: Parser Impl
 impl = do

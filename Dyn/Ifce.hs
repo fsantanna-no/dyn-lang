@@ -36,23 +36,9 @@ inline :: [Ifce] -> [Impl] -> [Glob] -> [Decl]
 inline ifces impls globs = concatMap globToDecl globs where
 
   globToDecl :: Glob -> [Decl]
-  globToDecl (GDecl dcl) = declToDecls ifces dcl
+  globToDecl (GDecl dcl) = mapDecl (fD,fEz,fPz) ifces cz [] dcl
   globToDecl (GIfce ifc) = ifceToDecls ifces ifc
   globToDecl (GImpl imp) = implToDecls ifces impls imp
-
-  declToDecls ifces dcl = mapDecl (fD,fEz,fPz) ifces [] dcl where
-
-    -- f :: ((a,a) -> Bool) where a is IOrd
-
-    fD :: [Ifce] -> [Decl] -> Decl -> [Decl]
-
-    fD ifces dsigs d@(DAtr z pat@(PWrite _ id) whe) =
-      case ctrs of
-        []            -> [d]   -- no constraints on declaration
-        [("a",[ifc])] -> [expandDecl ifces (ifc,[]) d]
-        otherwise     -> error $ "TODO: multiple vars/ctrs"
-
-    fD _ _ d = [d]
 
 -------------------------------------------------------------------------------
 
@@ -61,7 +47,7 @@ inline ifces impls globs = concatMap globToDecl globs where
 --  <...>                    -- : modify nested impls which become globals
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
+ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
 
   -- dIEq = Dict.IEq (eq,neq)
   -- (only if all methods are implemented)
@@ -75,7 +61,10 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = map (expandDecl ifces (ifc_id,[])) decls
+  decls' = mapDecl (fD,fEz,fPz) ifces ctrs' [] dcl where
+            ctrs' = Ctrs $ ("a", ifcesSups ifces [ifc_id])         : cs3
+
+            .
 
 -------------------------------------------------------------------------------
 
@@ -91,11 +80,7 @@ implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
   -- implementation of IAaa for Xxx with
   -- find all implementations of IAaa ([IXxx,...])
   ctrDicts :: [Decl]
-  ctrDicts = map toDict $ map getTp $ concatMap findImpls ctr where
-    ctr :: [ID_Ifce]
-    ctr = case ctrs of
-            []            -> []
-            [("a",[ifc])] -> [ifc]              -- IAaa
+  ctrDicts = map toDict $ map getTp $ concatMap findImpls imp_ids
 
     -- find all implementations of IAaa
     findImpls :: ID_Ifce -> [Impl]
@@ -128,13 +113,13 @@ implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
                     (ExpWhere (z,EArg z,[]))
 
   toString' (TData hr) = concat hr
-  toString' (TVar _)   = concat l where [(_,l)]=ctrs
+  toString' (TVar _)   = concat l where [(_,l)]=cs
 
   -- eq = <...>
   decls' = map (expandDecl ifces (id,imp_ids)) decls where
             Ifce (_,id,_,_) = ifce    -- id:  from interface
 
-  imp_ids = case ctrs of          -- ids: from instance constraints
+  imp_ids = case cs of          -- ids: from instance constraints
               []      -> []
               [(_,l)] -> l
               _       -> error "TODO: multiple vars"

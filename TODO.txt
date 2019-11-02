@@ -1,6 +1,5 @@
+- map include ctrs
 - remove poly.map
-- TCtrs -> Ctrs
-- Inverter Type/TCtrs -> TCtrs/Type
 - TIPOS!
     - ir tirando as anotacoes de tipos
     - necessario p/ TODO de poly
