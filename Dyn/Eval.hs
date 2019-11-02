@@ -130,13 +130,13 @@ evalExpWhere env (ExpWhere (z, e, dcls)) =
 
 -------------------------------------------------------------------------------
 
-evalProg :: Bool -> Prog -> Expr
-evalProg shouldAnalyse prog =
+evalProg :: Prog -> Expr
+evalProg prog =
   evalExpWhere [] $ ExpWhere (pz, EVar pz "main", map globToDecl glbs') where
     Prog glbs' = prog
 
-evalString :: Bool -> String -> String
-evalString shouldAnalyse input =
+evalString :: String -> String
+evalString input =
   case parse input of
     Left  err  -> err
-    Right prog -> toString $ evalProg shouldAnalyse prog
+    Right prog -> toString $ evalProg prog

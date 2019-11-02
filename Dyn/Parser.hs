@@ -471,8 +471,8 @@ parse' rule input =
     (Right v) -> Right v
     (Left  v) -> Left (show v)
 
-parseToString :: Bool -> String -> String
-parseToString shouldAnalyse input =
+parseToString :: String -> String
+parseToString input =
   case parse input of
     (Left  err)  -> err
     (Right prog) -> toString prog
