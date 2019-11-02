@@ -59,12 +59,12 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-  describe "HKT" $ do
+  describe "impl w/ extra ctrs" $ do
 
     it "implementation of IEq for a where a is IXxx" $
       evalString False ([r|
 main = eq (Dict.IEq (eq,neq),Xxx,Xxx) where
-  Dict.IEq (eq,neq) = ieq_ixxx dixxx_xxx      -- higher-kinded types (HKT)?
+  Dict.IEq (eq,neq) = ieq_ixxx dixxx_xxx
 ;
 
 ieq_ixxx = func -> -- ixxx -> ieq
