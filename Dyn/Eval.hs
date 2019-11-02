@@ -136,7 +136,10 @@ evalProg prog =
     Prog glbs' = prog
 
 evalString :: String -> String
-evalString input =
+evalString input = evalStringF Prelude.id input
+
+evalStringF :: (Prog->Prog) -> String -> String
+evalStringF f input =
   case parse input of
     Left  err  -> err
-    Right prog -> toString $ evalProg prog
+    Right prog -> toString $ evalProg $ f prog
