@@ -111,7 +111,7 @@ instance IString Expr where
       f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString True pat ++ " -> " ++ toStringI (spc+2) whe
   toStringI spc (EData  _ h (EUnit _)) = intercalate "." h
   toStringI spc (EData  _ h st)        = "(" ++ intercalate "." h ++ " " ++ toString st ++ ")"
-  toStringI spc (ETType _ ttp)         = "(TType " ++ toString ttp ++ ")"
+  toStringI spc (EType  _ ttp)         = "(Type " ++ toString ttp ++ ")"
   --toStringI e                    = error $ show e
 
 -------------------------------------------------------------------------------
