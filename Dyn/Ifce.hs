@@ -1,4 +1,4 @@
-module Dyn.Ifce where
+module Dyn.Ifce (apply,evalString,parseToString) where
 
 import Debug.Trace
 import Data.Bool                (bool)
@@ -7,6 +7,42 @@ import qualified Data.List as L (find, sort)
 
 import Dyn.AST
 import Dyn.Classes
+import qualified Dyn.Parser as P
+import qualified Dyn.Eval   as E
+
+-------------------------------------------------------------------------------
+
+apply :: Prog -> ([Ifce], Prog)
+apply (Prog globs) = (ifces,prog) where
+  prog = Prog $
+          map globFromDecl   $
+          inline ifces impls $  -- [Decl] w/o Ifce/Impl/Gens
+          globs
+
+  ifces :: [Ifce]
+  ifces = globsToIfces globs
+  impls :: [Impl]
+  impls = globsToImpls globs
+
+  globsToIfces :: [Glob] -> [Ifce]
+  globsToIfces globs = map g $ filter f globs where
+                        f (GIfce ifc) = True
+                        f _           = False
+                        g (GIfce ifc) = ifc
+
+  globsToImpls :: [Glob] -> [Impl]
+  globsToImpls globs = map g $ filter f globs where
+                        f (GImpl ifc) = True
+                        f _           = False
+                        g (GImpl ifc) = ifc
+
+evalString :: String -> String
+evalString input = E.evalStringF f input where
+                    f prog = prog' where (_,prog') = apply prog
+
+parseToString :: String -> String
+parseToString input = P.parseToStringF f input where
+                        f prog = prog' where (_,prog') = apply prog
 
 -------------------------------------------------------------------------------
 
@@ -25,20 +61,22 @@ ifcesSups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
 ifcesSups ifces []  = []
 ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
                         ids' = concatMap (f . (ifceFind ifces)) ids
-                        f (Ifce (_,ifc,Ctrs [],     _)) = []
-                        f (Ifce (_,ifc,Ctrs [(_,l)],_)) = l
+                        f (Ifce (_,_,Ctrs l,_)) = l
+{-
+                        f (Ifce (_,ifc,Ctrs [],_)) = []
+                        f (Ifce (_,ifc,Ctrs l, _)) = l
                         f _ = error $ "TODO: multiple constraints"
+-}
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 inline :: [Ifce] -> [Impl] -> [Glob] -> [Decl]
-inline ifces impls globs = concatMap globToDecl globs where
-
-  globToDecl :: Glob -> [Decl]
-  globToDecl (GDecl dcl) = mapDecl (fD,fEz,fPz) ifces cz [] dcl
-  globToDecl (GIfce ifc) = ifceToDecls ifces ifc
-  globToDecl (GImpl imp) = implToDecls ifces impls imp
+inline ifces impls globs = concatMap f globs where
+                            f :: Glob -> [Decl]
+                            f (GDecl dcl) = traceShow (toString dcl) $ mapDecl (fD,fEz,fPz) ifces cz [] dcl
+                            f (GIfce ifc) = ifceToDecls ifces ifc
+                            f (GImpl imp) = implToDecls ifces impls imp
 
 -------------------------------------------------------------------------------
 
@@ -61,10 +99,8 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = mapDecl (fD,fEz,fPz) ifces ctrs' [] dcl where
-            ctrs' = Ctrs $ ("a", ifcesSups ifces [ifc_id])         : cs3
-
-            .
+  decls' = mapDecls (fD,fEz,fPz) ifces ctrs' [] decls where
+            ctrs' = Ctrs $ ifcesSups ifces [ifc_id]
 
 -------------------------------------------------------------------------------
 
@@ -74,13 +110,13 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
 --              <...>                     -- :   with nested impls to follow only visible here
 
 implToDecls :: [Ifce] -> [Impl] -> Impl -> [Decl]
-implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
+implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
 
   -- implementation of IOrd for a where a is IAaa with
   -- implementation of IAaa for Xxx with
   -- find all implementations of IAaa ([IXxx,...])
   ctrDicts :: [Decl]
-  ctrDicts = map toDict $ map getTp $ concatMap findImpls imp_ids
+  ctrDicts = map toDict $ map getTp $ concatMap findImpls cs where
 
     -- find all implementations of IAaa
     findImpls :: ID_Ifce -> [Impl]
@@ -93,14 +129,13 @@ implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
     -- tp = Xxx
     toDict :: Type -> Decl
     toDict tp = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,e,[])) where
-                  e = ECall z (EVar z $ "d"++head ctr++ifc)
-                        (EVar z $ "d"++toString' tp++head ctr)
+                  e = ECall z (EVar z $ "d"++ctr++ifc)
+                        (EVar z $ "d"++toString' tp++ctr)
+                  [ctr] = cs  -- TODO: multiple constraints
 
   -- dIEqBool = Dict.IEq (eq,neq) where eq=<...> daIXxx=... ;
   dict = DAtr z (PWrite z ("d"++toString' tp++ifc)) d where
-          d = case imp_ids of
-                []        -> ExpWhere (z,d1,decls')
-                otherwise -> ExpWhere (z,d2,[])
+          d = bool (ExpWhere (z,d2,[])) (ExpWhere (z,d1,decls')) (null cs)
 
           d1 = ECall z (ECons z ["Dict",ifc])
                        (fromList $ map (EVar z) $ ifceToDeclIds ifce)
@@ -109,20 +144,15 @@ implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
           d2 = EFunc z cz TAny [] $ ExpWhere (z,d1,decls'++[ups'])
 
           -- {daIXxx} // implementation of IOrd for a where a is IXxx
-          ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) imp_ids)
+          ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) cs)
                     (ExpWhere (z,EArg z,[]))
 
   toString' (TData hr) = concat hr
-  toString' (TVar _)   = concat l where [(_,l)]=cs
+  toString' (TVar _)   = concat cs
 
   -- eq = <...>
-  decls' = map (expandDecl ifces (id,imp_ids)) decls where
-            Ifce (_,id,_,_) = ifce    -- id:  from interface
-
-  imp_ids = case cs of          -- ids: from instance constraints
-              []      -> []
-              [(_,l)] -> l
-              _       -> error "TODO: multiple vars"
+  decls' = mapDecls (fD,fEz,fPz) ifces ctrs' [] decls where
+            ctrs' = Ctrs $ ifcesSups ifces [ifc]  -- TODO: cs
 
   ifce = fromJust $ L.find h ifces where
           h :: Ifce -> Bool
@@ -130,20 +160,13 @@ implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
 
 -------------------------------------------------------------------------------
 
--- [Ifce]:              known interfaces
--- ([ID_ifce],[ID_Ifce]): ifce constraint // impl extra constraints
---                          - ifce method always has ifce but not impl constraints
---                          - impl method always has ifce and maybe impl constraints
---                          - gnrc method never has ifce or impl constraints
---                              - it is already on its type explicitly
--- Decl:                decl to expand
--- Decl:                expanded decl
-expandDecl :: [Ifce] -> (ID_Ifce,[ID_Ifce]) -> Decl -> Decl
+fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
 
-expandDecl ifces _ (DSig z id _) = DSig z id TAny -- isImpl: prevent clashes w/ poly
+fD _ (Ctrs []) _ decl = [decl]
 
 -- IBounded: minimum/maximum
-expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl where
+-- unit/cons do not get changed
+fD _ _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = [decl] where
   isConst (EUnit  _)      = True
   isConst (ECons  _ _)    = True
   isConst (ETuple _ es)   = all isConst es
@@ -156,24 +179,21 @@ expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl w
 --      ... = (p1,...pN)                  -- : restore original args
 --      (fN,...,gN) = dN                  -- : restore iface functions from dicts
 --      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
-expandDecl ifces (ifc_id,imp_ids)
-           (DAtr z1 e1
-            (ExpWhere (z2,
-              EFunc z3 (Ctrs cs3) (TFunc inp4 out4) [] (ExpWhere (z5,e5,ds5)),
-              ds2))) =
-  DAtr z1 e1
+fD ifces ctrs _ (DAtr z1 pat1
+                  (ExpWhere (z2,
+                    EFunc z3 cs3 tp3 [] (ExpWhere (z5,e5,ds5)),
+                    ds2))) = traceShow (pattToString False pat1, cs3) $
+  [DAtr z1 pat1
     (ExpWhere (z2,
-               EFunc z3 cs3NImps' (TFunc inp4 out4) ups3' (ExpWhere (z5,e5,ds5')),
-               ds2))
+               EFunc z3 ctrs' tp3 ups3' (ExpWhere (z5,e5,ds5')),
+               ds2))]
   where
-    --  a where a is (IEq,IOrd)
-    -- TODO: a?
-    -- TODO: ctrsUnion
-    cs3NImps' = Ctrs $ ("a", ifcesSups ifces [ifc_id])         : cs3
-    cs3YImps  = Ctrs $ ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs3
+    ctrs' = case (ctrs,cs3) of
+      (_, Ctrs []) -> ctrs
+      (Ctrs [], _) -> cs3
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
-    ups3' = map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
+    ups3' = [] --map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
 
     --  <...>               -- original
     --  (f1,...,g1) = d1
@@ -187,7 +207,7 @@ expandDecl ifces (ifc_id,imp_ids)
 
     -- [Dict.IEq (eq,neq) = daIEq]
     fsDicts5 :: [Decl]
-    fsDicts5 = map f (dicts cs3YImps) where
+    fsDicts5 = map f (dicts ctrs') where
       f :: (ID_Var,ID_Ifce,[ID_Var]) -> Decl
       f (var,ifc,ids) = DAtr z1 pat (ExpWhere (z1,exp,[])) where
         -- Dict.IEq (eq,neq)
@@ -200,20 +220,26 @@ expandDecl ifces (ifc_id,imp_ids)
     -- (d1,...,dN)
     -- csNImps: exclude implementation constraints since dicts come from closure
     dicts5 :: Patt
-    dicts5 = fromList $ map (PWrite z1) $ L.sort $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts cs3NImps')
+    dicts5 = fromList $ map (PWrite z1) $ L.sort $ map (\(var,ifc,_) -> 'd':var++ifc) (dicts ctrs')
                                                   -- [daIEq,daIShow,dbIEq,...]
 
     -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
     dicts :: Ctrs -> [(ID_Var,ID_Ifce,[ID_Var])]
-    dicts (Ctrs cs) = concatMap f cs where
+    dicts (Ctrs cs) = f ("a",cs) where
       -- (a,[IEq,IShow]) -> [(a,IEq,[eq,neq]), (a,IOrd,[lt,gt,lte,gte]]
       f :: (ID_Var,[ID_Ifce]) -> [(ID_Var,ID_Ifce,[ID_Var])]
       f (var,ifcs) = map h $ map g ifcs where
                       h :: (ID_Ifce,[ID_Var]) -> (ID_Var,ID_Ifce,[ID_Var])
                       h (ifc,ids) = (var,ifc,ids)
+{-
+      f :: (ID_Var,[ID_Ifce]) -> [(ID_Var,ID_Ifce,[ID_Var])]
+      f (var,ifcs) = map h $ map g ifcs where
+                      h :: (ID_Ifce,[ID_Var]) -> (ID_Var,ID_Ifce,[ID_Var])
+                      h (ifc,ids) = (var,ifc,ids)
+-}
 
       -- IEq -> (IEq, [eq,neq])
       g :: ID_Ifce -> (ID_Ifce,[ID_Var])
       g ifc = (ifc, ifceToDeclIds $ ifceFind ifces ifc)
 
-expandDecl _ _ decl = error $ toString decl
+fD _ _ _ decl = [decl]
