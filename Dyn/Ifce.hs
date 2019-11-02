@@ -25,8 +25,8 @@ ifcesSups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
 ifcesSups ifces []  = []
 ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
                         ids' = concatMap (f . (ifceFind ifces)) ids
-                        f (Ifce (_,ifc,TCtrs [],     _)) = []
-                        f (Ifce (_,ifc,TCtrs [(_,l)],_)) = l
+                        f (Ifce (_,ifc,Ctrs [],     _)) = []
+                        f (Ifce (_,ifc,Ctrs [(_,l)],_)) = l
                         f _ = error $ "TODO: multiple constraints"
 
 -------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
   dict :: [Decl]
   dict = bool [] [datr] has_all_impls where
           datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,[])) where
-            f = EFunc z TAny cz [] (ExpWhere (z,d,[]))
+            f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
             d = ECall z (ECons z ["Dict",ifc_id])
                         (fromList $ map (EVar z) $ ifceToDeclIds me)
 
@@ -85,7 +85,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,_,decls)) = dict ++ decls' where
 --              <...>                     -- :   with nested impls to follow only visible here
 
 implToDecls :: [Ifce] -> [Impl] -> Impl -> [Decl]
-implToDecls ifces impls (Impl (z,ifc,tp,cs,decls)) = ctrDicts++[dict] where
+implToDecls ifces impls (Impl (z,ifc,cs,tp,decls)) = ctrDicts++[dict] where
 
   -- implementation of IOrd for a where a is IAaa with
   -- implementation of IAaa for Xxx with
@@ -102,7 +102,7 @@ implToDecls ifces impls (Impl (z,ifc,tp,cs,decls)) = ctrDicts++[dict] where
     findImpls ifc1 = filter isSame impls where  -- IAaa == IAaa
                       isSame (Impl (_,ifc2,_,_,_)) = (ifc1 == ifc2)
 
-    getTp (Impl (_,_,tp,_,_)) = tp              -- Xxx
+    getTp (Impl (_,_,_,tp,_)) = tp              -- Xxx
 
     -- dXxxIOrd = dIAaaIOrd dXxxIAaa
     -- tp = Xxx
@@ -121,7 +121,7 @@ implToDecls ifces impls (Impl (z,ifc,tp,cs,decls)) = ctrDicts++[dict] where
                        (fromList $ map (EVar z) $ ifceToDeclIds ifce)
 
           -- func b/c needs a closure with parametric dictionary
-          d2 = EFunc z TAny cz [] $ ExpWhere (z,d1,decls'++[ups'])
+          d2 = EFunc z cz TAny [] $ ExpWhere (z,d1,decls'++[ups'])
 
           -- {daIXxx} // implementation of IOrd for a where a is IXxx
           ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) imp_ids)
@@ -174,18 +174,18 @@ expandDecl _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = decl w
 expandDecl ifces (ifc_id,imp_ids)
            (DAtr z1 e1
             (ExpWhere (z2,
-              EFunc z3 (TFunc inp4 out4) (TCtrs cs3) [] (ExpWhere (z5,e5,ds5)),
+              EFunc z3 (Ctrs cs3) (TFunc inp4 out4) [] (ExpWhere (z5,e5,ds5)),
               ds2))) =
   DAtr z1 e1
     (ExpWhere (z2,
-               EFunc z3 (TFunc inp4 out4) cs3NImps' ups3' (ExpWhere (z5,e5,ds5')),
+               EFunc z3 cs3NImps' (TFunc inp4 out4) ups3' (ExpWhere (z5,e5,ds5')),
                ds2))
   where
     --  a where a is (IEq,IOrd)
     -- TODO: a?
     -- TODO: ctrsUnion
-    cs3NImps' = TCtrs $ ("a", ifcesSups ifces [ifc_id])         : cs3
-    cs3YImps  = TCtrs $ ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs3
+    cs3NImps' = Ctrs $ ("a", ifcesSups ifces [ifc_id])         : cs3
+    cs3YImps  = Ctrs $ ("a", ifcesSups ifces (ifc_id:imp_ids)) : cs3
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
     ups3' = map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
@@ -219,8 +219,8 @@ expandDecl ifces (ifc_id,imp_ids)
                                                   -- [daIEq,daIShow,dbIEq,...]
 
     -- [ (a,IEq,[eq,neq]), (a,IOrd,[...]), (b,...,...), ...]
-    dicts :: TCtrs -> [(ID_Var,ID_Ifce,[ID_Var])]
-    dicts (TCtrs cs) = concatMap f cs where
+    dicts :: Ctrs -> [(ID_Var,ID_Ifce,[ID_Var])]
+    dicts (Ctrs cs) = concatMap f cs where
       -- (a,[IEq,IShow]) -> [(a,IEq,[eq,neq]), (a,IOrd,[lt,gt,lte,gte]]
       f :: (ID_Var,[ID_Ifce]) -> [(ID_Var,ID_Ifce,[ID_Var])]
       f (var,ifcs) = map h $ map g ifcs where

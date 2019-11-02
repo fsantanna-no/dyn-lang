@@ -37,10 +37,10 @@ class IType a where
 
 -------------------------------------------------------------------------------
 
-type    TCtr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
-newtype TCtrs = TCtrs [TCtr]         -- [(a,[IEq,IOrd,IShow]), (b,[...])]
+type    Ctr  = (ID_Var, [ID_Ifce])  -- (a,[IEq,IOrd,IShow])
+newtype Ctrs = Ctrs [Ctr]           -- [(a,[IEq,IOrd,IShow]), (b,[...])]
   deriving (Show,Eq)
-cz = TCtrs []
+cz = Ctrs []
 
 data Type = TAny
           | TUnit
@@ -50,11 +50,11 @@ data Type = TAny
           | TFunc  {-FuncType-} Type Type  -- inp out
   deriving (Eq,Show)
 
-ctrsToMap :: TCtrs -> M.Map ID_Var (S.Set ID_Ifce)
-ctrsToMap (TCtrs cs) = M.map S.fromAscList $ M.fromAscList cs
+ctrsToMap :: Ctrs -> M.Map ID_Var (S.Set ID_Ifce)
+ctrsToMap (Ctrs cs) = M.map S.fromAscList $ M.fromAscList cs
 
-ctrsFromMap :: M.Map ID_Var (S.Set ID_Ifce) -> TCtrs
-ctrsFromMap csmap = TCtrs $ map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
+ctrsFromMap :: M.Map ID_Var (S.Set ID_Ifce) -> Ctrs
+ctrsFromMap csmap = Ctrs $ map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
 
 -------------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ data Expr
   | EVar   Pos ID_Var                 -- (id)         -- a ; xs
   | ECons  Pos ID_Hier                -- (ids)        -- Bool.True ; Int.1 ; Tree.Node
   | ETuple Pos [Expr]                 -- (exprs)      -- (1,2) ; ((1,2),3) ; ((),()) // (len >= 2)
-  | EFunc  Pos Type TCtrs Ups ExpWhere -- (type,ups,body)
+  | EFunc  Pos Ctrs Type Ups ExpWhere -- (type,ups,body)
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
@@ -97,10 +97,10 @@ data Decl = DSig Pos ID_Var Type
           | DAtr Pos Patt ExpWhere
   deriving (Eq, Show)
 
-newtype Ifce = Ifce (Pos, ID_Ifce, TCtrs, [Decl])
+newtype Ifce = Ifce (Pos, ID_Ifce, Ctrs, [Decl])
   deriving (Eq, Show)
 
-newtype Impl = Impl (Pos, ID_Ifce, Type, TCtrs, [Decl])
+newtype Impl = Impl (Pos, ID_Ifce, Ctrs, Type, [Decl])
   deriving (Eq, Show)
 
 newtype Prog = Prog [Glob]

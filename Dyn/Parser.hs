@@ -241,8 +241,8 @@ expr_func :: Parser Expr
 expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
-  (tp,cs) <- option (TAny,TCtrs [])
-                    (tk_sym "::" *> ((,) <$> type_ <*> (option (TCtrs []) ctrs)))
+  (tp,cs) <- option (TAny,Ctrs [])
+                    (tk_sym "::" *> ((,) <$> type_ <*> (option (Ctrs []) ctrs)))
   ups  <- option [] $
             parensWith (tk_sym "{", tk_sym "}") $
               list (tk_sym ",") tk_var    -- {x}, {x,y}
@@ -251,7 +251,7 @@ expr_func = do
   void <- string ";"
   void <- optional $ try $ tk_key "func"
   spc
-  return $ EFunc pos tp cs (map (\id -> (id,EUnit pos)) ups) body
+  return $ EFunc pos cs tp (map (\id -> (id,EUnit pos)) ups) body
 
 expr_case :: Parser Expr
 expr_case = do
@@ -275,11 +275,11 @@ expr_parens = parens expr
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-ctrs :: Parser TCtrs
+ctrs :: Parser Ctrs
 ctrs = do
   void <- try $ tk_key "where"
   cs   <- (singleton <$> ctr) <|> (parens $ list (tk_sym ",") $ ctr)
-  return $ TCtrs cs
+  return $ Ctrs cs
 
 ctr :: Parser (ID_Var,[ID_Ifce])
 ctr = do
@@ -412,15 +412,15 @@ ifce = do
   cls  <- tk_ifce
   void <- tk_key "for"
   var  <- tk_var
-  cs   <- option (TCtrs []) ctrs
+  cs   <- option (Ctrs []) ctrs
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "interface"
   spc
   return $ let
-    f (TCtrs [])                 = TCtrs [(var, [])]
-    f (TCtrs [(id,l)]) | id==var = TCtrs [(var,  l)]
+    f (Ctrs [])                 = Ctrs [(var, [])]
+    f (Ctrs [(id,l)]) | id==var = Ctrs [(var,  l)]
     f _ = error $ "TODO: multiple vars or unmatching var"
    in
     Ifce (pos, cls, f cs, ds)
@@ -432,13 +432,13 @@ impl = do
   void <- tk_key "of"
   cls  <- tk_ifce
   void <- tk_key "for"
-  (tp,cs) <- (,) <$> type_ <*> (option (TCtrs []) ctrs)
+  (tp,cs) <- (,) <$> type_ <*> (option (Ctrs []) ctrs)
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"
   void <- optional $ try $ tk_key "implementation"
   spc
-  return $ Impl (pos, cls, tp, cs, ds)
+  return $ Impl (pos, cls, cs, tp, ds)
 
 -------------------------------------------------------------------------------
 

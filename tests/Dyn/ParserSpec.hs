@@ -48,7 +48,7 @@ spec = do
         `shouldBe` Right (EUnit (1,2))
     it "func" $
       parse' expr "func :: () -> ();"
-        `shouldBe` Right (EFunc (1,1) TUnit (TCtrs []) [] (ExpWhere ((1,15), EUnit (1,15),[])))
+        `shouldBe` Right (EFunc (1,1) (Ctrs []) TUnit [] (ExpWhere ((1,15), EUnit (1,15),[])))
     it "a b c" $
       parse' expr "a b c"
         `shouldBe` Left "(line 1, column 5):\nunexpected 'c'\nexpecting end of input"

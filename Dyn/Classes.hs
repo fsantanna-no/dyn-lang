@@ -77,9 +77,9 @@ instance IString Type where
 
   toStringI _ _ = error "TODO"
 
-instance IString TCtrs where
-  toString (TCtrs []) = ""
-  toString (TCtrs cs) = " where (" ++ intercalate "," (map f cs) ++ ")" where
+instance IString Ctrs where
+  toString (Ctrs []) = ""
+  toString (Ctrs cs) = " where (" ++ intercalate "," (map f cs) ++ ")" where
     f (var,[cls]) = var ++ " is " ++ cls
     f (var,clss)  = var ++ " is (" ++ intercalate "," clss ++ ")"
 
@@ -97,7 +97,7 @@ instance IString Expr where
   toStringI spc (ECons  _ h)           = intercalate "." h
   toStringI spc (EArg   _)             = "..."
   toStringI spc (ETuple _ es)          = "(" ++ intercalate "," (map toString es) ++ ")"
-  toStringI spc (EFunc  _ tp cs ups bd)  = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
+  toStringI spc (EFunc  _ cs tp ups bd)  = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
                                               toStringI (spc+2) bd ++ "\n" ++ rep spc ++ ";"
                                              where
                                               upsToString []  = ""
