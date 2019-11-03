@@ -106,7 +106,7 @@ data Patt
 newtype ExpWhere = ExpWhere (Pos, Expr, [Decl])
   deriving (Eq, Show)
 
-data Decl = DSig Pos ID_Var Type
+data Decl = DSig Pos ID_Var Ctrs Type
           | DAtr Pos Patt ExpWhere
   deriving (Eq, Show)
 
@@ -124,8 +124,8 @@ data Glob = GDecl Decl | GIfce Ifce | GImpl Impl
 -------------------------------------------------------------------------------
 
 isDSig :: Decl -> Bool
-isDSig (DSig _ _ _) = True
-isDSig _            = False
+isDSig (DSig _ _ _ _) = True
+isDSig _              = False
 
 isDAtr :: Decl -> Bool
 isDAtr (DAtr _ _ _) = True
@@ -143,11 +143,11 @@ globFromDecl decl = GDecl decl
 
 dsigsFind :: [Decl] -> ID_Var -> Type
 dsigsFind dsigs id = case L.find f dsigs of
-                      Nothing            -> TAny
-                      Just (DSig _ _ tp) -> tp
+                      Nothing              -> TAny
+                      Just (DSig _ _ _ tp) -> tp
                      where
                       f :: Decl -> Bool
-                      f (DSig _ x _) = (id == x)
+                      f (DSig _ x _ _) = (id == x)
 
 -------------------------------------------------------------------------------
 
@@ -164,8 +164,8 @@ mapDecls fs ifces ctrs dsigs decls = concatMap (mapDecl fs ifces ctrs dsigs') de
     dsigs' = dsigs ++ filter isDSig decls
 
 mapDecl :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
-mapDecl fs@(fD,_,_) ifces ctrs dsigs decl@(DSig _ _ _) = fD ifces ctrs dsigs decl
-mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)  = (fD ifces ctrs dsigs $ DAtr z pat' whe') ++ dsPat'
+mapDecl fs@(fD,_,_) ifces ctrs dsigs decl@(DSig _ _ _ _) = fD ifces ctrs dsigs decl
+mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)    = (fD ifces ctrs dsigs $ DAtr z pat' whe') ++ dsPat'
   where
     (dsPat',pat') = mapPatt  fs ifces ctrs dsigs pat
     whe'          = mapWhere fs ifces ctrs dsigs whe

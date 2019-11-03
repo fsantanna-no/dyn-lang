@@ -56,7 +56,7 @@ ifceFind ifces ifc = fromJust $ L.find f ifces where
 -- IEq -> [eq,neq]
 ifceToDeclIds :: Ifce -> [ID_Var]
 ifceToDeclIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
-                                      getId (DSig _ id _) = id
+                                      getId (DSig _ id _ _) = id
 
 -- [...] -> ["IEq"] -> ["IEq","IOrd"] -- (sorted)
 ifcesSups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
@@ -83,19 +83,26 @@ inline ifces impls globs = concatMap f globs where
 -------------------------------------------------------------------------------
 
 -- interface IEq for a
---  dIEq = Dict.IEq (eq,neq) where -- : declare instance dict if all defaults are implemented
---          <...>                  -- :   with nested impls to follow only visible here
+--  dIEq = Dict.IEq (eq,neq) -- : declare instance dict if all defaults are implemented
+--  <...>                    -- : modify nested impls which become globals
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict where
+ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
 
   -- dIEq = Dict.IEq (eq,neq)
   -- (only if all methods are implemented)
   dict :: [Decl]
-  dict = [ DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,decls')) ] where
-          f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
-          d = ECall z (ECons z ["Dict",ifc_id])
-                      (fromList $ map (EVar z) $ ifceToDeclIds me)
+  dict = bool [] [datr] has_all_impls where
+          datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,[])) where
+            f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
+            d = ECall z (ECons z ["Dict",ifc_id])
+                        (fromList $ map (EVar z) $ ifceToDeclIds me)
+
+          has_all_impls = (length dsigs == length datrs) where
+                            (dsigs, datrs) = declsSplit decls
+
+          declsSplit :: [Decl] -> ([Decl],[Decl])
+          declsSplit decls = (filter isDSig decls, filter isDAtr decls)
 
   decls' = mapDecls (fD,fEz,fPz) ifces (Ctrs [ifc_id]) [] decls
 

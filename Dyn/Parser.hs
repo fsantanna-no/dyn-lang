@@ -356,7 +356,7 @@ decl_sig = do
             void <- tk_sym "="
             w    <- where_let
             return $ singleton $ DAtr pos (PWrite pos id) w
-  return $ (DSig pos id tp) : atr
+  return $ (DSig pos id cz tp) : atr
 
 decl_atr :: Parser [Decl]
 decl_atr = do

@@ -35,7 +35,7 @@ spec = do
     it "b where b::() b=()" $
       evalExpWhere []
         (ExpWhere (pz, EVar pz "b", [
-          DSig pz "b" TAny,
+          DSig pz "b" cz TAny,
           DAtr pz (PWrite pz "b") (ExpWhere (pz, EUnit pz,[]))
         ]))
         `shouldBe` (EUnit pz)

@@ -82,10 +82,10 @@ spec = do
   describe "decl:" $ do
     it "x :: () = ()" $
       parse' decl "x :: () = ()"
-        `shouldBe` Right [DSig (1,1) "x" TUnit,DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,11), EUnit (1,11), []))]
+        `shouldBe` Right [DSig (1,1) "x" cz TUnit,DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,11), EUnit (1,11), []))]
     it "x :: ()" $
       parse' decl "x :: ()"
-        `shouldBe` Right [DSig (1,1) "x" TUnit]
+        `shouldBe` Right [DSig (1,1) "x" cz TUnit]
     it "x = ()" $
       parse' decl "x = ()"
         `shouldBe` Right [DAtr (1,1) (PWrite (1,1) "x") (ExpWhere ((1,5),  EUnit (1,5),  []))]

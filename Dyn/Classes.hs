@@ -33,8 +33,8 @@ instance IPos Patt where
   getPos (PCall  z _ _)   = z
 
 instance IPos Decl where
-  getPos (DSig z _ _) = z
-  getPos (DAtr z _ _) = z
+  getPos (DSig z _ _ _) = z
+  getPos (DAtr z _ _)   = z
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -136,8 +136,8 @@ pattToString s (PCall  _ p1 p2)     = "(" ++ pattToString s p1 ++ " " ++ pattToS
 instance IString Decl where
   toString decl = toStringI 0 decl
 
-  toStringI spc (DSig _ var tp) = var ++ " :: " ++ toString tp
-  toStringI spc (DAtr _ pat wh) = pattToString False pat ++ " = " ++ toStringI spc wh
+  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp ++ toString cs
+  toStringI spc (DAtr _ pat wh)    = pattToString False pat ++ " = " ++ toStringI spc wh
 
 -------------------------------------------------------------------------------
 
