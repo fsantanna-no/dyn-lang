@@ -1,15 +1,13 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Dyn.PolyIfceSpec (main,spec) where
+module Dyn.PolySpec (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ
 
 import Dyn.AST
-import Dyn.Parser
---import Dyn.Eval
 import Dyn.Prelude
-import Dyn.Ifce
+import Dyn.Analyse
 
 main :: IO ()
 main = hspec spec
@@ -19,11 +17,11 @@ spec = do
   describe "IBounded" $ do
 
     it "XXX: main = x where x::Bool = maximum;" $
-      evalString True ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
+      evalString ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
-      evalString True ([r|
+      evalString ([r|
 main = (x,y) where
   x :: Bool = maximum
   y :: Bool = minimum
@@ -34,7 +32,7 @@ main = (x,y) where
   describe "IEq" $ do
 
     it "IEq: eq" $
-      evalString True ([r|  -- neq (eq(T,T), F)
+      evalString ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = eq (Bool.False,Bool.False)
 ;
@@ -42,7 +40,7 @@ main = x where
         `shouldBe` "Bool.True"
 
     it "IEq: neq" $
-      evalString True ([r|  -- neq (eq(T,T), F)
+      evalString ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
 ;
@@ -50,7 +48,7 @@ main = x where
         `shouldBe` "Bool.True"
 
     it "IEq: default eq" $
-      evalString True ([r|  -- neq (eq(T,T), F)
+      evalString ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
 ;
@@ -60,7 +58,7 @@ main = x where
   describe "IRec-IInd" $ do
 
     it "IInd" $
-      evalString True ([r|
+      evalString ([r|
 main = f Bool.True
 
 implementation of IInd for Bool with
@@ -80,7 +78,7 @@ interface IInd for a with
         `shouldBe` "()"
 
     it "IRec-rec" $
-      evalString True ([r|
+      evalString ([r|
 main = rec (Nat.Succ Nat.Zero)
 
 implementation of IRec for Nat with
@@ -100,7 +98,7 @@ interface IRec for a with
         `shouldBe` "()"
 
     it "IRec-ind" $
-      evalString True ([r|
+      evalString ([r|
 main = f (Nat.Succ Nat.Zero)
 
 implementation of IRec for Nat with
@@ -124,13 +122,13 @@ interface IRec for a with
   describe "IOrd" $ do
 
     it "IEq/IOrd" $
-      evalString True ([r|
+      evalString ([r|
 main = gt (Bool.False,Bool.True)
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
     it "IEq/IOrd" $
-      evalString True ([r|
+      evalString ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( lte (Bool.True,  Bool.False),
         gte (Bool.True,  Bool.True ),
@@ -141,7 +139,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
     it "IEq/IOrd/IAaa" $
-      evalString True ([r|
+      evalString ([r|
 main = f (Bool.True,Bool.False)
 
 implementation of IAaa for Bool with
@@ -156,7 +154,7 @@ interface IAaa for a where a is IOrd with
         `shouldBe` "Bool.False"
 
     it "f a where a is IOrd" $
-      evalString True ([r|
+      evalString ([r|
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False)) where
   f :: ((a,a) -> Bool) where a is IOrd
@@ -166,7 +164,7 @@ main = (f (Bool.True, Bool.False),
         `shouldBe` "(Bool.True,Bool.False)"
 
     it "TODO-dict-closure: ff1/ff2" $
-      evalString True ([r|
+      evalString ([r|
 main = (ff1 (lte, (Bool.True,Bool.False)),
         ff2 (gte, (Bool.True,Bool.True )) ) where           -- gte must become closure
   ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
@@ -180,7 +178,7 @@ main = (ff1 (lte, (Bool.True,Bool.False)),
 
     -- TODO: dIOrd(dIAaaXxx())
     it "TODO-impl-with-ctrs: implementation of IEq for a where a is IAaa" $
-      evalString True ([r|
+      evalString ([r|
 main = (lt (Xxx.True,Xxx.False), gt (Xxx.True,Xxx.False))
 
 implementation of IEq for a where a is IAaa with
@@ -219,23 +217,23 @@ implementation of IAaa for Xxx with
   describe "Misc" $ do
 
       it "eq" $
-        evalString True ("main = eq (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
+        evalString ("main = eq (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
           `shouldBe` "Bool.True"
       it "eq" $
-        evalString True ("main = eq (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
+        evalString ("main = eq (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
            `shouldBe` "Bool.False"
       it "gte" $
-        evalString True ("main = gte (Char.AA,Char.Aa)"++prelude)
+        evalString ("main = gte (Char.AA,Char.Aa)"++prelude)
            `shouldBe` "Bool.False"
       it "lt" $
-        evalString True ("main = lt (Char.AA,Char.Aa)"++prelude)
+        evalString ("main = lt (Char.AA,Char.Aa)"++prelude)
            `shouldBe` "Bool.True"
       it "isLower" $
-        evalString True ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
+        evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
            `shouldBe` "(Bool.False,Bool.True)"
       it "capitalize" $
-        evalString True ("main = (capitalize Char.CC, capitalize Char.Cc)"++prelude)
+        evalString ("main = (capitalize Char.CC, capitalize Char.Cc)"++prelude)
            `shouldBe` "(Char.CC,Char.CC)"
       it "nextlet" $
-        evalString True ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
+        evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
            `shouldBe` "(Char.Dd,Char.AA)"

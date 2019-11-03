@@ -6,8 +6,7 @@ import Test.Hspec
 import Text.RawString.QQ
 
 import Dyn.AST
-import Dyn.Parser
-import Dyn.Eval
+import Dyn.Analyse
 import Dyn.Prelude
 
 main :: IO ()
@@ -20,16 +19,16 @@ spec = do
 
   describe "PRE" $ do
     it "Nat +" $
-      evalString True ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
+      evalString ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat -" $
-      evalString True ("main = sub (Nat.Succ Nat.Zero, Nat.Zero)\n" ++ nat)
+      evalString ("main = sub (Nat.Succ Nat.Zero, Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat *" $
-      evalString True ("main = mul (two,three)\n" ++ nat)
+      evalString ("main = mul (two,three)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
     it "Nat %" $
-      evalString True ("main = rem (two,three)\n" ++ prelude)
+      evalString ("main = rem (two,three)\n" ++ prelude)
         `shouldBe` "(Nat.Succ (Nat.Succ Nat.Zero))"
 
 -------------------------------------------------------------------------------
@@ -43,7 +42,7 @@ spec = do
     describe "Chapter 1.1 - Sessions and Scripts:" $ do       -- pg 1
 
       it "square" $
-        evalString True ([r|
+        evalString ([r|
 main = square two
 square =
   func -> let x = ... in
@@ -53,13 +52,13 @@ square =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
 
       it "lt" $
-        evalString True ([r|
+        evalString ([r|
 main = (nlte (three,two), nlte (three,three))
 |] ++ nat)
           `shouldBe` "(Bool.False,Bool.True)"
 
       it "smaller" $                  -- pg 2
-        evalString True ([r|
+        evalString ([r|
 main = add (smaller (ten,five) , smaller (one,four))
 smaller =
   func ->
@@ -75,7 +74,7 @@ smaller =
 
 
       it "square/smaller" $           -- pg 3
-        evalString True ([r|
+        evalString ([r|
 main = square (smaller (four, two))
 square =
   func -> let x=... in
@@ -101,7 +100,7 @@ smaller =
     describe "Chapter 1.2 - Evaluation:" $ do                 -- pg 4
 
       it "three" $            -- pg 5
-        evalString True ([r|
+        evalString ([r|
 main = fthree ten
 fthree =
   func ->
@@ -140,7 +139,7 @@ fthree =
     describe "Chapter 1.3 - Values:" $ do                     -- pg 7
 
       it "multiply 2 3" $     -- pg 9
-        evalString True ([r|
+        evalString ([r|
 main = multiply (two,three)
 multiply =
   func ->
@@ -178,7 +177,7 @@ multiply =
       describe "Chapter 1.4.2 - Currying:" $ do               -- pg 11
 
         it "smallerc" $            -- pg 11
-          evalString True ([r|
+          evalString ([r|
 main = (smallerc two) four
 smallerc =
   func ->
@@ -196,7 +195,7 @@ smallerc =
 
 
         it "twice" $            -- pg 12
-          evalString True ([r|
+          evalString ([r|
 main = twice (square,two)
 square = func -> mul (...,...) ;
 twice = func ->
@@ -208,7 +207,7 @@ twice = func ->
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
 
         it "twicec" $            -- pg 12
-          evalString True ([r|
+          evalString ([r|
 main   = matches ((twicec square) two, mul(four,four))
 square = func -> mul (...,...);
 twicec = func ->
@@ -222,7 +221,7 @@ twicec = func ->
           `shouldBe` "Bool.True"
 
         it "quad" $            -- pg 12
-          evalString True ([r|
+          evalString ([r|
 main   = matches (quad two, mul (four,four))
 quad   = twicec square
 square = func -> mul (...,...);
@@ -237,7 +236,7 @@ twicec = func ->
           `shouldBe` "Bool.True"
 
         it "curry" $            -- pg 13
-          evalString True ([r|
+          evalString ([r|
 main   = matches ((twicec square) two, mul(four,four))
 square = func -> mul (...,...);
 twicec = curry twice
@@ -273,7 +272,7 @@ curry  = func ->
 -}
 
         it "uncurry" $            -- pg 11
-          evalString True ([r|
+          evalString ([r|
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
   func {x} ->
@@ -300,7 +299,7 @@ uncurry = func ->
       describe "Chapter 1.4.7 - Composition:" $ do               -- pg 15
 
         it "compose" $         -- pg 15
-          evalString True ([r|
+          evalString ([r|
 main    = matches (quad two, mul (four,four))
 quad    = compose (square,square)
 square  = func -> mul (...,...);
@@ -338,7 +337,7 @@ compose = func ->
 -}
 
       it "fact" $             -- pg 19
-        evalString True ([r|
+        evalString ([r|
 main = fact three
 fact =
   func ->
@@ -370,7 +369,7 @@ fact =
 -}
 
       it "locals" $           -- pg 20
-        evalString True ([r|
+        evalString ([r|
 main = f (zero,one)
 f =
   func ->
@@ -383,7 +382,7 @@ f =
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
 
       it "locals" $           -- pg 21
-        evalString True ([r|
+        evalString ([r|
 main = f (zero,one)
 f =
   func ->
@@ -426,7 +425,7 @@ f =
 -}
 
       it "not" $              -- pg 30
-        evalString True ([r|
+        evalString ([r|
 main = not Bool.False
 not = func ->
   case ... of
@@ -438,7 +437,7 @@ not = func ->
           `shouldBe` "Bool.True"
 
       it "and-1" $            -- pg 30
-        evalString True ([r|
+        evalString ([r|
 main = and (Bool.True, Bool.False)
 and = func ->
   case ... of
@@ -451,13 +450,13 @@ and = func ->
           `shouldBe` "Bool.False"
 
       it "and-2" $            -- pg 30
-        evalString True ([r|
+        evalString ([r|
 main = and (Bool.True, Bool.True)
 |] ++ bool)
           `shouldBe` "Bool.True"
 
       it "or-1" $               -- pg 30
-        evalString True ([r|
+        evalString ([r|
 main = or (Bool.True, Bool.False)
 or = func ->
   case ... of
@@ -469,7 +468,7 @@ or = func ->
           `shouldBe` "Bool.True"
 
       it "or-2" $               -- pg 30
-        evalString True ([r|
+        evalString ([r|
 main = or (Bool.False, Bool.False)
 or = func ->
   case ... of
@@ -481,7 +480,7 @@ or = func ->
           `shouldBe` "Bool.False"
 
       it "eq, neq" $         -- pg 31
-        evalString True ([r|
+        evalString ([r|
 main = neq (eq (Bool.True,Bool.True), Bool.False)
 eq = func ->
   or (and (x,y), (and (not x, not y))) where
@@ -497,7 +496,7 @@ neq = func ->
           `shouldBe` "Bool.True"
 
       it "@<=" $
-        evalString True ([r|
+        evalString ([r|
 main = lte (Xx.Aa,Xx.Bb)
 --data Xx
 --data Xx.Aa
@@ -506,7 +505,7 @@ main = lte (Xx.Aa,Xx.Bb)
         `shouldBe` "(line=2, col=8) ERROR : unassigned variable 'dXxIOrd'"
 
       it "leap years" $         -- pg 33
-        evalString True ([r|
+        evalString ([r|
 main = and (not (leapyear y1979), and (leapyear y1980, and (not (leapyear hundred), leapyear (mul (four,hundred)))))
 leapyear :: (Int->Bool) = func ->
   case rem (y,hundred) of
@@ -522,7 +521,7 @@ y1980 = add (thousand, add (mul(five,hundred), mul(eight,ten)))
         `shouldBe` "Bool.True"
 
       it "analyse triangles" $         -- pg 33
-        evalString True ([r|
+        evalString ([r|
 main = (analyse (ten, twenty, mul(ten,three)),
         analyse (ten, twenty, add(twenty,five)),
         analyse (ten, twenty, twenty),
@@ -545,7 +544,7 @@ analyse = func ->
           `shouldBe` "(Tri.Fail,Tri.Scal,Tri.Isos,Tri.Equi)"
 
       it "implication" $         -- pg 34
-        evalString True ([r|
+        evalString ([r|
 main = (impl (Bool.False,Bool.True),
         impl (Bool.True, Bool.True),
         impl (Bool.False,Bool.False),
@@ -560,7 +559,7 @@ impl = func ->
           `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True)"
 
       it "analyse triangles" $         -- pg 35
-        evalString True ([r|
+        evalString ([r|
 main = ( analyse2 (add(twenty,ten),twenty,ten)  ,
          analyse2 (ten,add(twenty,five),twenty) ,
          analyse2 (ten,twenty,twenty)           ,
@@ -610,7 +609,7 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
         `shouldBe` "(Triangle.Failure,Triangle.Scalene,Triangle.Isosceles,Triangle.Equilateral)"
 
       it "sort3" $         -- pg 35
-        evalString True ([r|
+        evalString ([r|
 main = ( analyse (sort3 (add(twenty,ten),twenty,ten))  ,
          analyse (sort3 (ten,add(twenty,five),twenty)) ,
          analyse (sort3 (ten,twenty,twenty))           ,
@@ -664,7 +663,7 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
     describe "Chapter 2.2 - Characters:" $ do                 -- pg 35
 
       it "char" $         -- pg 36
-        evalString True ([r|
+        evalString ([r|
 main = (xeq,xgt,cs,low,cp1,cp2,nx,ok)
 
 xeq :: Bool = not (matches (c1,c2))
@@ -690,7 +689,7 @@ c2  :: Char = Char.BB
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
       it "enum" $         -- pg 38
-        evalString True ([r|
+        evalString ([r|
 main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
 
 dsat :: Day = fromEnum (toEnum Day.Sat)
@@ -778,7 +777,7 @@ implementation of IEq for Day with
         `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
 
       it "direction" $         -- pg 41
-        evalString True ([r|
+        evalString ([r|
 main = (toEnum Dir.N, ses, matches (lel, Dir.L), matches (reverse Dir.O, Dir.L))
 
 ses :: Dir = fromEnum one
@@ -824,7 +823,7 @@ reverse = func ->
         `shouldBe` "(Nat.Zero,Dir.S,Bool.True,Bool.True)"
 
       it "bool enum" $         -- pg 41
-        evalString True ([r|
+        evalString ([r|
 main :: Bool = fromEnum (add (toEnum Bool.False, one))
 |] ++ prelude)
         `shouldBe` "Bool.True"
@@ -834,7 +833,7 @@ main :: Bool = fromEnum (add (toEnum Bool.False, one))
     describe "Chapter 2.4 - Tuples:" $ do                     -- pg 41
 
       it "mkpair" $         -- pg 41
-        evalString True ("main = Pair (one,two)" ++ nat)
+        evalString ("main = Pair (one,two)" ++ nat)
         `shouldBe` "(Pair ((Nat.Succ Nat.Zero),(Nat.Succ (Nat.Succ Nat.Zero))))"
 
 {-
@@ -851,7 +850,7 @@ main :: Bool = fromEnum (add (toEnum Bool.False, one))
 -}
 
       it "fst/snd" $         -- pg 41
-        evalString True ([r|
+        evalString ([r|
 main = and (matches (add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True))
 fst = func -> x where (x,_)=... ;;
 snd = func -> y where (_,y)=... ;;
@@ -859,7 +858,7 @@ snd = func -> y where (_,y)=... ;;
         `shouldBe` "Bool.True"
 
       it "pair" $         -- pg 42
-        evalString True ([r|
+        evalString ([r|
 main = pair ((f,g), one)
 f = func -> matches (add (zero,...), ...) ;
 g = func -> mul (two, ...) ;
@@ -870,7 +869,7 @@ pair = func -> (f x, g x) where
         `shouldBe` "(Bool.True,(Nat.Succ (Nat.Succ Nat.Zero)))"
 
       it "compose" $         -- pg 15
-        evalString True ([r|
+        evalString ([r|
 main    = (compose (dec, compose (dup,Nat.Succ))) one
 dup     = func -> mul (two,...) ;
 compose = func ->

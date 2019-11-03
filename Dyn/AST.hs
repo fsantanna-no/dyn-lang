@@ -134,9 +134,6 @@ isDAtr _            = False
 isEError (EError _ _) = True
 isEError _            = False
 
-declsSplit :: [Decl] -> ([Decl],[Decl])
-declsSplit decls = (filter isDSig decls, filter isDAtr decls)
-
 globToDecl :: Glob -> Decl
 globToDecl (GDecl decl) = decl
   -- refuse GIfce/GImpl
@@ -144,11 +141,11 @@ globToDecl (GDecl decl) = decl
 globFromDecl :: Decl -> Glob
 globFromDecl decl = GDecl decl
 
-dsigFind :: [Decl] -> ID_Var -> Type
-dsigFind dsigs id = case L.find f dsigs of
+dsigsFind :: [Decl] -> ID_Var -> Type
+dsigsFind dsigs id = case L.find f dsigs of
                       Nothing            -> TAny
                       Just (DSig _ _ tp) -> tp
-                    where
+                     where
                       f :: Decl -> Bool
                       f (DSig _ x _) = (id == x)
 

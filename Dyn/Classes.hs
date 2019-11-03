@@ -163,7 +163,7 @@ instance IString Prog where
 
 instance IType Expr where
   toType _  (EArg   _)     = TAny
-  toType ds (EVar   _ id)  = dsigFind ds id
+  toType ds (EVar   _ id)  = dsigsFind ds id
   toType _  (ECons  _ hr)  = TData hr
   toType ds (ETuple _ es)  = TTuple $ map (toType ds) es
   toType ds (ECall  _ f _) = case toType ds f of

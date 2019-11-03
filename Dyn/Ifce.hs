@@ -1,4 +1,4 @@
-module Dyn.Ifce (apply,evalString,parseToString) where
+module Dyn.Ifce (apply,evalString,parseToString,ifceFind,ifceToDeclIds) where
 
 import Debug.Trace
 import Data.Bool                (bool)
@@ -9,6 +9,16 @@ import Dyn.AST
 import Dyn.Classes
 import qualified Dyn.Parser as P
 import qualified Dyn.Eval   as E
+
+-------------------------------------------------------------------------------
+
+evalString :: String -> String
+evalString input = E.evalStringF f input where
+                    f prog = prog' where (_,prog') = apply prog
+
+parseToString :: String -> String
+parseToString input = P.parseToStringF f input where
+                        f prog = prog' where (_,prog') = apply prog
 
 -------------------------------------------------------------------------------
 
@@ -35,14 +45,6 @@ apply (Prog globs) = (ifces,prog) where
                         f (GImpl ifc) = True
                         f _           = False
                         g (GImpl ifc) = ifc
-
-evalString :: String -> String
-evalString input = E.evalStringF f input where
-                    f prog = prog' where (_,prog') = apply prog
-
-parseToString :: String -> String
-parseToString input = P.parseToStringF f input where
-                        f prog = prog' where (_,prog') = apply prog
 
 -------------------------------------------------------------------------------
 
@@ -81,23 +83,19 @@ inline ifces impls globs = concatMap f globs where
 -------------------------------------------------------------------------------
 
 -- interface IEq for a
---  dIEq = Dict.IEq (eq,neq) -- : declare instance dict if all defaults are implemented
---  <...>                    -- : modify nested impls which become globals
+--  dIEq = Dict.IEq (eq,neq) where -- : declare instance dict if all defaults are implemented
+--          <...>                  -- :   with nested impls to follow only visible here
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
+ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict where
 
   -- dIEq = Dict.IEq (eq,neq)
   -- (only if all methods are implemented)
   dict :: [Decl]
-  dict = bool [] [datr] has_all_impls where
-          datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,[])) where
-            f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
-            d = ECall z (ECons z ["Dict",ifc_id])
-                        (fromList $ map (EVar z) $ ifceToDeclIds me)
-
-          has_all_impls = (length dsigs == length datrs) where
-                            (dsigs, datrs) = declsSplit decls
+  dict = [ DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,decls')) ] where
+          f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
+          d = ECall z (ECons z ["Dict",ifc_id])
+                      (fromList $ map (EVar z) $ ifceToDeclIds me)
 
   decls' = mapDecls (fD,fEz,fPz) ifces (Ctrs [ifc_id]) [] decls
 
