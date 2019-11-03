@@ -82,7 +82,7 @@ data Expr
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
-  | EType Pos Type
+  | EType  Pos Type
   deriving (Eq, Show)
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]

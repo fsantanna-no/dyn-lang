@@ -1,5 +1,6 @@
 module Dyn.Classes where
 
+import Debug.Trace
 import Data.Bool (bool)
 import Data.List (intercalate)
 
@@ -170,4 +171,8 @@ instance IType Expr where
                                 TAny        -> TAny
                                 TFunc _ out -> out
                                 TData hr    -> TData hr
+  toType _  (EType  _ _)   = TData ["Type"]
   toType _  e = error $ "toType: " ++ toString e
+
+instance IType ExpWhere where
+  toType dsigs (ExpWhere (_,e,ds)) = toType (dsigs++filter isDSig ds) e
