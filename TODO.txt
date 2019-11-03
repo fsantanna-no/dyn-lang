@@ -1,7 +1,6 @@
-- map include ctrs
-- remove poly.map
 - TIPOS!
     - ir tirando as anotacoes de tipos
+        - e tirando anotacoes de PolySpec.hs
     - necessario p/ TODO de poly
 - poly
     - TODO em Poly:

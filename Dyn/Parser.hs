@@ -242,7 +242,7 @@ expr_func = do
   pos  <- toPos <$> getPosition
   void <- tk_key "func"
   (tp,cs) <- option (TAny,Ctrs [])
-                    (tk_sym "::" *> ((,) <$> type_ <*> (option (Ctrs []) ctrs)))
+                    (tk_sym "::" *> type_ctrs)
   ups  <- option [] $
             parensWith (tk_sym "{", tk_sym "}") $
               list (tk_sym ",") tk_var    -- {x}, {x,y}
@@ -292,11 +292,17 @@ ctr = do
 
 -------------------------------------------------------------------------------
 
+type_ctrs :: Parser (Type,Ctrs)
+type_ctrs = do
+  tp <- type_
+  cs <- option (Ctrs []) ctrs
+  return (tp,cs)
+
 type_ :: Parser Type
 type_ = do
-  ttp <- try ttype_A <|> try ttype_D <|> try ttype_V <|> try ttype_0 <|>
-         try ttype_parens <|> try ttype_N <|> ttype_F <?> "type"
-  return ttp
+  tp <- try ttype_A <|> try ttype_D <|> try ttype_V <|> try ttype_0 <|>
+        try ttype_parens <|> try ttype_N <|> ttype_F <?> "type"
+  return tp
 
 ttype_A :: Parser Type
 ttype_A = do
@@ -351,12 +357,12 @@ decl_sig = do
   pos  <- toPos <$> getPosition
   id   <- tk_var
   void <- tk_sym "::"
-  tp   <- type_
+  (tp,cs) <- type_ctrs
   atr  <- option [] $ do
             void <- tk_sym "="
             w    <- where_let
             return $ singleton $ DAtr pos (PWrite pos id) w
-  return $ (DSig pos id cz tp) : atr
+  return $ (DSig pos id cs tp) : atr
 
 decl_atr :: Parser [Decl]
 decl_atr = do
@@ -438,7 +444,7 @@ impl = do
   void <- tk_key "of"
   cls  <- tk_ifce
   void <- tk_key "for"
-  (tp,cs) <- (,) <$> type_ <*> (option (Ctrs []) ctrs)
+  (tp,cs) <- type_ctrs
   void <- tk_key "with"
   ds   <- decls
   void <- string ";"

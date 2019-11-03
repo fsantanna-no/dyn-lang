@@ -49,7 +49,7 @@ apply (Prog globs) = (ifces,prog) where
   inline :: [Ifce] -> [Impl] -> [Glob] -> [Decl]
   inline ifces impls globs = concatMap f globs where
                               f :: Glob -> [Decl]
-                              f (GDecl dcl) = expandDecl ifces cz dcl
+                              f (GDecl dcl) = expandDecl  ifces cz dcl
                               f (GIfce ifc) = ifceToDecls ifces ifc
                               f (GImpl imp) = implToDecls ifces impls imp
 
@@ -166,7 +166,7 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
 
 expandDecl :: [Ifce] -> Ctrs -> Decl -> [Decl]
 
-expandDecl _ cs (DSig z id (Ctrs []) tp) = [DSig z id cs tp]
+expandDecl _ cs decl@(DSig z id (Ctrs []) tp) = [DSig z id cs tp]
 
 -- IBounded: minimum/maximum
 -- unit/cons do not get changed

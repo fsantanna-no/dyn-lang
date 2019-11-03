@@ -136,7 +136,7 @@ pattToString s (PCall  _ p1 p2)     = "(" ++ pattToString s p1 ++ " " ++ pattToS
 instance IString Decl where
   toString decl = toStringI 0 decl
 
-  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp -- ++ toString cs
+  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp ++ toString cs
   toStringI spc (DAtr _ pat wh)    = pattToString False pat ++ " = " ++ toStringI spc wh
 
 -------------------------------------------------------------------------------
