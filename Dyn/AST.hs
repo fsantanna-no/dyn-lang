@@ -141,10 +141,10 @@ globToDecl (GDecl decl) = decl
 globFromDecl :: Decl -> Glob
 globFromDecl decl = GDecl decl
 
-dsigsFind :: [Decl] -> ID_Var -> Type
+dsigsFind :: [Decl] -> ID_Var -> (Ctrs,Type)
 dsigsFind dsigs id = case L.find f dsigs of
-                      Nothing              -> TAny
-                      Just (DSig _ _ _ tp) -> tp
+                      Nothing               -> (cz,TAny)
+                      Just (DSig _ _ cs tp) -> (cs,tp)
                      where
                       f :: Decl -> Bool
                       f (DSig _ x _ _) = (id == x)

@@ -16,7 +16,7 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "XXX: main = x where x::Bool = maximum;" $
+    it "main = x where x::Bool = maximum;" $
       evalString ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 

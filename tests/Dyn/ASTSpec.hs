@@ -20,7 +20,7 @@ spec = do
         `shouldBe` "x :: ?"
     it "x :: a where a is IEq" $
       toString (DSig pz "x" (Ctrs ["IEq"]) (TVar "a"))
-        `shouldBe` "x :: a where (a is IEq)"
+        `shouldBe` "x :: a" -- where (a is IEq)"
     it "x = b" $
       toString (DAtr pz (PWrite pz "x") (ExpWhere (pz, EVar pz "b", [])))
         `shouldBe` "x = b"

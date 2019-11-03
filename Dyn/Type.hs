@@ -6,13 +6,13 @@ import Dyn.Classes
 -------------------------------------------------------------------------------
 
 apply :: [Ifce] -> [Decl] -> [Decl]
-apply x y = mapDecls (fDz,fE,fPz) x [] y where
+apply x y = mapDecls (fDz,fE,fPz) x cz [] y where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
-  fE :: [Ifce] -> [Decl] -> Expr -> ([Decl],Expr)
-  fE _ dsigs (ECall z (ECons z1 ["Type"]) e2) = ([], EType z $ toType dsigs e2)
-  fE _ _ e = ([], e)
+  fE :: [Ifce] -> Ctrs -> [Decl] -> Expr -> ([Decl],Expr)
+  fE _ _ dsigs (ECall z (ECons z1 ["Type"]) e2) = ([], EType z $ toType dsigs e2)
+  fE _ _ _ e = ([], e)
 
   -- infer TAny decls (only if no DSig found, or DSig is TAny)
   -- x :: ? = 10       --> x :: Nat = 10

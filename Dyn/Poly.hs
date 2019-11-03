@@ -15,13 +15,13 @@ import qualified Dyn.Ifce as Ifce
 apply :: [Ifce] -> [Decl] -> [Decl]
 apply x y = mapDecls (fD,fE TAny,fPz) x cz [] y where
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
-  fD _ _ _ d@(DSig _ _ _)   = [d]
+  fD _ _ _ d@(DSig _ _ _ _)   = [d]
   fD ifces ctrs dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
     d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
     (dsE2',e2') = fE (pattToType dsigs pat1) ifces ctrs dsigs e2
 
     pattToType :: [Decl] -> Patt -> Type
-    pattToType dsigs (PWrite _ id) = dsigsFind dsigs id
+    pattToType dsigs (PWrite _ id) = snd $ dsigsFind dsigs id
     --pattToType _ x = error $ pattToString True x
 
 -------------------------------------------------------------------------
@@ -34,8 +34,11 @@ fE :: Type -> [Ifce] -> Ctrs -> [Decl] -> Expr -> ([Decl],Expr)
 -- pat::Bool = id(maximum)
 fE xtp ifces _ dsigs (EVar z id) = (ds', EVar z id') where
 
+  (cs,_) = dsigsFind dsigs id
+  cs' = Ctrs $ Ifce.ifcesSups ifces (getCtrs cs) where
+
   (id',ds') =
-    if null cs then
+    if null (getCtrs cs') then
       (id, [])          -- var is not poly, nothing to do
     else                -- var is poly ...
       case xtp of       --   ... and xtp is concrete -> resolve!
@@ -48,23 +51,25 @@ fE xtp ifces _ dsigs (EVar z id) = (ds', EVar z id') where
 -- pat1::B = id2(neq) e2::(B,B)
 fE xtp ifces _ dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2') e2') where
 
+  -- [("IEq",...)]
+  -- a is IEq
+  (cs2,_) = dsigsFind dsigs id2
+  cs2' = Ctrs $ Ifce.ifcesSups ifces (getCtrs cs2) where
+  cs2ids' = getCtrs cs2'
+
   (id2',e2',ds2') =
-    if null cs2 || err then
+    if null cs2ids' || err then
       (id2,e2,[])                  -- f is not poly, nothing to do
     else                           -- f is poly ...
       case xhr of                  --   ... and xtp is concrete -> resolve!
-        Just xhr -> case ifceOrGen ifces cs2 id2 of
+        Just xhr -> case ifceOrGen ifces cs2' id2 of
           Nothing  -> (id2, e2T'', [])
           Just ifc -> (posid z2 id2, e2T'', declLocals ifces dsigs z2 ifc xhr)
         Nothing    -> (id2, e2A'', [])  --   ... but xtp is not concrete
 
   -- eq :: (a,a) -> Bool
-  tp2 = dsigsFind dsigs id2
+  (_,tp2) = dsigsFind dsigs id2
   [tvar2] = toVars tp2   -- [a]
-
-  -- [("IEq",...)]
-  -- a is IEq
-  ifc_ids = snd $ fromJust $ L.find ((==tvar2).fst) cs2
 
   -- eq (Bool,Boot)
   -- a is Bool
@@ -88,13 +93,13 @@ fE xtp ifces _ dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2'
   e2T'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2]
           where
             -- ["dBoolIEq",...]
-            dicts = map (\ifc -> "d"++concat (fromJust xhr)++ifc) ifc_ids
+            dicts = map (\ifc -> "d"++concat (fromJust xhr)++ifc) cs2ids'
 
   -- eq(daIEq,...)
   e2A'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2]
           where
             -- ["daIEq",...]
-            dicts = map (\ifc -> "d"++tvar2++ifc) ifc_ids
+            dicts = map (\ifc -> "d"++tvar2++ifc) cs2ids'
 
 fE _ _ _ _ e = ([], e)
 
@@ -133,7 +138,7 @@ declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
       d  = DAtr z (PCall z (PCons z ["Dict",ifc]) (fromList $ map (PWrite z) $ map (posid z) dcls))
                    (ExpWhere (z, EVar z dict, []))
       ds = map g dcls where
-            g id = DSig z (posid z id) $ mapType f $ dsigsFind dsigs id where
+            g id = DSig z (posid z id) cz $ mapType f $ snd $ dsigsFind dsigs id where
                     f (TVar "a") = TData xhr
                     f ttp        = ttp
 

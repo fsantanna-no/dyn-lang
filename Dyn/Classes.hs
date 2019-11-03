@@ -136,7 +136,7 @@ pattToString s (PCall  _ p1 p2)     = "(" ++ pattToString s p1 ++ " " ++ pattToS
 instance IString Decl where
   toString decl = toStringI 0 decl
 
-  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp ++ toString cs
+  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp -- ++ toString cs
   toStringI spc (DAtr _ pat wh)    = pattToString False pat ++ " = " ++ toStringI spc wh
 
 -------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ instance IString Prog where
 
 instance IType Expr where
   toType _  (EArg   _)     = TAny
-  toType ds (EVar   _ id)  = dsigsFind ds id
+  toType ds (EVar   _ id)  = snd $ dsigsFind ds id
   toType _  (ECons  _ hr)  = TData hr
   toType ds (ETuple _ es)  = TTuple $ map (toType ds) es
   toType ds (ECall  _ f _) = case toType ds f of
