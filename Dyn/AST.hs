@@ -173,9 +173,11 @@ mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)    = (fD ifces ctrs dsigs 
 mapWhere :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> ExpWhere -> ExpWhere
 mapWhere fs ifces ctrs dsigs (ExpWhere (z,e,ds)) = ExpWhere (z, e', dsE'++ds')
   where
-    dsigs'    = dsigs ++ filter isDSig ds
-    (dsE',e') = mapExpr  fs ifces ctrs dsigs' e
-    ds'       = mapDecls fs ifces ctrs dsigs' ds
+    (dsE',e') = mapExpr  fs ifces ctrs dsigs'' e
+    ds'       = mapDecls fs ifces ctrs dsigs'  ds
+
+    dsigs'' = dsigs' ++ filter isDSig ds'
+    dsigs'  = dsigs  ++ filter isDSig ds
 
 mapPatt :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Patt -> ([Decl], Patt)
 mapPatt fs@(_,_,fP) ifces ctrs dsigs p = (dsP', fP ifces ctrs dsigs p') where
@@ -191,7 +193,8 @@ mapPatt fs@(_,_,fP) ifces ctrs dsigs p = (dsP', fP ifces ctrs dsigs p') where
 
 mapExpr :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Expr -> ([Decl], Expr)
 mapExpr fs@(_,fE,_) ifces ctrs dsigs e = (dsE'++dsE'', e'') where
-  (dsE'',e'') = fE ifces ctrs dsigs e'
+  (dsE'',e'') = fE ifces ctrs dsigs' e' where
+                  dsigs' = dsigs ++ filter isDSig dsE'
   (dsE', e')  = aux e
   aux (EFunc  z cs tp ups whe) = ([], EFunc z cs tp ups $ mapWhere fs ifces ctrs' dsigs whe) where
                                   ctrs' = Ctrs $ getCtrs ctrs ++ getCtrs cs
