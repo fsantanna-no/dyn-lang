@@ -74,7 +74,7 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 inline :: [Ifce] -> [Impl] -> [Glob] -> [Decl]
 inline ifces impls globs = concatMap f globs where
                             f :: Glob -> [Decl]
-                            f (GDecl dcl) = traceShow (toString dcl) $ mapDecl (fD,fEz,fPz) ifces cz [] dcl
+                            f (GDecl dcl) = mapDecl (fD,fEz,fPz) ifces cz [] dcl
                             f (GIfce ifc) = ifceToDecls ifces ifc
                             f (GImpl imp) = implToDecls ifces impls imp
 
@@ -99,8 +99,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
 
-  decls' = mapDecls (fD,fEz,fPz) ifces ctrs' [] decls where
-            ctrs' = Ctrs $ ifcesSups ifces [ifc_id]
+  decls' = mapDecls (fD,fEz,fPz) ifces (Ctrs [ifc_id]) [] decls
 
 -------------------------------------------------------------------------------
 
@@ -151,8 +150,8 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
   toString' (TVar _)   = concat cs
 
   -- eq = <...>
-  decls' = mapDecls (fD,fEz,fPz) ifces ctrs' [] decls where
-            ctrs' = Ctrs $ ifcesSups ifces [ifc]  -- TODO: cs
+  -- TODO: cs
+  decls' = mapDecls (fD,fEz,fPz) ifces (Ctrs [ifc]) [] decls
 
   ifce = fromJust $ L.find h ifces where
           h :: Ifce -> Bool
@@ -162,16 +161,16 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
 
 fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
 
-fD _ (Ctrs []) _ decl = [decl]
-
 -- IBounded: minimum/maximum
 -- unit/cons do not get changed
-fD _ _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = [decl] where
+fD _ (Ctrs (_:_)) _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = [decl] where
   isConst (EUnit  _)      = True
   isConst (ECons  _ _)    = True
   isConst (ETuple _ es)   = all isConst es
   isConst (ECall  _ f ps) = isConst f && isConst ps
   isConst _               = False
+
+fD _ (Ctrs []) _ decl@(DAtr _ _ (ExpWhere (_,EFunc _ (Ctrs []) _ [] _,_))) = [decl]
 
 --  eq = func :: ((a,a) -> Bool) ->       -- : insert a is IEq/IXxx
 --    ret where
@@ -182,15 +181,16 @@ fD _ _ _ decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = [decl] where
 fD ifces ctrs _ (DAtr z1 pat1
                   (ExpWhere (z2,
                     EFunc z3 cs3 tp3 [] (ExpWhere (z5,e5,ds5)),
-                    ds2))) = traceShow (pattToString False pat1, cs3) $
+                    ds2))) =
   [DAtr z1 pat1
     (ExpWhere (z2,
                EFunc z3 ctrs' tp3 ups3' (ExpWhere (z5,e5,ds5')),
                ds2))]
   where
-    ctrs' = case (ctrs,cs3) of
-      (_, Ctrs []) -> ctrs
-      (Ctrs [], _) -> cs3
+    ctrs' = Ctrs $ ifcesSups ifces (getCtrs cs) where
+              cs = case (ctrs,cs3) of
+                    (_, Ctrs []) -> ctrs
+                    (Ctrs [], _) -> cs3
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
     ups3' = [] --map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids

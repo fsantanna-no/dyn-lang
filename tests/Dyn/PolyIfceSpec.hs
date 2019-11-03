@@ -188,7 +188,7 @@ interface IAaa for a where a is IOrd with
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
-    it "XXX: f a where a is IOrd" $
+    it "f a where a is IOrd" $
       evalString ([r|
 main = (f ((dBoolIEq,dBoolIOrd),(Bool.True, Bool.False)),
         f ((dBoolIEq,dBoolIOrd),(Bool.False,Bool.False)))
@@ -257,23 +257,21 @@ implementation of IAaa for Xxx with
   describe "Misc" $ do
 
       it "eq" $
-        evalString ("main = eq (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
+        evalString ("main = eq (dCharIEq, (Char.AA,Char.AA)) where Dict.IEq (eq,neq)=dCharIEq ;"++char_ieq++char++nat++ieq++std)
           `shouldBe` "Bool.True"
       it "eq" $
-        evalString ("main = eq (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
+        evalString ("main = eq (dCharIEq, (Char.AA,Char.Aa)) where Dict.IEq (eq,neq)=dCharIEq ;"++char_ieq++char++nat++ieq++std)
            `shouldBe` "Bool.False"
       it "gte" $
-        evalString ("main = gte (Char.AA,Char.Aa)"++prelude)
+        evalString ("main = gte ((dCharIEq,dCharIOrd),(Char.AA,Char.Aa)) where Dict.IOrd (lt,lte,gt,gte) = dCharIOrd ;"++prelude)
+
            `shouldBe` "Bool.False"
       it "lt" $
-        evalString ("main = lt (Char.AA,Char.Aa)"++prelude)
+        evalString ("main = lt ((dCharIEq,dCharIOrd),(Char.AA,Char.Aa)) where Dict.IOrd (lt,lte,gt,gte) = dCharIOrd ;"++prelude)
            `shouldBe` "Bool.True"
       it "isLower" $
         evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
            `shouldBe` "(Bool.False,Bool.True)"
-      it "capitalize" $
-        evalString ("main = (capitalize Char.CC, capitalize Char.Cc)"++prelude)
-           `shouldBe` "(Char.CC,Char.CC)"
       it "nextlet" $
         evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
            `shouldBe` "(Char.Dd,Char.AA)"
