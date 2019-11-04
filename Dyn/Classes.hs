@@ -165,9 +165,14 @@ instance IType Expr where
   toType _  (EArg   _)     = TAny
   toType ds (EVar   _ id)  = snd $ dsigsFind ds id
   toType _  (ECons  _ hr)  = TData hr
+  toType _  (EFunc  _ _ tp _ _) = tp
   toType ds (ETuple _ es)  = TTuple $ map (toType ds) es
   toType ds (ECall  _ f _) = case toType ds f of
                                 TAny        -> TAny
                                 TFunc _ out -> out
                                 TData hr    -> TData hr
   toType _  e = error $ "toType: " ++ toString e
+
+instance IType ExpWhere where
+  toType ds (ExpWhere (_,e,dcls)) = toType ds' e where
+                                      ds' = ds ++ filter isDSig dcls
