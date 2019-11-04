@@ -1,3 +1,4 @@
+- inverter ExpWhere exp/decls
 - TIPOS!
     - ir tirando as anotacoes de tipos
         - e tirando anotacoes de PolySpec.hs

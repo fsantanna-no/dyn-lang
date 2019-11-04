@@ -37,11 +37,7 @@ ieq = [r|
   interface IEq for a with
     eq  :: ((a,a) -> Bool)
     neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      not ((eq' dIEqa) (x,y)) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
+      not ((eq' dIEqa) ...)
     ;
   ;
 |]
@@ -54,25 +50,13 @@ iord = [r|
     gte :: ((a,a) -> Bool)
 
     lte = func :: ((a,a) -> Bool) ->
-      or (lt ((daIEq,daIOrd),(x,y)), eq (daIEq,(x,y))) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
+      or (lt ((daIEq,daIOrd),...), eq (daIEq,...))
     ;
     gt = func :: ((a,a) -> Bool) ->
-      not (lte ((daIEq,daIOrd),(x,y))) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
+      not (lte ((daIEq,daIOrd),...))
     ;
     gte = func :: ((a,a) -> Bool) ->
-      or (gt ((daIEq,daIOrd),(x,y)), eq (daIEq,(x,y))) where
-        x :: a
-        y :: a
-        (x,y) = ...
-      ;
+      or (gt ((daIEq,daIOrd),...), eq (daIEq,...))
     ;
   ;
 |]
@@ -123,8 +107,6 @@ bool_ieq = [r|
   implementation of IEq for Bool with
     eq = func :: ((Bool,Bool) -> Bool) ->
       or (and (x,y), (and (not x, not y))) where
-        x :: Bool
-        y :: a
         (x,y) = ...
       ;
     ;
@@ -134,15 +116,11 @@ bool_ieq = [r|
 bool_iord = [r|
   implementation of IOrd for Bool with
     lt = func :: ((Bool,Bool) -> Bool) ->
-      case (x,y) of
+      case ... of
         (Bool.False, Bool.False) -> Bool.False
         (Bool.False, Bool.True)  -> Bool.True
         (Bool.True,  Bool.False) -> Bool.False
         (Bool.True,  Bool.True)  -> Bool.False
-      ; where
-        x :: Bool
-        y :: a
-        (x,y) = ...
       ;
     ;
   ;

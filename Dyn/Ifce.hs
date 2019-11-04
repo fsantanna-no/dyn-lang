@@ -92,7 +92,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ dict ++ decls' wher
 
   -- Same for constant (minimum) and function (eq).
   -- eq' = func -> eq ... where Dict.IEq (eq, _) = ...
-  wraps = traceShowSS $ map toWrap meIds where
+  wraps = map toWrap meIds where
     toWrap id = DAtr z (PWrite z (id++"'")) (ExpWhere (z,func,[])) where
       func = EFunc z cz TAny [] (ExpWhere (z,call,[dict]))
       call = ECall z (EVar z id) (EArg z)   -- eq ...
@@ -209,12 +209,15 @@ expandDecl _ (Ctrs []) decl@(DAtr _ _ (ExpWhere (_,EFunc _ (Ctrs []) _ [] _,_)))
 
 expandDecl ifces ctrs (DAtr z1 pat1
                         (ExpWhere (z2,
-                          EFunc z3 cs3 tp3 [] (ExpWhere (z5,e5,[])),
-                          ds2))) =
+                          EFunc z3 cs3 tp3 [] whe3,
+                          []))) =
   [DAtr z1 pat1
     (ExpWhere (z2,
-               EFunc z3 ctrs' tp3 ups3' (ExpWhere (z5,e5,ds5')),
-               ds2))]
+       EFunc z2 cz TAny []
+         (ExpWhere (z2,
+           EFunc z3 ctrs' tp3 ups3' whe3,
+           [letDicts])),
+       []))]  -- let dIEqa = ...
   where
     ctrs' = Ctrs $ ifcesSups ifces (getCtrs cs) where
               cs = case (ctrs,cs3) of
@@ -222,14 +225,21 @@ expandDecl ifces ctrs (DAtr z1 pat1
                     (Ctrs [], _) -> cs3
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
-    ups3' = [] --map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
+    --ups3' = [] --map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
 
+    -- { dIEqa }
+    ups3' = map (\id -> ("d"++id++"a",EUnit z3)) $ getCtrs ctrs'
+    letDicts = DAtr z2  -- (dIEqa,...) = ...
+                (fromList $ map (\id -> PWrite z2 $ "d"++id++"a") $ getCtrs ctrs')
+                (ExpWhere (z2,EArg z2,[]))
+
+{-
     --  <...>               -- original
     --  (f1,...,g1) = d1
     --  (fN,...,gN) = dN
     --  ... = args          -- AUTO
     --  ((d1,...,dN), args) = ...
-    ds5' = fsDicts5 ++ [
+    ds5' = ds5 ++ fsDicts5 ++ [
       DAtr z1 (PArg z1)                             (ExpWhere (z1,EVar z1 "args",[])),
       DAtr z1 (PTuple z1 [dicts5,PWrite z1 "args"]) (ExpWhere (z1,EArg z1,[]))
      ]
@@ -270,5 +280,6 @@ expandDecl ifces ctrs (DAtr z1 pat1
       -- IEq -> (IEq, [eq,neq])
       g :: ID_Ifce -> (ID_Ifce,[ID_Var])
       g ifc = (ifc, ifceToDeclIds $ ifceFind ifces ifc)
+-}
 
 expandDecl _ _ decl = [decl]
