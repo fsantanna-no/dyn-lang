@@ -16,16 +16,15 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "main :: Bool = maximum;" $
-      evalString ("main :: Bool = maximum where Dict.IBounded (_,maximum)=dBoolIBounded;" ++ bool_ibounded ++ bool ++ ibounded)
+    it "XXX: main :: Bool = maximum;" $
+      evalString ("main :: Bool = maximum' dIBoundedBool" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
       evalString ([r|
 main = (x,y) where
-  x :: Bool = maximum
-  y :: Bool = minimum
-  Dict.IBounded (minimum,maximum) = dBoolIBounded
+  x :: Bool = maximum' dIBoundedBool
+  y :: Bool = minimum' dIBoundedBool
 ;
 |] ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"

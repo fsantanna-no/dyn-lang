@@ -83,11 +83,24 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 -------------------------------------------------------------------------------
 
 -- interface IEq for a
+--  eq' = func -> eq ... where Dict.IEq (eq,_) = ...
 --  dIEq = Dict.IEq (eq,neq) -- : declare instance dict if all defaults are implemented
 --  <...>                    -- : modify nested impls which become globals
 
 ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
+ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ dict ++ decls' where
+
+  -- Same for constant (minimum) and function (eq).
+  -- eq' = func -> eq ... where Dict.IEq (eq, _) = ...
+  wraps = traceShowSS $ map toWrap meIds where
+    toWrap id = DAtr z (PWrite z (id++"'")) (ExpWhere (z,func,[])) where
+      func = EFunc z cz TAny [] (ExpWhere (z,call,[dict]))
+      call = ECall z (EVar z id) (EArg z)   -- eq ...
+      dict = DAtr z patt exp where
+              patt = PCall z (PCons z ["Dict",ifc_id])
+                             (PTuple z $ map f meIds) where
+                      f x = bool (PAny z) (PWrite z id) (id==x)
+              exp  = ExpWhere (z,EArg z,[])
 
   -- dIEq = Dict.IEq (eq,neq)
   -- (only if all methods are implemented)
@@ -96,7 +109,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
           datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,[])) where
             f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
             d = ECall z (ECons z ["Dict",ifc_id])
-                        (fromList $ map (EVar z) $ ifceToDeclIds me)
+                        (fromList $ map (EVar z) meIds)
 
           has_all_impls = (length dsigs == length datrs) where
                             (dsigs, datrs) = declsSplit decls
@@ -105,6 +118,8 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = dict ++ decls' where
           declsSplit decls = (filter isDSig decls, filter isDAtr decls)
 
   decls' = concatMap (expandDecl ifces (Ctrs [ifc_id])) decls
+
+  meIds = ifceToDeclIds me
 
 -------------------------------------------------------------------------------
 
@@ -132,13 +147,13 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
     -- dXxxIOrd = dIAaaIOrd dXxxIAaa
     -- tp = Xxx
     toDict :: Type -> Decl
-    toDict tp = DAtr z (PWrite z ("d"++toString' tp++ifc)) (ExpWhere (z,e,[])) where
-                  e = ECall z (EVar z $ "d"++ctr++ifc)
-                        (EVar z $ "d"++toString' tp++ctr)
+    toDict tp = DAtr z (PWrite z ("d"++ifc++toString' tp)) (ExpWhere (z,e,[])) where
+                  e = ECall z (EVar z $ "d"++ifc++ctr)
+                        (EVar z $ "d"++ctr++toString' tp)
                   [ctr] = cs  -- TODO: multiple constraints
 
   -- dIEqBool = Dict.IEq (eq,neq) where eq=<...> daIXxx=... ;
-  dict = DAtr z (PWrite z ("d"++toString' tp++ifc)) d where
+  dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) d where
           d = bool (ExpWhere (z,d2,[])) (ExpWhere (z,d1,decls')) (null cs)
 
           d1 = ECall z (ECons z ["Dict",ifc])
@@ -168,26 +183,33 @@ expandDecl :: [Ifce] -> Ctrs -> Decl -> [Decl]
 
 expandDecl _ cs decl@(DSig z id (Ctrs []) tp) = [DSig z id cs tp]
 
--- IBounded: minimum/maximum
--- unit/cons do not get changed
-expandDecl _ (Ctrs (_:_)) decl@(DAtr _ _ (ExpWhere (_,econst,_))) | isConst econst = [decl] where
+-- Constant (minimum) will ignore dict (dIBoundeda).
+-- Function (eq)      will add    dict (dIEqa)      as an upvalue.
+--  minimum :: a ->
+--    --let dIBoundeda = ... in       -- not required since it will be ignored
+--      <...>
+--  eq = func :: ((a,a) -> Bool) ->
+--    let dIEqa = ... in
+--      <...>   -- include {IEqa}
+--  f = func :: ((a,a) -> Bool) ->
+--    let dIEqa = ... in
+--      <...>   -- include {IEqa}
+
+expandDecl _ (Ctrs (_:_)) decl@(DAtr z1 pat1 (ExpWhere (z2,econst2,[]))) | isConst econst2 = [decl'] where
   isConst (EUnit  _)      = True
   isConst (ECons  _ _)    = True
   isConst (ETuple _ es)   = all isConst es
   isConst (ECall  _ f ps) = isConst f && isConst ps
   isConst _               = False
 
+  decl' = DAtr z1 pat1 $ ExpWhere (z2, func, []) where
+            func = EFunc z2 cz TAny [] $ ExpWhere (z2, econst2, [])
+
 expandDecl _ (Ctrs []) decl@(DAtr _ _ (ExpWhere (_,EFunc _ (Ctrs []) _ [] _,_))) = [decl]
 
---  eq = func :: ((a,a) -> Bool) ->       -- : insert a is IEq/IXxx
---    ret where
---      <...>
---      ... = (p1,...pN)                  -- : restore original args
---      (fN,...,gN) = dN                  -- : restore iface functions from dicts
---      ((d1,...,dN), (p1,...,pN)) = ...  -- : split dicts / args from instance call
 expandDecl ifces ctrs (DAtr z1 pat1
                         (ExpWhere (z2,
-                          EFunc z3 cs3 tp3 [] (ExpWhere (z5,e5,ds5)),
+                          EFunc z3 cs3 tp3 [] (ExpWhere (z5,e5,[])),
                           ds2))) =
   [DAtr z1 pat1
     (ExpWhere (z2,
@@ -207,7 +229,7 @@ expandDecl ifces ctrs (DAtr z1 pat1
     --  (fN,...,gN) = dN
     --  ... = args          -- AUTO
     --  ((d1,...,dN), args) = ...
-    ds5' = ds5 ++ fsDicts5 ++ [
+    ds5' = fsDicts5 ++ [
       DAtr z1 (PArg z1)                             (ExpWhere (z1,EVar z1 "args",[])),
       DAtr z1 (PTuple z1 [dicts5,PWrite z1 "args"]) (ExpWhere (z1,EArg z1,[]))
      ]

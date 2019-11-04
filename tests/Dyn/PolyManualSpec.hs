@@ -15,6 +15,18 @@ main = hspec spec
 
 spec = do
 
+  describe "IBounded" $ do
+
+    it "main :: Bool = maximum;" $
+      evalString ("main = maximum' dIBoundedBool" ++ bool_ibounded ++ bool ++ ibounded)
+        `shouldBe` "Bool.True"
+
+    it "(maximum,minimum)" $
+      evalString ([r|
+main = (maximum' dIBoundedBool,minimum' dIBoundedBool)
+|] ++ bool_ibounded ++ bool ++ ibounded)
+        `shouldBe` "(Bool.True,Bool.False)"
+
   describe "IEq" $ do
 
     it "IEq: default eq" $
@@ -98,6 +110,20 @@ f = func ->
 -------------------------------------------------------------------------------
 
 prelude = nat_iord ++ nat_ieq ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool
+
+-- interface IBounded(minimum,maximum)
+ibounded = [r|
+  minimum' = func ->
+    minimum ... where
+      Dict.IBounded (minimum,_) = ...
+    ;
+  ;
+  maximum' = func ->
+    maximum ... where
+      Dict.IBounded (_,maximum) = ...
+    ;
+  ;
+|]
 
 -- interface IEq(eq,neq)
 ieq = [r|
@@ -188,6 +214,24 @@ iord = [r|
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+-- instance IBounded (Bool)
+bool_ibounded = [r|
+  dIBoundedBool = Dict.IBounded (minimum,maximum) where
+    minimum = func ->
+      let dIBoundeda = ... in
+        -- >> body
+        Bool.False
+        -- << body
+      ;
+    ;
+    maximum = func ->
+      let dIBoundedq = ... in
+        Bool.True
+      ;
+    ;
+  ;
+|]
+
 -- instance IEq (Bool)
 bool_ieq = [r|
   -- Dict receives eq/neq methods.
@@ -197,11 +241,13 @@ bool_ieq = [r|
   dIEqBool = Dict.IEq (eq_Bool,neq_IEq) where
     eq_Bool = func ->
       let dIEqa = ... in
+        -- >> body
         func {dIEqa} ->
           let (x,y) = ... in
             or (and (x,y), (and (not x, not y)))
           ;
         ;
+        -- << body
       ;
     ;
   ;

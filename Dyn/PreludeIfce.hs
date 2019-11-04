@@ -37,7 +37,7 @@ ieq = [r|
   interface IEq for a with
     eq  :: ((a,a) -> Bool)
     neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      not (eq (daIEq,(x,y))) where
+      not ((eq' dIEqa) (x,y)) where
         x :: a
         y :: a
         (x,y) = ...
