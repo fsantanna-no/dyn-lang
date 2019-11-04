@@ -101,6 +101,7 @@ spec = do
       evalString "main = ... where ... = Nat.Zero;"
         `shouldBe` "Nat.Zero"
 
+  describe "misc:" $ do
     describe "char:" $ do
       it "ord" $
         evalString ("main = ord Char.AA"++char++nat) `shouldBe` "(Nat.Succ Nat.Zero)"
