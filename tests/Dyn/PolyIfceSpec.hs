@@ -121,8 +121,8 @@ interface IRec for a with
 
   describe "IOrd" $ do
 
-    it "XXX: IEq/IOrd" $
-      parseToString ([r|
+    it "IEq/IOrd" $
+      evalString ([r|
 main = (gt' (dIEqBool,dIOrdBool)) (Bool.False,Bool.True)
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
@@ -130,21 +130,17 @@ main = (gt' (dIEqBool,dIOrdBool)) (Bool.False,Bool.True)
     it "IEq/IOrd" $
       evalString ([r|
 main = v where  -- (T<=F, T>=T, F>F, F<T)
-  v = ( lte ((dIEqBool,dIOrdBool), (Bool.True,  Bool.False)),
-        gte ((dIEqBool,dIOrdBool), (Bool.True,  Bool.True )),
-        gt  ((dIEqBool,dIOrdBool), (Bool.False, Bool.False)),
-        lt  ((dIEqBool,dIOrdBool), (Bool.False, Bool.True )) ) where
-        Dict.IOrd (lt,lte,gt,gte) = dIOrdBool
-  ;
+  v = ( (lte' (dIEqBool,dIOrdBool)) (Bool.True,  Bool.False),
+        (gte' (dIEqBool,dIOrdBool)) (Bool.True,  Bool.True ),
+        (gt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.False),
+        (lt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.True ) )
 ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-    it "IEq/IOrd/IAaa" $
+    it "XXX: IEq/IOrd/IAaa" $
       evalString ([r|
-main = f ((dIAaaBool,dIEqBool,dIOrdBool),(Bool.True,Bool.False)) where
-        Dict.IAaa f = dIAaaBool
-       ;
+main = (f' (dIAaaBool,dIEqBool,dIOrdBool)) (Bool.True,Bool.False)
 
 implementation of IAaa for Bool with
   f :: ((Bool,Bool) -> Bool)
@@ -153,27 +149,18 @@ implementation of IAaa for Bool with
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
   f = func :: ((a,a) -> Bool) ->
-    lt ((dIEqa,dIOrda),(x,y)) where
-      x::a
-      y::a (x,y)=...
-      Dict.IOrd (lt,lte,gt,gte) = dIOrda
-    ;
+    (lt' (dIEqa,dIOrda)) ...
   ;
 ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
-    it "f a where a is IOrd" $
+    it "XXX: f a where a is IOrd" $
       evalString ([r|
-main = (f ((dIEqBool,dIOrdBool),(Bool.True, Bool.False)),
-        f ((dIEqBool,dIOrdBool),(Bool.False,Bool.False)))
+main = ((f' (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
+        (f' (dIEqBool,dIOrdBool)) (Bool.False,Bool.False))
 f = func :: ((a,a) -> Bool) where a is IOrd ->
-  gt ((dIEqa,dIOrda),(x,y)) where
-    x::a
-    y::a
-    (x,y)=...
-    Dict.IOrd (lt,lte,gt,gte) = dIOrda
-  ;
+  (gt' (dIEqa,dIOrda)) ...
 ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"

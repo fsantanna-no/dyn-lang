@@ -96,7 +96,10 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ dict ++ decls' wher
     toWrap id = DAtr z (PWrite z (id++"'")) (ExpWhere (z,func,[])) where
       func = EFunc z cz TAny [] (ExpWhere (z,call,[dict]))
       call = ECall z (EVar z id) (EArg z)   -- eq ...
-      dict = DAtr z patt exp where
+      dict = DAtr z pats exp where
+              pats = fromList $ map f $ L.sort $ ifc_id : getCtrs ctrs where
+                      f id | (id==ifc_id) = patt
+                           | otherwise    = PAny z
               patt = PCall z (PCons z ["Dict",ifc_id])
                              (PTuple z $ map f meIds) where
                       f x = bool (PAny z) (PWrite z id) (id==x)

@@ -50,13 +50,13 @@ iord = [r|
     gte :: ((a,a) -> Bool)
 
     lte = func :: ((a,a) -> Bool) ->
-      or (lt ((daIEq,daIOrd),...), eq (daIEq,...))
+      or ((lt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
     ;
     gt = func :: ((a,a) -> Bool) ->
-      not (lte ((daIEq,daIOrd),...))
+      not ((lte' (dIEqa,dIOrda)) ...)
     ;
     gte = func :: ((a,a) -> Bool) ->
-      or (gt ((daIEq,daIOrd),...), eq (daIEq,...))
+      or ((gt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
     ;
   ;
 |]
