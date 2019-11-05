@@ -220,8 +220,8 @@ expandDecl ifces ctrs (DAtr z1 pat1@(PWrite pz pid)
           EFunc z3 ctrs' tp3 ups3' whe3)))]
   where
     (wrap',ctrs') = case (ctrs,cs3) of
-                    (_, Ctrs []) -> ([],  Ctrs $ ifcesSups ifces (getCtrs ctrs))  -- ifce method
-                    (Ctrs [], _) -> ([w], Ctrs $ ifcesSups ifces (getCtrs cs3))   -- gen function
+                      (_, Ctrs []) -> ([],  Ctrs $ ifcesSups ifces (getCtrs ctrs))  -- ifce method
+                      (Ctrs [], _) -> ([w], Ctrs $ ifcesSups ifces (getCtrs cs3))   -- gen function
                     where
                       -- f' = f
                       w = DAtr z1 (PWrite pz (pid++"'")) (ExpWhere (pz,[],EVar pz pid))

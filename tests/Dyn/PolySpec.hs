@@ -161,7 +161,7 @@ interface IAaa for a where a is IOrd with
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
-    it "XXX: f a where a is IOrd" $
+    it "f a where a is IOrd" $
       evalString ([r|
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False))

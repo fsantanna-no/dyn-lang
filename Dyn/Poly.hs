@@ -62,7 +62,7 @@ poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3' where
         Right Nothing     -> xxx z2 cs2' "a"          id2 -- xtp is not concrete yet
     otherwise             -> e2      -- var is not function, ignore
 
-  xhr inp2 out2 = --traceShow (toString e3, (toType dsigs e3,xtp)) $
+  xhr inp2 out2 = --traceShow (id2, toString e3, (toType dsigs e3,xtp)) $
     case tpMatch (TTuple [inp2             , out2])
                  (TTuple [toType dsigs e3' , xtp ]) of
       [("a", TData xhr)] -> Right $ Just xhr
@@ -89,7 +89,8 @@ poly ifces dsigs xtp (ECase z e l) = ECase z e' l' where
   e' = poly ifces dsigs TAny e
   l' = map f l where
         -- TODO: pat
-        f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z,ds,poly ifces dsigs xtp e))
+        f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z,ds,poly ifces dsigs' xtp e)) where
+                                      dsigs' = dsigs ++ filter isDSig ds
 
 poly _ _ _ e@(EArg  _)   = e
 poly _ _ _ e@(EUnit _)   = e
