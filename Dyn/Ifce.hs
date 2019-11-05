@@ -93,8 +93,8 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ dict ++ decls' wher
   -- Same for constant (minimum) and function (eq).
   -- eq' = func -> eq ... where Dict.IEq (eq, _) = ...
   wraps = map toWrap meIds where
-    toWrap id = DAtr z (PWrite z (id++"'")) (ExpWhere (z,func,[])) where
-      func = EFunc z cz TAny [] (ExpWhere (z,call,[dict]))
+    toWrap id = DAtr z (PWrite z (id++"'")) (ExpWhere (z,[],func)) where
+      func = EFunc z cz TAny [] (ExpWhere (z,[dict],call))
       call = ECall z (EVar z id) (EArg z)   -- eq ...
       dict = DAtr z pats exp where
               pats = fromList $ map f $ L.sort $ ifc_id : getCtrs ctrs where
@@ -103,14 +103,14 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ dict ++ decls' wher
               patt = PCall z (PCons z ["Dict",ifc_id])
                              (fromList $ map f meIds) where
                       f x = bool (PAny z) (PWrite z id) (id==x)
-              exp  = ExpWhere (z,EArg z,[])
+              exp  = ExpWhere (z,[],EArg z)
 
   -- dIEq = Dict.IEq (eq,neq)
   -- (only if all methods are implemented)
   dict :: [Decl]
   dict = bool [] [datr] has_all_impls where
-          datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,f,[])) where
-            f = EFunc z cz TAny [] (ExpWhere (z,d,[]))
+          datr = DAtr z (PWrite z ("d"++ifc_id)) (ExpWhere (z,[],f)) where
+            f = EFunc z cz TAny [] (ExpWhere (z,[],d))
             d = ECall z (ECons z ["Dict",ifc_id])
                         (fromList $ map (EVar z) meIds)
 
@@ -150,24 +150,24 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
     -- dXxxIOrd = dIAaaIOrd dXxxIAaa
     -- tp = Xxx
     toDict :: Type -> Decl
-    toDict tp = DAtr z (PWrite z ("d"++ifc++toString' tp)) (ExpWhere (z,e,[])) where
+    toDict tp = DAtr z (PWrite z ("d"++ifc++toString' tp)) (ExpWhere (z,[],e)) where
                   e = ECall z (EVar z $ "d"++ifc++ctr)
                         (EVar z $ "d"++ctr++toString' tp)
                   [ctr] = cs  -- TODO: multiple constraints
 
   -- dIEqBool = Dict.IEq (eq,neq) where eq=<...> daIXxx=... ;
   dict = DAtr z (PWrite z ("d"++ifc++toString' tp)) d where
-          d = bool (ExpWhere (z,d2,[])) (ExpWhere (z,d1,decls')) (null cs)
+          d = bool (ExpWhere (z,[],d2)) (ExpWhere (z,decls',d1)) (null cs)
 
           d1 = ECall z (ECons z ["Dict",ifc])
                        (fromList $ map (EVar z) $ ifceToDeclIds ifce)
 
           -- func b/c needs a closure with parametric dictionary
-          d2 = EFunc z cz TAny [] $ ExpWhere (z,d1,decls'++[ups'])
+          d2 = EFunc z cz TAny [] $ ExpWhere (z,decls'++[ups'],d1)
 
           -- {daIXxx} // implementation of IOrd for a where a is IXxx
           ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) cs)
-                    (ExpWhere (z,EArg z,[]))
+                    (ExpWhere (z,[],EArg z))
 
   toString' (TData hr) = concat hr
   toString' (TVar _)   = concat cs
@@ -198,29 +198,26 @@ expandDecl _ cs decl@(DSig z id (Ctrs []) tp) = [DSig z id cs tp]
 --    let dIEqa = ... in
 --      <...>   -- include {IEqa}
 
-expandDecl _ (Ctrs (_:_)) decl@(DAtr z1 pat1 (ExpWhere (z2,econst2,[]))) | isConst econst2 = [decl'] where
+expandDecl _ (Ctrs (_:_)) decl@(DAtr z1 pat1 (ExpWhere (z2,[],econst2))) | isConst econst2 = [decl'] where
   isConst (EUnit  _)      = True
   isConst (ECons  _ _)    = True
   isConst (ETuple _ es)   = all isConst es
   isConst (ECall  _ f ps) = isConst f && isConst ps
   isConst _               = False
 
-  decl' = DAtr z1 pat1 $ ExpWhere (z2, func, []) where
-            func = EFunc z2 cz TAny [] $ ExpWhere (z2, econst2, [])
+  decl' = DAtr z1 pat1 $ ExpWhere (z2, [], func) where
+            func = EFunc z2 cz TAny [] $ ExpWhere (z2, [], econst2)
 
-expandDecl _ (Ctrs []) decl@(DAtr _ _ (ExpWhere (_,EFunc _ (Ctrs []) _ [] _,_))) = [decl]
+expandDecl _ (Ctrs []) decl@(DAtr _ _ (ExpWhere (_,_,EFunc _ (Ctrs []) _ [] _))) = [decl]
 
 expandDecl ifces ctrs (DAtr z1 pat1
-                        (ExpWhere (z2,
-                          EFunc z3 cs3 tp3 [] whe3,
-                          []))) =
+                        (ExpWhere (z2, [],
+                          EFunc z3 cs3 tp3 [] whe3))) =
   [DAtr z1 pat1
-    (ExpWhere (z2,
-       EFunc z2 cz TAny []
-         (ExpWhere (z2,
-           EFunc z3 ctrs' tp3 ups3' whe3,
-           [letDicts])),
-       []))]  -- let dIEqa = ...
+    (ExpWhere (z2, [],
+      EFunc z2 cz TAny [] $
+        ExpWhere (z2, [letDicts],            -- let dIEqa = ...
+          EFunc z3 ctrs' tp3 ups3' whe3)))]
   where
     ctrs' = Ctrs $ ifcesSups ifces (getCtrs cs) where
               cs = case (ctrs,cs3) of
@@ -234,6 +231,6 @@ expandDecl ifces ctrs (DAtr z1 pat1
     ups3' = map (\id -> ("d"++id++"a",EUnit z3)) $ getCtrs ctrs'
     letDicts = DAtr z2  -- (dIEqa,...) = ...
                 (fromList $ map (\id -> PWrite z2 $ "d"++id++"a") $ getCtrs ctrs')
-                (ExpWhere (z2,EArg z2,[]))
+                (ExpWhere (z2,[],EArg z2))
 
 expandDecl _ _ decl = [decl]

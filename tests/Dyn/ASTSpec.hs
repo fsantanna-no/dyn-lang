@@ -22,24 +22,23 @@ spec = do
       toString (DSig pz "x" (Ctrs ["IEq"]) (TVar "a"))
         `shouldBe` "x :: a where (a is IEq)"
     it "x = b" $
-      toString (DAtr pz (PWrite pz "x") (ExpWhere (pz, EVar pz "b", [])))
+      toString (DAtr pz (PWrite pz "x") (ExpWhere (pz, [], EVar pz "b")))
         `shouldBe` "x = b"
     it "x = b where\n  b=()" $
       toString
         (DAtr pz (PWrite pz "x")
-          (ExpWhere (pz, EVar pz "b",
-            [DSig pz "b" cz TAny])))
+          (ExpWhere (pz, [DSig pz "b" cz TAny], EVar pz "b")))
         `shouldBe` "x = b where\n  b :: ?\n;"
 
   describe "declToString:" $ do
     it "b where b=x, x=()" $
       toString (
-        ExpWhere (pz, EVar pz "b", [
-          DAtr pz (PWrite pz "b") (ExpWhere (pz, EVar pz "x",[])),
-          DAtr pz (PWrite pz "x") (ExpWhere (pz, EUnit pz,[]))
-        ]))
+        ExpWhere (pz, [
+          DAtr pz (PWrite pz "b") (ExpWhere (pz,[],EVar pz "x")),
+          DAtr pz (PWrite pz "x") (ExpWhere (pz,[],EUnit pz))
+        ], EVar pz "b"))
         `shouldBe` "b where\n  b = x\n  x = ()\n;"
 
   describe "progToString:" $ do
     it "v" $
-      toString (ExpWhere (pz, EVar pz "v", [])) `shouldBe` "v"
+      toString (ExpWhere (pz, [], EVar pz "v")) `shouldBe` "v"

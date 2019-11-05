@@ -117,7 +117,7 @@ evalDecl env _            = (env, Right True)
 -------------------------------------------------------------------------------
 
 evalExpWhere :: Env -> ExpWhere -> Expr
-evalExpWhere env (ExpWhere (z, e, dcls)) =
+evalExpWhere env (ExpWhere (z, dcls, e)) =
   case foldr f (env, Right True) dcls of
     (env', Right True)  -> evalExpr env' e
     (_,    Right False) -> EError (getPos $ head dcls) "invalid assignment"
@@ -132,7 +132,7 @@ evalExpWhere env (ExpWhere (z, e, dcls)) =
 
 evalProg :: Prog -> Expr
 evalProg prog =
-  evalExpWhere [] $ ExpWhere (pz, EVar pz "main", map globToDecl glbs') where
+  evalExpWhere [] $ ExpWhere (pz, map globToDecl glbs', EVar pz "main") where
     Prog glbs' = prog
 
 evalString :: String -> String

@@ -395,8 +395,8 @@ let_ = do
   void <- string ";"
   void <- optional $ try $ tk_key "let"
   spc
-  let ExpWhere (_,e',ds') = whe
-  return $ ExpWhere (pos, e', ds'++reverse ds)
+  let ExpWhere (_,ds',e') = whe
+  return $ ExpWhere (pos, ds'++reverse ds, e')
 
 where_ :: Parser ExpWhere
 where_ = do
@@ -409,7 +409,7 @@ where_ = do
           void <- optional $ try $ tk_key "where"
           spc
           return ds
-  return $ ExpWhere (pos, e, ds)
+  return $ ExpWhere (pos, ds, e)
 
 -------------------------------------------------------------------------------
 

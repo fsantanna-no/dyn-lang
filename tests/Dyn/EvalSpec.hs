@@ -23,26 +23,26 @@ spec = do
   describe "evalExpWhere:" $ do
     it "()" $
       evalExpWhere []
-        (ExpWhere (pz, EUnit pz, []))
+        (ExpWhere (pz, [], EUnit pz))
         `shouldBe` (EUnit pz)
     it "b where b=a, a=()" $
       evalExpWhere []
-        (ExpWhere (pz, EVar pz "b", [
-          DAtr pz (PWrite pz "b") (ExpWhere (pz, EVar pz "a",[])),
-          DAtr pz (PWrite pz "a") (ExpWhere (pz, EUnit pz,[]))
-        ]))
+        (ExpWhere (pz, [
+          DAtr pz (PWrite pz "b") (ExpWhere (pz, [], EVar pz "a")),
+          DAtr pz (PWrite pz "a") (ExpWhere (pz, [], EUnit pz))
+        ], EVar pz "b"))
         `shouldBe` (EUnit pz)
     it "b where b::() b=()" $
       evalExpWhere []
-        (ExpWhere (pz, EVar pz "b", [
+        (ExpWhere (pz, [
           DSig pz "b" cz TAny,
-          DAtr pz (PWrite pz "b") (ExpWhere (pz, EUnit pz,[]))
-        ]))
+          DAtr pz (PWrite pz "b") (ExpWhere (pz,[], EUnit pz))
+        ], EVar pz "b"))
         `shouldBe` (EUnit pz)
 
   describe "evalDecl:" $ do
     it "a=()" $
-      evalDecl [] (DAtr pz (PWrite pz "a") (ExpWhere (pz, EUnit pz,[])))
+      evalDecl [] (DAtr pz (PWrite pz "a") (ExpWhere (pz,[], EUnit pz)))
         `shouldBe` ([("a", EUnit pz)], Right True)
 
   describe "parser:" $ do

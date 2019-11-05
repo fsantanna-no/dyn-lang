@@ -103,7 +103,7 @@ data Patt
 
 -------------------------------------------------------------------------------
 
-newtype ExpWhere = ExpWhere (Pos, Expr, [Decl])
+newtype ExpWhere = ExpWhere (Pos, [Decl], Expr)
   deriving (Eq, Show)
 
 data Decl = DSig Pos ID_Var Ctrs Type
@@ -172,7 +172,7 @@ mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)    = (fD ifces ctrs dsigs'
     whe'          = mapWhere fs ifces ctrs dsigs whe
 
 mapWhere :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> ExpWhere -> ExpWhere
-mapWhere fs ifces ctrs dsigs (ExpWhere (z,e,ds)) = ExpWhere (z, e', dsE'++ds')
+mapWhere fs ifces ctrs dsigs (ExpWhere (z,ds,e)) = ExpWhere (z, dsE'++ds', e')
   where
     (dsE',e') = mapExpr  fs ifces ctrs dsigs'' e
     ds'       = mapDecls fs ifces ctrs dsigs'  ds

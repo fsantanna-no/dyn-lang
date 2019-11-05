@@ -16,8 +16,8 @@ apply :: [Ifce] -> [Decl] -> [Decl]
 apply x y = mapDecls (fD,fE TAny,fPz) x cz [] y where
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
   fD _ _ _ d@(DSig _ _ _ _)   = [d]
-  fD ifces ctrs dsigs (DAtr z1 pat1 (ExpWhere (z2,e2,ds2))) = [d'] ++ dsE2' where
-    d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
+  fD ifces ctrs dsigs (DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] ++ dsE2' where
+    d' = DAtr z1 pat1 $ ExpWhere (z2,ds2,e2')
     (dsE2',e2') = fE (pattToType dsigs pat1) ifces ctrs dsigs e2
 
     pattToType :: [Decl] -> Patt -> Type
@@ -136,7 +136,7 @@ declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
     f :: (ID_Ifce, ID_Var, [ID_Var]) -> [Decl]
     f (ifc,dict,dcls) = ds ++ [d] where
       d  = DAtr z (PCall z (PCons z ["Dict",ifc]) (fromList $ map (PWrite z) $ map (posid z) dcls))
-                   (ExpWhere (z, EVar z dict, []))
+                   (ExpWhere (z, [], EVar z dict))
       ds = map g dcls where
             g id = DSig z (posid z id) cz $ mapType f $ snd $ dsigsFind dsigs id where
                     f (TVar "a") = TData xhr
