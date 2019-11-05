@@ -185,7 +185,7 @@ char = [r|
   ;
 
   isLower :: (Char -> Bool) = func ->
-    and (gte  ((dCharIEq,dCharIOrd),(c,Char.Aa)), lte  ((dCharIEq,dCharIOrd),(c,Char.Dd))) where
+    and ((gte' (dIEqChar,dIOrdChar)) (c,Char.Aa), (lte' (dIEqChar,dIOrdChar)) (c,Char.Dd)) where
       c :: Char
       c = ...
     ;
@@ -229,8 +229,7 @@ char_ieq = [r|
 char_iord = [r|
   implementation of IOrd for Char with
     lt = func :: ((Char,Char) -> Bool) ->
-      lt ((dNatIEq,dNatIOrd), (ord x, ord y)) where
-        Dict.IOrd (lt,lte,gt,gte) = dNatIOrd
+      (lt' (dIEqNat,dIOrdNat)) (ord x, ord y) where
         (x,y) = ...
       ;
     ;
@@ -288,13 +287,10 @@ nat = [r|
 
   rem =
     func ->
-      case lt ((dNatIEq,dNatIOrd),(x,y)) of
+      case (lt' (dIEqNat,dIOrdNat)) (x,y) of
         Bool.True  -> x
         Bool.False -> rem (sub (x,y), y)
       ; where
-        Dict.IOrd (lt,lte,gt,gte) = dNatIOrd
-        x :: Nat
-        y :: Nat
         (x,y) = ...
       ;
     ;
@@ -324,7 +320,7 @@ nat_iord = [r|
         (Nat.Zero,     Nat.Zero)     -> Bool.False
         (Nat.Zero,     _)            -> Bool.True
         (Nat.Succ _,   Nat.Zero)     -> Bool.False
-        (Nat.Succ =x', Nat.Succ =y') -> lt ((daIEq,daIOrd), (x',y'))    -- TODO: lt recursive call
+        (Nat.Succ =x', Nat.Succ =y') -> (lt' (dIEqa,dIOrda)) (x',y')
       ; where
         x' :: Nat
         y' :: Nat

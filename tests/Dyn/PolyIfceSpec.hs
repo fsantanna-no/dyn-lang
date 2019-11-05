@@ -219,17 +219,19 @@ implementation of IAaa for Xxx with
   describe "Misc" $ do
 
       it "eq" $
-        evalString ("main = eq (dIEqChar, (Char.AA,Char.AA)) where Dict.IEq (eq,neq)=dIEqChar ;"++char_ieq++char++nat++ieq++std)
+        evalString ("main = (eq' dIEqChar) (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
           `shouldBe` "Bool.True"
       it "eq" $
-        evalString ("main = eq (dIEqChar, (Char.AA,Char.Aa)) where Dict.IEq (eq,neq)=dIEqChar ;"++char_ieq++char++nat++ieq++std)
+        evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
            `shouldBe` "Bool.False"
       it "gte" $
-        evalString ("main = gte ((dIEqChar,dIOrdChar),(Char.AA,Char.Aa)) where Dict.IOrd (lt,lte,gt,gte) = dIOrdChar ;"++prelude)
-
+        evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
+           `shouldBe` "Bool.False"
+      it "gte" $
+        evalString ("main = (gte' (dIEqNat,dIOrdNat)) (one,two)"++prelude)
            `shouldBe` "Bool.False"
       it "lt" $
-        evalString ("main = lt ((dIEqChar,dIOrdChar),(Char.AA,Char.Aa)) where Dict.IOrd (lt,lte,gt,gte) = dIOrdChar ;"++prelude)
+        evalString ("main = (lt' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
            `shouldBe` "Bool.True"
       it "isLower" $
         evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
