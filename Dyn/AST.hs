@@ -165,8 +165,9 @@ mapDecls fs ifces ctrs dsigs decls = concatMap (mapDecl fs ifces ctrs dsigs') de
 
 mapDecl :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
 mapDecl fs@(fD,_,_) ifces ctrs dsigs decl@(DSig _ _ _ _) = fD ifces ctrs dsigs decl
-mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)    = (fD ifces ctrs dsigs $ DAtr z pat' whe') ++ dsPat'
+mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)    = (fD ifces ctrs dsigs' $ DAtr z pat' whe') ++ dsPat'
   where
+    dsigs' = dsigs ++ filter isDSig dsPat'
     (dsPat',pat') = mapPatt  fs ifces ctrs dsigs pat
     whe'          = mapWhere fs ifces ctrs dsigs whe
 
@@ -176,8 +177,8 @@ mapWhere fs ifces ctrs dsigs (ExpWhere (z,e,ds)) = ExpWhere (z, e', dsE'++ds')
     (dsE',e') = mapExpr  fs ifces ctrs dsigs'' e
     ds'       = mapDecls fs ifces ctrs dsigs'  ds
 
-    dsigs'' = dsigs' ++ filter isDSig ds'
-    dsigs'  = dsigs  ++ filter isDSig ds
+    dsigs''   = dsigs' ++ filter isDSig ds'
+    dsigs'    = dsigs  ++ filter isDSig ds
 
 mapPatt :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Patt -> ([Decl], Patt)
 mapPatt fs@(_,_,fP) ifces ctrs dsigs p = (dsP', fP ifces ctrs dsigs p') where
