@@ -129,7 +129,7 @@ interface IRec for a with
 
   describe "IOrd" $ do
 
-    it "XXX: IEq/IOrd" $
+    it "IEq/IOrd" $
       evalString ([r|
 main = gt (Bool.False,Bool.True)
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
@@ -161,7 +161,7 @@ interface IAaa for a where a is IOrd with
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
-    it "f a where a is IOrd" $
+    it "XXX: f a where a is IOrd" $
       evalString ([r|
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False))

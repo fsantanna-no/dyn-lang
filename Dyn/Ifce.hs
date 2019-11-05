@@ -210,19 +210,21 @@ expandDecl _ (Ctrs (_:_)) decl@(DAtr z1 pat1 (ExpWhere (z2,[],econst2))) | isCon
 
 expandDecl _ (Ctrs []) decl@(DAtr _ _ (ExpWhere (_,_,EFunc _ (Ctrs []) _ [] _))) = [decl]
 
-expandDecl ifces ctrs (DAtr z1 pat1
+expandDecl ifces ctrs (DAtr z1 pat1@(PWrite pz pid)
                         (ExpWhere (z2, [],
                           EFunc z3 cs3 tp3 [] whe3))) =
-  [DAtr z1 pat1
+  wrap' ++ [DAtr z1 pat1
     (ExpWhere (z2, [],
       EFunc z2 cz TAny [] $
         ExpWhere (z2, [letDicts],            -- let dIEqa = ...
           EFunc z3 ctrs' tp3 ups3' whe3)))]
   where
-    ctrs' = Ctrs $ ifcesSups ifces (getCtrs cs) where
-              cs = case (ctrs,cs3) of
-                    (_, Ctrs []) -> ctrs
-                    (Ctrs [], _) -> cs3
+    (wrap',ctrs') = case (ctrs,cs3) of
+                    (_, Ctrs []) -> ([],  Ctrs $ ifcesSups ifces (getCtrs ctrs))  -- ifce method
+                    (Ctrs [], _) -> ([w], Ctrs $ ifcesSups ifces (getCtrs cs3))   -- gen function
+                    where
+                      -- f' = f
+                      w = DAtr z1 (PWrite pz (pid++"'")) (ExpWhere (pz,[],EVar pz pid))
 
     -- {daIXxx} // implementation of IOrd for a where a is IXxx
     --ups3' = [] --map (\id -> (id,EUnit pz)) $ L.sort $ map ("da"++) imp_ids
