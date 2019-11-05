@@ -21,6 +21,6 @@ spec = do
 
   describe "Infer" $ do
 
-    it "TODO-start-Type.hs: main=Type x x=Bool.True" $
+    it "main=Type x x=Bool.True" $
       evalString ("main=Type x where x=Bool.True ;")
         `shouldBe` "(Type Bool.True)"

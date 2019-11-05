@@ -176,4 +176,7 @@ instance IType Expr where
   toType _  e = error $ "toType: " ++ toString e
 
 instance IType ExpWhere where
-  toType dsigs (ExpWhere (_,ds,e)) = toType (dsigs++filter isDSig ds) e
+  toType ds (ExpWhere (_,d,e)) = toType (ds++filter isDSig d) e
+
+instance IType Patt where
+  toType ds (PWrite _ id) = snd $ dsigsFind ds id

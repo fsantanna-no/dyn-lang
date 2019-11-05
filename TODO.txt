@@ -1,4 +1,6 @@
-- verificar se fD e fE precisam retornar [decl]
+- usar mapExpr em Poly
+    - depois o mesmo em Type
+
 - TIPOS!
     - ir tirando as anotacoes de tipos
         - e tirando anotacoes de PolySpec.hs

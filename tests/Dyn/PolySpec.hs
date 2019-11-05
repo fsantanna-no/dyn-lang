@@ -24,8 +24,8 @@ spec = do
       evalString ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
-    it "TODO-infer: main::Bool = x where x = maximum;" $
-      evalString ("main::Bool = x where x = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
+    it "XXX-infer: main::Bool = x where x = maximum;" $
+      parseToString ("main::Bool = x where x = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
