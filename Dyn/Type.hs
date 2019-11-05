@@ -24,8 +24,8 @@ apply x y = mapDecls (fD,fE,fPz) x cz [] y where
   --fD _ _ dsigs d@(DSig _ _ (_,TAny,_)) = []   -- removes itself (prevents double decl)
   --fD _ _ dsigs d@(DSig _ _ _)          = [d]
 
-  fD _ _ dsigs datr@(DAtr z (PWrite z1 id1) whe) = [dsig,datr] where
-    dsig = DSig z id1 cz (toType dsigs whe)
+  --fD _ _ dsigs datr@(DAtr z (PWrite z1 id1) whe) = [dsig,datr] where
+    --dsig = DSig z id1 cz (toType dsigs whe)
 
   fD _ _ _ d = [d]
 {-
