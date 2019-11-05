@@ -155,7 +155,7 @@ type MapFs = ( ([Ifce]->Ctrs->[Decl]->Decl->[Decl]),
                ([Ifce]->Ctrs->[Decl]->Expr->Expr  ),
                ([Ifce]->Ctrs->[Decl]->Patt->Patt) )
 fDz _ _ _ d = [d]
-fEz _ _ _ e = ([],e)
+fEz _ _ _ e = e
 fPz _ _ _ p = p
 
 mapDecls :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> [Decl] -> [Decl]

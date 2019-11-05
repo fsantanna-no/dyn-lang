@@ -47,7 +47,7 @@ main = x where
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "XXX: IEq: neq" $
+    it "IEq: neq" $
       parseToString ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
