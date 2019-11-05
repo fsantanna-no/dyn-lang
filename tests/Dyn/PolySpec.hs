@@ -16,11 +16,15 @@ spec = do
 
   describe "IBounded" $ do
 
+    it "main = x \n x::Bool = maximum;" $
+      evalString ("main = x\nx::Bool = maximum" ++ bool_ibounded ++ bool ++ ibounded)
+        `shouldBe` "Bool.True"
+
     it "main = x where x::Bool = maximum;" $
       evalString ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
-    it "XXX: main::Bool = x where x = maximum;" $
+    it "main::Bool = x where x = maximum;" $
       evalString ("main::Bool = x where x = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
@@ -43,8 +47,8 @@ main = x where
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "IEq: neq" $
-      evalString ([r|  -- neq (eq(T,T), F)
+    it "XXX: IEq: neq" $
+      parseToString ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
 ;

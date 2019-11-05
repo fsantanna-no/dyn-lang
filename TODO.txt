@@ -1,4 +1,4 @@
-- inverter ExpWhere exp/decls
+- verificar se fD e fE precisam retornar [decl]
 - TIPOS!
     - ir tirando as anotacoes de tipos
         - e tirando anotacoes de PolySpec.hs

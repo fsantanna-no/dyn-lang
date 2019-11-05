@@ -16,7 +16,7 @@ apply :: [Ifce] -> [Decl] -> [Decl]
 apply x y = mapDecls (fD,fE TAny,fPz) x cz [] y where
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
   fD _ _ _ d@(DSig _ _ _ _)   = [d]
-  fD ifces ctrs dsigs (DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] ++ dsE2' where
+  fD ifces ctrs dsigs d@(DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] ++ dsE2' where
     d' = DAtr z1 pat1 $ ExpWhere (z2,ds2,e2')
     (dsE2',e2') = fE (pattToType dsigs pat1) ifces ctrs dsigs e2
 
@@ -26,28 +26,91 @@ apply x y = mapDecls (fD,fE TAny,fPz) x cz [] y where
 
 -------------------------------------------------------------------------
 
+-- (a,a) vs (Bool.True,Bool.False)  -> [(a,Bool)]
+tpMatch :: Type -> Type -> [(ID_Var,Type)]
+tpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
+  aux :: Type -> Type -> M.Map ID_Var Type
+  aux (TVar id)    TAny                    = M.singleton id TAny
+  aux (TVar id)    (TData (hr:_))          = M.singleton id (TData [hr])
+  aux (TVar id)    (TVar  id') | (id==id') = M.singleton id (TVar  id')
+  --aux (TVar id)    _                       = M.singleton id ["Bool"]
+  aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2) where
+                                              f TAny ttp2              = ttp2
+                                              f ttp1 TAny              = ttp1
+                                              f ttp1 ttp2 | ttp1==ttp2 = ttp1
+  aux x y = M.empty
+  --aux x y = error $ "tpMatch: " ++ show (x,y)
+
+toVars :: Type -> [ID_Var]
+toVars ttp = S.toAscList $ aux ttp where
+  aux TAny            = S.empty
+  aux TUnit           = S.empty
+  aux (TData _)       = S.empty
+  aux (TVar id)       = S.singleton id
+  aux (TFunc inp out) = S.union (aux inp) (aux out)
+  aux (TTuple tps)    = S.unions (map aux tps)
+
+xxx z ifcs suf id = ECall z (EVar z $ id++"'")
+                            (fromList $ map (EVar z) $ map toID $ ifcs) where
+                              toID id = "d" ++ id ++ suf
+
+-------------------------------------------------------------------------
+
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
 fE :: Type -> [Ifce] -> Ctrs -> [Decl] -> Expr -> ([Decl],Expr)
 
 -- pat::Bool = id(maximum)
-fE xtp ifces _ dsigs (EVar z id) = (ds', EVar z id') where
+fE xtp ifces _ dsigs e@(EVar z id) = ([], e') where
 
   (cs,_) = dsigsFind dsigs id
-  cs' = Ctrs $ Ifce.ifcesSups ifces (getCtrs cs) where
+  cs' = Ifce.ifcesSups ifces (getCtrs cs) where
 
-  (id',ds') =
-    if null (getCtrs cs') then
-      (id, [])          -- var is not poly, nothing to do
-    else                -- var is poly ...
-      case xtp of       --   ... and xtp is concrete -> resolve!
-        TData xhr -> case ifceOrGen ifces cs id of
-          Just ifc -> (posid z id, declLocals ifces dsigs z ifc xhr)
-        otherwise -> (id, []) -- xtp is not concrete yet
+  e' =
+    if null cs' then
+      e                                         -- var is not poly, nothing to do
+    else                                        -- var is poly ...
+      case xtp of
+        TData xhr -> xxx z cs' (concat xhr) id  -- xtp is concrete
+        otherwise -> xxx z cs' "a"          id  -- xtp is not concrete yet
 
--------------------------------------------------------------------------
+-- pat::Bool = id(maximum)
+-- pat1::B = id2(neq) e2::(B,B)
+fE xtp ifces _ dsigs (ECall z1 e2@(EVar z2 id2) e3) = ([], ECall z1 e2' e3) where
 
+  (cs2,_) = dsigsFind dsigs id2
+  cs2' = Ifce.ifcesSups ifces (getCtrs cs2) where
+
+  e2' =
+    if null cs2' || err then
+      e2                                          -- var is not poly, nothing to do
+    else                                          -- var is poly ...
+      case traceShow (id2,xhr) xhr of                                 --   ... and xtp is concrete -> resolve!
+        Just xhr  -> xxx z2 cs2' (concat xhr) id2
+        otherwise -> xxx z2 cs2' "a"          id2 -- xtp is not concrete yet
+
+  -- TODO: `err` is required b/c of fE that executes 2x per Expr
+  -- the first execution, which fails, must keep `e2` the same
+  -- (will fix when fE is called only by parents and once)
+  (xhr,err) =
+    case tpMatch (TTuple [inp2,out2])
+                 ({-traceShowX (id2,toString e2,inp2,out2) $-}
+                  TTuple [toType dsigs e2,xtp]) of
+      [("a", TData xhr)] -> (Just xhr, False)
+      [("a", TVar  "a")] -> (Nothing,  False)
+      _ -> (Nothing, True)    -- TODO: b/c of err
+          --x -> error $ show x
+    where
+      -- eq :: (a,a) -> Bool
+      (_,tp2) = dsigsFind dsigs id2
+      [tvar2] = toVars tp2   -- [a]
+
+      -- eq (Bool,Boot)
+      -- a is Bool
+      TFunc inp2 out2 = tp2
+
+{-
 -- pat1::B = id2(neq) e2::(B,B)
 fE xtp ifces _ dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2') e2') where
 
@@ -93,16 +156,18 @@ fE xtp ifces _ dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2'
   e2T'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2]
           where
             -- ["dBoolIEq",...]
-            dicts = map (\ifc -> "d"++concat (fromJust xhr)++ifc) cs2ids'
+            dicts = map (\ifc -> "d"++ifc++concat (fromJust xhr)) cs2ids'
 
   -- eq(daIEq,...)
   e2A'' = ETuple z1 [(fromList $ map (EVar z1) dicts), e2]
           where
             -- ["daIEq",...]
-            dicts = map (\ifc -> "d"++tvar2++ifc) cs2ids'
+            dicts = map (\ifc -> "d"++ifc++tvar2) cs2ids'
+-}
 
 fE _ _ _ _ e = ([], e)
 
+{-
 -- lt (x,y)   // ifce call to IOrd
 -- f  (x,y)   // gen  call that uses IOrd inside it
 ifceOrGen :: [Ifce] -> Ctrs -> ID_Var -> Maybe ID_Ifce
@@ -128,7 +193,7 @@ declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
                       -- ("IEq", "daIEqBool", (eq,neq))
   where
     -- "dIEqBool"
-    dict = "d" ++ concat xhr ++ ifc_id
+    dict = "d" ++ ifc_id ++ concat xhr
     -- [(eq,neq),...]
     dcls = Ifce.ifceToDeclIds $ Ifce.ifceFind ifces ifc_id
 
@@ -145,30 +210,6 @@ declLocals ifces dsigs z ifc_id xhr = f $ (ifc_id,dict,dcls)
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-toVars :: Type -> [ID_Var]
-toVars ttp = S.toAscList $ aux ttp where
-  aux TAny            = S.empty
-  aux TUnit           = S.empty
-  aux (TData _)       = S.empty
-  aux (TVar id)       = S.singleton id
-  aux (TFunc inp out) = S.union (aux inp) (aux out)
-  aux (TTuple tps)    = S.unions (map aux tps)
-
--- (a,a) vs (Bool.True,Bool.False)  -> [(a,Bool)]
-tpMatch :: Type -> Type -> [(ID_Var,Type)]
-tpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
-  aux :: Type -> Type -> M.Map ID_Var Type
-  aux (TVar id)    TAny                    = M.singleton id TAny
-  aux (TVar id)    (TData (hr:_))          = M.singleton id (TData [hr])
-  aux (TVar id)    (TVar  id') | (id==id') = M.singleton id (TVar  id')
-  --aux (TVar id)    _                       = M.singleton id ["Bool"]
-  aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2) where
-                                              f TAny ttp2              = ttp2
-                                              f ttp1 TAny              = ttp1
-                                              f ttp1 ttp2 | ttp1==ttp2 = ttp1
-  aux x y = M.empty
-  --aux x y = error $ "tpMatch: " ++ show (x,y)
-
 mapType :: (Type -> Type) -> Type -> Type
 mapType f TAny             = f $ TAny
 mapType f TUnit            = f $ TUnit
@@ -179,3 +220,4 @@ mapType f (TFunc  inp out) = f $ TFunc  (mapType f inp) (mapType f out)
 
 posid :: Pos -> ID_Var -> ID_Var
 posid (l,c) id = id ++ "_" ++ show l ++ "_" ++ show c
+-}
