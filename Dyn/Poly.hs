@@ -16,9 +16,9 @@ apply :: [Ifce] -> [Decl] -> [Decl]
 apply x y = mapDecls (fD,fE TAny,fPz) x cz [] y where
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
   fD _ _ _ d@(DSig _ _ _ _)   = [d]
-  fD ifces ctrs dsigs d@(DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] ++ dsE2' where
-    d' = DAtr z1 pat1 $ ExpWhere (z2,ds2,e2')
-    (dsE2',e2') = fE (pattToType dsigs pat1) ifces ctrs dsigs e2
+  fD ifces ctrs dsigs d@(DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] where
+    d'  = DAtr z1 pat1 $ ExpWhere (z2,ds2,e2')
+    e2' = fE (pattToType dsigs pat1) ifces ctrs dsigs e2
 
     pattToType :: [Decl] -> Patt -> Type
     pattToType dsigs (PWrite _ id) = snd $ dsigsFind dsigs id
@@ -59,10 +59,10 @@ xxx z ifcs suf id = ECall z (EVar z $ id++"'")
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-fE :: Type -> [Ifce] -> Ctrs -> [Decl] -> Expr -> ([Decl],Expr)
+fE :: Type -> [Ifce] -> Ctrs -> [Decl] -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-fE xtp ifces _ dsigs e@(EVar z id) = ([], e') where
+fE xtp ifces _ dsigs e@(EVar z id) = e' where
 
   (cs,_) = dsigsFind dsigs id
   cs' = Ifce.ifcesSups ifces (getCtrs cs) where
@@ -77,7 +77,7 @@ fE xtp ifces _ dsigs e@(EVar z id) = ([], e') where
 
 -- pat::Bool = id(maximum)
 -- pat1::B = id2(neq) e2::(B,B)
-fE xtp ifces _ dsigs (ECall z1 e2@(EVar z2 id2) e3) = ([], ECall z1 e2' e3) where
+fE xtp ifces _ dsigs (ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
   (cs2,_) = dsigsFind dsigs id2
   cs2' = Ifce.ifcesSups ifces (getCtrs cs2) where
@@ -165,7 +165,7 @@ fE xtp ifces _ dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2'
             dicts = map (\ifc -> "d"++ifc++tvar2) cs2ids'
 -}
 
-fE _ _ _ _ e = ([], e)
+fE _ _ _ _ e = e
 
 {-
 -- lt (x,y)   // ifce call to IOrd
