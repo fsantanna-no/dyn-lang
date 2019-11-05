@@ -34,12 +34,3 @@ apply x y = mapDecls (fD,fE,fPz) x cz [] y where
                 --dsigs' = dsigs ++ filter isDSig ds2
 
   fD _ _ _ d = [d]
-{-
-    if toTType
-    d' = DAtr z1 pat1 $ ExpWhere (z2,e2',ds2)
-    (e2',dsE2') = fE (pattToType dsigs pat1) ifces dsigs e2
-
-    pattToType :: [Decl] -> Patt -> Type
-    pattToType dsigs (PWrite _ id) = dsigFind dsigs id
-    --pattToType _ x = error $ pattToString True x
--}
