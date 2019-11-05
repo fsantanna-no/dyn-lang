@@ -502,7 +502,7 @@ main = lte (Xx.Aa,Xx.Bb)
 --data Xx.Aa
 --data Xx.Bb
 |] ++ iord ++ ieq)
-        `shouldBe` "(line=2, col=8) ERROR : unassigned variable 'dXxIOrd'"
+        `shouldBe` "(line=2, col=8) ERROR : unassigned variable 'dIEqXx'"
 
       it "leap years" $         -- pg 33
         evalString ([r|

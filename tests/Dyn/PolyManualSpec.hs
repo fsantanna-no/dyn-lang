@@ -67,7 +67,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 
   describe "impl w/ extra ctrs" $ do
 
-    it "implementation of IEq for a where a is IXxx" $
+    it "TODO: implementation of IEq for a where a is IXxx" $
       evalString ([r|
 main = (eq' (dIEqIXxx dIXxxXxx)) (Xxx,Xxx)
 
@@ -95,7 +95,7 @@ dixxx_xxx = f where
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "XXX: f = func :: ((a -> Int) where a is IEq) -> eq (x,x)" $
+    it "f = func :: ((a -> Int) where a is IEq) -> eq (x,x)" $
       evalString ([r|
 main = (f dIEqNat) one
 f = func ->
