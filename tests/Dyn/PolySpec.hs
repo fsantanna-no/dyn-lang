@@ -20,6 +20,10 @@ spec = do
       evalString ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
+    it "XXX: main::Bool = x where x = maximum;" $
+      evalString ("main::Bool = x where x = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
+        `shouldBe` "Bool.True"
+
     it "(maximum,minimum)" $
       evalString ([r|
 main = (x,y) where

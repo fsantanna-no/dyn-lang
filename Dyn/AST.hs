@@ -82,7 +82,7 @@ data Expr
   | ECall  Pos Expr Expr              -- (func,arg)   -- f a ; f(a) ; f(1,2)
   | ECase  Pos Expr [(Patt,ExpWhere)] -- (exp,[(pat,whe)] -- case x of A->a B->b _->z
   | EData  Pos ID_Hier Expr           -- (ids,struct) -- B.True () ; Int.1 () ; T.Node (T.Leaf(),T.Leaf())
-  | EType Pos Type
+  | EType  Pos Type
   deriving (Eq, Show)
 
 type Ups = [(ID_Var,Expr)]            -- [(x,1),(y,())]
@@ -194,7 +194,8 @@ mapPatt fs@(_,_,fP) ifces ctrs dsigs p = (dsP', fP ifces ctrs dsigs p') where
 
 mapExpr :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Expr -> ([Decl], Expr)
 mapExpr fs@(_,fE,_) ifces ctrs dsigs e = (dsE'++dsE'', e'') where
-  (dsE'',e'') = fE ifces ctrs dsigs' e' where dsigs' = dsigs ++ filter isDSig dsE'
+  (dsE'',e'') = fE ifces ctrs dsigs' e' where
+                  dsigs' = dsigs ++ filter isDSig dsE'
   (dsE', e')  = aux e
   aux (EFunc  z cs tp ups whe) = ([], EFunc z cs tp ups $ mapWhere fs ifces ctrs' dsigs whe) where
                                   ctrs' = Ctrs $ getCtrs ctrs ++ getCtrs cs

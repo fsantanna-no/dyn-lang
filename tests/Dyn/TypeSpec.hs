@@ -19,6 +19,8 @@ spec = do
       evalString ("main=Type Bool.True")
         `shouldBe` "(Type Bool.True)"
 
+  describe "Infer" $ do
+
     it "XXX: main=Type x x=Bool.True" $
       evalString ("main=Type x where x=Bool.True ;")
         `shouldBe` "(Type Bool.True)"
