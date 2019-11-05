@@ -13,12 +13,13 @@ import qualified Dyn.Ifce as Ifce
 -------------------------------------------------------------------------------
 
 apply :: [Ifce] -> [Decl] -> [Decl]
-apply x y = mapDecls (fD,fEz,fPz) x cz [] y where
+apply ifces decls = mapDecls (fD,fEz,fPz) ifces cz [] decls where
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
-  fD _ _ _ d@(DSig _ _ _ _)   = [d]
+  fD _ _ _ d@(DSig _ _ _ _) = [d]
   fD ifces _ dsigs d@(DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] where
+    dsigs' = dsigs ++ filter isDSig ds2
     d'  = DAtr z1 pat1 $ ExpWhere (z2,ds2,e2')
-    e2' = poly ifces dsigs (pattToType dsigs pat1) e2
+    e2' = poly ifces dsigs' (pattToType dsigs' pat1) e2
 
     pattToType :: [Decl] -> Patt -> Type
     pattToType dsigs (PWrite _ id) = snd $ dsigsFind dsigs id
@@ -35,48 +36,64 @@ poly :: [Ifce] -> [Decl] -> Type -> Expr -> Expr
 poly ifces dsigs xtp e@(EVar z id) = e' where
 
   (cs,_) = dsigsFind dsigs id
-  cs' = Ifce.ifcesSups ifces (getCtrs cs) where
+  cs'    = Ifce.ifcesSups ifces (getCtrs cs) where
 
-  e' =
-    if null cs' then
-      e                                         -- var is not poly, nothing to do
-    else                                        -- var is poly ...
-      case xtp of
-        TData xhr -> xxx z cs' (concat xhr) id  -- xtp is concrete
-        otherwise -> xxx z cs' "a"          id  -- xtp is not concrete yet
-        --(EVar z $ id++"'")
+  e' = case (cs', xtp) of
+    ([], _)        -> e                          -- var is not poly, nothing to do
+    (_, TData xhr) -> xxx z cs' (concat xhr) id  -- xtp is concrete
+    (_, TVar _   ) -> xxx z cs' "a"          id  -- xtp is not concrete yet
+    otherwise      -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
+poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3' where
+
+  e3' = poly ifces dsigs xtp e3
 
   (cs2,_) = dsigsFind dsigs id2
-  cs2' = Ifce.ifcesSups ifces (getCtrs cs2) where
+  cs2'    = Ifce.ifcesSups ifces (getCtrs cs2) where
+  (_,tp2) = dsigsFind dsigs id2
 
-  e2' =
-    if null cs2' then
-      e2                                          -- var is not poly, nothing to do
-    else                                          -- var is poly ...
-      case traceShow (id2,xhr) xhr of                                 --   ... and xtp is concrete -> resolve!
-        Just xhr  -> xxx z2 cs2' (concat xhr) id2
-        otherwise -> xxx z2 cs2' "a"          id2 -- xtp is not concrete yet
+  e2' = case (cs2', tp2) of
+    ([], _)               -> e2      -- var is not poly, nothing to do
+    (_,  TFunc inp2 out2) ->
+      case xhr inp2 out2 of          --   ... and xtp is concrete -> resolve!
+        Left ()           -> e2
+        Right (Just xhr)  -> xxx z2 cs2' (concat xhr) id2
+        Right Nothing     -> xxx z2 cs2' "a"          id2 -- xtp is not concrete yet
+    otherwise             -> e2      -- var is not function, ignore
 
-  xhr = --traceShow (toString xtp, toString e, inp2,out2, toType dsigs e2) $
-    case tpMatch (TTuple [inp2,out2])
-                 ({-traceShowX (id2,toString e2,inp2,out2) $-}
-                  TTuple [toType dsigs e3,xtp]) of
-      [("a", TData xhr)] -> Just xhr
-      [("a", TVar  "a")] -> Nothing
-      --x -> error $ show x
-    where
-      -- eq :: (a,a) -> Bool
-      (_,tp2) = dsigsFind dsigs id2
-      [tvar2] = toVars tp2   -- [a]
+  xhr inp2 out2 = --traceShow (toString e3, (toType dsigs e3,xtp)) $
+    case tpMatch (TTuple [inp2             , out2])
+                 (TTuple [toType dsigs e3' , xtp ]) of
+      [("a", TData xhr)] -> Right $ Just xhr
+      [("a", TVar  "a")] -> Right $ Nothing
+      otherwise          -> Left ()
+        where
+          -- eq :: (a,a) -> Bool
+          [tvar2] = toVars tp2   -- [a]
+          -- a is Bool
 
-      -- eq (Bool,Boot)
-      -- a is Bool
-      TFunc inp2 out2 = tp2
+poly ifces dsigs _ (ETuple z es) = ETuple z $ map (poly ifces dsigs TAny) es
 
-poly _ _ _ e = e
+poly ifces dsigs _ (EFunc  z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2))) =
+  EFunc  z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2')) where
+    e2' = poly ifces dsigs' TAny e2 where
+            dsigs' = dsigs ++ filter isDSig ds2
+
+poly ifces dsigs xtp (ECall z1 (ECons z2 hr2) e3) =
+  ECall z1 (ECons z2 hr2) e3' where
+    e3' = poly ifces dsigs TAny e3
+
+poly ifces dsigs xtp (ECase z e l) = ECase z e' l' where
+  e' = poly ifces dsigs TAny e
+  l' = map f l where
+        -- TODO: pat
+        f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z,ds,poly ifces dsigs xtp e))
+
+poly _ _ _ e@(EArg  _)   = e
+poly _ _ _ e@(ECons _ _) = e
+
+poly _ _ _ e = error $ show e
 
 {-
 -- pat1::B = id2(neq) e2::(B,B)
@@ -110,8 +127,7 @@ fE xtp ifces _ dsigs (ECall z1 (EVar z2 id2) e2) = (ds2', ECall z1 (EVar z2 id2'
   -- the first execution, which fails, must keep `e2` the same
   -- (will fix when fE is called only by parents and once)
   (xhr,err) = case tpMatch (TTuple [inp2,out2])
-                      ({-traceShowX (id2,toString e2,inp2,out2) $-}
-                        TTuple [toType dsigs e2,xtp])
+                           (TTuple [toType dsigs e2,xtp])
         of
           [("a", TData xhr)] -> (Just xhr, False)
           [("a", TVar  "a")] -> (Nothing,  False)
@@ -204,6 +220,7 @@ tpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
                                               f TAny ttp2              = ttp2
                                               f ttp1 TAny              = ttp1
                                               f ttp1 ttp2 | ttp1==ttp2 = ttp1
+  aux (TTuple ts1) TAny                    = aux (TTuple ts1) (TTuple $ replicate (length ts1) TAny)
   aux x y = M.empty
   --aux x y = error $ "tpMatch: " ++ show (x,y)
 

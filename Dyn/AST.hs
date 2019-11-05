@@ -176,8 +176,8 @@ mapWhere fs ifces ctrs dsigs (ExpWhere (z,ds,e)) = ExpWhere (z, ds', e')
     e'  = mapExpr  fs ifces ctrs dsigs'' e
     ds' = mapDecls fs ifces ctrs dsigs'  ds
 
-    dsigs''   = dsigs' ++ filter isDSig ds'
-    dsigs'    = dsigs  ++ filter isDSig ds
+    dsigs''   = dsigs ++ filter isDSig ds'
+    dsigs'    = dsigs ++ filter isDSig ds
 
 mapPatt :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Patt -> Patt
 mapPatt fs@(_,_,fP) ifces ctrs dsigs p = fP ifces ctrs dsigs (aux p) where

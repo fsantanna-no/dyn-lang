@@ -48,7 +48,7 @@ main = x where
         `shouldBe` "Bool.True"
 
     it "IEq: neq" $
-      parseToString ([r|  -- neq (eq(T,T), F)
+      evalString ([r|  -- neq (eq(T,T), F)
 main = x where
   x :: Bool = neq (Bool.True,Bool.False)
 ;
@@ -65,7 +65,7 @@ main = x where
 
   describe "IRec-IInd" $ do
 
-    it "IInd" $
+    it "XXX: IInd" $
       evalString ([r|
 main = f Bool.True
 
