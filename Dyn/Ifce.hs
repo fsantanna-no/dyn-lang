@@ -101,7 +101,7 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ dict ++ decls' wher
                       f id | (id==ifc_id) = patt
                            | otherwise    = PAny z
               patt = PCall z (PCons z ["Dict",ifc_id])
-                             (PTuple z $ map f meIds) where
+                             (fromList $ map f meIds) where
                       f x = bool (PAny z) (PWrite z id) (id==x)
               exp  = ExpWhere (z,EArg z,[])
 

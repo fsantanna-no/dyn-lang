@@ -75,7 +75,7 @@ interface IInd for a with
 |])
         `shouldBe` "()"
 
-    it "XXX: IRec-rec" $
+    it "IRec-rec" $
       evalString ([r|
 main = (rec' dIRecNat) (Nat.Succ Nat.Zero)
 
@@ -138,7 +138,7 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
-    it "XXX: IEq/IOrd/IAaa" $
+    it "IEq/IOrd/IAaa" $
       evalString ([r|
 main = (f' (dIAaaBool,dIEqBool,dIOrdBool)) (Bool.True,Bool.False)
 
