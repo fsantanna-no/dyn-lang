@@ -155,10 +155,10 @@ interface IAaa for a where a is IOrd with
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
-    it "XXX: f a where a is IOrd" $
+    it "f a where a is IOrd" $
       evalString ([r|
-main = ((f' (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
-        (f' (dIEqBool,dIOrdBool)) (Bool.False,Bool.False))
+main = ((f (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
+        (f (dIEqBool,dIOrdBool)) (Bool.False,Bool.False))
 f = func :: ((a,a) -> Bool) where a is IOrd ->
   (gt' (dIEqa,dIOrda)) ...
 ;

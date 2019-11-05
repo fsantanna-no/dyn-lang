@@ -95,12 +95,16 @@ dixxx_xxx = f where
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
-    it "f = func :: ((a -> Int) where a is IEq) {a,b} -> eq (x,x)" $
+    it "XXX: f = func :: ((a -> Int) where a is IEq) -> eq (x,x)" $
       evalString ([r|
-main = f (nat_ieq, one)
+main = (f dIEqNat) one
 f = func ->
-  eq (Dict.IEq (eq,neq),x,x) where
-    (Dict.IEq (eq,neq), x) = ...
+  let dIEqa = ... in
+    func {dIEqa} ->
+      (eq' dIEqa) (x,x) where
+        x = ...
+      ;
+    ;
   ;
 ;
 |] ++ prelude)
@@ -109,7 +113,7 @@ f = func ->
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-prelude = nat_iord ++ nat_ieq ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool
+prelude = nat_ieq ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool
 
 -- interface IBounded(minimum,maximum)
 ibounded = [r|
@@ -276,25 +280,5 @@ bool_iord = [r|
 
 -- instance IEq (Int)
 nat_ieq = [r|
-  nat_ieq = Dict.IEq (eq,neq)
-|]
-
--- implementation IOrd for Nat
-nat_iord = [r|
-  nat_iord = Dict.IOrd (lt,lte,gt,gte) where
-    lt = func ->
-      case (x,y) of
-        (Nat.Zero,     Nat.Zero)     -> Bool.False
-        (Nat.Zero,     _)            -> Bool.True
-        (Nat.Succ _,   Nat.Zero)     -> Bool.False
-        (Nat.Succ =x', Nat.Succ =y') -> lt (dieq,diord,x',y')
-      ; where
-        (x,y) = ...
-        -- AUTO
-        ... = (p1,p2)
-        Dict.IOrd (lt,_,_,_) = diord
-        (dieq,diord,p1,p2)   = ...
-      ;
-    ;
-  ;
+  dIEqNat = Dict.IEq (eq_IEq,neq_IEq)
 |]
