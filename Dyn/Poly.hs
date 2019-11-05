@@ -73,16 +73,17 @@ poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3' where
           [tvar2] = toVars tp2   -- [a]
           -- a is Bool
 
+poly ifces dsigs xtp (ECall z1 e2 e3) =
+  ECall z1 e2' e3' where
+    e2' = poly ifces dsigs TAny e2
+    e3' = poly ifces dsigs TAny e3
+
 poly ifces dsigs _ (ETuple z es) = ETuple z $ map (poly ifces dsigs TAny) es
 
 poly ifces dsigs _ (EFunc  z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2))) =
   EFunc  z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2')) where
     e2' = poly ifces dsigs' TAny e2 where
             dsigs' = dsigs ++ filter isDSig ds2
-
-poly ifces dsigs xtp (ECall z1 (ECons z2 hr2) e3) =
-  ECall z1 (ECons z2 hr2) e3' where
-    e3' = poly ifces dsigs TAny e3
 
 poly ifces dsigs xtp (ECase z e l) = ECase z e' l' where
   e' = poly ifces dsigs TAny e
@@ -91,7 +92,9 @@ poly ifces dsigs xtp (ECase z e l) = ECase z e' l' where
         f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z,ds,poly ifces dsigs xtp e))
 
 poly _ _ _ e@(EArg  _)   = e
+poly _ _ _ e@(EUnit _)   = e
 poly _ _ _ e@(ECons _ _) = e
+poly _ _ _ e@(EType _ _) = e
 
 poly _ _ _ e = error $ show e
 

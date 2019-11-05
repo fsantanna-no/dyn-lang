@@ -65,7 +65,7 @@ main = x where
 
   describe "IRec-IInd" $ do
 
-    it "XXX: IInd" $
+    it "IInd" $
       evalString ([r|
 main = f Bool.True
 
@@ -129,7 +129,7 @@ interface IRec for a with
 
   describe "IOrd" $ do
 
-    it "IEq/IOrd" $
+    it "XXX: IEq/IOrd" $
       evalString ([r|
 main = gt (Bool.False,Bool.True)
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
