@@ -81,7 +81,7 @@ interface IInd for a with
 |])
         `shouldBe` "()"
 
-    it "XXX: IRec-rec" $
+    it "IRec-rec" $
       evalString ([r|
 main = rec (Nat.Succ Nat.Zero)
 

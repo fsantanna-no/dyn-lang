@@ -38,8 +38,6 @@ ieq = [r|
     eq  :: ((a,a) -> Bool)
     neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
       not (eq (x,y)) where
-        x :: a
-        y :: a
         (x,y) = ...
       ;
     ;
@@ -55,22 +53,16 @@ iord = [r|
 
     lte = func :: ((a,a) -> Bool) ->
       or (lt (x,y), eq (x,y)) where
-        x :: a
-        y :: a
         (x,y) = ...
       ;
     ;
     gt = func :: ((a,a) -> Bool) ->
       not (lte (x,y)) where
-        x :: a
-        y :: a
         (x,y) = ...
       ;
     ;
     gte = func :: ((a,a) -> Bool) ->
       or (gt (x,y), eq (x,y)) where
-        x :: a
-        y :: a
         (x,y) = ...
       ;
     ;
@@ -123,8 +115,6 @@ bool_ieq = [r|
   implementation of IEq for Bool with
     eq = func :: ((Bool,Bool) -> Bool) ->
       or (and (x,y), (and (not x, not y))) where
-        x :: Bool
-        y :: a
         (x,y) = ...
       ;
     ;
@@ -140,8 +130,6 @@ bool_iord = [r|
         (Bool.True,  Bool.False) -> Bool.False
         (Bool.True,  Bool.True)  -> Bool.False
       ; where
-        x :: Bool
-        y :: a
         (x,y) = ...
       ;
     ;
@@ -208,7 +196,6 @@ char = [r|
 
   isLower :: (Char -> Bool) = func ->
     and (gte (c,Char.Aa), lte (c,Char.Dd)) where
-      c :: Char
       c = ...
     ;
   ;
@@ -218,9 +205,8 @@ char = [r|
       Bool.True  -> chr (sub (ord c, off))
       Bool.False -> c
     ; where
-      c :: Char
-      c = ...
-      off :: Nat = sub (ord Char.Aa, ord Char.AA)
+      c   = ...
+      off = sub (ord Char.Aa, ord Char.AA)
     ;
   ;
 
@@ -308,13 +294,11 @@ nat = [r|
     ;
 
   rem =
-    func ->
+    func :: ((Nat,Nat)->Nat) ->
       case lt (x,y) of
         Bool.True  -> x
         Bool.False -> rem (sub (x,y), y)
       ; where
-        x :: Nat
-        y :: Nat
         (x,y) = ...
       ;
     ;
