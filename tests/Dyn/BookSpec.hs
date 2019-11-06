@@ -1838,7 +1838,9 @@ return (neg ((((mkRat (10,2)) -- (mkRat (0,1))) ++ (mkRat (1,-5))) ** (mkRat (-5
     --describe "Chapter 3.7 - Church numbers:" $ do                   -- pg 86
 -------------------------------------------------------------------------------
 
-  describe "Chapter 4 - Lists:" $ do           -- pg 91
+-}
+
+  describe "XXX: Chapter 4 - Lists:" $ do           -- pg 91
 
 -------------------------------------------------------------------------------
 
@@ -1847,24 +1849,15 @@ return (neg ((((mkRat (10,2)) -- (mkRat (0,1))) ++ (mkRat (1,-5))) ** (mkRat (-5
     describe "Chapter 4.1.1 - List as a datatype:" $ do       -- pg 92
 
       it "List" $                   -- pg 92
-        (run True $
-          [r|
-data List for a
-data List.Nil
-data List.Cons with (a, List of a)
-return 10 (List.Cons) List.Nil
-|])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
+        evalString ([r|
+--data List for a
+--data List.Nil
+--data List.Cons with (a, List of a)
+main = List.Cons (Nat.Succ Nat.Zero, List.Nil)
+|] ++ nat)
+          `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),List.Nil))"
 
-      it "List" $                   -- pg 92
-        (run True $
-          [r|
-data List for a
-data List.Nil
-data List.Cons with (a, List of a)
-return List.Cons (10, List.Nil)
-|])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
+{-
 
       it "TODO: List `:´" $                   -- pg 92
         (run True $

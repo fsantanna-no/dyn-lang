@@ -1,13 +1,12 @@
+- dynamic?
+    - Listas em Book
+    - primeiro ver se da erro tentando lista de tipos heterogeneos
+
 - tratar Data patt
-- remover tipos de nat_iord
-- TIPOS!
-    - ir tirando as anotacoes de tipos
-        - e tirando anotacoes de PolySpec.hs
-    - necessario p/ TODO de poly
+    - precisa de "data" declaration
+    - remover tipos de nat_iord
+
 - poly
-    - TODO em Poly:
-        - passando poly fc para concrete precisa de closure
-            - precisa da parte de tipos para comparar a f passada com a f esperada
     - multiplas variaveis
 
 - voltar ao Book

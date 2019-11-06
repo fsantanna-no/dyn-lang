@@ -152,7 +152,7 @@ implementation of IAaa for Bool with
 
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
-  f = func :: ((a,a) -> Bool) -> lt (x,y) where x::a y::a (x,y)=... ;;
+  f = func :: ((a,a) -> Bool) -> lt (x,y) where (x,y)=... ;;
 ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
@@ -162,7 +162,7 @@ interface IAaa for a where a is IOrd with
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False))
 f :: ((a,a) -> Bool) where a is IOrd
-f = func :: ((a,a) -> Bool) where a is IOrd -> gt (x,y) where x::a y::a (x,y)=...;;
+f = func :: ((a,a) -> Bool) where a is IOrd -> gt (x,y) where (x,y)=...;;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -171,7 +171,7 @@ f = func :: ((a,a) -> Bool) where a is IOrd -> gt (x,y) where x::a y::a (x,y)=..
 main = (ff1 (lte, (Bool.True,Bool.False)),
         ff2 (gte, (Bool.True,Bool.True )) ) where           -- gte must become closure
   ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
-  ff1 = func -> f (x,y) where x::a y::a (f,(x,y))=... ;;
+  ff1 = func -> f (x,y) where (f,(x,y))=... ;;
 
   ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closure to hold actual dict
   ff2 = func -> f ps where (f,ps)=... ;;
@@ -194,8 +194,6 @@ implementation of IOrd for a where a is IAaa with
   lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
     lt (f x, f y) where
-      x :: a
-      y :: a
       (x,y) = ...
     ;
   ;
