@@ -596,8 +596,6 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
       _        -> Triangle.Scalene
     ;
   ; where
-    x :: Nat
-    y :: Nat
     z :: Nat
     (x,y,z) = ...
   ;
