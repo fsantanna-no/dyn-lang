@@ -558,7 +558,7 @@ impl = func ->
 |] ++ bool)
           `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True)"
 
-      it "XXX: analyse triangles" $         -- pg 35
+      it "analyse triangles" $         -- pg 35
         evalString ([r|
 main = ( analyse2 (add(twenty,ten),twenty,ten)  ,
          analyse2 (ten,add(twenty,five),twenty) ,
@@ -586,7 +586,7 @@ analyse2 :: ((Nat,Nat,Nat) -> Triangle) = func ->
   ;
 ;
 
-analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
+analyse = func :: ((Nat,Nat,Nat) -> Triangle) ->
   case lte (add (x,y), z) of
     Bool.True  -> Triangle.Failure
     Bool.False -> case (x,y,z) of
@@ -596,7 +596,6 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
       _        -> Triangle.Scalene
     ;
   ; where
-    z :: Nat
     (x,y,z) = ...
   ;
 ;
@@ -618,7 +617,7 @@ twenty = mul (two,ten)
 --data Triangle.Equilateral
 --data Triangle.Scalene
 
-sort3 :: ((Nat,Nat,Nat) -> (Nat,Nat,Nat)) = func ->
+sort3 = func :: ((Nat,Nat,Nat) -> (Nat,Nat,Nat)) ->
   case ( lt(x,y) , lt(x,z) , lt(y,x) , lt(y,z) ) of
     (Bool.True, Bool.True, _, Bool.True)  -> (x,y,z)
     (Bool.True, Bool.True, _, Bool.False) -> (x,z,y)
@@ -627,14 +626,11 @@ sort3 :: ((Nat,Nat,Nat) -> (Nat,Nat,Nat)) = func ->
     (Bool.True,  _, _, _)                 -> (z,x,y)
     (Bool.False, _, _, _)                 -> (z,y,x)
   ; where
-    x :: Nat
-    y :: Nat
-    z :: Nat
     (x,y,z) = ...
   ;
 ;
 
-analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
+analyse = func :: ((Nat,Nat,Nat) -> Triangle) ->
   case lte (add (x,y), z) of
     Bool.True  -> Triangle.Failure
     Bool.False -> case (x,y,z) of
@@ -644,9 +640,6 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
       _        -> Triangle.Scalene
     ;
   ; where
-    x :: Nat
-    y :: Nat
-    z :: Nat
     (x,y,z) = ...
   ;
 ;
@@ -661,21 +654,21 @@ analyse :: ((Nat,Nat,Nat) -> Triangle) = func ->
         evalString ([r|
 main = (xeq,xgt,cs,low,cp1,cp2,nx,ok)
 
-xeq :: Bool = not (matches (c1,c2))
-xgt :: Bool = lt (c1,c2)
-cs  :: Bool = lt (Char.AA, Char.Aa)
-low :: Bool = and (not (isLower Char.AA), isLower Char.Dd)
-cp1 :: Bool = matches (capitalize Char.BB, Char.BB)
-cp2 :: Bool = matches (capitalize Char.Cc, Char.CC)
-nx  :: Bool = and (and (nx1,nx2) , and (nx3,nx4))
-nx1 :: Bool = matches (nextlet Char.Cc, Char.Dd)
-nx2 :: Bool = matches (nextlet Char.AA, Char.BB)
-nx3 :: Bool = matches (nextlet Char.DD, Char.AA)
-nx4 :: Bool = matches (nextlet Char.Dd, Char.Aa)
-ok  :: Bool = matches (sum,ten)
-sum :: Nat  = add (add (add (ord c1,ord c2), ord Char.CC), ord Char.DD)
-c1  :: Char = Char.AA
-c2  :: Char = Char.BB
+xeq = not (matches (c1,c2))
+xgt = lt (c1,c2)
+cs  = lt (Char.AA, Char.Aa)
+low = and (not (isLower Char.AA), isLower Char.Dd)
+cp1 = matches (capitalize Char.BB, Char.BB)
+cp2 = matches (capitalize Char.Cc, Char.CC)
+nx  = and (and (nx1,nx2) , and (nx3,nx4))
+nx1 = matches (nextlet Char.Cc, Char.Dd)
+nx2 = matches (nextlet Char.AA, Char.BB)
+nx3 = matches (nextlet Char.DD, Char.AA)
+nx4 = matches (nextlet Char.Dd, Char.Aa)
+ok  = matches (sum,ten)
+sum = add (add (add (ord c1,ord c2), ord Char.CC), ord Char.DD)
+c1  = Char.AA
+c2  = Char.BB
 |] ++ prelude)
         `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
 
@@ -683,7 +676,7 @@ c2  :: Char = Char.BB
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
-      it "enum" $         -- pg 38
+      it "XXX: enum" $         -- pg 38
         evalString ([r|
 main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
 
@@ -698,24 +691,24 @@ dsat :: Day = fromEnum (toEnum Day.Sat)
 --data Day.Fri
 --data Day.Sat
 
-xeq :: Bool = not (matches (d1,d2))
-xgt :: Bool = lt  (d1, d2)
-wd1 :: Bool = workday Day.Sun
-wd2 :: Bool = workday Day.Fri
-aft :: Bool = and (matches (dayAfter Day.Sun,Day.Mon), matches (dayAfter Day.Sat, Day.Sun))
-sum :: Nat  = add (add (add (toEnum d1,toEnum d2),toEnum Day.Sat), toEnum Day.Wed)
+xeq = not (matches (d1,d2))
+xgt = lt  (d1, d2)
+wd1 = workday Day.Sun
+wd2 = workday Day.Fri
+aft = and (matches (dayAfter Day.Sun,Day.Mon), matches (dayAfter Day.Sat, Day.Sun))
+sum = add (add (add (toEnum d1,toEnum d2),toEnum Day.Sat), toEnum Day.Wed)
 
-d1 :: Day = Day.Sun
-d2 :: Day = Day.Mon
+d1 = Day.Sun
+d2 = Day.Mon
 
-workday = func :: (Day -> Bool) ->
-  let day :: Day = ... in
+workday = func ->
+  let day = ... in
     and (gte (day,Day.Mon), lte(day,Day.Fri))
   ;
 ;
 
 dayAfter = func :: (Day -> Day) ->
-  let day :: Day = ... in
+  let day = ... in
     ret where
       ret :: Day = fromEnum (rem (add (toEnum day,one), seven))
     ;
@@ -723,7 +716,7 @@ dayAfter = func :: (Day -> Day) ->
 ;
 
 implementation of IEnum for Day with
-  toEnum = func :: (Day -> Nat) ->
+  toEnum = func ->
     case ... of
       Day.Sun -> zero
       Day.Mon -> one
@@ -735,7 +728,7 @@ implementation of IEnum for Day with
     ;
   ;
 
-  fromEnum = func :: (Nat -> Day) ->
+  fromEnum = func ->
     case ... of
       ~zero  -> Day.Sun
       ~one   -> Day.Mon
@@ -751,20 +744,18 @@ implementation of IEnum for Day with
 implementation of IOrd for Day with
   lt = func :: ((Day,Day) -> Bool) ->
     let
-      x :: Day
-      y :: Day
       (x,y) = ...
     in
       lt (x', y') where
-        x' :: Nat = toEnum x
-        y' :: Nat = toEnum y
+        x' = toEnum x
+        y' = toEnum y
       ;
     ;
   ;
 ;
 
 implementation of IEq for Day with
-  eq = func :: ((Day,Day) -> Bool) ->
+  eq = func ->
     matches ...
   ;
 ;
