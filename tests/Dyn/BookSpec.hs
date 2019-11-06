@@ -688,7 +688,7 @@ c2  :: Char = Char.BB
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
-      it "XXX: enum" $         -- pg 38
+      it "enum" $         -- pg 38
         evalString ([r|
 main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
 

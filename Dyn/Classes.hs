@@ -178,6 +178,9 @@ instance IType Expr where
                                 TAny        -> TAny
                                 TFunc _ out -> out
                                 TData hr    -> TData hr
+  toType ds (ECase  _ _ cs) = foldr f TAny $ map ((toType ds).snd) cs where
+                                f tp1 TAny               = tp1
+                                f tp1 tp2 | (tp1 == tp2) = tp1
   toType _  (EType  _ _)   = TData ["Type"]
   toType _  e = error $ "toType: " ++ toString e
 
@@ -186,5 +189,5 @@ instance IType ExpWhere where
 
 instance IType Patt where
   --toType _  (PUnit  _)    = TUnit
-  toType ds (PWrite _ id) = snd $ dsigsFind ds id
-  toType ds (PTuple _ ps) = TTuple $ map (toType ds) ps
+  toType ds (PWrite _ id)   = snd $ dsigsFind ds id
+  toType ds (PTuple _ ps)   = TTuple $ map (toType ds) ps

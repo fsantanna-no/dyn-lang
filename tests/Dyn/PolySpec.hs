@@ -16,16 +16,12 @@ spec = do
 
   describe "IBounded" $ do
 
-    it "main = x \n x::Bool = maximum;" $
+    it "main = x // x::Bool = maximum;" $
       evalString ("main = x\nx::Bool = maximum" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "main = x where x::Bool = maximum;" $
       evalString ("main = x where x::Bool = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
-        `shouldBe` "Bool.True"
-
-    it "XXX-infer: main::Bool = x where x = maximum;" $
-      parseToString ("main::Bool = x where x = maximum;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
