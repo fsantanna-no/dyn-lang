@@ -59,6 +59,7 @@ keywords = [
     "where",
 
     -- Xtensions
+    "data",
     "let",
     "for",
     "implementation",
@@ -413,6 +414,22 @@ where_ = do
 
 -------------------------------------------------------------------------------
 
+data_ :: Parser Data
+data_ = do
+  pos  <- toPos <$> getPosition
+  void <- try $ tk_key "data"
+  hr   <- tk_hier
+  ofs  <- option [] $ try $ tk_key "for" *> (list (tk_sym "") tk_var)
+  cs   <- option (Ctrs []) ctrs
+  tps  <- option [] $ do
+            void <- try $ tk_key "with"
+            tps  <- list (tk_sym "") type_
+            void <- string ";"
+            void <- optional $ try $ tk_key "data"
+            spc
+            return tps
+  return $ Data (pos, hr, cs, tps)
+
 ifce :: Parser Ifce
 ifce = do
   pos  <- toPos <$> getPosition
@@ -427,15 +444,7 @@ ifce = do
   void <- string ";"
   void <- optional $ try $ tk_key "interface"
   spc
-  let
-    f (Ctrs []) = Ctrs []
-    f (Ctrs l)  = Ctrs l
-{-
-    f (Ctrs [])                 = Ctrs [(var, [])]
-    f (Ctrs [(id,l)]) | id==var = Ctrs [(var,  l)]
-    f _ = error $ "TODO: multiple vars or unmatching var"
--}
-  return $ Ifce (pos, cls, f cs, ds)
+  return $ Ifce (pos, cls, cs, ds)
 
 impl :: Parser Impl
 impl = do
@@ -459,8 +468,9 @@ prog = do
   pos   <- toPos <$> getPosition
   spc
   globs <- concat <$> list (tk_sym "") (
-            (fmap (GDecl<$>) (try decl)) <|>
-            (singleton <$> GIfce <$> try ifce) <|>
+            (fmap (GDecl<$>) (try decl))        <|>
+            (singleton <$> GData <$> try data_) <|>
+            (singleton <$> GIfce <$> try ifce)  <|>
             (singleton <$> GImpl <$> impl) -- <|>
            )
   void <- eof

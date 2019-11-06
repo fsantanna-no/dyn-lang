@@ -110,6 +110,9 @@ data Decl = DSig Pos ID_Var Ctrs Type
           | DAtr Pos Patt ExpWhere
   deriving (Eq, Show)
 
+newtype Data = Data (Pos, ID_Hier, Ctrs, [Type])
+  deriving (Eq, Show)
+
 newtype Ifce = Ifce (Pos, ID_Ifce, Ctrs, [Decl])
   deriving (Eq, Show)
 
@@ -119,7 +122,7 @@ newtype Impl = Impl (Pos, ID_Ifce, Ctrs, Type, [Decl])
 newtype Prog = Prog [Glob]
 
 -- top-level global declarations
-data Glob = GDecl Decl | GIfce Ifce | GImpl Impl
+data Glob = GDecl Decl | GData Data | GIfce Ifce | GImpl Impl
 
 -------------------------------------------------------------------------------
 

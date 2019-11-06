@@ -157,9 +157,17 @@ instance IString ExpWhere where
 
 -------------------------------------------------------------------------------
 
+instance IString Data where
+  toString (Data (_,hr,Ctrs [],[])) = "data " ++ intercalate "." hr
+
+  toStringI _ _ = error "TODO"
+
+-------------------------------------------------------------------------------
+
 instance IString Prog where
   toString (Prog glbs) = concatMap f glbs where
                           f (GDecl decl) = toString decl ++ "\n"
+                          f (GData dat_) = toString dat_ ++ "\n"
                           f (GIfce ifce) = error "TODO"
                           f (GImpl impl) = error "TODO"
   toStringI _ _ = error "TODO"

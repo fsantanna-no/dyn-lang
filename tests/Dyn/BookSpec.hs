@@ -1840,7 +1840,7 @@ return (neg ((((mkRat (10,2)) -- (mkRat (0,1))) ++ (mkRat (1,-5))) ** (mkRat (-5
 
 -}
 
-  describe "XXX: Chapter 4 - Lists:" $ do           -- pg 91
+  describe "Chapter 4 - Lists:" $ do           -- pg 91
 
 -------------------------------------------------------------------------------
 
@@ -1858,7 +1858,6 @@ main = List.Cons (Nat.Succ Nat.Zero, List.Nil)
           `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),List.Nil))"
 
 {-
-
       it "TODO: List `:´" $                   -- pg 92
         (run True $
           [r|
@@ -1870,40 +1869,37 @@ set :: = List.Cons
 return 10 :: (List.Nil)
 |])
         `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
+-}
 
-      it "List: ==" $                   -- pg 93
-        (run True $
-          pre ++ [r|
-data List for a
+      it "XXX: List: ==" $                   -- pg 93
+        evalString ([r|
+main = (neq (List.Cons (ten,List.Nil), List.Cons (ten,List.Nil)),
+         eq (List.Cons (ten,List.Nil), List.Cons (ten,List.Nil)),
+         eq (List.Cons (two,List.Nil), List.Cons (ten,List.Nil)))
+
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
-implementation of IEqualable for List of a where (a is IEqualable) with end
+implementation of IEq for List of a where (a is IEq) with
+  eq = func :: ((a,a) -> Bool) ->
+    matches ...
+  ;
+;
 
-func eq (l1,l2) : ((List of a, List of a) -> Bool) do
-  if l1 matches List.Nil then
-    if l2 matches List.Nil then
-      return Bool.True
-    else
-      return Bool.False
-    end
-  else/if l2 matches List.Nil then
-      return Bool.False
-  else
-      var (v1 ,v2 ) : (a,         a)
-      var (l1_,l2_) : (List of a, List of a)
-      set! List.Cons (v1,l1_) = l1
-      set! List.Cons (v2,l2_) = l2
-      return (v1 === v2) and (l1_ === l2_)
-  end
-end
+eq = func :: ((List of a, List of a) -> Bool) ->
+  case ... of
+    (List.Nil, List.Nil) -> Bool.True
+    (List.Nil, _)        -> Bool.False
+    (_       , List.Nil) -> Bool.False
 
-return ((10 (List.Cons) List.Nil) =/= (List.Cons (10, List.Nil)),
-        (10 (List.Cons) List.Nil) eq  (List.Cons (10, List.Nil)),
-        (10 (List.Cons) List.Nil) eq  (List.Cons (11, List.Nil)))
+    (List.Cons (=v1,=l1) , List.Cons (=v2,=l2)) -> and (eq (v1,v2), eq (l1,l2))
+  ;
+;
 |])
-        `shouldBe` Right (ETuple [EData ["Bool","False"] EUnit,EData ["Bool","True"] EUnit,EData ["Bool","False"] EUnit])
+        `shouldBe` "(Bool.False,Bool.True,Bool.False)"
 
+{-
       it "List: null" $                   -- pg 93
         (run True $
           [r|

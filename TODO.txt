@@ -1,3 +1,5 @@
+- Env = Data/Impl/Ifce/Decls
+- list receber string vs tk_sym
 - dynamic?
     - Listas em Book
     - primeiro ver se da erro tentando lista de tipos heterogeneos
