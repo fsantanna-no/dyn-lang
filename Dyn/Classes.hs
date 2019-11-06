@@ -132,6 +132,11 @@ pattToString _ (PCons  _ hier)      = intercalate "." hier
 pattToString s (PTuple _ es)        = "(" ++ intercalate "," (map (pattToString s) es) ++ ")"
 pattToString s (PCall  _ p1 p2)     = "(" ++ pattToString s p1 ++ " " ++ pattToString s p2 ++ ")"
 
+instance IString Patt where
+  toString decl = toStringI 0 decl
+
+  toStringI spc pat = pattToString True pat
+
 -------------------------------------------------------------------------------
 
 instance IString Decl where
@@ -164,6 +169,7 @@ instance IString Prog where
 
 instance IType Expr where
   toType _  (EArg   _)     = TAny
+  toType _  (EUnit  _)     = TUnit
   toType ds (EVar   _ id)  = snd $ dsigsFind ds id
   toType _  (ECons  _ hr)  = TData hr
   toType _  (EFunc  _ _ tp _ _) = tp
@@ -179,4 +185,6 @@ instance IType ExpWhere where
   toType ds (ExpWhere (_,d,e)) = toType (ds++filter isDSig d) e
 
 instance IType Patt where
+  --toType _  (PUnit  _)    = TUnit
   toType ds (PWrite _ id) = snd $ dsigsFind ds id
+  toType ds (PTuple _ ps) = TTuple $ map (toType ds) ps
