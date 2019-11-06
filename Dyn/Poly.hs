@@ -8,6 +8,7 @@ import qualified Data.Map  as M
 
 import Dyn.AST
 import Dyn.Classes
+import Dyn.Map
 import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
@@ -77,8 +78,11 @@ poly ifces dsigs _ (ETuple z es) = ETuple z $ map (poly ifces dsigs TAny) es
 
 poly ifces dsigs _ (EFunc  z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2))) =
   EFunc z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2')) where
-    e2' = poly ifces dsigs' TAny e2 where
+    e2' = poly ifces dsigs' tp2 e2 where
             dsigs' = dsigs ++ filter isDSig ds2
+            tp2 = case tp1 of
+                    TFunc _ out -> out
+                    otherwise   -> TAny
 
 poly ifces dsigs xtp (ECase z e l) = ECase z e' l' where
   e' = poly ifces dsigs TAny e

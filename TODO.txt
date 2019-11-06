@@ -1,3 +1,5 @@
+- tentar remover poly recursivo
+    - usar fE?
 - usar mapExpr em Poly
     - depois o mesmo em Type
         - na verdade fazer manual em Type e talvez remover a passagem de tipo

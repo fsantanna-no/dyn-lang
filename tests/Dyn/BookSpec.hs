@@ -709,9 +709,7 @@ workday = func ->
 
 dayAfter = func :: (Day -> Day) ->
   let day = ... in
-    ret where
-      ret :: Day = fromEnum (rem (add (toEnum day,one), seven))
-    ;
+    fromEnum (rem (add (toEnum day,one), seven))
   ;
 ;
 

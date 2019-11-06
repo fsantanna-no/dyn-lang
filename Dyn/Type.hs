@@ -5,6 +5,7 @@ import qualified Data.List as L
 
 import Dyn.AST
 import Dyn.Classes
+import Dyn.Map
 
 -------------------------------------------------------------------------------
 
@@ -13,9 +14,9 @@ apply x y = mapDecls (fD,fE,fPz) x cz [] y where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
-  fE :: [Ifce] -> Ctrs -> [Decl] -> Expr -> Expr
-  fE _ _ dsigs (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
-  fE _ _ _ e = e
+  fE :: [Ifce] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+  fE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
+  fE _ _ _ _ e = e
 
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
 
