@@ -1,3 +1,5 @@
+- tratar Data patt
+- remover tipos de nat_iord
 - TIPOS!
     - ir tirando as anotacoes de tipos
         - e tirando anotacoes de PolySpec.hs

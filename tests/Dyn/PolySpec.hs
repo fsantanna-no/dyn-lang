@@ -90,7 +90,7 @@ implementation of IRec for Nat with
   rec = func :: (Nat -> ()) ->
     case ... of
       Nat.Zero    -> ()
-      Nat.Succ =x -> rec x
+      Nat.Succ =x -> rec x where x::Nat;  -- TODO: needs to know (Nat.Succ Nat)
     ;
   ;
 ;
