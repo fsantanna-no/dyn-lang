@@ -180,14 +180,14 @@ multiply =
           evalString ([r|
 main = (smallerc two) four
 smallerc =
-  func ->
-    func {x} ->
+  func :: (Nat -> (Nat -> Nat)) ->
+    func :: (Nat -> Nat) {x} ->
       lt (x',y) where
-        x' :: Nat = x
-        y  :: Nat = ...
+        x' = x
+        y  = ...
       ;
     ; where
-      x :: Nat = ...
+      x = ...
     ;
   ;
 |] ++ prelude)

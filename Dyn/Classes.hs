@@ -168,7 +168,7 @@ instance IString Prog where
 -------------------------------------------------------------------------------
 
 instance IType Expr where
-  toType _  (EArg   _)     = TAny
+  toType ds (EArg   _)     = snd $ dsigsFind ds "..."
   toType _  (EUnit  _)     = TUnit
   toType ds (EVar   _ id)  = snd $ dsigsFind ds id
   toType _  (ECons  _ hr)  = TData hr

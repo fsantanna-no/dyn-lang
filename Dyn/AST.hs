@@ -190,8 +190,12 @@ mapPatt fs@(_,_,fP) ifces ctrs dsigs p = fP ifces ctrs dsigs (aux p) where
 
 mapExpr :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Expr -> Expr
 mapExpr fs@(_,fE,_) ifces ctrs dsigs e = fE ifces ctrs dsigs (aux e) where
-  aux (EFunc  z cs tp ups whe) = EFunc  z cs tp ups $ mapWhere fs ifces ctrs' dsigs whe where
+  aux (EFunc  z cs tp ups whe) = EFunc  z cs tp ups $ mapWhere fs ifces ctrs' (arg:dsigs) whe where
                                   ctrs' = Ctrs $ getCtrs ctrs ++ getCtrs cs
+                                  arg   = DSig z "..." cz tp' where
+                                            tp' = case tp of
+                                                    TFunc inp _ -> inp
+                                                    otherwise   -> TAny
   aux (EData  z hr e)          = EData  z hr $ mapExpr fs ifces ctrs dsigs e
   aux (ETuple z es)            = ETuple z $ map (mapExpr fs ifces ctrs dsigs) es
   aux (ECall  z e1 e2)         = ECall  z e1' e2' where
