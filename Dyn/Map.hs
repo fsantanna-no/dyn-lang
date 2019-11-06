@@ -23,8 +23,8 @@ mapDecl :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
 mapDecl fs@(fD,_,_) ifces ctrs dsigs decl@(DSig _ _ _ _) = fD ifces ctrs dsigs decl
 mapDecl fs@(fD,_,_) ifces ctrs dsigs (DAtr z pat whe)    = fD ifces ctrs dsigs $ DAtr z pat' whe'
   where
-    pat' = mapPatt  fs ifces ctrs dsigs pat
-    whe' = mapWhere fs ifces ctrs dsigs (toType dsigs pat) whe
+    ([],pat') = mapPatt  fs ifces ctrs dsigs pat
+    whe'      = mapWhere fs ifces ctrs dsigs (toType dsigs pat) whe
 
 -------------------------------------------------------------------------------
 
@@ -39,14 +39,17 @@ mapWhere fs ifces ctrs dsigs xtp (ExpWhere (z,ds,e)) = ExpWhere (z, ds', e')
 
 -------------------------------------------------------------------------------
 
-mapPatt :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Patt -> Patt
-mapPatt fs@(_,_,fP) ifces ctrs dsigs p = fP ifces ctrs dsigs (aux p) where
-  aux (PRead  z e)     = PRead  z $ mapExpr fs ifces ctrs dsigs TAny e  -- TODO: xtp
-  aux (PTuple z ps)    = PTuple z $ map (mapPatt fs ifces ctrs dsigs) ps
-  aux (PCall  z p1 p2) = PCall  z p1' p2' where
-                          p1' = mapPatt fs ifces ctrs dsigs p1
-                          p2' = mapPatt fs ifces ctrs dsigs p2
-  aux p                = p
+mapPatt :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Patt -> ([Decl],Patt)
+mapPatt fs@(_,_,fP) ifces ctrs dsigs p = (ds', fP ifces ctrs dsigs p') where
+  (ds',p') = aux p
+
+  aux (PRead  z e)     = ([], PRead z $ mapExpr fs ifces ctrs dsigs TAny e) -- TODO: xtp
+  aux (PTuple z ps)    = (concat ds', PTuple z ps') where
+                          (ds',ps') = unzip $ map (mapPatt fs ifces ctrs dsigs) ps
+  aux (PCall  z p1 p2) = (ds2'++ds1', PCall z p1' p2') where
+                          (ds1',p1') = mapPatt fs ifces ctrs dsigs p1
+                          (ds2',p2') = mapPatt fs ifces ctrs dsigs p2
+  aux p                = ([], p)
 
 -------------------------------------------------------------------------------
 
@@ -65,9 +68,10 @@ mapExpr fs@(_,fE,_) ifces ctrs dsigs xtp e = fE ifces ctrs dsigs xtp (aux e) whe
                                   e1' = mapExpr fs ifces ctrs dsigs TAny e1
                                   e2' = mapExpr fs ifces ctrs dsigs TAny e2
   aux (ECase  z e l)           = ECase  z e' l' where
-                                  e'       = mapExpr fs ifces ctrs dsigs TAny e
-                                  (ps, ws) = unzip l
-                                  ps'      = map (mapPatt  fs ifces ctrs dsigs) ps
-                                  ws'      = map (mapWhere fs ifces ctrs dsigs xtp) ws -- TODO: TAny
-                                  l'       = zip ps' ws'
+    e'        = mapExpr fs ifces ctrs dsigs TAny e
+    (ps, ws)  = unzip l
+    (ds',ps') = unzip $ map (mapPatt fs ifces ctrs dsigs) ps
+    ws'       = map (mapWhere fs ifces ctrs dsigs' xtp) ws where
+                  dsigs' = (filter isDSig $ concat ds') ++ dsigs
+    l'        = zip ps' ws'
   aux e                        = e

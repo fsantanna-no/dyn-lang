@@ -38,7 +38,7 @@ main = (x,y) where
     it "IEq: eq" $
       evalString ([r|  -- neq (eq(T,T), F)
 main = x where
-  x :: Bool = eq (Bool.False,Bool.False)
+  x = eq (Bool.False,Bool.False)
 ;
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -46,7 +46,7 @@ main = x where
     it "IEq: neq" $
       evalString ([r|  -- neq (eq(T,T), F)
 main = x where
-  x :: Bool = neq (Bool.True,Bool.False)
+  x = neq (Bool.True,Bool.False)
 ;
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -54,7 +54,7 @@ main = x where
     it "IEq: default eq" $
       evalString ([r|  -- neq (eq(T,T), F)
 main = x where
-  x :: Bool = neq (eq (Bool.True,Bool.True), Bool.False)
+  x = neq (eq (Bool.True,Bool.True), Bool.False)
 ;
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
@@ -66,7 +66,7 @@ main = x where
 main = f Bool.True
 
 implementation of IInd for Bool with
-  g :: (Bool -> ()) = func :: (Bool -> ()) -> () ;
+  g = func -> () ;
 ;
 
 interface IInd for a with
@@ -74,14 +74,14 @@ interface IInd for a with
   f :: (a -> ()) =
     func :: (a -> ()) ->
       g x where
-        x :: a = ...
+        x = ...
       ;
     ;
 ;
 |])
         `shouldBe` "()"
 
-    it "IRec-rec" $
+    it "XXX: IRec-rec" $
       evalString ([r|
 main = rec (Nat.Succ Nat.Zero)
 
@@ -90,7 +90,7 @@ implementation of IRec for Nat with
   rec = func :: (Nat -> ()) ->
     case ... of
       Nat.Zero    -> ()
-      Nat.Succ =x -> rec x where x::Nat;
+      Nat.Succ =x -> rec x
     ;
   ;
 ;

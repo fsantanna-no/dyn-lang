@@ -676,7 +676,7 @@ c2  = Char.BB
 
     describe "Chapter 2.3 - Enumerations:" $ do                 -- pg 38
 
-      it "XXX: enum" $         -- pg 38
+      it "enum" $         -- pg 38
         evalString ([r|
 main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
 
@@ -767,7 +767,7 @@ main = (toEnum Dir.N, ses, matches (lel, Dir.L), matches (reverse Dir.O, Dir.L))
 ses :: Dir = fromEnum one
 
 lel :: Dir = fromEnum (toEnum l)
-l   :: Dir = Dir.L
+l   = Dir.L
 
 --data Dir
 --data Dir.N
@@ -776,7 +776,7 @@ l   :: Dir = Dir.L
 --data Dir.O
 
 implementation of IEnum for Dir with
-  toEnum = func :: (Dir -> Nat) ->
+  toEnum = func ->
     case ... of
       Dir.N -> zero
       Dir.S -> one
@@ -785,7 +785,7 @@ implementation of IEnum for Dir with
     ;
   ;
 
-  fromEnum = func :: (Nat -> Dir) ->
+  fromEnum = func ->
     case ... of
       ~zero  -> Dir.N
       ~one   -> Dir.S
