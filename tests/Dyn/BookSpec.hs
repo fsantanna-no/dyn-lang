@@ -113,7 +113,7 @@ fthree =
       it "infinity" $         -- pg 5
         (run True $
           unlines [
-            "func infinity () : (() -> Int) do",
+            "func infinity () : (() -> Nat) do",
             "   return (infinity()) + 1",
             "end",
             "return infinity ()"
@@ -123,10 +123,10 @@ fthree =
       it "three/infinity" $   -- pg 5
         (run True $
           unlines [
-            "func three (x) : (Int -> Int) do",
+            "func three (x) : (Nat -> Nat) do",
             "   return 3",
             "end",
-            "func infinity () : (() -> Int) do",
+            "func infinity () : (() -> Nat) do",
             "   return (infinity()) + 1",
             "end",
             "return three (infinity ())"
@@ -155,14 +155,14 @@ multiply =
       it "multiply 3 infinity" $  -- pg 9
         (run True $
           unlines [
-            "func multiply (x,y) : ((Int,Int) -> Int) do",
+            "func multiply (x,y) : ((Nat,Nat) -> Nat) do",
             "   if x == 0 then",
             "     return 0",
             "   else",
             "     return x * y",
             "   end",
             "end",
-            "func infinity () : (() -> Int) do",
+            "func infinity () : (() -> Nat) do",
             "   return (infinity()) + 1",
             "end",
             "return multiply (3,infinity())"
@@ -268,17 +268,17 @@ curry  = func ->
             unlines [
               "return 1 + (+ (2,3))"
              ])
-          `shouldBe` Right (EData ["Int","6"] EUnit)
+          `shouldBe` Right (EData ["Nat","6"] EUnit)
 -}
 
         it "uncurry" $            -- pg 11
           evalString ([r|
 main = (uncurry smallerc) (two,ten)
 smallerc = func ->
-  func {x} ->
+  func :: (Nat->Nat) {x} ->
     lt (x',y) where
-      x' :: Nat = x
-      y  :: Nat = ...
+      x' = x
+      y  = ...
     ;
   ; where
     x = ...
@@ -322,7 +322,7 @@ compose = func ->
       it "signum" $           -- pg 18
         (run True $
           unlines [
-            "func signum (x) : (Int->Int) do",
+            "func signum (x) : (Nat->Nat) do",
             "   if x < 0 then",
             "     return  -1",
             "   else/if x == 0 then",
@@ -333,7 +333,7 @@ compose = func ->
             "end",
             "return (signum 1) + ((signum (-10)) + (signum (10-10)))"
            ])
-        `shouldBe` Right (EData ["Int","0"] EUnit)
+        `shouldBe` Right (EData ["Nat","0"] EUnit)
 -}
 
       it "fact" $             -- pg 19
@@ -354,7 +354,7 @@ fact =
       it "fact - error" $     -- pg 20
         (run True $
           unlines [
-            "func fact (n) : (Int->Int) do",
+            "func fact (n) : (Nat->Nat) do",
             "   if n < 0 then",
             "     error 1",
             "   else/if n == 0 then",
@@ -507,7 +507,7 @@ main = lte (Xx.Aa,Xx.Bb)
       it "leap years" $         -- pg 33
         evalString ([r|
 main = and (not (leapyear y1979), and (leapyear y1980, and (not (leapyear hundred), leapyear (mul (four,hundred)))))
-leapyear :: (Int->Bool) = func ->
+leapyear :: (Nat->Bool) = func ->
   case rem (y,hundred) of
     Nat.Zero -> eq(rem (y, mul(four,hundred)), Nat.Zero)
     _        -> eq(rem (y, four),              Nat.Zero)
@@ -558,7 +558,7 @@ impl = func ->
 |] ++ bool)
           `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True)"
 
-      it "analyse triangles" $         -- pg 35
+      it "XXX: analyse triangles" $         -- pg 35
         evalString ([r|
 main = ( analyse2 (add(twenty,ten),twenty,ten)  ,
          analyse2 (ten,add(twenty,five),twenty) ,
@@ -573,7 +573,7 @@ twenty = mul (two,ten)
 --data Triangle.Equilateral
 --data Triangle.Scalene
 
-analyse2 :: ((Int,Int,Int) -> Triangle) = func ->
+analyse2 :: ((Nat,Nat,Nat) -> Triangle) = func ->
   case (lte(x,y),  lte(x,z),  lte(y,x),  lte(y,z) ) of
        (Bool.True, Bool.True, _,         Bool.True)  -> analyse (x,y,z)
        (Bool.True, Bool.True, _,         Bool.False) -> analyse (x,z,y)
@@ -582,9 +582,6 @@ analyse2 :: ((Int,Int,Int) -> Triangle) = func ->
        (Bool.True, _,         _,         _)          -> analyse (z,x,y)
        _                                             -> analyse (z,y,x)
   ; where
-    x :: Nat
-    y :: Nat
-    z :: Nat
     (x,y,z) = ...
   ;
 ;
@@ -843,10 +840,10 @@ main :: Bool = fromEnum (add (toEnum Bool.False, one))
           unlines [
             "data Pair for (a,b) with (a,b)",
             "var mkPair : ((a,b) -> Pair of (a,b)) = Pair",
-            "var p1 : Pair of (Int,Int) = mkPair (1,2)",
+            "var p1 : Pair of (Nat,Nat) = mkPair (1,2)",
             "return p1"
            ])
-        `shouldBe` Right (EData ["Pair"] (ETuple [EData ["Int","1"] EUnit,EData ["Int","2"] EUnit]))
+        `shouldBe` Right (EData ["Pair"] (ETuple [EData ["Nat","1"] EUnit,EData ["Nat","2"] EUnit]))
 -}
 
       it "fst/snd" $         -- pg 41
@@ -895,37 +892,37 @@ compose = func ->
             "func cross ((f,g), p) : ((((a->b),(c->d)),(a,c)) -> (b,d)) do",
             "   return (f (fst p), g (snd p))",
             "end",
-            "func f x : (Int -> Bool) do",
+            "func f x : (Nat -> Bool) do",
             "   return (x rem 2) === 1",
             "end",
-            "func g x : (Int -> Int) do",
+            "func g x : (Nat -> Nat) do",
             "   return x * 2",
             "end",
             "return cross ((f,g), (3,4))"
            ])
-        `shouldBe` Right (ETuple [EData ["Bool","True"] EUnit,EData ["Int","8"] EUnit])
+        `shouldBe` Right (ETuple [EData ["Bool","True"] EUnit,EData ["Nat","8"] EUnit])
 
       it "pi" $         -- pg 44
         (run True $
           pre ++ unlines [
-            "func pifun : (() -> Int) do",
+            "func pifun : (() -> Nat) do",
             "   return 314",
             "end",
             "return pifun ()"
            ])
-        `shouldBe` Right (EData ["Int","314"] EUnit)
+        `shouldBe` Right (EData ["Nat","314"] EUnit)
 
       it "roots" $         -- pg 44
         (run True $
           pre ++ unlines [
-            "implementation of IEqualable for (Int,Int) with end",
-            "func sqrt x : (Int -> Int) do",
+            "implementation of IEqualable for (Nat,Nat) with end",
+            "func sqrt x : (Nat -> Nat) do",
             "  if (x === 0) or (x === 1) then",
             "    return x; ",
             "  end",
             "",
-            "  var i : Int = 1",
-            "  var r : Int = 1",
+            "  var i : Nat = 1",
+            "  var r : Nat = 1",
             "  loop do",
             "    if r @> x then",
             "      return i - 1",
@@ -935,15 +932,15 @@ compose = func ->
             "    end",
             "  end",
             "end",
-            "func roots (a,b,c) : ((Int,Int,Int) -> (Int,Int)) do",
-            "   var e : Int = (b*b) - (4 * (a*c))",
+            "func roots (a,b,c) : ((Nat,Nat,Nat) -> (Nat,Nat)) do",
+            "   var e : Nat = (b*b) - (4 * (a*c))",
             "   if a === 0 then",
             "     return (0,0)",
             "   else/if e @< 0 then",
             "     return (-1,-1)",
             "   else",
-            "     var d : Int = 2 * a",
-            "     var r : Int = sqrt e",
+            "     var d : Nat = 2 * a",
+            "     var r : Nat = sqrt e",
             "     return (((-b)-r)/d, ((-b)+r)/d)",
             "   end",
             "end",
@@ -979,9 +976,9 @@ compose = func ->
           pre ++ unlines [
             "data Triple for (a,b,c) with (a,b,c)",
             "implementation of IEqualable for Triple of (a,b,c) with end",
-            "var t0 : Triple of (Int,Int,Int) = Triple (1,0,3)",
-            "var t1 : Triple of (Int,Int,Int) = Triple (1,2,3)",
-            "var t2 : Triple of (Int,Int,Int) = Triple (1,2,3)",
+            "var t0 : Triple of (Nat,Nat,Nat) = Triple (1,0,3)",
+            "var t1 : Triple of (Nat,Nat,Nat) = Triple (1,2,3)",
+            "var t2 : Triple of (Nat,Nat,Nat) = Triple (1,2,3)",
             "return (t1 === t2) and (t0 =/= t1)"
            ])
         `shouldBe` Right (EData ["Bool","True"] EUnit)
@@ -991,12 +988,12 @@ compose = func ->
           pre ++ unlines [
             "data Triple for (a,b,c) with (a,b,c)",
             "implementation of IEqualable for Triple with end",
-            "var t1 : Triple of (Int,Int,Int)    = Triple (1,2,3)",
+            "var t1 : Triple of (Nat,Nat,Nat)    = Triple (1,2,3)",
             "var t2 : Triple of (Bool,Bool,Bool) = Triple (Bool.True,Bool.False,Bool.True)",
             "return t1 =/= t2"
            ])
-        `shouldBe` Left "(line 79, column 11):\ntypes do not match : expected '(((Triple of (Int,Int,Int)),(Triple of (Bool,Bool,Bool))) -> ?)' : found '((a,a) -> Bool)'\n(line 79, column 11):\nambiguous implementations for 'a' : '(Triple of (Int,Int,Int))', '(Triple of (Bool,Bool,Bool))'\n"
-        --`shouldBe` Left "(line 79, column 11):\nvariable '=/=' has no associated implementation for '(((Triple of (Int,Int,Int)),(Triple of (Bool,Bool,Bool))) -> ?)'\n"
+        `shouldBe` Left "(line 79, column 11):\ntypes do not match : expected '(((Triple of (Nat,Nat,Nat)),(Triple of (Bool,Bool,Bool))) -> ?)' : found '((a,a) -> Bool)'\n(line 79, column 11):\nambiguous implementations for 'a' : '(Triple of (Nat,Nat,Nat))', '(Triple of (Bool,Bool,Bool))'\n"
+        --`shouldBe` Left "(line 79, column 11):\nvariable '=/=' has no associated implementation for '(((Triple of (Nat,Nat,Nat)),(Triple of (Bool,Bool,Bool))) -> ?)'\n"
 
       it "Date - age" $         -- pg 45
         (run True $
@@ -1007,10 +1004,10 @@ compose = func ->
             "     return (i @< x) or ((i === x) and (j @< y))",
             "   end",
             "end",
-            "data Date with (Int,Int,Int)",
-            "func age (now,person) : ((Date,Date) -> Int) do",
-            "   var (d1,m1,y1) : (Int,Int,Int)",
-            "   var (d2,m2,y2) : (Int,Int,Int)",
+            "data Date with (Nat,Nat,Nat)",
+            "func age (now,person) : ((Date,Date) -> Nat) do",
+            "   var (d1,m1,y1) : (Nat,Nat,Nat)",
+            "   var (d2,m2,y2) : (Nat,Nat,Nat)",
             "   set Date (d2,m2,y2) = now",
             "   set Date (d1,m1,y1) = person",
             "   if (d1,m1) @< (d2,m2) then",
@@ -1023,7 +1020,7 @@ compose = func ->
             "         (age(Date(3,6,2019), Date(3,6,1979))) ) +",
             "         (age(Date(2,6,2019), Date(3,6,1979)))"
            ])
-        `shouldBe` Right (EData ["Int","119"] EUnit)
+        `shouldBe` Right (EData ["Nat","119"] EUnit)
 
 -------------------------------------------------------------------------------
 
@@ -1034,12 +1031,12 @@ compose = func ->
           pre ++ [r|
 data Either
 data Either.Left  with Bool
-data Either.Right with Int
+data Either.Right with Nat
 var l : Either.Left  = Either.Left  Bool.True
 var r : Either.Right = Either.Right 10
 return (l,r)
 |])
-        `shouldBe` Right (ETuple [EData ["Either","Left"] (EData ["Bool","True"] EUnit),EData ["Either","Right"] (EData ["Int","10"] EUnit)])
+        `shouldBe` Right (ETuple [EData ["Either","Left"] (EData ["Bool","True"] EUnit),EData ["Either","Right"] (EData ["Nat","10"] EUnit)])
 
       it "Either a b" $         -- pg 46
         (run True $
@@ -1047,11 +1044,11 @@ return (l,r)
 data Either for (a,b)
 data Either.Left  with a
 data Either.Right with b
-var l : Either.Left  of (Bool,Int) = Either.Left  Bool.True
-var r : Either.Right of (Bool,Int) = Either.Right 10
+var l : Either.Left  of (Bool,Nat) = Either.Left  Bool.True
+var r : Either.Right of (Bool,Nat) = Either.Right 10
 return (l,r)
 |])
-        `shouldBe` Right (ETuple [EData ["Either","Left"] (EData ["Bool","True"] EUnit),EData ["Either","Right"] (EData ["Int","10"] EUnit)])
+        `shouldBe` Right (ETuple [EData ["Either","Left"] (EData ["Bool","True"] EUnit),EData ["Either","Right"] (EData ["Nat","10"] EUnit)])
 
       it "case" $         -- pg 46
         (run True $
@@ -1062,27 +1059,27 @@ data Either.Right with b
 
 func case_ ((f,g),v) : ((((a->r),(b->r)), Either of (a,b)) -> r) do
   match v with
-    case (Either.Left  =x) : Int then
+    case (Either.Left  =x) : Nat then
       return f x
-    case (Either.Right =x) : Int then
+    case (Either.Right =x) : Nat then
       return g x
   end
 end
 
-func f (v) : (Bool -> Int) do
+func f (v) : (Bool -> Nat) do
   return 1
 end
 
-func g (v) : (Int -> Int) do
+func g (v) : (Nat -> Nat) do
   return 10
 end
 
-var l : Either.Left  of (Bool,Int) = Either.Left  Bool.True
-var r : Either.Right of (Bool,Int) = Either.Right 10
+var l : Either.Left  of (Bool,Nat) = Either.Left  Bool.True
+var r : Either.Right of (Bool,Nat) = Either.Right 10
 
 return (case_ ((f,g),l)) + (case_ ((f,g),r))
 |])
-        `shouldBe` Right (EData ["Int","11"] EUnit)
+        `shouldBe` Right (EData ["Nat","11"] EUnit)
 
       it "Either / IEq" $         -- pg 47
         (run True $
@@ -1093,10 +1090,10 @@ data Either.Right with b
 
 implementation of IEqualable for Either of (a,b) with end
 
-var l : Either.Left  of (Bool,Int) = Either.Left  Bool.True
-var r : Either.Right of (Bool,Int) = Either.Right 10
+var l : Either.Left  of (Bool,Nat) = Either.Left  Bool.True
+var r : Either.Right of (Bool,Nat) = Either.Right 10
 
-var l_ : Either of (Bool,Int) = l
+var l_ : Either of (Bool,Nat) = l
 
 return (l_ === l) and (l_ =/= r)
 |])
@@ -1125,13 +1122,13 @@ implementation of IOrderable for Either of (a,b) where (a is IOrderable, b is IO
   end
 end
 
-var f : Either.Left  of (Bool,Int) = Either.Left  Bool.False
-var l : Either.Left  of (Bool,Int) = Either.Left  Bool.True
-var r : Either.Right of (Bool,Int) = Either.Right 10
+var f : Either.Left  of (Bool,Nat) = Either.Left  Bool.False
+var l : Either.Left  of (Bool,Nat) = Either.Left  Bool.True
+var r : Either.Right of (Bool,Nat) = Either.Right 10
 
-var f_ : Either of (Bool,Int) = f
-var l_ : Either of (Bool,Int) = l
-var r_ : Either of (Bool,Int) = r
+var f_ : Either of (Bool,Nat) = f
+var l_ : Either of (Bool,Nat) = l
+var r_ : Either of (Bool,Nat) = r
 
 return (f_ @<= f) and (((f @< l_) and (l @< r_)) and (r_ @>= r))
 |])
@@ -1144,18 +1141,18 @@ return (f_ @<= f) and (((f @< l_) and (l @< r_)) and (r_ @>= r))
       it "Roots/Coefs" $         -- pg 48
         (run True $
           pre ++ [r|
-data Coefs with (Int,Int,Int)
-data Roots with (Int,Int)
+data Coefs with (Nat,Nat,Nat)
+data Roots with (Nat,Nat)
 
 implementation of IEqualable for Roots with end
 
-func sqrt x : (Int -> Int) do
+func sqrt x : (Nat -> Nat) do
   if (x === 0) or (x === 1) then
     return x;
   end
 
-  var i : Int = 1
-  var r : Int = 1
+  var i : Nat = 1
+  var r : Nat = 1
   loop do
     if r @> x then
       return i - 1
@@ -1167,16 +1164,16 @@ func sqrt x : (Int -> Int) do
 end
 
 func roots (cs) : (Coefs -> Roots) do
-  var (a,b,c) : (Int,Int,Int)
+  var (a,b,c) : (Nat,Nat,Nat)
   set Coefs (a,b,c) = cs
-  var e : Int = (b*b) - (4 * (a*c))
+  var e : Nat = (b*b) - (4 * (a*c))
   if a === 0 then
     return Roots (0,0)
   else/if e @< 0 then
     return Roots (-1,-1)
   else
-    var d : Int = 2 * a
-    var r : Int = sqrt e
+    var d : Nat = 2 * a
+    var r : Nat = sqrt e
     return Roots (((-b)-r)/d, ((-b)+r)/d)
   end
 end
@@ -1188,12 +1185,12 @@ return (((roots(Coefs (3,4,5))) === (Roots (-1,-1))) and ((roots(Coefs (2,-16,-1
       it "move" $         -- pg 48
         (run True $
           pre ++ [r|
-data Position with (Int,Int)
-data Angle    with Int
-data Distance with Int
+data Position with (Nat,Nat)
+data Angle    with Nat
+data Distance with Nat
 
 func move (d_,a_,p_) : ((Distance,Angle,Position) -> Position) do
-  var (d,a,x,y) : (Int,Int,Int,Int)
+  var (d,a,x,y) : (Nat,Nat,Nat,Nat)
   set Distance d     = d_
   set Angle a        = a_
   set Position (x,y) = p_
@@ -1202,7 +1199,7 @@ end
 
 return move(Distance 10,Angle 2,Position(0,0))
 |])
-        `shouldBe` Right (EData ["Position"] (ETuple [EData ["Int","20"] EUnit,EData ["Int","-20"] EUnit]))
+        `shouldBe` Right (EData ["Position"] (ETuple [EData ["Nat","20"] EUnit,EData ["Nat","-20"] EUnit]))
 
       it "OneTwo" $         -- pg 49
         (run True $
@@ -1213,7 +1210,7 @@ data OneTwo.One with a
 data OneTwo.Two with Pair of a
 return (OneTwo.One 10, OneTwo.Two (Pair (10,20)))
 |])
-        `shouldBe` Right (ETuple [EData ["OneTwo","One"] (EData ["Int","10"] EUnit),EData ["OneTwo","Two"] (EData ["Pair"] (ETuple [EData ["Int","10"] EUnit,EData ["Int","20"] EUnit]))])
+        `shouldBe` Right (ETuple [EData ["OneTwo","One"] (EData ["Nat","10"] EUnit),EData ["OneTwo","Two"] (EData ["Pair"] (ETuple [EData ["Nat","10"] EUnit,EData ["Nat","20"] EUnit]))])
 
       it "OneTwo" $         -- pg 49
         (run True $
@@ -1224,16 +1221,16 @@ data OneTwo.One with a
 data OneTwo.Two with Pair of a
 return (OneTwo.One 10, OneTwo.Two (Pair (10,())))
 |])
-        `shouldBe` Left "(line 6, column 36):\ntypes do not match : expected '((Int,()) -> ?)' : found '((a,a) -> (Pair of a))'\n(line 6, column 36):\nambiguous instances for 'a' : 'Int', '()'\n"
+        `shouldBe` Left "(line 6, column 36):\ntypes do not match : expected '((Nat,()) -> ?)' : found '((a,a) -> (Pair of a))'\n(line 6, column 36):\nambiguous instances for 'a' : 'Nat', '()'\n"
 
       it "Angle" $         -- pg 49
         (run True $
           pre ++ [r|
-data Angle with Int
+data Angle with Nat
 
 implementation of IEqualable for Angle with
   func === (a1,a2) : ((Angle,Angle) -> Bool) do
-    var (a1_,a2_) : (Int,Int)
+    var (a1_,a2_) : (Nat,Nat)
     set (Angle a1_, Angle a2_) = (a1,a2)
     return (a1_ rem 360) == (a2_ rem 360)
   end
@@ -1249,11 +1246,11 @@ return ((Angle 370) === (Angle 10)) and (a1 === a2)
       it "Distance" $         -- pg 50
         (run True $
           pre ++ [r|
-data Distance with Int
+data Distance with Nat
 
 implementation of IEqualable for Distance with
   func === (d1,d2) : ((Distance,Distance) -> Bool) do
-    var (d1_,d2_) : (Int,Int)
+    var (d1_,d2_) : (Nat,Nat)
     set (Distance d1_, Distance d2_) = (d1,d2)
     if d2_ < d1_ then
       return (d1_-d2_) < 10
@@ -1512,7 +1509,7 @@ return fib (one ++ (one ++ (one ++ (one ++ (one ++ one)))))
       it "convert" $            -- pg 62
         (run True $
           nat ++ [r|
-func convert (x) : (Nat -> Int) do
+func convert (x) : (Nat -> Nat) do
   if x matches Nat.Zero then
     return 0
   else
@@ -1524,7 +1521,7 @@ end
 
 return convert (one ++ (one ++ (one ++ (one ++ (one ++ one)))))
 |])
-        `shouldBe` Right (EData ["Int","6"] EUnit)
+        `shouldBe` Right (EData ["Nat","6"] EUnit)
 
       it "Nat -" $            -- pg 60
         (run True $
@@ -1649,21 +1646,21 @@ error 1
 
     describe "Chapter 3.4 - Haskell Numbers:" $ do            -- pg 75
 
-      it "data Integer / Positive" $            -- pg 75
+      it "data Nateger / Positive" $            -- pg 75
         (run True $
           [r|
 data Positive
 data Positive.One
 data Positive.Succ with Positive
 
-data Integer
-data Integer.Zero
-data Integer.Neg with Positive
-data Integer.Pos with Positive
+data Nateger
+data Nateger.Zero
+data Nateger.Neg with Positive
+data Nateger.Pos with Positive
 
-return (Integer.Neg (Positive.One), Integer.Zero, Integer.Pos (Positive.Succ (Positive.One)))
+return (Nateger.Neg (Positive.One), Nateger.Zero, Nateger.Pos (Positive.Succ (Positive.One)))
 |])
-        `shouldBe` Right (ETuple [EData ["Integer","Neg"] (EData ["Positive","One"] EUnit),EData ["Integer","Zero"] EUnit,EData ["Integer","Pos"] (EData ["Positive","Succ"] (EData ["Positive","One"] EUnit))])
+        `shouldBe` Right (ETuple [EData ["Nateger","Neg"] (EData ["Positive","One"] EUnit),EData ["Nateger","Zero"] EUnit,EData ["Nateger","Pos"] (EData ["Positive","Succ"] (EData ["Positive","One"] EUnit))])
 
       it "INumeric" $                           -- pg 76
         (run True $
@@ -1682,10 +1679,10 @@ interface IReal for a where (a is INumeric) with // TODO: , a is IOrderable) wit
   //var toRational : (a -> Rational)
 end
 
-interface IIntegral for a where (a is IReal) with // TODO: , a is IEnumerable) with
+interface INategral for a where (a is IReal) with // TODO: , a is IEnumerable) with
   func div       : ((a,a) -> a)
   func mod       : ((a,a) -> a)
-  //func toInteger : (a -> Integer)
+  //func toNateger : (a -> Nateger)
 end
 
 interface IFractional for a where (a is INumeric) with
@@ -1702,9 +1699,9 @@ return ()
       it "Rational" $                           -- pg 78 (TODO: show)
         (run True $
           pre ++ [r|
-data Rational with (Int,Int)
+data Rational with (Nat,Nat)
 
-func signum x : (Int -> Int) do
+func signum x : (Nat -> Nat) do
   if x == 0 then
     return 0
   else/if x < 0 then
@@ -1714,7 +1711,7 @@ func signum x : (Int -> Int) do
   end
 end
 
-func abs x : (Int -> Int) do
+func abs x : (Nat -> Nat) do
   if x < 0 then
     return -x
   else
@@ -1722,8 +1719,8 @@ func abs x : (Int -> Int) do
   end
 end
 
-func gcd (x,y) : ((Int,Int) -> Int) do
-  func gcd_ (a,b) : ((Int,Int) -> Int) do
+func gcd (x,y) : ((Nat,Nat) -> Nat) do
+  func gcd_ (a,b) : ((Nat,Nat) -> Nat) do
     if b == 0 then
       return a
     else
@@ -1733,16 +1730,16 @@ func gcd (x,y) : ((Int,Int) -> Int) do
   return gcd_ (abs x, abs y)
 end
 
-func mkRat (x,y) : ((Int,Int) -> Rational) do
-  var u : Int = (signum y) * x
-  var v : Int = abs y
-  var d : Int = gcd (u,v)
+func mkRat (x,y) : ((Nat,Nat) -> Rational) do
+  var u : Nat = (signum y) * x
+  var v : Nat = abs y
+  var d : Nat = gcd (u,v)
   return Rational (u / d, v / d)
 end
 
 return (mkRat (10,2), mkRat (0,1), mkRat (1,-5))
 |])
-        `shouldBe` Right (ETuple [EData ["Rational"] (ETuple [EData ["Int","5"] EUnit,EData ["Int","1"] EUnit]),EData ["Rational"] (ETuple [EData ["Int","0"] EUnit,EData ["Int","1"] EUnit]),EData ["Rational"] (ETuple [EData ["Int","-1"] EUnit,EData ["Int","5"] EUnit])])
+        `shouldBe` Right (ETuple [EData ["Rational"] (ETuple [EData ["Nat","5"] EUnit,EData ["Nat","1"] EUnit]),EData ["Rational"] (ETuple [EData ["Nat","0"] EUnit,EData ["Nat","1"] EUnit]),EData ["Rational"] (ETuple [EData ["Nat","-1"] EUnit,EData ["Nat","5"] EUnit])])
 
       it "Rational / INumeric / IFractional" $                       -- pg 80
         (run True $
@@ -1762,9 +1759,9 @@ interface IFractional for a where (a is INumeric) with
   //var fromRational : (a -> Rational)
 end
 
-data Rational with (Int,Int)
+data Rational with (Nat,Nat)
 
-func signum x : (Int -> Int) do
+func signum x : (Nat -> Nat) do
   if x == 0 then
     return 0
   else/if x < 0 then
@@ -1774,7 +1771,7 @@ func signum x : (Int -> Int) do
   end
 end
 
-func abs x : (Int -> Int) do
+func abs x : (Nat -> Nat) do
   if x < 0 then
     return -x
   else
@@ -1782,8 +1779,8 @@ func abs x : (Int -> Int) do
   end
 end
 
-func gcd (x,y) : ((Int,Int) -> Int) do
-  func gcd_ (a,b) : ((Int,Int) -> Int) do
+func gcd (x,y) : ((Nat,Nat) -> Nat) do
+  func gcd_ (a,b) : ((Nat,Nat) -> Nat) do
     if b == 0 then
       return a
     else
@@ -1793,10 +1790,10 @@ func gcd (x,y) : ((Int,Int) -> Int) do
   return gcd_ (abs x, abs y)
 end
 
-func mkRat (x,y) : ((Int,Int) -> Rational) do
-  var u : Int = (signum y) * x
-  var v : Int = abs y
-  var d : Int = gcd (u,v)
+func mkRat (x,y) : ((Nat,Nat) -> Rational) do
+  var u : Nat = (signum y) * x
+  var v : Nat = abs y
+  var d : Nat = gcd (u,v)
   return Rational (u / d, v / d)
 end
 
@@ -1804,28 +1801,28 @@ implementation of IEqualable for Rational with end
 
 implementation of INumeric for Rational with
   func ++ (x,y) : ((Rational,Rational) -> Rational) do
-    var (x1,x2) : (Int,Int)
-    var (y1,y2) : (Int,Int)
+    var (x1,x2) : (Nat,Nat)
+    var (y1,y2) : (Nat,Nat)
     set Rational (x1,x2) = x
     set Rational (y1,y2) = y
     return mkRat ((x1*y2) + (y1*x2), x2*y2)
   end
   func -- (x,y) : ((Rational,Rational) -> Rational) do
-    var (x1,x2) : (Int,Int)
-    var (y1,y2) : (Int,Int)
+    var (x1,x2) : (Nat,Nat)
+    var (y1,y2) : (Nat,Nat)
     set Rational (x1,x2) = x
     set Rational (y1,y2) = y
     return mkRat ((x1*y2) - (y1*x2), x2*y2)
   end
   func ** (x,y) : ((Rational,Rational) -> Rational) do
-    var (x1,x2) : (Int,Int)
-    var (y1,y2) : (Int,Int)
+    var (x1,x2) : (Nat,Nat)
+    var (y1,y2) : (Nat,Nat)
     set Rational (x1,x2) = x
     set Rational (y1,y2) = y
     return mkRat (x1*y1, x2*y2)
   end
   func neg x : (Rational -> Rational) do
-    var (x1,x2) : (Int,Int)
+    var (x1,x2) : (Nat,Nat)
     set Rational (x1,x2) = x
     return mkRat (-x1, x2)
   end
@@ -1833,8 +1830,8 @@ end
 
 implementation of IFractional for Rational with
   func /- (x,y) : ((Rational,Rational) -> Rational) do
-    var Rational (x1,x2) : (Int,Int) = x
-    var Rational (y1,y2) : (Int,Int) = y
+    var Rational (x1,x2) : (Nat,Nat) = x
+    var Rational (y1,y2) : (Nat,Nat) = y
     if y1 < 0 then
       return mkRat ((-x1)*y2, (-x2)*y1)
     else/if y1 == 0 then
@@ -1847,7 +1844,7 @@ end
 
 return (neg ((((mkRat (10,2)) -- (mkRat (0,1))) ++ (mkRat (1,-5))) ** (mkRat (-5,-1)))) /- (mkRat (24,1))
 |])
-        `shouldBe` Right (EData ["Rational"] (ETuple [EData ["Int","-1"] EUnit,EData ["Int","1"] EUnit]))
+        `shouldBe` Right (EData ["Rational"] (ETuple [EData ["Nat","-1"] EUnit,EData ["Nat","1"] EUnit]))
 
 -------------------------------------------------------------------------------
     --describe "Chapter 3.6 - Example: linear and binary search:" $ do -- pg 81
@@ -1870,7 +1867,7 @@ data List.Nil
 data List.Cons with (a, List of a)
 return 10 (List.Cons) List.Nil
 |])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Int","10"] EUnit,EData ["List","Nil"] EUnit]))
+        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
 
       it "List" $                   -- pg 92
         (run True $
@@ -1880,7 +1877,7 @@ data List.Nil
 data List.Cons with (a, List of a)
 return List.Cons (10, List.Nil)
 |])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Int","10"] EUnit,EData ["List","Nil"] EUnit]))
+        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
 
       it "TODO: List `:´" $                   -- pg 92
         (run True $
@@ -1892,7 +1889,7 @@ func :: : (a -> List of a)
 set :: = List.Cons
 return 10 :: (List.Nil)
 |])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Int","10"] EUnit,EData ["List","Nil"] EUnit]))
+        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
 
       it "List: ==" $                   -- pg 93
         (run True $
@@ -2022,7 +2019,7 @@ data X
 
 return (last2 (List.Cons (X, List.Nil)), last1 (List.Cons (10, List.Nil)))
 |])
-        `shouldBe` Right (ETuple [EData ["X"] EUnit,EData ["Int","10"] EUnit])
+        `shouldBe` Right (ETuple [EData ["X"] EUnit,EData ["Nat","10"] EUnit])
 
       it "List: last2" $                   -- pg 94
         (run True $
@@ -2084,12 +2081,12 @@ func convert (xs,acc) : ((Liste of a, List of a) -> List of a) do
   end
 end
 
-var l  : List  of Int = List.Cons  (10, List.Cons  (20, List.Nil ))
-var le : Liste of Int = Liste.Snoc (Liste.Snoc (Liste.Nil, 10), 20)
+var l  : List  of Nat = List.Cons  (10, List.Cons  (20, List.Nil ))
+var le : Liste of Nat = Liste.Snoc (Liste.Snoc (Liste.Nil, 10), 20)
 
 return (head l, heade le, (convert (le, List.Nil)) === l)
 |])
-        `shouldBe` Right (ETuple [EData ["Int","10"] EUnit,EData ["Int","10"] EUnit,EData ["Bool","True"] EUnit])
+        `shouldBe` Right (ETuple [EData ["Nat","10"] EUnit,EData ["Nat","10"] EUnit,EData ["Bool","True"] EUnit])
 
 -------------------------------------------------------------------------------
 
@@ -2113,7 +2110,7 @@ end
 
 return cat (List.Cons (10, List.Cons (20, List.Nil)), List.Nil)
 |])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Int","10"] EUnit,EData ["List","Cons"] (ETuple [EData ["Int","20"] EUnit,EData ["List","Nil"] EUnit])]))
+        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Cons"] (ETuple [EData ["Nat","20"] EUnit,EData ["List","Nil"] EUnit])]))
 
       it "List: concat" $                   -- pg 98
         (run True $
@@ -2144,7 +2141,7 @@ end
 
 return concat (List.Cons (List.Cons(10,List.Nil), List.Cons (List.Cons(20,List.Nil), List.Nil)))
 |])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Int","10"] EUnit,EData ["List","Cons"] (ETuple [EData ["Int","20"] EUnit,EData ["List","Nil"] EUnit])]))
+        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Cons"] (ETuple [EData ["Nat","20"] EUnit,EData ["List","Nil"] EUnit])]))
 
       it "List: reverse" $                   -- pg 99
         (run True $
@@ -2164,11 +2161,11 @@ func reverse (xs,acc) : ((List of a, List of a) -> List of a) do
   end
 end
 
-var l : List of Int = List.Cons (10, List.Cons (20, List.Nil))
+var l : List of Nat = List.Cons (10, List.Cons (20, List.Nil))
 
 return (reverse (l, List.Nil))
 |])
-        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Int","20"] EUnit,EData ["List","Cons"] (ETuple [EData ["Int","10"] EUnit,EData ["List","Nil"] EUnit])]))
+        `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","20"] EUnit,EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit])]))
 
       it "List: length" $                   -- pg 102
         (run True $
@@ -2177,7 +2174,7 @@ data List for a is abstract
 data List.Nil
 data List.Cons with (a, List of a)
 
-func length (xs) : (List of a -> Int) do
+func length (xs) : (List of a -> Nat) do
   match xs with
     case List.Nil then
       return 0
@@ -2186,11 +2183,11 @@ func length (xs) : (List of a -> Int) do
   end
 end
 
-var l : List of Int = List.Cons (10, List.Cons (20, List.Nil))
+var l : List of Nat = List.Cons (10, List.Cons (20, List.Nil))
 
 return length l
 |])
-        `shouldBe` Right (EData ["Int","2"] EUnit)
+        `shouldBe` Right (EData ["Nat","2"] EUnit)
 
       it "List: head/tail" $                   -- pg 102
         (run True $
@@ -2209,11 +2206,11 @@ func tail (xs) : (List of a -> List of a) do
   return xs_
 end
 
-var l : List of Int = List.Cons (10, List.Cons (20, List.Nil))
+var l : List of Nat = List.Cons (10, List.Cons (20, List.Nil))
 
 return (head l, tail l)
 |])
-        `shouldBe` Right (ETuple [EData ["Int","10"] EUnit,EData ["List","Cons"] (ETuple [EData ["Int","20"] EUnit,EData ["List","Nil"] EUnit])])
+        `shouldBe` Right (ETuple [EData ["Nat","10"] EUnit,EData ["List","Cons"] (ETuple [EData ["Nat","20"] EUnit,EData ["List","Nil"] EUnit])])
 
 -------------------------------------------------------------------------------
 
@@ -2301,8 +2298,8 @@ interface IEqualable for a with
   end
 end
 
-implementation of IEqualable for Int with
-  func === (x,y) : ((Int,Int) -> Bool) do
+implementation of IEqualable for Nat with
+  func === (x,y) : ((Nat,Nat) -> Bool) do
     return x == y
   end
 end
@@ -2320,8 +2317,8 @@ interface IOrderable for a where (a is IEqualable) with
   func @>= (x,y) : ((a,a) -> Bool) do return (x @> y) or (x === y) end
 end
 
-implementation of IOrderable for Int with
-  func @< (x,y) : ((Int,Int) -> Bool) do
+implementation of IOrderable for Nat with
+  func @< (x,y) : ((Nat,Nat) -> Bool) do
     return x < y
   end
 end
