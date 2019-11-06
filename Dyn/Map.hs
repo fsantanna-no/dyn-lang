@@ -68,6 +68,6 @@ mapExpr fs@(_,fE,_) ifces ctrs dsigs xtp e = fE ifces ctrs dsigs xtp (aux e) whe
                                   e'       = mapExpr fs ifces ctrs dsigs TAny e
                                   (ps, ws) = unzip l
                                   ps'      = map (mapPatt  fs ifces ctrs dsigs) ps
-                                  ws'      = map (mapWhere fs ifces ctrs dsigs TAny) ws -- TODO: TAny
+                                  ws'      = map (mapWhere fs ifces ctrs dsigs xtp) ws -- TODO: TAny
                                   l'       = zip ps' ws'
   aux e                        = e

@@ -18,9 +18,9 @@ apply x y = mapDecls (fD,fE,fPz) x cz [] y where
   fE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
   fE _ _ _ _ e = e
 
+  -- removes TAny decls (prevents double decl)
   fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
-
-  fD _ _ dsigs d@(DSig _ _ _ TAny) = []   -- removes itself (prevents double decl)
+  fD _ _ dsigs d@(DSig _ _ _ TAny) = []
   fD _ _ dsigs d@(DSig _ _ _ _)    = [d]
 
   fD ifces ctrs dsigs datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =

@@ -14,23 +14,17 @@ import qualified Dyn.Ifce as Ifce
 -------------------------------------------------------------------------------
 
 apply :: [Ifce] -> [Decl] -> [Decl]
-apply ifces decls = mapDecls (fD,fEz,fPz) ifces cz [] decls where
-  fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
-  fD _ _ _ d@(DSig _ _ _ _) = [d]
-  fD ifces _ dsigs d@(DAtr z1 pat1 (ExpWhere (z2,ds2,e2))) = [d'] where
-    d'  = DAtr z1 pat1 $ ExpWhere (z2,ds2,e2')
-    e2' = poly ifces dsigs' (toType dsigs' pat1) e2 where
-            dsigs' = dsigs ++ filter isDSig ds2
+apply ifces decls = mapDecls (fDz,fE,fPz) ifces cz [] decls where
 
 -------------------------------------------------------------------------
 
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-poly :: [Ifce] -> [Decl] -> Type -> Expr -> Expr
+fE :: [Ifce] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-poly ifces dsigs xtp e@(EVar z id) = e' where
+fE ifces _ dsigs xtp e@(EVar z id) = e' where
 
   (cs,_) = dsigsFind dsigs id
   cs'    = Ifce.ifcesSups ifces (getCtrs cs) where
@@ -42,9 +36,7 @@ poly ifces dsigs xtp e@(EVar z id) = e' where
     otherwise      -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3' where
-
-  e3' = poly ifces dsigs xtp e3
+fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
   (cs2,tp2) = dsigsFind dsigs id2
   cs2'      = Ifce.ifcesSups ifces (getCtrs cs2) where
@@ -59,8 +51,8 @@ poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3' where
     otherwise             -> e2      -- var is not function, ignore
 
   xhr inp2 out2 = --traceShow (id2, toString e, toString e3, toType dsigs e3) $
-    case tpMatch (TTuple [inp2             , out2])
-                 (TTuple [toType dsigs e3' , xtp ]) of
+    case tpMatch (TTuple [inp2            , out2])
+                 (TTuple [toType dsigs e3 , xtp ]) of
       [("a", TData xhr)] -> Right $ Just xhr
       [("a", TVar  "a")] -> Right $ Nothing
       otherwise          -> Left ()
@@ -69,34 +61,7 @@ poly ifces dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3' where
           [tvar2] = toVars tp2   -- [a]
           -- a is Bool
 
-poly ifces dsigs xtp (ECall z1 e2 e3) =
-  ECall z1 e2' e3' where
-    e2' = poly ifces dsigs TAny e2
-    e3' = poly ifces dsigs TAny e3
-
-poly ifces dsigs _ (ETuple z es) = ETuple z $ map (poly ifces dsigs TAny) es
-
-poly ifces dsigs _ (EFunc  z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2))) =
-  EFunc z1 cs1 tp1 ups1 (ExpWhere (z2,ds2,e2')) where
-    e2' = poly ifces dsigs' tp2 e2 where
-            dsigs' = dsigs ++ filter isDSig ds2
-            tp2 = case tp1 of
-                    TFunc _ out -> out
-                    otherwise   -> TAny
-
-poly ifces dsigs xtp (ECase z e l) = ECase z e' l' where
-  e' = poly ifces dsigs TAny e
-  l' = map f l where
-        -- TODO: pat
-        f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z,ds,poly ifces dsigs' xtp e)) where
-                                      dsigs' = dsigs ++ filter isDSig ds
-
-poly _ _ _ e@(EArg  _)   = e
-poly _ _ _ e@(EUnit _)   = e
-poly _ _ _ e@(ECons _ _) = e
-poly _ _ _ e@(EType _ _) = e
-
-poly _ _ _ e = error $ show e
+fE _ _ _ _ e = e
 
 -------------------------------------------------------------------------
 
