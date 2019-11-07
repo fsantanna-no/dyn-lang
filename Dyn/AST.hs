@@ -50,7 +50,7 @@ cz = Ctrs []
 data Type = TAny
           | TUnit
           | TVar   ID_Var
-          | TData  ID_Hier {-[Type]-}       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
+          | TData  ID_Hier [Type]       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
           | TTuple [Type]               -- (len >= 2)
           | TFunc  {-FuncType-} Type Type  -- inp out
   deriving (Eq,Show)

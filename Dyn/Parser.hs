@@ -319,7 +319,8 @@ type_0 = do
 type_D :: Parser Type
 type_D = do
   hier <- tk_hier
-  return $ TData hier {-(f ofs)-}
+  ofs  <- option TUnit $ try (tk_key "of" *> type_)
+  return $ TData hier $ toList ofs
 
 type_N :: Parser Type
 type_N = do

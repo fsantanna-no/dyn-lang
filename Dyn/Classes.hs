@@ -70,7 +70,10 @@ instance IString Type where
   toString TAny             = "?"
   toString TUnit            = "()"
   toString (TVar   id)      = id
-  toString (TData  hr)      = intercalate "." hr
+  toString (TData  hr ofs)  = intercalate "." hr ++ of_ ofs where
+                                of_ []  = ""
+                                of_ [v] = " of " ++ toString v
+                                of_ l   = " of (" ++ intercalate "," (map toString l) ++ ")"
   toString (TTuple ttps)    = "(" ++ intercalate "," (map toString ttps) ++ ")"
   toString (TFunc  inp out) = "(" ++ toString inp ++ " -> " ++ toString out ++ ")"
   --toString (TData ids [x]) = intercalate "." ids ++ " of " ++ toString x
@@ -183,17 +186,17 @@ instance IType Expr where
   toType ds (EArg   _)     = snd $ dsigsFind ds "..."
   toType _  (EUnit  _)     = TUnit
   toType ds (EVar   _ id)  = snd $ dsigsFind ds id
-  toType _  (ECons  _ hr)  = TData hr
+  toType _  (ECons  _ hr)  = TData hr []
   toType _  (EFunc  _ _ tp _ _) = tp
   toType ds (ETuple _ es)  = TTuple $ map (toType ds) es
   toType ds (ECall  _ f _) = case toType ds f of
-                                TAny        -> TAny
-                                TFunc _ out -> out
-                                TData hr    -> TData hr
+                                TAny         -> TAny
+                                TFunc _ out  -> out
+                                TData hr ofs -> TData hr ofs
   toType ds (ECase  _ _ cs) = foldr f TAny $ map ((toType ds).snd) cs where
                                 f tp1 TAny               = tp1
                                 f tp1 tp2 | (tp1 == tp2) = tp1
-  toType _  (EType  _ _)   = TData ["Type"]
+  toType _  (EType  _ _)   = TData ["Type"] []
   toType _  e = error $ "toType: " ++ toString e
 
 instance IType ExpWhere where

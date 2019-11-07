@@ -169,8 +169,8 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
           ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) cs)
                     (ExpWhere (z,[],EArg z))
 
-  toString' (TData hr) = concat hr
-  toString' (TVar _)   = concat cs
+  toString' (TData hr []) = concat hr
+  toString' (TVar _)      = concat cs
 
   -- eq = <...>
   -- TODO: cs

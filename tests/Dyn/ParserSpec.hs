@@ -251,7 +251,7 @@ add =
         `shouldBe` "data Pair of (a,b) with (a,b)\n"
     it "Pair (a,a) ; p1:Pair(Int,Int)" $
       parseToString "data Pair for a with (a,a) p1 :: Pair of Int"
-        `shouldBe` ""
+        `shouldBe` "data Pair of a with (a,a)\np1 :: Pair of Int\n"
     it "Either" $
       parseToString "data Either for (a,b) data Either.Left with a data Either.Right with b"
-        `shouldBe` ""
+        `shouldBe` "data Either of (a,b)\ndata Either.Left with a\ndata Either.Right with b\n"

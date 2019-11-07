@@ -49,7 +49,7 @@ isSup _ _ tp1 tp2 = isSup' tp1 tp2
 --isSup _ _ tp1 tp2 = error $ show (toString tp1, toString tp2)
 
 isSup' :: Type -> Type -> Bool
-isSup' tp1         (TVar "a")  = True
-isSup' (TVar "a")  tp2         = True
-isSup' (TData hr1) (TData hr2) = hr1 `L.isPrefixOf` hr2
+isSup' tp1            (TVar "a")     = True
+isSup' (TVar "a")     tp2            = True
+isSup' (TData hr1 []) (TData hr2 []) = hr1 `L.isPrefixOf` hr2
 isSup' tp1 tp2 = error $ show (toString tp1, toString tp2)
