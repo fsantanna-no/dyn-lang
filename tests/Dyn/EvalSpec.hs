@@ -107,3 +107,7 @@ spec = do
         evalString ("main = ord Char.AA"++char++nat) `shouldBe` "(Nat.Succ Nat.Zero)"
       it "chr" $
         evalString ("main = chr one"    ++char++nat) `shouldBe` "Char.AA"
+    describe "list:" $ do
+      it "[(),1,True]" $
+        evalString ("main = List.Cons ((), List.Cons (Nat.Succ Nat.Zero, List.Cons (Bool.True, List.Nil)))")
+          `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"

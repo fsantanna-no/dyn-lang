@@ -217,24 +217,36 @@ implementation of IAaa for Xxx with
 
   describe "Misc" $ do
 
-      it "eq" $
-        evalString ("main = eq (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
-          `shouldBe` "Bool.True"
-      it "eq" $
-        evalString ("main = eq (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
-           `shouldBe` "Bool.False"
-      it "gte" $
-        evalString ("main = gte (Char.AA,Char.Aa)"++prelude)
-           `shouldBe` "Bool.False"
-      it "lt" $
-        evalString ("main = lt (Char.AA,Char.Aa)"++prelude)
-           `shouldBe` "Bool.True"
-      it "isLower" $
-        evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
-           `shouldBe` "(Bool.False,Bool.True)"
-      it "capitalize" $
-        evalString ("main = (capitalize Char.CC, capitalize Char.Cc)"++prelude)
-           `shouldBe` "(Char.CC,Char.CC)"
-      it "nextlet" $
-        evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
-           `shouldBe` "(Char.Dd,Char.AA)"
+    it "eq" $
+      evalString ("main = eq (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
+        `shouldBe` "Bool.True"
+    it "eq" $
+      evalString ("main = eq (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
+         `shouldBe` "Bool.False"
+    it "gte" $
+      evalString ("main = gte (Char.AA,Char.Aa)"++prelude)
+         `shouldBe` "Bool.False"
+    it "lt" $
+      evalString ("main = lt (Char.AA,Char.Aa)"++prelude)
+         `shouldBe` "Bool.True"
+    it "isLower" $
+      evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
+         `shouldBe` "(Bool.False,Bool.True)"
+    it "capitalize" $
+      evalString ("main = (capitalize Char.CC, capitalize Char.Cc)"++prelude)
+         `shouldBe` "(Char.CC,Char.CC)"
+    it "nextlet" $
+      evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
+         `shouldBe` "(Char.Dd,Char.AA)"
+
+  describe "dyn:" $ do
+    it "f (toEnum) True" $
+      evalString ([r|
+main = f Bool.True
+
+f :: (a -> Nat) where a is IEnum
+f = func :: (a -> Nat) where a is IEnum ->
+  toEnum ...
+;
+|] ++ prelude)
+        `shouldBe` "(Nat.Succ Nat.Zero)"

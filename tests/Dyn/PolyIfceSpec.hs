@@ -280,3 +280,36 @@ implementation of IEq for Maybe of a where (a is IEq) with
     it "nextlet" $
       evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
          `shouldBe` "(Char.Dd,Char.AA)"
+
+  describe "dyn:" $ do
+    it "XXX-0: f (toEnum) True" $
+      evalString ([r|
+main = (f' dIEnumBool) Bool.True
+
+f :: (a -> Nat) where a is IEnum
+f = func :: (a -> Nat) where a is IEnum ->
+  (toEnum' dIEnuma) ...
+;
+|] ++ prelude)
+        `shouldBe` "(Nat.Succ Nat.Zero)"
+
+    it "XXX: [(),1,True]" $
+      evalString ([r|
+main = f l
+
+data List for a
+data List.Nil
+data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum
+l = List.Cons ((),
+    List.Cons (Nat.Succ Nat.Zero,
+    List.Cons (Bool.True,
+    List.Nil)))
+
+f :: (List of a -> List of Nat) where a is IEnum
+f = func ->
+  ()
+;
+|])
+        `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"
