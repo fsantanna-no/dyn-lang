@@ -110,7 +110,7 @@ data Decl = DSig Pos ID_Var Ctrs Type
           | DAtr Pos Patt ExpWhere
   deriving (Eq, Show)
 
-newtype Data = Data (Pos, ID_Hier, Ctrs, [Type])
+newtype Data = Data (Pos, ID_Hier, [ID_Var], Type)
   deriving (Eq, Show)
 
 newtype Ifce = Ifce (Pos, ID_Ifce, Ctrs, [Decl])

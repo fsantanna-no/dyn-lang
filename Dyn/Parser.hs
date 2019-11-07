@@ -279,7 +279,7 @@ expr_parens = parens expr
 ctrs :: Parser Ctrs
 ctrs = do
   void <- try $ tk_key "where"
-  cs   <- (singleton <$> ctr) <|> (parens $ list (tk_sym ",") $ ctr)
+  cs   <- (singleton <$> ctr) <|> (parens $ list (tk_sym ",") ctr)
   let [("a",ifcs)] = cs
   return $ Ctrs ifcs
 
@@ -419,16 +419,15 @@ data_ = do
   pos  <- toPos <$> getPosition
   void <- try $ tk_key "data"
   hr   <- tk_hier
-  ofs  <- option [] $ try $ tk_key "for" *> (list (tk_sym "") tk_var)
-  cs   <- option (Ctrs []) ctrs
-  tps  <- option [] $ do
+  ofs  <- option [] $ do
+            void <- try $ tk_key "for"
+            ofs  <- (singleton <$> tk_var) <|> (parens $ list (tk_sym ",") tk_var)
+            return ofs
+  tp   <- option TUnit $ do
             void <- try $ tk_key "with"
-            tps  <- list (tk_sym "") type_
-            void <- string ";"
-            void <- optional $ try $ tk_key "data"
-            spc
-            return tps
-  return $ Data (pos, hr, cs, tps)
+            tp   <- type_
+            return tp
+  return $ Data (pos, hr, ofs, tp)
 
 ifce :: Parser Ifce
 ifce = do

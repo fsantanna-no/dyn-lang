@@ -158,8 +158,12 @@ instance IString ExpWhere where
 -------------------------------------------------------------------------------
 
 instance IString Data where
-  toString (Data (_,hr,Ctrs [],[])) = "data " ++ intercalate "." hr
-
+  toString (Data (_,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ with st where
+                                    of_ []  = ""
+                                    of_ [v] = " of " ++ v
+                                    of_ l   = " of (" ++ intercalate "," l ++ ")"
+                                    with TUnit = ""
+                                    with tp    = " with " ++ toString tp
   toStringI _ _ = error "TODO"
 
 -------------------------------------------------------------------------------
