@@ -308,8 +308,11 @@ l = List.Cons ((),
     List.Nil)))
 
 f :: (List of a -> List of Nat) where a is IEnum
-f = func ->
-  ()
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil
+    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a l::List of a;
+  ;
 ;
-|])
+|] ++ prelude)
         `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"

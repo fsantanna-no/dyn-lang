@@ -1,3 +1,7 @@
+- como methods nao podem ser overriden,
+    - funcoes default podem ir pra fora do Dict
+        - vao funcionar *exatamente* como funcoes genericas
+- exemplos com IEq nos slides para mostrar
 - corrigir impl () para IEnum
 - List of IEnum
 - pq f l nao funciona?

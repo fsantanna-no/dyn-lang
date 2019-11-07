@@ -110,6 +110,33 @@ f = func ->
 |] ++ prelude)
           `shouldBe` "Bool.True"
 
+    it "XXX: [(),1,True]" $
+      evalString ([r|
+main = f l
+
+data List for a
+data List.Nil
+data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum
+l = List.Cons (("Unit", ()),
+    List.Cons (("Nat",  Nat.Succ Nat.Zero),
+    List.Cons (("Bool", Bool.True),
+    List.Nil)))
+
+f :: (List of a -> List of Nat) where a is IEnum
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil
+    List.Cons ((=id,=x),=l) -> List.Cons (toEnum (dIEnumIEnum id) x, f l) where
+      id :: String
+      x  :: a
+      l  :: List of a;
+  ;
+;
+|] ++ prelude)
+        `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
