@@ -1,3 +1,5 @@
+- corrigir impl () para IEnum
+- List of IEnum
 - pq f l nao funciona?
 - Inferir tipo de fields em Data
     - List ...

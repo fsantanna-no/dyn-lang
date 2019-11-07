@@ -173,7 +173,7 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
   toString' (TData hr [])  = concat hr
   --toString' (TData hr tps) = concat hr ++ concatMap toString' tps
   toString' (TVar _)       = concat cs
-  --toString' TUnit          = "Unit"
+  toString' TUnit          = "Unit"
   toString' x = error $ show x
 
   -- eq = <...>

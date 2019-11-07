@@ -51,6 +51,7 @@ fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,
   xhr inp2 out2 = --traceShow (id2, toString e, toString e3, toType dsigs e3) $
     case tpMatch (TTuple [inp2            , out2])
                  (TTuple [toType dsigs e3 , xtp ]) of
+      [("a", TUnit)]       -> Right $ Just ["Unit"]
       [("a", TData xhr _)] -> Right $ Just xhr   -- TODO: _
       [("a", TVar  "a")]   -> Right $ Nothing
       otherwise            -> Left ()
@@ -68,6 +69,7 @@ tpMatch :: Type -> Type -> [(ID_Var,Type)]
 tpMatch tp1 tp2 = {-traceShowX ("MATCH",toString tp1,toString tp2) $-} M.toAscList $ aux tp1 tp2 where
   aux :: Type -> Type -> M.Map ID_Var Type
   aux (TVar id)      TAny                    = M.singleton id TAny
+  aux (TVar id)      TUnit                   = M.singleton id TUnit
   aux (TVar id)      (TData (hr:_) ofs)      = M.singleton id (TData [hr] ofs)    -- TODO: ofs
   aux (TVar id)      (TVar  id') | (id==id') = M.singleton id (TVar  id')
   --aux (TVar id)    _                       = M.singleton id ["Bool"]

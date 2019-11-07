@@ -7,6 +7,7 @@ import Text.RawString.QQ
 prelude = nat_iord   ++ nat_ieq
        ++ bool_ienum ++ bool_iord ++ bool_ieq ++ bool_ibounded
        ++ char_iord  ++ char_ieq
+       ++ unit_ienum
        ++ ienum      ++ iord      ++ ieq      ++ ibounded
        ++ nat        ++ char      ++ bool
        ++ std
@@ -73,6 +74,23 @@ ienum = [r|
   interface IEnum for a with
     toEnum   :: (a -> Nat)
     fromEnum :: (Nat -> a)
+  ;
+|]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+unit_ienum = [r|
+  implementation of IEnum for () with
+    toEnum = func :: (() -> Nat) ->
+      Nat.Zero
+    ;
+
+    fromEnum = func :: (Nat -> ()) ->
+      case ... of
+        Nat.Zero -> ()
+      ;
+    ;
   ;
 |]
 
