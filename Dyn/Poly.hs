@@ -28,13 +28,13 @@ fE ifces _ dsigs xtp e@(EVar z id) = e' where
   cs'    = Ifce.ifcesSups ifces (getCtrs cs) where
 
   e' = case (cs', xtp) of
-    ([], _)           -> e                          -- var is not poly, nothing to do
-    (_, TData xhr []) -> xxx z cs' (concat xhr) id  -- xtp is concrete
-    (_, TVar _)       -> xxx z cs' "a"          id  -- xtp is not concrete yet
-    otherwise         -> e
+    ([], _)          -> e                          -- var is not poly, nothing to do
+    (_, TData xhr _) -> xxx z cs' (concat xhr) id  -- xtp is concrete     -- TODO: _
+    (_, TVar _)      -> xxx z cs' "a"          id  -- xtp is not concrete yet
+    otherwise        -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
+fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow (id2,cs2,toString e2') $-} ECall z1 e2' e3 where
 
   (cs2,tp2) = dsigsFind dsigs id2
   cs2'      = Ifce.ifcesSups ifces (getCtrs cs2) where
@@ -51,9 +51,9 @@ fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
   xhr inp2 out2 = --traceShow (id2, toString e, toString e3, toType dsigs e3) $
     case tpMatch (TTuple [inp2            , out2])
                  (TTuple [toType dsigs e3 , xtp ]) of
-      [("a", TData xhr [])] -> Right $ Just xhr
-      [("a", TVar  "a")]    -> Right $ Nothing
-      otherwise             -> Left ()
+      [("a", TData xhr _)] -> Right $ Just xhr   -- TODO: _
+      [("a", TVar  "a")]   -> Right $ Nothing
+      otherwise            -> Left ()
         where
           -- eq :: (a,a) -> Bool
           [tvar2] = toVars tp2   -- [a]
@@ -68,7 +68,7 @@ tpMatch :: Type -> Type -> [(ID_Var,Type)]
 tpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
   aux :: Type -> Type -> M.Map ID_Var Type
   aux (TVar id)    TAny                    = M.singleton id TAny
-  aux (TVar id)    (TData (hr:_) [])       = M.singleton id (TData [hr] [])
+  aux (TVar id)    (TData (hr:_) ofs)      = M.singleton id (TData [hr] ofs)    -- TODO: ofs
   aux (TVar id)    (TVar  id') | (id==id') = M.singleton id (TVar  id')
   --aux (TVar id)    _                       = M.singleton id ["Bool"]
   aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2) where

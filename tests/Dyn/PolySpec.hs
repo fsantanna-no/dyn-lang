@@ -252,7 +252,7 @@ f = func :: (a -> Nat) where a is IEnum ->
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
     it "XXX: f [False,True]" $
-      parseToString ([r|
+      evalString ([r|
 main = f l
 
 data List for a
@@ -268,7 +268,7 @@ f :: (List of a -> List of Nat) where a is IEnum
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil
-    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a;
+    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a l::List of a;
   ;
 ;
 |] ++ prelude)

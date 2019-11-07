@@ -1,3 +1,4 @@
+- pq f l nao funciona?
 - Inferir tipo de fields em Data
     - List ...
     - Tem alguns exemplos de :: que nao deveriam ser necessarios
