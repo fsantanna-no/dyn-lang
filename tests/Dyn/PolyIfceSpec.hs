@@ -178,8 +178,10 @@ main = (ff1 (lte, (Bool.True,Bool.False)),
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
 
+    describe "TODO: impl-with-ctrs" $ do
+
     -- TODO: dIOrd(dIAaaXxx())
-    it "TODO-impl-with-ctrs: implementation of IEq for a where a is IAaa" $
+    it "TODO: implementation of IEq for a where a is IAaa" $
       evalString ([r|
 main = (lt (Xxx.True,Xxx.False), gt (Xxx.True,Xxx.False))
 
@@ -216,26 +218,65 @@ implementation of IAaa for Xxx with
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq ++ std)
         `shouldBe` "(Bool.False,Bool.True)"
 
+    it "TODO: implementation of IEq for Maybe of a" $
+        evalString ([r|
+main = (eq (m1,m1), neq(m1,m2))
+
+m1 :: Maybe of () = Maybe.Nothing
+m2 :: Maybe of () = Maybe.Just ()
+
+--data Maybe for a
+--data Maybe.Nothing
+--data Maybe.Just with a
+
+interface IEq for a with
+  eq  :: ((a,a) -> Bool)
+  neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
+    not ((eq' dIEqa) ...)
+  ;
+;
+
+implementation of IEq for () with
+  eq = func :: (((),()) -> Bool) ->
+    case ... of
+      ((), ()) -> Bool.True
+    ;
+  ;
+;
+
+implementation of IEq for Maybe of a where (a is IEq) with
+  eq = func :: ((Maybe of a,Maybe of a) -> Bool) ->
+    case ... of
+      (Maybe.Nothing, Maybe.Nothing) -> True
+      (Maybe.Just =x, Maybe.Just =y) -> (eq' dIEqa) (x,y)
+      _                              -> False
+    ;
+  ;
+;
+|])
+        `shouldBe` "(Bool.True,Bool.True)"
+
+
   describe "Misc" $ do
 
-      it "eq" $
-        evalString ("main = (eq' dIEqChar) (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
-          `shouldBe` "Bool.True"
-      it "eq" $
-        evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
-           `shouldBe` "Bool.False"
-      it "gte" $
-        evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
-           `shouldBe` "Bool.False"
-      it "gte" $
-        evalString ("main = (gte' (dIEqNat,dIOrdNat)) (one,two)"++prelude)
-           `shouldBe` "Bool.False"
-      it "lt" $
-        evalString ("main = (lt' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
-           `shouldBe` "Bool.True"
-      it "isLower" $
-        evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
-           `shouldBe` "(Bool.False,Bool.True)"
-      it "nextlet" $
-        evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
-           `shouldBe` "(Char.Dd,Char.AA)"
+    it "eq" $
+      evalString ("main = (eq' dIEqChar) (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
+        `shouldBe` "Bool.True"
+    it "eq" $
+      evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
+         `shouldBe` "Bool.False"
+    it "gte" $
+      evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
+         `shouldBe` "Bool.False"
+    it "gte" $
+      evalString ("main = (gte' (dIEqNat,dIOrdNat)) (one,two)"++prelude)
+         `shouldBe` "Bool.False"
+    it "lt" $
+      evalString ("main = (lt' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
+         `shouldBe` "Bool.True"
+    it "isLower" $
+      evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
+         `shouldBe` "(Bool.False,Bool.True)"
+    it "nextlet" $
+      evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
+         `shouldBe` "(Char.Dd,Char.AA)"

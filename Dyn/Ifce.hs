@@ -50,6 +50,7 @@ apply (Prog globs) = (ifces,prog) where
   inline ifces impls globs = concatMap f globs where
                               f :: Glob -> [Decl]
                               f (GDecl dcl) = expandDecl  ifces cz dcl
+                              f (GData dat) = []
                               f (GIfce ifc) = ifceToDecls ifces ifc
                               f (GImpl imp) = implToDecls ifces impls imp
 
@@ -147,7 +148,7 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
 
     getTp (Impl (_,_,_,tp,_)) = tp              -- Xxx
 
-    -- dXxxIOrd = dIAaaIOrd dXxxIAaa
+    -- dIOrdXxx = dIOrdIAaa dIAaaXxx
     -- tp = Xxx
     toDict :: Type -> Decl
     toDict tp = DAtr z (PWrite z ("d"++ifc++toString' tp)) (ExpWhere (z,[],e)) where
@@ -169,8 +170,11 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs cs,tp,decls)) = ctrDicts++[dict] where
           ups' = DAtr z (fromList $ map (PWrite z) $ L.sort $ map ("da"++) cs)
                     (ExpWhere (z,[],EArg z))
 
-  toString' (TData hr []) = concat hr
-  toString' (TVar _)      = concat cs
+  toString' (TData hr [])  = concat hr
+  --toString' (TData hr tps) = concat hr ++ concatMap toString' tps
+  toString' (TVar _)       = concat cs
+  --toString' TUnit          = "Unit"
+  toString' x = error $ show x
 
   -- eq = <...>
   -- TODO: cs

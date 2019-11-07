@@ -1871,13 +1871,13 @@ return 10 :: (List.Nil)
         `shouldBe` Right (EData ["List","Cons"] (ETuple [EData ["Nat","10"] EUnit,EData ["List","Nil"] EUnit]))
 -}
 
-      it "XXX: List: ==" $                   -- pg 93
+      it "TODO-impl-with-ctrs: List: ==" $                   -- pg 93
         evalString ([r|
 main = (neq (List.Cons (ten,List.Nil), List.Cons (ten,List.Nil)),
          eq (List.Cons (ten,List.Nil), List.Cons (ten,List.Nil)),
          eq (List.Cons (two,List.Nil), List.Cons (ten,List.Nil)))
 
-data List of a
+data List for a
 data List.Nil
 data List.Cons with (a, List of a)
 
