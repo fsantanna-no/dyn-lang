@@ -250,3 +250,26 @@ f = func :: (a -> Nat) where a is IEnum ->
 ;
 |] ++ prelude)
         `shouldBe` "(Nat.Succ Nat.Zero)"
+
+    it "XXX: f [False,True]" $
+      parseToString ([r|
+main = f l
+
+data List for a
+data List.Nil
+data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum
+l = List.Cons (Bool.False,
+    List.Cons (Bool.True,
+    List.Nil))
+
+f :: (List of a -> List of Nat) where a is IEnum
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil
+    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a;
+  ;
+;
+|] ++ prelude)
+        `shouldBe` "(List.Cons (Nat.Zero,(List.Cons (Nat.Succ Nat.Zero,List.Nil))))"

@@ -1,8 +1,6 @@
 module Dyn.Poly where
 
 import Debug.Trace
-import Data.Maybe               (fromJust)
-import qualified Data.List as L (find)
 import qualified Data.Set  as S
 import qualified Data.Map  as M
 
