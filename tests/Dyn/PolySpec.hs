@@ -259,7 +259,7 @@ data List for a
 data List.Nil
 data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum
+l :: List of Bool
 l = List.Cons (Bool.False,
     List.Cons (Bool.True,
     List.Nil))
@@ -272,4 +272,4 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
   ;
 ;
 |] ++ prelude)
-        `shouldBe` "(List.Cons (Nat.Zero,(List.Cons (Nat.Succ Nat.Zero,List.Nil))))"
+        `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"

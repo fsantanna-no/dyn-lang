@@ -34,7 +34,7 @@ fE ifces _ dsigs xtp e@(EVar z id) = e' where
     otherwise        -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow (id2,cs2,toString e2') $-} ECall z1 e2' e3 where
+fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,toString e2') $-} ECall z1 e2' e3 where
 
   (cs2,tp2) = dsigsFind dsigs id2
   cs2'      = Ifce.ifcesSups ifces (getCtrs cs2) where
@@ -65,22 +65,25 @@ fE _ _ _ _ e = e
 
 -- (a,a) vs (Bool.True,Bool.False)  -> [(a,Bool)]
 tpMatch :: Type -> Type -> [(ID_Var,Type)]
-tpMatch ttp1 ttp2 = M.toAscList $ aux ttp1 ttp2 where
+tpMatch tp1 tp2 = {-traceShowX ("MATCH",toString tp1,toString tp2) $-} M.toAscList $ aux tp1 tp2 where
   aux :: Type -> Type -> M.Map ID_Var Type
-  aux (TVar id)    TAny                    = M.singleton id TAny
-  aux (TVar id)    (TData (hr:_) ofs)      = M.singleton id (TData [hr] ofs)    -- TODO: ofs
-  aux (TVar id)    (TVar  id') | (id==id') = M.singleton id (TVar  id')
+  aux (TVar id)      TAny                    = M.singleton id TAny
+  aux (TVar id)      (TData (hr:_) ofs)      = M.singleton id (TData [hr] ofs)    -- TODO: ofs
+  aux (TVar id)      (TVar  id') | (id==id') = M.singleton id (TVar  id')
   --aux (TVar id)    _                       = M.singleton id ["Bool"]
-  aux (TTuple ts1) (TTuple ts2)            = M.unionsWith f $ map (\(x,y)->aux x y) (zip ts1 ts2) where
-                                              f TAny ttp2              = ttp2
-                                              f ttp1 TAny              = ttp1
-                                              f ttp1 ttp2 | ttp1==ttp2 = ttp1
-  aux (TTuple ts1) TAny                    = aux (TTuple ts1) (TTuple $ replicate (length ts1) TAny)
+  aux (TData _ ofs1) (TData _ ofs2)          = unions $ zip ofs1 ofs2
+  aux (TTuple ts1)   (TTuple ts2)            = unions $ zip ts1 ts2
+  aux (TTuple ts1)   TAny                    = aux (TTuple ts1) (TTuple $ replicate (length ts1) TAny)
   aux x y = M.empty
   --aux x y = error $ "tpMatch: " ++ show (x,y)
 
+  unions ls = M.unionsWith f $ map (\(x,y)->aux x y) ls where
+                f TAny tp2           = tp2
+                f tp1 TAny           = tp1
+                f tp1 tp2 | tp1==tp2 = tp1
+
 toVars :: Type -> [ID_Var]
-toVars ttp = S.toAscList $ aux ttp where
+toVars tp = S.toAscList $ aux tp where
   aux TAny            = S.empty
   aux TUnit           = S.empty
   aux (TData _ [])    = S.empty
