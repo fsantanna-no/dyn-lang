@@ -301,33 +301,33 @@ type_ctrs = do
 
 type_ :: Parser Type
 type_ = do
-  tp <- try ttype_A <|> try ttype_D <|> try ttype_V <|> try ttype_0 <|>
-        try ttype_parens <|> try ttype_N <|> ttype_F <?> "type"
+  tp <- try type_A <|> try type_D <|> try type_V <|> try type_0 <|>
+        try type_parens <|> try type_N <|> type_F <?> "type"
   return tp
 
-ttype_A :: Parser Type
-ttype_A = do
+type_A :: Parser Type
+type_A = do
   void <- tk_sym "?"
   return TAny
 
-ttype_0 :: Parser Type
-ttype_0 = do
+type_0 :: Parser Type
+type_0 = do
   void <- tk_sym "("
   void <- tk_sym ")"
   return TUnit
 
-ttype_D :: Parser Type
-ttype_D = do
+type_D :: Parser Type
+type_D = do
   hier <- tk_hier
   return $ TData hier {-(f ofs)-}
 
-ttype_N :: Parser Type
-ttype_N = do
+type_N :: Parser Type
+type_N = do
   ttps <- parens $ list (tk_sym ",") $ type_
   return $ TTuple ttps
 
-ttype_F :: Parser Type
-ttype_F = do
+type_F :: Parser Type
+type_F = do
   void <- tk_sym "("
   inp  <- type_
   void <- tk_sym "->"
@@ -335,16 +335,16 @@ ttype_F = do
   void <- tk_sym ")"
   return $ TFunc inp out
 
-ttype_V :: Parser Type
-ttype_V = do
+type_V :: Parser Type
+type_V = do
   ref <- option False $ do
           void <- try $ tk_key "ref"
           return True
   var <- tk_var
   return $ TVar var
 
-ttype_parens :: Parser Type
-ttype_parens = do
+type_parens :: Parser Type
+type_parens = do
   void <- tk_sym "("
   tp   <- type_
   void <- tk_sym ")"
