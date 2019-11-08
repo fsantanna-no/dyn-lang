@@ -1,3 +1,9 @@
+- ao declarar tipos das funcoes de implementacoes ocorrem erros de incompatilibidade
+    - provavelmente com global generica
+    - isso esta obrigando a declarar o tipos dos argumentos
+        - ver Prelude:nat_iord
+        - ver BookSpec:enum
+
 - como methods nao podem ser overriden,
     - funcoes default podem ir pra fora do Dict
         - vao funcionar *exatamente* como funcoes genericas

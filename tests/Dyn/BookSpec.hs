@@ -740,8 +740,10 @@ implementation of IEnum for Day with
 ;
 
 implementation of IOrd for Day with
-  lt = func :: ((Day,Day) -> Bool) ->
+  lt = func ->
     let
+      x :: Day
+      y :: Day
       (x,y) = ...
     in
       lt (x', y') where

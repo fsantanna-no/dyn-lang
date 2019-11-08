@@ -71,10 +71,10 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
       evalString ([r|
 main = (eq' (dIEqIXxx dIXxxXxx)) (Xxx,Xxx)
 
-dIEqIXxx = Dict.IEq (eq,neq_IEq) where
+dIEqIXxx = Dict.IEq (eq) where
   eq = func {f} ->  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
-    eq (Dict.IEq (eq,neq), f ((f),x), f ((f),y)) where
-      Dict.IEq (eq,neq) = dIEqBool
+    eq (Dict.IEq (eq), f ((f),x), f ((f),y)) where
+      Dict.IEq (eq) = dIEqBool
       (_,x,y) = ...
     ;
   ; where
@@ -160,16 +160,14 @@ ibounded = [r|
 ieq = [r|
   eq' = func ->
     eq ... where
-      Dict.IEq (eq,_) = ...
+      Dict.IEq (eq) = ...
     ;
   ;
   neq' = func ->
-    neq ... where
-      Dict.IEq (_,neq) = ...
-    ;
+    neq_IEq ...
   ;
 
-  dIEq = Dict.IEq (eq_IEq,neq_IEq)
+  dIEq = Dict.IEq (eq_IEq)
 
   neq_IEq = func ->
     let dIEqa = ... in
@@ -269,7 +267,7 @@ bool_ieq = [r|
   --  - implements eq, uses default neq
   --  - methods receive extra dict
   -- overrides default eq
-  dIEqBool = Dict.IEq (eq_Bool,neq_IEq) where
+  dIEqBool = Dict.IEq (eq_Bool) where
     eq_Bool = func ->
       let dIEqa = ... in
         -- >> body
@@ -307,5 +305,5 @@ bool_iord = [r|
 
 -- instance IEq (Int)
 nat_ieq = [r|
-  dIEqNat = Dict.IEq (eq_IEq,neq_IEq)
+  dIEqNat = Dict.IEq (eq_IEq)
 |]

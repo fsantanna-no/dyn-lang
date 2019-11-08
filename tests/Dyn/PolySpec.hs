@@ -79,12 +79,11 @@ implementation of IInd for Bool with
 
 interface IInd for a with
   g :: (a -> ())
-  f :: (a -> ()) =
-    func :: (a -> ()) ->
-      g x where
-        x = ...
-      ;
-    ;
+;
+f :: (a -> ()) where a is IInd = func :: (a -> ()) where a is IInd ->
+  g x where
+    x = ...
+  ;
 ;
 |])
         `shouldBe` "()"
@@ -94,8 +93,7 @@ interface IInd for a with
 main = rec (Nat.Succ Nat.Zero)
 
 implementation of IRec for Nat with
-  rec :: (Nat -> ())
-  rec = func :: (Nat -> ()) ->
+  rec = func ->
     case ... of
       Nat.Zero    -> ()
       Nat.Succ =x -> rec x where x::Nat;  -- TODO: needs to know (Nat.Succ Nat)
@@ -114,8 +112,7 @@ interface IRec for a with
 main = f (Nat.Succ Nat.Zero)
 
 implementation of IRec for Nat with
-  rec :: (Nat -> ())
-  rec = func :: (Nat -> ()) ->
+  rec = func ->
     case ... of
       Nat.Zero    -> ()
       Nat.Succ =x -> rec x where x::Nat;
@@ -125,9 +122,8 @@ implementation of IRec for Nat with
 
 interface IRec for a with
   rec :: (a -> ())
-  f :: (a -> ())
-  f = func :: (a -> ()) -> rec x where x::a = ... ;;
 ;
+f :: (a -> ()) where a is IRec = func :: (a -> ()) where a is IRec -> rec x where x::a = ... ;;
 |])
         `shouldBe` "()"
 
@@ -155,13 +151,14 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 main = f (Bool.True,Bool.False)
 
 implementation of IAaa for Bool with
-  f :: ((Bool,Bool) -> Bool)
+  f = func -> g (x,y) where x::Bool y::Bool (x,y)=... ;;
 ;
 
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
-  f = func :: ((a,a) -> Bool) -> lt (x,y) where (x,y)=... ;;
 ;
+g :: ((a,a) -> Bool) where a is IAaa
+g = func :: ((a,a) -> Bool) where a is IAaa -> lt ... ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 

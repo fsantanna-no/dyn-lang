@@ -36,28 +36,24 @@ ibounded = [r|
 ieq = [r|
   interface IEq for a with
     eq  :: ((a,a) -> Bool)
-    neq :: ((a,a) -> Bool) = func :: ((a,a) -> Bool) ->
-      not ((eq' dIEqa) ...)
-    ;
+  ;
+  neq = func :: ((a,a) -> Bool) where a is IEq ->
+    not ((eq' dIEqa) ...)
   ;
 |]
 
 iord = [r|
   interface IOrd for a where a is IEq with
     lt  :: ((a,a) -> Bool)
-    lte :: ((a,a) -> Bool)
-    gt  :: ((a,a) -> Bool)
-    gte :: ((a,a) -> Bool)
-
-    lte = func :: ((a,a) -> Bool) ->
-      or ((lt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
-    ;
-    gt = func :: ((a,a) -> Bool) ->
-      not ((lte' (dIEqa,dIOrda)) ...)
-    ;
-    gte = func :: ((a,a) -> Bool) ->
-      or ((gt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
-    ;
+  ;
+  lte = func :: ((a,a) -> Bool) where a is IOrd ->
+    or ((lt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
+  ;
+  gt = func :: ((a,a) -> Bool) where a is IOrd ->
+    not ((lte' (dIEqa,dIOrda)) ...)
+  ;
+  gte = func :: ((a,a) -> Bool) where a is IOrd ->
+    or ((gt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
   ;
 |]
 
@@ -316,15 +312,11 @@ nat_ieq = [r|
 nat_iord = [r|
   implementation of IOrd for Nat with
     lt = func :: ((Nat,Nat) -> Bool) ->
-      case (x,y) of
+      case ... of
         (Nat.Zero,     Nat.Zero)     -> Bool.False
         (Nat.Zero,     _)            -> Bool.True
         (Nat.Succ _,   Nat.Zero)     -> Bool.False
-        (Nat.Succ =x', Nat.Succ =y') -> (lt' (dIEqa,dIOrda)) (x',y')
-      ; where
-        x' :: Nat
-        y' :: Nat
-        (x,y) = ...
+        (Nat.Succ =x', Nat.Succ =y') -> (lt' (dIEqNat,dIOrdNat)) (x',y')
       ;
     ;
   ;

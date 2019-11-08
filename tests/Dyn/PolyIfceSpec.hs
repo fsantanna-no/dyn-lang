@@ -67,11 +67,12 @@ implementation of IInd for Bool with
 
 interface IInd for a with
   g :: (a -> ())
-  f :: (a -> ()) =
-    func :: (a -> ()) ->
-      (g' dIInda) ...
-    ;
 ;
+
+f =
+  func :: (a -> ()) where a is IInd ->
+    (g' dIInda) ...
+  ;
 |])
         `shouldBe` "()"
 
@@ -84,7 +85,7 @@ implementation of IRec for Nat with
   rec = func :: (Nat -> ()) ->
     case ... of
       Nat.Zero    -> ()
-      Nat.Succ =x -> (rec' dIReca) x
+      Nat.Succ =x -> (rec' dIRecNat) x
     ;
   ;
 ;
@@ -104,17 +105,18 @@ implementation of IRec for Nat with
   rec = func :: (Nat -> ()) ->
     case ... of
       Nat.Zero    -> ()
-      Nat.Succ =x -> (rec' dIReca) x
+      Nat.Succ =x -> (rec' dIRecNat) x
     ;
   ;
 ;
 
 interface IRec for a with
   rec :: (a -> ())
-  f :: (a -> ())
-  f = func :: (a -> ()) ->
-    (rec' dIReca) ...
-  ;
+;
+
+f :: (a -> ()) where a is IRec =
+  func :: (a -> ()) where a is IRec ->
+  (rec' dIReca) ...
 ;
 |])
         `shouldBe` "()"
@@ -143,14 +145,16 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 main = (f' (dIAaaBool,dIEqBool,dIOrdBool)) (Bool.True,Bool.False)
 
 implementation of IAaa for Bool with
-  f :: ((Bool,Bool) -> Bool)
+  f :: ((Bool,Bool) -> Bool) = func ->
+    (g' (dIAaaBool,dIEqBool,dIOrdBool)) ...
+  ;
 ;
 
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool)
-  f = func :: ((a,a) -> Bool) ->
-    (lt' (dIEqa,dIOrda)) ...
-  ;
+;
+g = func :: ((a,a) -> Bool) where a is IAaa ->
+  (lt' (dIEqa,dIOrda)) ...
 ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
@@ -265,7 +269,7 @@ implementation of IEq for Maybe of a where (a is IEq) with
     it "eq" $
       evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
          `shouldBe` "Bool.False"
-    it "gte" $
+    it "YYY: gte" $
       evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
          `shouldBe` "Bool.False"
     it "gte" $
