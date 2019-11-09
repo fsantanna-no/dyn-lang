@@ -23,7 +23,10 @@ apply x y = mapDecls (fD,fE,fPz) x cz [] y where
   fD _ _ dsigs d@(DSig _ _ _ TAny) = []
   fD _ _ dsigs d@(DSig _ _ _ _)    = [d]
 
+  -- infer type of pat1 (add dsig) based on type of whe2
+
   fD ifces ctrs dsigs datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
+
     aux pat1 (toType dsigs whe2) ++ [datr] where
 
       aux _ TAny = []

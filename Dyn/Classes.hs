@@ -24,6 +24,7 @@ instance IPos Expr where
   getPos (ECase  z _ _)   = z
 
 instance IPos Patt where
+  getPos (PAny   z)       = z
   getPos (PError z _)     = z
   getPos (PArg   z)       = z
   getPos (PRead  z _)     = z
@@ -106,7 +107,7 @@ instance IString Expr where
   toStringI spc (ECons  _ h)           = intercalate "." h
   toStringI spc (EArg   _)             = "..."
   toStringI spc (ETuple _ es)          = "(" ++ intercalate "," (map toString es) ++ ")"
-  toStringI spc (EFunc  _ cs tp ups bd)  = "func :: " ++ toString tp ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
+  toStringI spc (EFunc  _ cs tp ups bd)  = "func :: " ++ toString tp ++ toString cs ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
                                               toStringI (spc+2) bd ++ "\n" ++ rep spc ++ ";"
                                              where
                                               upsToString []  = ""

@@ -1,4 +1,3 @@
-- inferir tipo de func a partir da variavel
 - tipo da ifce vs tipo da impl
     - escondendo a ifce, os usos internos do nome apontam para a impl
         - mas nem sempre o uso é para a impl

@@ -161,8 +161,8 @@ g = func :: ((a,a) -> Bool) where a is IAaa ->
 
     it "f a where a is IOrd" $
       evalString ([r|
-main = ((f (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
-        (f (dIEqBool,dIOrdBool)) (Bool.False,Bool.False))
+main = ((f' (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
+        (f' (dIEqBool,dIOrdBool)) (Bool.False,Bool.False))
 f = func :: ((a,a) -> Bool) where a is IOrd ->
   (gt' (dIEqa,dIOrda)) ...
 ;

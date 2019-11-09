@@ -38,7 +38,7 @@ ieq = [r|
   interface IEq for a with
     eq  :: ((a,a) -> Bool)
   ;
-  neq :: ((a,a) -> Bool) where a is IEq = func :: ((a,a) -> Bool) where a is IEq ->
+  neq = func :: ((a,a) -> Bool) where a is IEq ->
     not (eq (x,y)) where
       (x,y) = ...
     ;
@@ -49,9 +49,9 @@ iord = [r|
   interface IOrd for a where a is IEq with
     lt  :: ((a,a) -> Bool)
   ;
-  lte :: ((a,a) -> Bool) where a is IOrd
-  gt  :: ((a,a) -> Bool) where a is IOrd
-  gte :: ((a,a) -> Bool) where a is IOrd
+  --lte :: ((a,a) -> Bool) where a is IOrd
+  --gt  :: ((a,a) -> Bool) where a is IOrd
+  --gte :: ((a,a) -> Bool) where a is IOrd
 
   lte = func :: ((a,a) -> Bool) where a is IOrd ->
     or (lt (x,y), eq (x,y)) where
@@ -75,7 +75,7 @@ ienum = [r|
     toEnum   :: (a -> Nat)
     fromEnum :: (Nat -> a)
   ;
-  succ :: (a -> a) where a is IEnum = func :: (a -> a) where a is IEnum ->
+  succ = func :: (a -> a) where a is IEnum ->
     fromEnum (Nat.Succ (toEnum ...))
   ;
 |]
@@ -134,7 +134,7 @@ bool_ibounded = [r|
 
 bool_ieq = [r|
   implementation of IEq for Bool with
-    eq :: ((Bool,Bool)->Bool) = func :: ((Bool,Bool)->Bool) ->
+    eq :: ((Bool,Bool)->Bool) = func ->
       or (and (x,y), (and (not x, not y))) where
         (x,y) = ...
       ;

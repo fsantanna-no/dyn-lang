@@ -573,7 +573,7 @@ twenty = mul (two,ten)
 --data Triangle.Equilateral
 --data Triangle.Scalene
 
-analyse2 :: ((Nat,Nat,Nat) -> Triangle) = func ->
+analyse2 = func :: ((Nat,Nat,Nat) -> Triangle) ->
   case (lte(x,y),  lte(x,z),  lte(y,x),  lte(y,z) ) of
        (Bool.True, Bool.True, _,         Bool.True)  -> analyse (x,y,z)
        (Bool.True, Bool.True, _,         Bool.False) -> analyse (x,z,y)

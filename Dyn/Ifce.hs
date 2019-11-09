@@ -137,22 +137,23 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs [],tp,decls)) =
 
 expandGen :: [Ifce] -> Decl -> [Decl]
 
---  neq = func :: ((a,a) -> Bool) ->
+--  neq = func :: ((a,a) -> Bool) where a is IEq ->
 --    not (eq ...)
 --
 --    expand to
 --
+--  neq :: ((a,a) -> Bool) where a is IEq
 --  neq' = func ->
---    let dIEqa = ... in                      -- receives dict
---      func :: ((a,a) -> Bool) {daIEq} ->    -- same as above but as a closure with fixed dict
---        not (eq ...)                        -- Poly.hs will then translate to ((eq' daIEq) ...)
+--    let dIEqa = ... in              -- receives dict
+--      func :: <tp/cs> {daIEq} ->    -- same as above but as a closure with fixed dict
+--        not (eq ...)                -- Poly.hs will then translate to ((eq' daIEq) ...)
 
-expandGen ifces (DAtr z1 pat1@(PWrite pz pid)
+expandGen ifces (DAtr z1 (PWrite pz pid)
                   (ExpWhere (z2, [],
                     EFunc z3 (Ctrs cs3) tp3 [] whe3))) | not (null cs3) =
   [
-    DAtr z1 (PWrite pz (pid++"'")) (ExpWhere (pz,[],EVar pz pid)),
-    DAtr z1 pat1
+    DSig z1 pid (Ctrs cs3) tp3,                   -- neq ::
+    DAtr z1 (PWrite pz (pid++"'"))                -- neq' =
     (ExpWhere (z2, [],
       EFunc z2 cz TAny [] $
         ExpWhere (z2, [letDicts],            -- let dIEqa = ...
