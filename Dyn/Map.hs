@@ -20,7 +20,7 @@ fPz _ _ _   p = p
 mapDecls :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> [Decl] -> [Decl]
 mapDecls fs ifces ctrs dsigs decls = concatMap (mapDecl fs ifces ctrs dsigs') decls
   where
-    dsigs' = dsigs ++ filter isDSig decls
+    dsigs' = filter isDSig decls ++ dsigs
 
 mapDecl :: MapFs -> [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
 mapDecl fs@(fD,_,_) ifces ctrs dsigs decl@(DSig _ _ _ _) = fD ifces ctrs dsigs decl
@@ -37,8 +37,8 @@ mapWhere fs ifces ctrs dsigs xtp (ExpWhere (z,ds,e)) = ExpWhere (z, ds', e')
     e'  = mapExpr  fs ifces ctrs dsigs'' xtp e
     ds' = mapDecls fs ifces ctrs dsigs'  ds
 
-    dsigs''   = dsigs ++ filter isDSig ds'
-    dsigs'    = dsigs ++ filter isDSig ds
+    dsigs''   = filter isDSig ds' ++ dsigs
+    dsigs'    = filter isDSig ds  ++ dsigs
 
 -------------------------------------------------------------------------------
 

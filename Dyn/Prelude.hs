@@ -131,7 +131,7 @@ bool_ibounded = [r|
 
 bool_ieq = [r|
   implementation of IEq for Bool with
-    eq = func ->
+    eq :: ((Bool,Bool)->Bool) = func :: ((Bool,Bool)->Bool) ->
       or (and (x,y), (and (not x, not y))) where
         (x,y) = ...
       ;

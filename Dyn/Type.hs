@@ -49,8 +49,9 @@ isSup _ _ tp1 tp2 = isSup' tp1 tp2
 --isSup _ _ tp1 tp2 = error $ show (toString tp1, toString tp2)
 
 isSup' :: Type -> Type -> Bool
-isSup' tp1            (TVar "a")     = True
-isSup' (TVar "a")     tp2            = True
-isSup' (TData hr1 _)  (TData hr2 _)  = hr1 `L.isPrefixOf` hr2   -- TODO: _
+isSup' tp1               (TVar "a")        = True
+isSup' (TVar "a")        tp2               = True
+isSup' (TData hr1 _)     (TData hr2 _)     = hr1 `L.isPrefixOf` hr2   -- TODO: _
+isSup' (TFunc inp1 out1) (TFunc inp2 out2) = (inp1 == inp2) && (out1 == out2) -- TODO: covar/contravar
 --isSup' tp1 tp2 = True
 isSup' tp1 tp2 = error $ show (toString tp1, toString tp2)
