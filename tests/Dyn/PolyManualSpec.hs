@@ -185,6 +185,40 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
+    it "succ [(),False]" $
+      evalString ([r|
+main = (f' dict) l
+
+dict = List.Cons ((Key.XXX, dIEnumUnit),
+       List.Cons ((Key.YYY, dIEnumBool),
+       List.Nil))
+
+--data List for a
+--data List.Nil
+--data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum   -- a is dynamic IEnum
+l = List.Cons ((Key.YYY, Bool.False),
+    List.Nil)
+
+f :: (List of a -> List of Nat) where a is IEnum  -- a is dynamic IEnum
+f' = func :: (List of a -> List of Nat) where a is IEnum ->
+  let dsa = ... in
+    func {dsa} ->
+      case ... of
+        List.Nil                 -> List.Nil
+        List.Cons ((=key,=x),=l) -> List.Cons ((succ' (getDict (dsa,key))) x, (f' dict) l) where
+          key :: Key
+          x   :: a
+          l   :: List of a
+        ;
+      ;
+    ;
+  ;
+;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons (Bool.True,List.Nil))"
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
