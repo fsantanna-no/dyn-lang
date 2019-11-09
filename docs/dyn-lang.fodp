@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:smil="urn:oasis:names:tc:opendocument:xmlns:smil-compatible:1.0" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.presentation">
- <office:meta><meta:generator>LibreOffice/6.0.7.3$Linux_X86_64 LibreOffice_project/00m0$Build-3</meta:generator><meta:creation-date>2011-05-24T14:40:40</meta:creation-date><dc:language>fi-FI</dc:language><meta:editing-cycles>1392</meta:editing-cycles><meta:editing-duration>P61DT22H26M21S</meta:editing-duration><meta:initial-creator>chico </meta:initial-creator><dc:date>2019-11-08T12:45:36.008920730</dc:date><meta:document-statistic meta:object-count="80"/><meta:user-defined meta:name="Info 1"/><meta:user-defined meta:name="Info 2"/><meta:user-defined meta:name="Info 3"/><meta:user-defined meta:name="Info 4"/><meta:template xlink:type="simple" xlink:actuate="onRequest" xlink:title="" xlink:href="../../UERJ/EDL/usr/lib/openoffice/basis3.2/share/template/en-US/presnt/Orange.otp"/></office:meta>
+ <office:meta><meta:generator>LibreOffice/6.0.7.3$Linux_X86_64 LibreOffice_project/00m0$Build-3</meta:generator><meta:creation-date>2011-05-24T14:40:40</meta:creation-date><dc:language>fi-FI</dc:language><meta:editing-cycles>1396</meta:editing-cycles><meta:editing-duration>P61DT22H33M46S</meta:editing-duration><meta:initial-creator>chico </meta:initial-creator><dc:date>2019-11-09T09:39:11.366112663</dc:date><meta:document-statistic meta:object-count="81"/><meta:user-defined meta:name="Info 1"/><meta:user-defined meta:name="Info 2"/><meta:user-defined meta:name="Info 3"/><meta:user-defined meta:name="Info 4"/><meta:template xlink:type="simple" xlink:actuate="onRequest" xlink:title="" xlink:href="../../UERJ/EDL/usr/lib/openoffice/basis3.2/share/template/en-US/presnt/Orange.otp"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
    <config:config-item config:name="VisibleAreaTop" config:type="int">-309</config:config-item>
@@ -35,10 +35,10 @@
      <config:config-item config:name="IsClickChangeRotation" config:type="boolean">true</config:config-item>
      <config:config-item config:name="SlidesPerRow" config:type="short">7</config:config-item>
      <config:config-item config:name="EditMode" config:type="int">0</config:config-item>
-     <config:config-item config:name="VisibleAreaTop" config:type="int">-1708</config:config-item>
-     <config:config-item config:name="VisibleAreaLeft" config:type="int">-435</config:config-item>
-     <config:config-item config:name="VisibleAreaWidth" config:type="int">28837</config:config-item>
-     <config:config-item config:name="VisibleAreaHeight" config:type="int">24416</config:config-item>
+     <config:config-item config:name="VisibleAreaTop" config:type="int">-309</config:config-item>
+     <config:config-item config:name="VisibleAreaLeft" config:type="int">-684</config:config-item>
+     <config:config-item config:name="VisibleAreaWidth" config:type="int">29458</config:config-item>
+     <config:config-item config:name="VisibleAreaHeight" config:type="int">21697</config:config-item>
      <config:config-item config:name="GridCoarseWidth" config:type="int">2540</config:config-item>
      <config:config-item config:name="GridCoarseHeight" config:type="int">2540</config:config-item>
      <config:config-item config:name="GridFineWidth" config:type="int">254</config:config-item>
@@ -115,8 +115,8 @@
    <config:config-item config:name="ParagraphSummation" config:type="boolean">false</config:config-item>
    <config:config-item config:name="PrintQuality" config:type="int">0</config:config-item>
    <config:config-item config:name="PrinterIndependentLayout" config:type="string">low-resolution</config:config-item>
-   <config:config-item config:name="PrinterName" config:type="string">Samsung-SCX-3400</config:config-item>
-   <config:config-item config:name="PrinterSetup" config:type="base64Binary">mAH+/1NhbXN1bmctU0NYLTM0MDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ1VQUzpTYW1zdW5nLVNDWC0zNDAwAAAAAAAAAAAAAAAWAAMAtQAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9U2Ftc3VuZy1TQ1gtMzQwMApvcmllbnRhdGlvbj1Qb3J0cmFpdApjb3BpZXM9MQpjb2xsYXRlPWZhbHNlCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MQpjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKUGFnZVNpemU6QTQAABIAQ09NUEFUX0RVUExFWF9NT0RFEwBEdXBsZXhNb2RlOjpVbmtub3du</config:config-item>
+   <config:config-item config:name="PrinterName" config:type="string">Casa</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary">iAH+/0Nhc2EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ1VQUzpDYXNhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAqQAAAAAAAAAEAAhSAAAEdAAASm9iRGF0YSAxCnByaW50ZXI9Q2FzYQpvcmllbnRhdGlvbj1Qb3J0cmFpdApjb3BpZXM9MQpjb2xsYXRlPWZhbHNlCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MQpjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKUGFnZVNpemU6QTQAABIAQ09NUEFUX0RVUExFWF9NT0RFDwBEdXBsZXhNb2RlOjpPZmY=</config:config-item>
    <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
    <config:config-item config:name="SlidesPerHandout" config:type="short">6</config:config-item>
    <config:config-item config:name="UpdateFromTemplate" config:type="boolean">true</config:config-item>
@@ -138,9 +138,11 @@
   <style:font-face style:name="Nimbus Roman No9 L" svg:font-family="&apos;Nimbus Roman No9 L&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
   <style:font-face style:name="Times New Roman" svg:font-family="&apos;Times New Roman&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
   <style:font-face style:name="Bitstream Vera Sans" svg:font-family="&apos;Bitstream Vera Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable"/>
-  <style:font-face style:name="DejaVu Sans" svg:font-family="&apos;DejaVu Sans&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="DejaVu Sans" svg:font-family="&apos;DejaVu Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable"/>
+  <style:font-face style:name="Liberation Sans1" svg:font-family="&apos;Liberation Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable"/>
+  <style:font-face style:name="AR PL UMing CN" svg:font-family="&apos;AR PL UMing CN&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="DejaVu Sans1" svg:font-family="&apos;DejaVu Sans&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
   <style:font-face style:name="Lohit Devanagari" svg:font-family="&apos;Lohit Devanagari&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
-  <style:font-face style:name="Noto Sans CJK SC Regular" svg:font-family="&apos;Noto Sans CJK SC Regular&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
  </office:font-face-decls>
  <office:styles>
   <draw:gradient draw:name="Gradient_20_7" draw:display-name="Gradient 7" draw:style="linear" draw:start-color="#cccccc" draw:end-color="#ffffff" draw:start-intensity="100%" draw:end-intensity="100%" draw:angle="0" draw:border="0%"/>
@@ -1403,7 +1405,7 @@
     </text:list-style>
    </style:graphic-properties>
    <style:paragraph-properties fo:margin-left="0.6cm" fo:margin-right="0cm" fo:text-indent="0cm"/>
-   <style:text-properties style:use-window-font-color="true" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="20pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="DejaVu Sans" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="20pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="20pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
+   <style:text-properties style:use-window-font-color="true" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="20pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="DejaVu Sans1" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="20pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans1" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="20pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
   </style:style>
   <style:style style:name="Human-outline1" style:family="presentation">
    <style:graphic-properties draw:stroke="none" draw:fill="none" draw:fill-image-name="Blue" draw:fill-image-width="0cm" draw:fill-image-height="0cm">
@@ -1451,7 +1453,7 @@
     </text:list-style>
    </style:graphic-properties>
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0.5cm" fo:text-indent="0cm"/>
-   <style:text-properties style:use-window-font-color="true" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="32pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="DejaVu Sans" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="32pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="32pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
+   <style:text-properties style:use-window-font-color="true" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="32pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="DejaVu Sans1" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="32pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans1" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="32pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
   </style:style>
   <style:style style:name="Human-outline2" style:family="presentation" style:parent-style-name="Human-outline1">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0.4cm" fo:text-indent="0cm"/>
@@ -1531,7 +1533,7 @@
     </text:list-style>
    </style:graphic-properties>
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:text-align="center" fo:text-indent="0cm"/>
-   <style:text-properties style:use-window-font-color="true" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="32pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="DejaVu Sans" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="32pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="32pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
+   <style:text-properties style:use-window-font-color="true" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="32pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="DejaVu Sans1" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="32pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans1" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="32pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
   </style:style>
   <style:style style:name="Human-title" style:family="presentation">
    <style:graphic-properties draw:stroke="none" draw:fill="none" draw:textarea-vertical-align="middle">
@@ -1579,7 +1581,7 @@
     </text:list-style>
    </style:graphic-properties>
    <style:paragraph-properties fo:text-align="center"/>
-   <style:text-properties fo:color="#ffffff" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="44pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="bold" style:font-name-asian="DejaVu Sans" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="44pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="44pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
+   <style:text-properties fo:color="#ffffff" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="roman" style:font-pitch="variable" fo:font-size="44pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="bold" style:font-name-asian="DejaVu Sans1" style:font-family-asian="&apos;DejaVu Sans&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="44pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="DejaVu Sans1" style:font-family-complex="&apos;DejaVu Sans&apos;" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="44pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
   </style:style>
   <style:presentation-page-layout style:name="AL0T31">
    <presentation:placeholder presentation:object="handout" svg:x="2.058cm" svg:y="1.743cm" svg:width="6.104cm" svg:height="-0.233cm"/>
@@ -1637,6 +1639,9 @@
   <style:style style:name="gr5" style:family="graphic">
    <style:graphic-properties style:protect="size"/>
   </style:style>
+  <style:style style:name="gr6" style:family="graphic" style:parent-style-name="standard" style:list-style-name="L1">
+   <style:graphic-properties draw:textarea-horizontal-align="justify" draw:textarea-vertical-align="middle" draw:auto-grow-height="false" fo:min-height="2.635cm" fo:min-width="6.336cm" fo:wrap-option="no-wrap"/>
+  </style:style>
   <style:style style:name="pr1" style:family="presentation" style:parent-style-name="oranssi-backgroundobjects">
    <style:graphic-properties draw:stroke="none" draw:fill="gradient" draw:fill-gradient-name="Gradient_20_7" draw:textarea-horizontal-align="center" draw:textarea-vertical-align="middle"/>
   </style:style>
@@ -1685,32 +1690,41 @@
   <style:style style:name="pr16" style:family="presentation" style:parent-style-name="oranssi-notes">
    <style:graphic-properties draw:fill-color="#ffffff" fo:min-height="13.364cm"/>
   </style:style>
-  <style:style style:name="pr17" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+  <style:style style:name="pr17" style:family="presentation" style:parent-style-name="oranssi-outline1">
+   <style:graphic-properties draw:auto-grow-height="true" fo:min-height="15.354cm"/>
+  </style:style>
+  <style:style style:name="pr18" style:family="presentation" style:parent-style-name="oranssi-subtitle">
    <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="7.331cm"/>
   </style:style>
-  <style:style style:name="pr18" style:family="presentation" style:parent-style-name="oranssi-title">
+  <style:style style:name="pr19" style:family="presentation" style:parent-style-name="oranssi-title">
    <style:graphic-properties draw:auto-grow-height="true" fo:min-height="3.625cm"/>
   </style:style>
-  <style:style style:name="pr19" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+  <style:style style:name="pr20" style:family="presentation" style:parent-style-name="oranssi-subtitle">
    <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="2.4cm"/>
   </style:style>
-  <style:style style:name="pr20" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+  <style:style style:name="pr21" style:family="presentation" style:parent-style-name="oranssi-subtitle">
    <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="4.911cm"/>
   </style:style>
-  <style:style style:name="pr21" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+  <style:style style:name="pr22" style:family="presentation" style:parent-style-name="oranssi-subtitle">
    <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="3.379cm"/>
   </style:style>
-  <style:style style:name="pr22" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+  <style:style style:name="pr23" style:family="presentation" style:parent-style-name="oranssi-subtitle">
    <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="5.487cm"/>
   </style:style>
-  <style:style style:name="pr23" style:family="presentation" style:parent-style-name="oranssi-subtitle">
-   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="4.512cm"/>
-  </style:style>
   <style:style style:name="pr24" style:family="presentation" style:parent-style-name="oranssi-subtitle">
-   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="3.438cm"/>
+   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="4.859cm"/>
   </style:style>
   <style:style style:name="pr25" style:family="presentation" style:parent-style-name="oranssi-subtitle">
-   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="6.472cm"/>
+   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="3.466cm"/>
+  </style:style>
+  <style:style style:name="pr26" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="2.245cm"/>
+  </style:style>
+  <style:style style:name="pr27" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="7.016cm"/>
+  </style:style>
+  <style:style style:name="pr28" style:family="presentation" style:parent-style-name="oranssi-subtitle">
+   <style:graphic-properties draw:fill="solid" draw:fill-color="#ffffff" draw:auto-grow-height="true" fo:min-height="2.207cm"/>
   </style:style>
   <style:style style:name="P1" style:family="paragraph">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:text-indent="0cm"/>
@@ -1817,6 +1831,14 @@
    <style:paragraph-properties fo:margin-left="0.254cm" fo:margin-right="0.254cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:text-align="start" fo:text-indent="0cm"/>
    <style:text-properties style:font-name="FreeMono" fo:font-size="14pt" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
   </style:style>
+  <style:style style:name="P29" style:family="paragraph">
+   <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-align="center" fo:text-indent="0cm"/>
+   <style:text-properties style:font-name="DejaVu Sans" fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="P30" style:family="paragraph">
+   <style:paragraph-properties fo:text-align="center"/>
+   <style:text-properties style:font-name="DejaVu Sans" fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+  </style:style>
   <style:style style:name="T1" style:family="text">
    <style:text-properties fo:font-size="14pt" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
   </style:style>
@@ -1872,7 +1894,16 @@
    <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="FreeMono" fo:font-size="14pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="bold" style:font-name-asian="HG Mincho Light J" style:font-size-asian="14pt" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-name-complex="Arial1" style:font-size-complex="14pt" style:font-style-complex="normal" style:font-weight-complex="bold" style:text-emphasize="none" style:font-relief="none"/>
   </style:style>
   <style:style style:name="T19" style:family="text">
-   <style:text-properties fo:color="#ed1c24" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="FreeMono" fo:font-size="14pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="bold" style:font-name-asian="HG Mincho Light J" style:font-size-asian="14pt" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-name-complex="Arial1" style:font-size-complex="14pt" style:font-style-complex="normal" style:font-weight-complex="bold" style:text-emphasize="none" style:font-relief="none"/>
+   <style:text-properties style:font-name="Liberation Sans1" fo:font-size="13pt" fo:font-weight="normal" style:font-size-asian="13pt" style:font-weight-asian="normal" style:font-size-complex="13pt" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="T20" style:family="text">
+   <style:text-properties style:font-name="FreeMono" fo:font-size="15pt" fo:font-weight="normal" style:font-size-asian="15pt" style:font-weight-asian="normal" style:font-size-complex="15pt" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="T21" style:family="text">
+   <style:text-properties style:font-name="FreeMono" fo:font-size="15pt" fo:font-weight="bold" style:font-size-asian="15pt" style:font-weight-asian="bold" style:font-size-complex="15pt" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T22" style:family="text">
+   <style:text-properties fo:color="#ed1c24" style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="FreeMono" fo:font-size="14pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-name-asian="HG Mincho Light J" style:font-size-asian="14pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="Arial1" style:font-size-complex="14pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none"/>
   </style:style>
   <text:list-style style:name="L1">
    <text:list-level-style-bullet text:level="1" text:bullet-char="●">
@@ -2055,22 +2086,22 @@
   <style:handout-master presentation:presentation-page-layout-name="AL0T31" style:page-layout-name="PM0" draw:style-name="dp3">
    <draw:frame draw:style-name="gr1" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="12.889cm" svg:height="1.048cm" svg:x="0cm" svg:y="0cm" presentation:class="header">
     <draw:text-box>
-     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:header/></text:span><presentation:header/></text:p>
+     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:header/></text:span><text:span text:style-name="T1"><presentation:header/></text:span><presentation:header/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame draw:style-name="gr1" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="12.889cm" svg:height="1.048cm" svg:x="16.811cm" svg:y="0cm" presentation:class="date-time">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><presentation:date-time/></text:span><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame draw:style-name="gr2" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="12.889cm" svg:height="1.048cm" svg:x="0cm" svg:y="19.94cm" presentation:class="footer">
     <draw:text-box>
-     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
+     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:footer/></text:span><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame draw:style-name="gr2" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="12.889cm" svg:height="1.048cm" svg:x="16.811cm" svg:y="19.94cm" presentation:class="page-number">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:page-number>1</text:page-number></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:page-thumbnail draw:layer="backgroundobjects" svg:width="6.616cm" svg:height="4.962cm" svg:x="1.975cm" svg:y="2.049cm"/>
@@ -2084,6 +2115,7 @@
    <draw:page-thumbnail draw:layer="backgroundobjects" svg:width="6.616cm" svg:height="4.962cm" svg:x="21.109cm" svg:y="13.975cm"/>
   </style:handout-master>
   <style:master-page style:name="oranssi" style:page-layout-name="PM1" draw:style-name="dp1">
+   <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
    <draw:rect presentation:style-name="pr1" draw:text-style-name="P5" draw:layer="backgroundobjects" svg:width="28cm" svg:height="10.5cm" svg:x="0cm" svg:y="0cm">
     <text:p/>
    </draw:rect>
@@ -2091,6 +2123,9 @@
     <draw:text-box>
      <text:p text:style-name="P6">Muokkaa otsikon tekstimuotoa napsauttamalla</text:p>
     </draw:text-box>
+   </draw:frame>
+   <draw:frame presentation:style-name="oranssi-outline1" draw:layer="backgroundobjects" svg:width="25.199cm" svg:height="12.18cm" svg:x="1.4cm" svg:y="4.914cm" presentation:class="outline" presentation:placeholder="true">
+    <draw:text-box/>
    </draw:frame>
    <draw:frame presentation:style-name="oranssi-outline1" draw:layer="backgroundobjects" svg:width="25.199cm" svg:height="12.18cm" svg:x="1.4cm" svg:y="4.914cm" presentation:class="outline" presentation:placeholder="true">
     <draw:text-box/>
@@ -2146,21 +2181,25 @@
    </draw:frame>
    <draw:frame presentation:style-name="pr4" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="6.523cm" svg:height="1.448cm" svg:x="1.4cm" svg:y="19.131cm" presentation:class="date-time">
     <draw:text-box>
-     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
+     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:date-time/></text:span><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame presentation:style-name="pr4" draw:text-style-name="P18" draw:layer="backgroundobjects" svg:width="8.875cm" svg:height="1.448cm" svg:x="9.576cm" svg:y="19.131cm" presentation:class="footer">
     <draw:text-box>
-     <text:p text:style-name="P17"><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
+     <text:p text:style-name="P17"><text:span text:style-name="T1"><presentation:footer/></text:span><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame presentation:style-name="pr4" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="6.523cm" svg:height="1.448cm" svg:x="20.075cm" svg:y="19.131cm" presentation:class="page-number">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:page-number>1</text:page-number></text:p>
     </draw:text-box>
    </draw:frame>
    <presentation:notes style:page-layout-name="PM2">
+    <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
     <draw:page-thumbnail presentation:style-name="oranssi-title" draw:layer="backgroundobjects" svg:width="14.848cm" svg:height="11.135cm" svg:x="3.07cm" svg:y="2.257cm" presentation:class="page"/>
+    <draw:frame presentation:style-name="oranssi-notes" draw:layer="backgroundobjects" svg:width="16.79cm" svg:height="13.364cm" svg:x="2.098cm" svg:y="14.107cm" presentation:class="notes" presentation:placeholder="true">
+     <draw:text-box/>
+    </draw:frame>
     <draw:frame presentation:style-name="oranssi-notes" draw:layer="backgroundobjects" svg:width="16.79cm" svg:height="13.364cm" svg:x="2.098cm" svg:y="14.107cm" presentation:class="notes" presentation:placeholder="true">
      <draw:text-box/>
     </draw:frame>
@@ -2169,22 +2208,22 @@
     </draw:frame>
     <draw:frame presentation:style-name="pr5" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="9.108cm" svg:height="1.484cm" svg:x="0cm" svg:y="0cm" presentation:class="header">
      <draw:text-box>
-      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:header/></text:span><presentation:header/></text:p>
+      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:header/></text:span><text:span text:style-name="T1"><presentation:header/></text:span><presentation:header/></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr5" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="9.108cm" svg:height="1.484cm" svg:x="11.88cm" svg:y="0cm" presentation:class="date-time">
      <draw:text-box>
-      <text:p text:style-name="P3"><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
+      <text:p text:style-name="P3"><text:span text:style-name="T1"><presentation:date-time/></text:span><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr6" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="9.108cm" svg:height="1.484cm" svg:x="0cm" svg:y="28.216cm" presentation:class="footer">
      <draw:text-box>
-      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
+      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:footer/></text:span><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr6" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="9.108cm" svg:height="1.484cm" svg:x="11.88cm" svg:y="28.216cm" presentation:class="page-number">
      <draw:text-box>
-      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
+      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:page-number>1</text:page-number></text:p>
      </draw:text-box>
     </draw:frame>
    </presentation:notes>
@@ -2246,17 +2285,17 @@
    </draw:frame>
    <draw:frame presentation:style-name="pr9" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="6.523cm" svg:height="1.448cm" svg:x="1.4cm" svg:y="19.131cm" presentation:class="date-time">
     <draw:text-box>
-     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
+     <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:date-time/></text:span><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame presentation:style-name="pr9" draw:text-style-name="P18" draw:layer="backgroundobjects" svg:width="8.875cm" svg:height="1.448cm" svg:x="9.576cm" svg:y="19.131cm" presentation:class="footer">
     <draw:text-box>
-     <text:p text:style-name="P17"><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
+     <text:p text:style-name="P17"><text:span text:style-name="T1"><presentation:footer/></text:span><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:frame presentation:style-name="pr9" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="6.523cm" svg:height="1.448cm" svg:x="20.075cm" svg:y="19.131cm" presentation:class="page-number">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:page-number>1</text:page-number></text:p>
     </draw:text-box>
    </draw:frame>
    <presentation:notes style:page-layout-name="PM2">
@@ -2266,22 +2305,22 @@
     </draw:frame>
     <draw:frame presentation:style-name="pr10" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="9.107cm" svg:height="1.484cm" svg:x="0.001cm" svg:y="0cm" presentation:class="header">
      <draw:text-box>
-      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:header/></text:span><presentation:header/></text:p>
+      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:header/></text:span><text:span text:style-name="T1"><presentation:header/></text:span><presentation:header/></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr10" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="9.107cm" svg:height="1.484cm" svg:x="11.88cm" svg:y="0cm" presentation:class="date-time">
      <draw:text-box>
-      <text:p text:style-name="P3"><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
+      <text:p text:style-name="P3"><text:span text:style-name="T1"><presentation:date-time/></text:span><text:span text:style-name="T1"><presentation:date-time/></text:span><presentation:date-time/></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr11" draw:text-style-name="P2" draw:layer="backgroundobjects" svg:width="9.107cm" svg:height="1.484cm" svg:x="0.001cm" svg:y="28.215cm" presentation:class="footer">
      <draw:text-box>
-      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
+      <text:p text:style-name="P1"><text:span text:style-name="T1"><presentation:footer/></text:span><text:span text:style-name="T1"><presentation:footer/></text:span><presentation:footer/></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr11" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="9.107cm" svg:height="1.484cm" svg:x="11.88cm" svg:y="28.215cm" presentation:class="page-number">
      <draw:text-box>
-      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
+      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>1</text:page-number></text:span><text:page-number>1</text:page-number></text:p>
      </draw:text-box>
     </draw:frame>
    </presentation:notes>
@@ -2293,7 +2332,7 @@
     <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
     <draw:frame presentation:style-name="pr12" draw:text-style-name="P20" draw:layer="layout" svg:width="25.199cm" svg:height="7.101cm" svg:x="1.501cm" svg:y="3.645cm" presentation:class="subtitle" presentation:user-transformed="true">
      <draw:text-box>
-      <text:p><text:span text:style-name="T2">A study (and unification) of polymorphism in FP and OOP static languages</text:span></text:p>
+      <text:p><text:span text:style-name="T2">A study (and </text:span><text:span text:style-name="T2">unification) of </text:span><text:span text:style-name="T2">polymorphism in </text:span><text:span text:style-name="T2">FP and OOP </text:span><text:span text:style-name="T2">static languages</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame draw:style-name="gr3" draw:text-style-name="P22" draw:layer="layout" svg:width="10.4cm" svg:height="3.744cm" svg:x="14.649cm" svg:y="13.572cm">
@@ -2374,7 +2413,7 @@
       <text:p>Implementation</text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr15" draw:layer="layout" svg:width="25.199cm" svg:height="15.354cm" svg:x="1.4cm" svg:y="4.914cm" presentation:class="outline" presentation:user-transformed="true">
+    <draw:frame presentation:style-name="pr17" draw:layer="layout" svg:width="25.199cm" svg:height="15.354cm" svg:x="1.4cm" svg:y="4.914cm" presentation:class="outline" presentation:user-transformed="true">
      <draw:text-box>
       <text:list text:style-name="L2">
        <text:list-item>
@@ -2431,7 +2470,7 @@
      <draw:text-box>
       <text:list text:style-name="L2">
        <text:list-item>
-        <text:p><text:span text:style-name="T7">https://en.wikipedia.org/wiki/Polymorphism_(computer_science)</text:span></text:p>
+        <text:p><text:span text:style-name="T7">https://en.wikipedia.org/wiki/</text:span><text:span text:style-name="T7">Polymorphism_(computer_science)</text:span></text:p>
         <text:list>
          <text:list-item>
           <text:p><text:span text:style-name="T7">Ver todos os tipos de polimorfismo</text:span></text:p>
@@ -2453,7 +2492,7 @@
    </draw:page>
    <draw:page draw:name="page5" draw:style-name="dp4" draw:master-page-name="oranssi" presentation:presentation-page-layout-name="AL2T1">
     <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
-    <draw:frame presentation:style-name="pr17" draw:text-style-name="P28" draw:layer="layout" svg:width="14.453cm" svg:height="7.331cm" svg:x="12.986cm" svg:y="6.539cm">
+    <draw:frame presentation:style-name="pr18" draw:text-style-name="P28" draw:layer="layout" svg:width="14.453cm" svg:height="7.331cm" svg:x="12.986cm" svg:y="6.539cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T8">implementation</text:span><text:span text:style-name="T9"> </text:span><text:span text:style-name="T8">of</text:span><text:span text:style-name="T9"> </text:span><text:span text:style-name="T10">IEnum</text:span><text:span text:style-name="T9"> </text:span><text:span text:style-name="T8">for</text:span><text:span text:style-name="T9"> Bool </text:span><text:span text:style-name="T8">with</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T8"/></text:p>
@@ -2469,19 +2508,19 @@
       <text:p text:style-name="P27"><text:span text:style-name="T9"><text:s text:c="6"/></text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr18" draw:layer="layout" svg:width="25.199cm" svg:height="3.625cm" svg:x="1.4cm" svg:y="0.778cm" presentation:class="title" presentation:user-transformed="true">
+    <draw:frame presentation:style-name="pr19" draw:layer="layout" svg:width="25.199cm" svg:height="3.625cm" svg:x="1.4cm" svg:y="0.778cm" presentation:class="title" presentation:user-transformed="true">
      <draw:text-box>
       <text:p>Haskell Type Classes<text:line-break/>(class / instance)</text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr19" draw:text-style-name="P28" draw:layer="layout" svg:width="11.838cm" svg:height="2.4cm" svg:x="0.692cm" svg:y="8.747cm">
+    <draw:frame presentation:style-name="pr20" draw:text-style-name="P28" draw:layer="layout" svg:width="11.838cm" svg:height="2.4cm" svg:x="0.692cm" svg:y="8.747cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T8">interface</text:span><text:span text:style-name="T9"> IEnumerable </text:span><text:span text:style-name="T8">for</text:span><text:span text:style-name="T9"> a </text:span><text:span text:style-name="T8">with</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"><text:s text:c="2"/></text:span><text:span text:style-name="T9">toNat <text:s text:c="2"/>:: (a -&gt; Nat)</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"><text:s text:c="2"/></text:span><text:span text:style-name="T9">fromNat :: (Nat -&gt; a)</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr20" draw:text-style-name="P28" draw:layer="layout" svg:width="14.453cm" svg:height="4.911cm" svg:x="12.986cm" svg:y="6.539cm">
+    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="14.453cm" svg:height="4.911cm" svg:x="12.986cm" svg:y="6.539cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T8">implementation</text:span><text:span text:style-name="T9"> </text:span><text:span text:style-name="T8">of</text:span><text:span text:style-name="T9"> IEnum </text:span><text:span text:style-name="T8">for</text:span><text:span text:style-name="T9"> () </text:span><text:span text:style-name="T8">with</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
@@ -2493,13 +2532,13 @@
       <text:p text:style-name="P27"><text:span text:style-name="T9"><text:s text:c="6"/></text:span><text:span text:style-name="T9">Nat.Zero -&gt; ()</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="16.896cm" svg:height="3.379cm" svg:x="5.552cm" svg:y="15.405cm">
+    <draw:frame presentation:style-name="pr22" draw:text-style-name="P28" draw:layer="layout" svg:width="16.896cm" svg:height="3.379cm" svg:x="5.552cm" svg:y="15.405cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T9">main </text:span><text:span text:style-name="T10">:: ()</text:span><text:span text:style-name="T9"> <text:s text:c="2"/>= fromNat Nat.Zero <text:s text:c="2"/>-- ()</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T9">main <text:s text:c="8"/>= toNat <text:s text:c="2"/>() <text:s text:c="8"/>-- Nat.Zero</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T9">main </text:span><text:span text:style-name="T10">:: ()</text:span><text:span text:style-name="T9"> <text:s text:c="2"/>= fromNat Nat.Zero <text:s text:c="2"/>-- </text:span><text:span text:style-name="T9">()</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T9">main <text:s text:c="8"/>= toNat <text:s text:c="2"/>() <text:s text:c="8"/>-- </text:span><text:span text:style-name="T9">Nat.Zero</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T9">main </text:span><text:span text:style-name="T10">:: Bool</text:span><text:span text:style-name="T9"> = fromNat Nat.Zero <text:s text:c="2"/>-- Bool.False</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T9">main <text:s text:c="8"/>= toNat <text:s text:c="2"/>Bool.False -- Nat.Zero</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T9">main </text:span><text:span text:style-name="T10">:: Bool</text:span><text:span text:style-name="T9"> = fromNat Nat.Zero <text:s text:c="2"/>-- </text:span><text:span text:style-name="T9">Bool.False</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T9">main <text:s text:c="8"/>= toNat <text:s text:c="2"/>Bool.False -- </text:span><text:span text:style-name="T9">Nat.Zero</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <presentation:notes draw:style-name="dp3">
@@ -2516,14 +2555,14 @@
       <text:p>Compilation</text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr19" draw:text-style-name="P28" draw:layer="layout" svg:width="11.106cm" svg:height="2.4cm" svg:x="0.692cm" svg:y="5.947cm">
+    <draw:frame presentation:style-name="pr20" draw:text-style-name="P28" draw:layer="layout" svg:width="11.106cm" svg:height="2.4cm" svg:x="0.692cm" svg:y="5.947cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T11">interface</text:span><text:span text:style-name="T12"> IEnum </text:span><text:span text:style-name="T11">for</text:span><text:span text:style-name="T12"> a </text:span><text:span text:style-name="T11">with</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">toNat <text:s text:c="2"/>:: (a -&gt; Nat)</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">fromNat :: (Nat -&gt; a)</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr20" draw:text-style-name="P28" draw:layer="layout" svg:width="11.084cm" svg:height="4.911cm" svg:x="0.692cm" svg:y="10.594cm">
+    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="11.084cm" svg:height="4.911cm" svg:x="0.692cm" svg:y="10.594cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T11">implementation</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T11">of</text:span><text:span text:style-name="T12"> IEnum </text:span><text:span text:style-name="T11">for</text:span><text:span text:style-name="T12"> () </text:span><text:span text:style-name="T11">with</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
@@ -2535,7 +2574,7 @@
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">Nat.Zero -&gt; ()</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="11.062cm" svg:height="3.379cm" svg:x="0.692cm" svg:y="16.328cm">
+    <draw:frame presentation:style-name="pr22" draw:text-style-name="P28" draw:layer="layout" svg:width="11.062cm" svg:height="3.379cm" svg:x="0.692cm" svg:y="16.328cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T12">main :: () <text:s text:c="2"/>= fromNat Nat.Zero</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12">main <text:s text:c="8"/>= toNat ()</text:span></text:p>
@@ -2544,7 +2583,7 @@
       <text:p text:style-name="P27"><text:span text:style-name="T12">main <text:s text:c="8"/>= toNat Bool.False</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr22" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="5.487cm" svg:x="13.555cm" svg:y="4.404cm">
+    <draw:frame presentation:style-name="pr23" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="5.487cm" svg:x="13.555cm" svg:y="4.404cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T13">data</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T11">with </text:span><text:span text:style-name="T12">((a-&gt;Nat),(Nat-&gt;a))</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
@@ -2558,19 +2597,20 @@
       <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="2"/></text:span><text:span text:style-name="T17">snd ...</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr23" draw:text-style-name="P28" draw:layer="layout" svg:width="14.436cm" svg:height="4.524cm" svg:x="12.995cm" svg:y="10.732cm">
+    <draw:frame presentation:style-name="pr24" draw:text-style-name="P28" draw:layer="layout" svg:width="13.917cm" svg:height="4.859cm" svg:x="13.555cm" svg:y="10.639cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12"> = </text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> (toNat,fromNat) </text:span><text:span text:style-name="T11">where</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12"> = </text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> (toNat</text:span><text:span text:style-name="T16">Unit</text:span><text:span text:style-name="T12">,</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="27"/></text:span><text:span text:style-name="T12">fromNat</text:span><text:span text:style-name="T16">Unit</text:span><text:span text:style-name="T12">) </text:span><text:span text:style-name="T11">where</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T11"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">toNat = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (() -&gt; Nat)</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">toNat</text:span><text:span text:style-name="T16">Unit</text:span><text:span text:style-name="T12"> = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (() -&gt; Nat)</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T12">Nat.Zero</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">fromNat = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (Nat -&gt; ())</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">fromNat</text:span><text:span text:style-name="T16">Unit</text:span><text:span text:style-name="T12"> = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (Nat -&gt; ())</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T11">case</text:span><text:span text:style-name="T12"> ... </text:span><text:span text:style-name="T11">of</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">Nat.Zero -&gt; ()</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="3.379cm" svg:x="13.555cm" svg:y="16.312cm">
+    <draw:frame presentation:style-name="pr22" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="3.379cm" svg:x="13.555cm" svg:y="16.312cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T12">main = (fromNat’ </text:span><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12">) Nat.Zero</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12">main = (toNat’ <text:s text:c="2"/></text:span><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12">) ()</text:span></text:p>
@@ -2579,6 +2619,25 @@
       <text:p text:style-name="P27"><text:span text:style-name="T17">main = </text:span><text:span text:style-name="T12">(toNat’ <text:s text:c="2"/></text:span><text:span text:style-name="T14">d_IEnum_Bool</text:span><text:span text:style-name="T12">) Bool.False</text:span></text:p>
      </draw:text-box>
     </draw:frame>
+    <draw:custom-shape draw:style-name="gr6" draw:text-style-name="P29" draw:layer="layout" svg:width="6.836cm" svg:height="2.885cm" svg:x="20.835cm" svg:y="13.229cm">
+     <text:p text:style-name="P29"><text:span text:style-name="T19">We know the concrete function:</text:span></text:p>
+     <text:p text:style-name="P29"><text:span text:style-name="T19"/></text:p>
+     <text:p text:style-name="P29"><text:span text:style-name="T20">fromNatUnit</text:span></text:p>
+     <text:p text:style-name="P29"><text:span text:style-name="T21"/></text:p>
+     <text:p text:style-name="P30"><text:span text:style-name="T19">(but generic functions...)</text:span></text:p>
+     <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:mirror-horizontal="false" draw:mirror-vertical="false" draw:type="line-callout-1" draw:modifiers="-5358.13953488372 25252.3908523909 -789.820096533567 4153.84615384615" draw:enhanced-path="M 0 0 L 21600 0 21600 21600 0 21600 Z N M ?f0 ?f1 L ?f2 ?f3 N">
+      <draw:equation draw:name="f0" draw:formula="$0 "/>
+      <draw:equation draw:name="f1" draw:formula="$1 "/>
+      <draw:equation draw:name="f2" draw:formula="$2 "/>
+      <draw:equation draw:name="f3" draw:formula="$3 "/>
+      <draw:equation draw:name="f4" draw:formula="$4 "/>
+      <draw:equation draw:name="f5" draw:formula="$5 "/>
+      <draw:equation draw:name="f6" draw:formula="$6 "/>
+      <draw:equation draw:name="f7" draw:formula="$7 "/>
+      <draw:handle draw:handle-position="$0 $1"/>
+      <draw:handle draw:handle-position="$2 $3"/>
+     </draw:enhanced-geometry>
+    </draw:custom-shape>
     <presentation:notes draw:style-name="dp3">
      <draw:page-thumbnail draw:style-name="gr5" draw:layer="layout" svg:width="14.848cm" svg:height="11.135cm" svg:x="3.07cm" svg:y="2.257cm" draw:page-number="6" presentation:class="page"/>
      <draw:frame presentation:style-name="pr16" draw:text-style-name="P7" draw:layer="layout" svg:width="16.79cm" svg:height="13.364cm" svg:x="2.098cm" svg:y="14.107cm" presentation:class="notes" presentation:placeholder="true" presentation:user-transformed="true">
@@ -2593,7 +2652,7 @@
       <text:p>Compilation</text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr24" draw:text-style-name="P28" draw:layer="layout" svg:width="12.404cm" svg:height="3.438cm" svg:x="0.692cm" svg:y="5.694cm">
+    <draw:frame presentation:style-name="pr25" draw:text-style-name="P28" draw:layer="layout" svg:width="12.392cm" svg:height="3.466cm" svg:x="1.229cm" svg:y="5.317cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T11">interface</text:span><text:span text:style-name="T12"> IEnum </text:span><text:span text:style-name="T11">for</text:span><text:span text:style-name="T12"> a </text:span><text:span text:style-name="T11">with</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">toNat <text:s text:c="2"/>:: (a -&gt; Nat)</text:span></text:p>
@@ -2603,66 +2662,35 @@
       <text:p text:style-name="P27"><text:span text:style-name="T16"><text:s text:c="2"/></text:span><text:span text:style-name="T16">fromNat (Nat.Succ (toNat ...))</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr20" draw:text-style-name="P28" draw:layer="layout" svg:width="11.084cm" svg:height="4.911cm" svg:x="0.692cm" svg:y="10.594cm">
+    <draw:frame presentation:style-name="pr26" draw:text-style-name="P28" draw:layer="layout" svg:width="11.062cm" svg:height="2.245cm" svg:x="0.692cm" svg:y="17.462cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T11">implementation</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T11">of</text:span><text:span text:style-name="T12"> IEnum </text:span><text:span text:style-name="T11">for</text:span><text:span text:style-name="T12"> () </text:span><text:span text:style-name="T11">with</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">toNat = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (() -&gt; Nat) -&gt;</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T12">Nat.Zero</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">fromNat = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (Nat -&gt; ()) -&gt;</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T11">case</text:span><text:span text:style-name="T12"> ... </text:span><text:span text:style-name="T11">of</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">Nat.Zero -&gt; ()</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12">main = succ Bool.False -- Bool.True</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="11.062cm" svg:height="3.379cm" svg:x="0.692cm" svg:y="16.328cm">
+    <draw:frame presentation:style-name="pr27" draw:text-style-name="P28" draw:layer="layout" svg:width="17.756cm" svg:height="7.016cm" svg:x="9.304cm" svg:y="9.601cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main :: () <text:s text:c="2"/>= fromNat Nat.Zero</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main <text:s text:c="8"/>= toNat ()</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main :: Bool = fromNat Nat.Zero</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main <text:s text:c="8"/>= toNat Bool.False</text:span></text:p>
-     </draw:text-box>
-    </draw:frame>
-    <draw:frame presentation:style-name="pr25" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="6.472cm" svg:x="13.555cm" svg:y="3.912cm">
-     <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T13">data</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T11">with </text:span><text:span text:style-name="T12">((a-&gt;Nat),(Nat-&gt;a))</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T13">data</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T11">Dict.IEnum</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T11">with </text:span><text:span text:style-name="T12">((a-&gt;Nat),(Nat-&gt;a))</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">toNat <text:s text:c="2"/>:: (a -&gt; Nat) </text:span><text:span text:style-name="T11">where</text:span><text:span text:style-name="T12"> (a </text:span><text:span text:style-name="T11">is</text:span><text:span text:style-name="T12"> IEnum)</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">fromNat :: (Nat -&gt; a) </text:span><text:span text:style-name="T11">where</text:span><text:span text:style-name="T12"> (a </text:span><text:span text:style-name="T11">is</text:span><text:span text:style-name="T12"> IEnum)</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">succ </text:span><text:span text:style-name="T11"><text:s text:c="2"/></text:span><text:span text:style-name="T12"><text:s/>:: (a -&gt; a) <text:s text:c="2"/></text:span><text:span text:style-name="T11">where</text:span><text:span text:style-name="T12"> (a </text:span><text:span text:style-name="T11">is</text:span><text:span text:style-name="T12"> IEnum)</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12">toNat <text:s text:c="3"/>:: (a -&gt; Nat) </text:span><text:span text:style-name="T11">where</text:span><text:span text:style-name="T12"> (a </text:span><text:span text:style-name="T11">is</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T12">IEnum)</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12">fromNat <text:s/>:: (Nat -&gt; a) </text:span><text:span text:style-name="T11">where</text:span><text:span text:style-name="T12"> (a </text:span><text:span text:style-name="T11">is</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T12">IEnum)</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12">succ </text:span><text:span text:style-name="T11"><text:s text:c="2"/></text:span><text:span text:style-name="T12"><text:s text:c="2"/>:: (a -&gt; a) <text:s text:c="2"/></text:span><text:span text:style-name="T11">where</text:span><text:span text:style-name="T12"> (a </text:span><text:span text:style-name="T11">is</text:span><text:span text:style-name="T12"> </text:span><text:span text:style-name="T12">IEnum)</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">toNat&apos; = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (</text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> -&gt; (a-&gt;Nat))</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="2"/></text:span><text:span text:style-name="T17">fst</text:span><text:span text:style-name="T12"> ...</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12">toNat&apos; <text:s text:c="2"/>:: (</text:span><text:span text:style-name="T11">Dict.IEnum</text:span><text:span text:style-name="T12"> -&gt; (a-&gt;Nat))</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17">fromNat&apos; :: </text:span><text:span text:style-name="T12">(</text:span><text:span text:style-name="T11">Dict.IEnum</text:span><text:span text:style-name="T12"> -&gt; (a-&gt;Nat))</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17">fromNat&apos; = </text:span><text:span text:style-name="T18">func</text:span><text:span text:style-name="T17"> :: </text:span><text:span text:style-name="T12">(</text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> -&gt; (a-&gt;Nat))</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="2"/></text:span><text:span text:style-name="T17">snd ...</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17">succ’ = </text:span><text:span text:style-name="T18">func</text:span><text:span text:style-name="T17"> :: (</text:span><text:span text:style-name="T19">Dict.IEnum</text:span><text:span text:style-name="T17"> -&gt; (a-&gt;a))</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17">succ’ = </text:span><text:span text:style-name="T18">func</text:span><text:span text:style-name="T17"> :: (</text:span><text:span text:style-name="T18">Dict.IEnum</text:span><text:span text:style-name="T17"> -&gt; (a-&gt;a))</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="2"/></text:span><text:span text:style-name="T18">let</text:span><text:span text:style-name="T17"> d_IEnum = ... </text:span><text:span text:style-name="T18">in</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="4"/></text:span><text:span text:style-name="T18">func</text:span><text:span text:style-name="T17"> :: (a -&gt; a) </text:span><text:span text:style-name="T22">{d_IEnum}</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T22"><text:s text:c="6"/></text:span><text:span text:style-name="T17">(fromNat</text:span><text:span text:style-name="T22">’ d_IEnum</text:span><text:span text:style-name="T17">) (Nat.Succ </text:span><text:span text:style-name="T17">((toNat</text:span><text:span text:style-name="T22">’ d_IEnum</text:span><text:span text:style-name="T17">) ...))</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr23" draw:text-style-name="P28" draw:layer="layout" svg:width="14.436cm" svg:height="4.524cm" svg:x="12.995cm" svg:y="10.732cm">
+    <draw:frame presentation:style-name="pr28" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="2.207cm" svg:x="13.555cm" svg:y="17.484cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12"> = </text:span><text:span text:style-name="T14">Dict.IEnum</text:span><text:span text:style-name="T12"> (toNat,fromNat) </text:span><text:span text:style-name="T11">where</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T11"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">toNat = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (() -&gt; Nat)</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T12">Nat.Zero</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T9"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">fromNat = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> :: (Nat -&gt; ())</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T11">case</text:span><text:span text:style-name="T12"> ... </text:span><text:span text:style-name="T11">of</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">Nat.Zero -&gt; ()</text:span></text:p>
-     </draw:text-box>
-    </draw:frame>
-    <draw:frame presentation:style-name="pr21" draw:text-style-name="P28" draw:layer="layout" svg:width="13.924cm" svg:height="3.379cm" svg:x="13.555cm" svg:y="16.312cm">
-     <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main = (fromNat’ </text:span><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12">) Nat.Zero</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main = (toNat’ <text:s text:c="2"/></text:span><text:span text:style-name="T14">d_IEnum_Unit</text:span><text:span text:style-name="T12">) ()</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17">main = </text:span><text:span text:style-name="T12">(fromNat’ </text:span><text:span text:style-name="T14">d_IEnum_Bool</text:span><text:span text:style-name="T12">) Nat.Zero</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17">main = </text:span><text:span text:style-name="T12">(toNat’ <text:s text:c="2"/></text:span><text:span text:style-name="T14">d_IEnum_Bool</text:span><text:span text:style-name="T12">) Bool.False</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17">main = </text:span><text:span text:style-name="T12">(succ’ </text:span><text:span text:style-name="T14">d_IEnum_Bool</text:span><text:span text:style-name="T12">) Bool.False</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <presentation:notes draw:style-name="dp3">
+     <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
      <draw:page-thumbnail draw:style-name="gr5" draw:layer="layout" svg:width="14.848cm" svg:height="11.135cm" svg:x="3.07cm" svg:y="2.257cm" draw:page-number="7" presentation:class="page"/>
      <draw:frame presentation:style-name="pr16" draw:text-style-name="P7" draw:layer="layout" svg:width="16.79cm" svg:height="13.364cm" svg:x="2.098cm" svg:y="14.107cm" presentation:class="notes" presentation:placeholder="true" presentation:user-transformed="true">
       <draw:text-box/>
