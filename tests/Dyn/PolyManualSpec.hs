@@ -110,9 +110,47 @@ f = func ->
 |] ++ prelude)
           `shouldBe` "Bool.True"
 
+  describe "ienum" $ do
+
+    it "ienum: ()" $
+      evalString ([r|
+main = (toNat' dIEnumUnit) ()
+|] ++ unit_ienum ++ ienum)
+        `shouldBe` "Nat.Zero"
+
+    it "ienum: Bool" $
+      evalString ([r|
+main = (toNat' dIEnumBool) Bool.True
+|] ++ bool_ienum ++ ienum)
+        `shouldBe` "(Nat.Succ Nat.Zero)"
+
+    it "succ: Bool" $
+      evalString ([r|
+main = (succ' dIEnumBool) Bool.False
+|] ++ bool_ienum ++ ienum)
+        `shouldBe` "Bool.True"
+
   describe "dynamic" $ do
 
-    it "XXX: [(),True]" $
+    it "succ: Bool" $
+      evalString ([r|
+main = (succ'2 dicts) dynv
+dynv :: Bool = (Key.Bool,Bool.False)  -- :: IEnum::Bool
+dicts = List.Cons ((Key.Bool,dIEnumBool), List.Nil)
+
+succ'2 = func ->
+  let ds = ... in
+    func {ds} ->
+      let (k,v) = ... in
+        (fromNat' (getDict (ds,k))) (Nat.Succ ((toNat' (getDict (ds,k))) v))
+      ;
+    ;
+  ;
+;
+|] ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "Bool.True"
+
+    it "[(),True]" $
       evalString ([r|
 main = (f' dict) l
 
@@ -124,27 +162,18 @@ dict = List.Cons ((Key.XXX, dIEnumUnit),
 --data List.Nil
 --data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum
+l :: List of a where a is IEnum   -- a is dynamic IEnum
 l = List.Cons ((Key.YYY, Bool.True),
     List.Cons ((Key.XXX, ()),
     List.Nil))
 
-get = func ->
-  let (l,key) = ... in
-    case l of
-      List.Cons ((~key,=dict),_) -> dict
-      List.Cons (_,=l')          -> get (l',key)
-    ;
-  ;
-;
-
-f :: (List of a -> List of Nat) where a is IEnum
+f :: (List of a -> List of Nat) where a is IEnum  -- a is dynamic IEnum
 f' = func :: (List of a -> List of Nat) where a is IEnum ->
-  let da = ... in
-    func {da} ->
+  let dsa = ... in
+    func {dsa} ->
       case ... of
         List.Nil                 -> List.Nil
-        List.Cons ((=key,=x),=l) -> List.Cons ((toNat' (get (da,key))) x, (f' dict) l) where
+        List.Cons ((=key,=x),=l) -> List.Cons ((toNat' (getDict (dsa,key))) x, (f' dict) l) where
           key :: Key
           x   :: a
           l   :: List of a
@@ -153,13 +182,24 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
     ;
   ;
 ;
-|] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat)
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-prelude = unit_ienum ++ nat_ieq ++ bool_ienum ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool ++ ienum
+prelude = unit_ienum ++ nat_ieq ++ bool_ienum ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool ++ ienum ++ std
+
+std = [r|
+  getDict = func ->
+    let (dicts,key) = ... in
+      case dicts of
+        List.Cons ((~key,=dict),_) -> dict
+        List.Cons (_,=dicts')      -> getDict (dicts',key)
+      ;
+    ;
+  ;
+|]
 
 -- interface IBounded(minimum,maximum)
 ibounded = [r|
@@ -184,6 +224,13 @@ ienum = [r|
   fromNat' = func ->
     fromNat where
       Dict.IEq (_,fromNat) = ...
+    ;
+  ;
+  succ' = func ->
+    let dict = ... in
+      func {dict} ->
+        (fromNat' dict) (Nat.Succ ((toNat' dict) ...))
+      ;
     ;
   ;
 |]

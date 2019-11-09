@@ -298,7 +298,7 @@ f = func :: (a -> Nat) where a is IEnum ->
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
     it "XXX: [(),1,True]" $
-      parseToString ([r|
+      evalString ([r|
 main = f l
 
 data List for a
