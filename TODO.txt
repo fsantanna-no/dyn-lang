@@ -1,3 +1,6 @@
+- List of IEnum
+    - Estou em PolyManual.dynamic.XXX
+
 - tipo da ifce vs tipo da impl
     - escondendo a ifce, os usos internos do nome apontam para a impl
         - mas nem sempre o uso é para a impl
@@ -5,14 +8,6 @@
     - isso esta obrigando a declarar o tipos dos argumentos
         - ver Prelude:nat_iord
         - ver BookSpec:enum
-
-- como methods nao podem ser overriden,
-    - funcoes default podem ir pra fora do Dict
-        - vao funcionar *exatamente* como funcoes genericas
-- exemplos com IEq nos slides para mostrar
-- corrigir impl () para IEnum
-- List of IEnum
-- pq f l nao funciona?
 - Inferir tipo de fields em Data
     - List ...
     - Tem alguns exemplos de :: que nao deveriam ser necessarios

@@ -110,37 +110,56 @@ f = func ->
 |] ++ prelude)
           `shouldBe` "Bool.True"
 
-    it "XXX: [(),1,True]" $
-      evalString ([r|
-main = f l
+  describe "dynamic" $ do
 
-data List for a
-data List.Nil
-data List.Cons with (a, List of a)
+    it "XXX: [(),True]" $
+      evalString ([r|
+main = (f' dict) l
+
+dict = List.Cons ((Key.XXX, dIEnumUnit),
+       List.Cons ((Key.YYY, dIEnumBool),
+       List.Nil))
+
+--data List for a
+--data List.Nil
+--data List.Cons with (a, List of a)
 
 l :: List of a where a is IEnum
-l = List.Cons (("Unit", ()),
-    List.Cons (("Nat",  Nat.Succ Nat.Zero),
-    List.Cons (("Bool", Bool.True),
-    List.Nil)))
+l = List.Cons ((Key.YYY, Bool.True),
+    List.Cons ((Key.XXX, ()),
+    List.Nil))
 
-f :: (List of a -> List of Nat) where a is IEnum
-f = func :: (List of a -> List of Nat) where a is IEnum ->
-  case ... of
-    List.Nil          -> List.Nil
-    List.Cons ((=id,=x),=l) -> List.Cons (toEnum (dIEnumIEnum id) x, f l) where
-      id :: String
-      x  :: a
-      l  :: List of a;
+get = func ->
+  let (l,key) = ... in
+    case l of
+      List.Cons ((~key,=dict),_) -> dict
+      List.Cons (_,=l')          -> get (l',key)
+    ;
   ;
 ;
-|] ++ prelude)
-        `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"
+
+f :: (List of a -> List of Nat) where a is IEnum
+f' = func :: (List of a -> List of Nat) where a is IEnum ->
+  let da = ... in
+    func {da} ->
+      case ... of
+        List.Nil                 -> List.Nil
+        List.Cons ((=key,=x),=l) -> List.Cons ((toNat' (get (da,key))) x, (f' dict) l) where
+          key :: Key
+          x   :: a
+          l   :: List of a
+        ;
+      ;
+    ;
+  ;
+;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-prelude = nat_ieq ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool
+prelude = unit_ienum ++ nat_ieq ++ bool_ienum ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool ++ ienum
 
 -- interface IBounded(minimum,maximum)
 ibounded = [r|
@@ -156,7 +175,19 @@ ibounded = [r|
   ;
 |]
 
--- interface IEq(eq,neq)
+ienum = [r|
+  toNat' = func ->
+    toNat where
+      Dict.IEq (toNat,_) = ...
+    ;
+  ;
+  fromNat' = func ->
+    fromNat where
+      Dict.IEq (_,fromNat) = ...
+    ;
+  ;
+|]
+
 ieq = [r|
   eq' = func ->
     eq ... where
@@ -261,22 +292,32 @@ bool_ibounded = [r|
   ;
 |]
 
--- instance IEq (Bool)
 bool_ieq = [r|
-  -- Dict receives eq/neq methods.
-  --  - implements eq, uses default neq
-  --  - methods receive extra dict
-  -- overrides default eq
   dIEqBool = Dict.IEq (eq_Bool) where
     eq_Bool = func ->
       let dIEqa = ... in
-        -- >> body
         func {dIEqa} ->
           let (x,y) = ... in
             or (and (x,y), (and (not x, not y)))
           ;
         ;
-        -- << body
+      ;
+    ;
+  ;
+|]
+
+bool_ienum = [r|
+  dIEnumBool = Dict.IEq (toNat,fromNat) where
+    toNat = func ->
+      case ... of
+        Bool.False -> Nat.Zero
+        Bool.True  -> Nat.Succ Nat.Zero
+      ;
+    ;
+    fromNat = func ->
+      case ... of
+        Nat.Zero          -> Bool.False
+        Nat.Succ Nat.Zero -> Bool.True
       ;
     ;
   ;
@@ -296,6 +337,21 @@ bool_iord = [r|
             (Bool.True,  Bool.True)  -> Bool.False
           ;
         ;
+      ;
+    ;
+  ;
+|]
+
+unit_ienum = [r|
+  dIEnumUnit = Dict.IEq (toNat,fromNat) where
+    toNat = func ->
+      case ... of
+        () -> Nat.Zero
+      ;
+    ;
+    fromNat = func ->
+      case ... of
+        Nat.Zero -> ()
       ;
     ;
   ;

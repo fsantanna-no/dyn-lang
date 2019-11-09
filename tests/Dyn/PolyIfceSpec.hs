@@ -269,7 +269,7 @@ implementation of IEq for Maybe of a where (a is IEq) with
     it "eq" $
       evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
          `shouldBe` "Bool.False"
-    it "YYY: gte" $
+    it "gte" $
       evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
          `shouldBe` "Bool.False"
     it "gte" $
@@ -286,7 +286,7 @@ implementation of IEq for Maybe of a where (a is IEq) with
          `shouldBe` "(Char.Dd,Char.AA)"
 
   describe "dyn:" $ do
-    it "XXX-0: f (toEnum) True" $
+    it "f (toEnum) True" $
       evalString ([r|
 main = (f' dIEnumBool) Bool.True
 
@@ -298,7 +298,7 @@ f = func :: (a -> Nat) where a is IEnum ->
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
     it "XXX: [(),1,True]" $
-      evalString ([r|
+      parseToString ([r|
 main = f l
 
 data List for a
