@@ -1,5 +1,8 @@
-- ao declarar tipos das funcoes de implementacoes ocorrem erros de incompatilibidade
-    - provavelmente com global generica
+- inferir tipo de func a partir da variavel
+- tipo da ifce vs tipo da impl
+    - escondendo a ifce, os usos internos do nome apontam para a impl
+        - mas nem sempre o uso é para a impl
+            - ex., Book.enum (Day.lt usa Nat.lt)
     - isso esta obrigando a declarar o tipos dos argumentos
         - ver Prelude:nat_iord
         - ver BookSpec:enum

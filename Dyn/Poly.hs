@@ -66,7 +66,7 @@ fE _ _ _ _ e = e
 
 -- (a,a) vs (Bool.True,Bool.False)  -> [(a,Bool)]
 tpMatch :: Type -> Type -> [(ID_Var,Type)]
-tpMatch tp1 tp2 = {-traceShowX ("MATCH",toString tp1,toString tp2) $-} M.toAscList $ aux tp1 tp2 where
+tpMatch tp1 tp2 = {-traceShow ("MATCH",toString tp1,toString tp2) $-} M.toAscList $ aux tp1 tp2 where
   aux :: Type -> Type -> M.Map ID_Var Type
   aux (TVar id)      TAny                    = M.singleton id TAny
   aux (TVar id)      TUnit                   = M.singleton id TUnit
@@ -80,9 +80,12 @@ tpMatch tp1 tp2 = {-traceShowX ("MATCH",toString tp1,toString tp2) $-} M.toAscLi
   --aux x y = error $ "tpMatch: " ++ show (x,y)
 
   unions ls = M.unionsWith f $ map (\(x,y)->aux x y) ls where
-                f TAny tp2           = tp2
-                f tp1 TAny           = tp1
+                f TAny     tp2       = tp2
+                f tp1      TAny      = tp1
+                f tp1      (TVar _)  = tp1
+                f (TVar _) tp2       = tp2
                 f tp1 tp2 | tp1==tp2 = tp1
+                f tp1 tp2 = error $ show (toString tp1, toString tp2)
 
 toVars :: Type -> [ID_Var]
 toVars tp = S.toAscList $ aux tp where

@@ -75,6 +75,9 @@ ienum = [r|
     toEnum   :: (a -> Nat)
     fromEnum :: (Nat -> a)
   ;
+  succ :: (a -> a) where a is IEnum = func :: (a -> a) where a is IEnum ->
+    fromEnum (Nat.Succ (toEnum ...))
+  ;
 |]
 
 -------------------------------------------------------------------------------

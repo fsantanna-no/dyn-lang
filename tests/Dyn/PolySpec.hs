@@ -66,6 +66,9 @@ main = x where
     it "()" $ do
       evalString ("main = toEnum ()"++unit_ienum++ienum++nat)
         `shouldBe` "Nat.Zero"
+    it "succ" $ do
+      evalString ("main = succ Bool.False"++bool_ienum++ienum++nat)
+        `shouldBe` "Bool.True"
 
   describe "IRec-IInd" $ do
 
