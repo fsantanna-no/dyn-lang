@@ -14,52 +14,34 @@ import qualified Dyn.Eval   as E
 
 evalString :: String -> String
 evalString input = E.evalStringF f input where
-                    f prog = prog' where (_,prog') = apply prog
+                    f prog = apply prog
 
 parseToString :: String -> String
 parseToString input = P.parseToStringF f input where
-                        f prog = prog' where (_,prog') = apply prog
+                        f prog = apply prog
 
 -------------------------------------------------------------------------------
 
-apply :: Prog -> ([Ifce], Prog)
-apply (Prog globs) = (ifces,prog) where
+apply :: Prog -> Prog
+apply (Prog globs) = prog where
   prog = Prog $
           map globFromDecl   $
-          inline ifces impls $  -- [Decl] w/o Ifce/Impl/Gens
+          inline $  -- [Decl] w/o Ifce/Impl/Gens
           globs
 
-  ifces :: [Ifce]
-  ifces = globsToIfces globs
-  impls :: [Impl]
-  impls = globsToImpls globs
-
-  globsToIfces :: [Glob] -> [Ifce]
-  globsToIfces globs = map g $ filter f globs where
-                        f (GIfce ifc) = True
-                        f _           = False
-                        g (GIfce ifc) = ifc
-
-  globsToImpls :: [Glob] -> [Impl]
-  globsToImpls globs = map g $ filter f globs where
-                        f (GImpl ifc) = True
-                        f _           = False
-                        g (GImpl ifc) = ifc
-
-  inline :: [Ifce] -> [Impl] -> [Glob] -> [Decl]
-  inline ifces impls globs = concatMap f globs where
-                              f :: Glob -> [Decl]
-                              f (GDecl dcl) = expandGen   ifces dcl
-                              f (GData dat) = []
-                              f (GIfce ifc) = ifceToDecls ifces ifc
-                              f (GImpl imp) = implToDecls ifces impls imp
+  inline :: [Glob] -> [Decl]
+  inline globs = concatMap f globs where
+                  f :: Glob -> [Decl]
+                  f (GDecl dcl) = expandGen globs dcl
+                  f (GData dat) = []
+                  f (GIfce ifc) = ifceToDecls ifc
+                  f (GImpl imp) = implToDecls globs imp
 
 -------------------------------------------------------------------------------
-
 -------------------------------------------------------------------------------
 
-ifceFind :: [Ifce] -> ID_Ifce -> Ifce
-ifceFind ifces ifc = fromJust $ L.find f ifces where
+ifceFind :: [Glob] -> ID_Ifce -> Ifce
+ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
                       f :: Ifce -> Bool
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
@@ -69,10 +51,10 @@ ifceToDeclIds (Ifce (_,_,_,dcls)) = map getId $ filter isDSig dcls where
                                       getId (DSig _ id _ _) = id
 
 -- [...] -> ["IEq"] -> ["IEq","IOrd"] -- (sorted)
-ifcesSups :: [Ifce] -> [ID_Ifce] -> [ID_Ifce]
-ifcesSups ifces []  = []
-ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
-                        ids' = concatMap (f . (ifceFind ifces)) ids
+ifcesSups :: [Glob] -> [ID_Ifce] -> [ID_Ifce]
+ifcesSups _     []  = []
+ifcesSups globs ids = L.sort $ ifcesSups globs ids' ++ ids where
+                        ids' = concatMap (f . (ifceFind globs)) ids
                         f (Ifce (_,_,Ctrs l,_)) = l
 
 -------------------------------------------------------------------------------
@@ -88,8 +70,8 @@ ifcesSups ifces ids = L.sort $ ifcesSups ifces ids' ++ ids where
 --  eq' = func -> eq where Dict.IEq (eq) = ...  -- same as above
 --  eq :: (a,a) -> Bool where a is IEq          -- global prototype (include IEq)
 
-ifceToDecls :: [Ifce] -> Ifce -> [Decl]
-ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ decls' where
+ifceToDecls :: Ifce -> [Decl]
+ifceToDecls me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ decls' where
 
   -- Same for constant (minimum) and function (eq).
   -- eq' = func -> eq where Dict.IEq (eq) = ...
@@ -120,12 +102,12 @@ ifceToDecls ifces me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ decls' where
 --  dIEqBool = Dict.IEq (eq) where    -- : declare instance dict with methods
 --              <...>                 -- :   with nested impls to follow only visible here
 
-implToDecls :: [Ifce] -> [Impl] -> Impl -> [Decl]
-implToDecls ifces impls (Impl (z,ifc,Ctrs [],tp,decls)) =
+implToDecls :: [Glob] -> Impl -> [Decl]
+implToDecls globs (Impl (z,ifc,Ctrs [],tp,decls)) =
   [DAtr z (PWrite z ("d"++ifc++toString' tp))
           (ExpWhere (z,decls,
             ECall z (ECons z ["Dict",ifc])
-                    (fromList $ map (EVar z) $ ifceToDeclIds $ ifceFind ifces ifc)))]
+                    (fromList $ map (EVar z) $ ifceToDeclIds $ ifceFind globs ifc)))]
   where
     toString' (TData hr [])  = concat hr
     --toString' (TData hr tps) = concat hr ++ concatMap toString' tps
@@ -135,7 +117,7 @@ implToDecls ifces impls (Impl (z,ifc,Ctrs [],tp,decls)) =
 
 -------------------------------------------------------------------------------
 
-expandGen :: [Ifce] -> Decl -> [Decl]
+expandGen :: [Glob] -> Decl -> [Decl]
 
 --  neq = func :: ((a,a) -> Bool) where a is IEq ->
 --    not (eq ...)
@@ -148,7 +130,7 @@ expandGen :: [Ifce] -> Decl -> [Decl]
 --      func :: <tp/cs> {daIEq} ->    -- same as above but as a closure with fixed dict
 --        not (eq ...)                -- Poly.hs will then translate to ((eq' daIEq) ...)
 
-expandGen ifces (DAtr z1 (PWrite pz pid)
+expandGen globs (DAtr z1 (PWrite pz pid)
                   (ExpWhere (z2, [],
                     EFunc z3 (Ctrs cs3) tp3 [] whe3))) | not (null cs3) =
   [
@@ -165,6 +147,6 @@ expandGen ifces (DAtr z1 (PWrite pz pid)
     letDicts = DAtr z2  -- (dIEqa,...) = ...
                 (fromList $ map (\id -> PWrite z2 $ "d"++id++"a") cs3')
                 (ExpWhere (z2,[],EArg z2))
-    cs3'     = ifcesSups ifces cs3
+    cs3'     = ifcesSups globs cs3
 
 expandGen _ decl = [decl]

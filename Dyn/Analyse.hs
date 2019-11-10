@@ -18,12 +18,13 @@ evalString input = E.evalStringF apply input
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog
-apply prog =
+apply prog@(Prog globs) =
   Prog $
     map globFromDecl $
-    Poly.apply ifces $ --traceShowSS $ -- [Decl] w/ polys resolved
-    Type.apply ifces $                 -- [Decl] with types applied/inferred
+    Poly.apply globs $ --traceShowSS $ -- [Decl] w/ polys resolved
+    Type.apply globs $                 -- [Decl] with types applied/inferred
     map globToDecl   $
-    globs
-  where
-    (ifces,Prog globs) = Ifce.apply prog
+    progToGlobs      $
+    Ifce.apply       $
+    prog where
+      progToGlobs (Prog globs) = globs

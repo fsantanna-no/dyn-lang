@@ -11,21 +11,21 @@ import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
 
-apply :: [Ifce] -> [Decl] -> [Decl]
-apply ifces decls = mapDecls (fDz,fE,fPz) ifces cz [] decls where
+apply :: [Glob] -> [Decl] -> [Decl]
+apply globs decls = mapDecls (fDz,fE,fPz) globs cz [] decls where
 
 -------------------------------------------------------------------------
 
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-fE :: [Ifce] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+fE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-fE ifces _ dsigs xtp e@(EVar z id) = e' where
+fE globs _ dsigs xtp e@(EVar z id) = e' where
 
   (cs,_) = dsigsFind dsigs id
-  cs'    = Ifce.ifcesSups ifces (getCtrs cs) where
+  cs'    = Ifce.ifcesSups globs (getCtrs cs) where
 
   e' = case (cs', xtp) of
     ([], _)          -> e                          -- var is not poly, nothing to do
@@ -34,10 +34,10 @@ fE ifces _ dsigs xtp e@(EVar z id) = e' where
     otherwise        -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-fE ifces _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,toString e2') $-} ECall z1 e2' e3 where
+fE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,toString e2') $-} ECall z1 e2' e3 where
 
   (cs2,tp2) = dsigsFind dsigs id2
-  cs2'      = Ifce.ifcesSups ifces (getCtrs cs2) where
+  cs2'      = Ifce.ifcesSups globs (getCtrs cs2) where
 
   e2' = case (cs2', tp2) of
     ([], _)               -> e2      -- var is not poly, nothing to do

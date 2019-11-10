@@ -9,17 +9,17 @@ import Dyn.Map
 
 -------------------------------------------------------------------------------
 
-apply :: [Ifce] -> [Decl] -> [Decl]
+apply :: [Glob] -> [Decl] -> [Decl]
 apply x y = mapDecls (fD,fE,fPz) x cz [] y where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
-  fE :: [Ifce] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+  fE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
   fE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
   fE _ _ _ _ e = e
 
   -- removes TAny decls (prevents double decl)
-  fD :: [Ifce] -> Ctrs -> [Decl] -> Decl -> [Decl]
+  fD :: [Glob] -> Ctrs -> [Decl] -> Decl -> [Decl]
   fD _ _ dsigs d@(DSig _ _ _ TAny) = []
   fD _ _ dsigs d@(DSig _ _ _ _)    = [d]
 
@@ -45,7 +45,7 @@ apply x y = mapDecls (fD,fE,fPz) x cz [] y where
 
 -------------------------------------------------------------------------------
 
-isSup :: [Ifce] -> Ctrs -> Type -> Type -> Bool
+isSup :: [Glob] -> Ctrs -> Type -> Type -> Bool
 isSup _ _ tp1 tp2 = isSup' tp1 tp2
 --isSup ifces (Ctrs cs) tp1 (TVar "a") = error $ show (toString tp1, cs)
 --isSup _     _         (TData hr1) (TData hr2) = hr1 `L.isPrefixOf` hr2

@@ -137,6 +137,18 @@ isDAtr _            = False
 isEError (EError _ _) = True
 isEError _            = False
 
+globsToIfces :: [Glob] -> [Ifce]
+globsToIfces globs = map g $ filter f globs where
+                      f (GIfce ifc) = True
+                      f _           = False
+                      g (GIfce ifc) = ifc
+
+globsToImpls :: [Glob] -> [Impl]
+globsToImpls globs = map g $ filter f globs where
+                      f (GImpl ifc) = True
+                      f _           = False
+                      g (GImpl ifc) = ifc
+
 globToDecl :: Glob -> Decl
 globToDecl (GDecl decl) = decl
   -- refuse GIfce/GImpl
