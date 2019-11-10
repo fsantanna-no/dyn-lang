@@ -65,6 +65,7 @@ keywords = [
     "implementation",
     "in",
     "interface",
+    "recursive",
     "with"
   ]
 
@@ -428,7 +429,11 @@ data_ = do
             void <- try $ tk_key "with"
             tp   <- type_
             return tp
-  return $ Data (pos, hr, ofs, tp)
+  rec  <- optionMaybe $ do
+            void <- try (tk_key "is")
+            void <- tk_key "recursive"
+            return ()
+  return $ Data (pos, isJust rec, hr, ofs, tp)
 
 ifce :: Parser Ifce
 ifce = do

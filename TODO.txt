@@ -1,8 +1,11 @@
-- unificar dGet/vGet novamente
-- chamar funcoes data/rec de f''
-- Fazer dict depender de v fc get
 - List of IEnum
     - Estou em PolyIfce.dynamic.XXX
+        - diferenciar data of Bool/IEnum
+            - mas primeiro assumir Bool
+                - ainda assim preciso saber que se trata de tipo recursivo
+        - unificar dGet/vGet novamente
+        - chamar funcoes data/rec de f''
+        - Fazer dict depender de v fc get
     - Depois falta Poly.dynamic
 
 - tipo da ifce vs tipo da impl

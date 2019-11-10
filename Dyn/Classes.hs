@@ -162,12 +162,14 @@ instance IString ExpWhere where
 -------------------------------------------------------------------------------
 
 instance IString Data where
-  toString (Data (_,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ with st where
-                                    of_ []  = ""
-                                    of_ [v] = " of " ++ v
-                                    of_ l   = " of (" ++ intercalate "," l ++ ")"
-                                    with TUnit = ""
-                                    with tp    = " with " ++ toString tp
+  toString (Data (_,rec,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ is_rec rec ++ with st where
+                                        of_ []  = ""
+                                        of_ [v] = " of " ++ v
+                                        of_ l   = " of (" ++ intercalate "," l ++ ")"
+                                        is_rec False = ""
+                                        is_rec True  = " is recursive"
+                                        with TUnit = ""
+                                        with tp    = " with " ++ toString tp
   toStringI _ _ = error "TODO"
 
 -------------------------------------------------------------------------------
