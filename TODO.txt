@@ -1,6 +1,9 @@
+- unificar dGet/vGet novamente
+- chamar funcoes data/rec de f''
 - Fazer dict depender de v fc get
 - List of IEnum
-    - Estou em PolyManual.dynamic.XXX
+    - Estou em PolyIfce.dynamic.XXX
+    - Depois falta Poly.dynamic
 
 - tipo da ifce vs tipo da impl
     - escondendo a ifce, os usos internos do nome apontam para a impl

@@ -7,6 +7,7 @@ import Text.RawString.QQ
 prelude = nat_iord   ++ nat_ieq
        ++ bool_ienum ++ bool_iord ++ bool_ieq ++ bool_ibounded
        ++ char_iord  ++ char_ieq
+       ++ unit_ienum
        ++ nat        ++ char
        ++ ienum      ++ iord      ++ ieq      ++ ibounded
        ++ std        ++ bool
@@ -22,6 +23,15 @@ std = [r|
       _      -> Bool.False
     ; where
       (x,y) = ...
+    ;
+  ;
+
+  getHash = func ->
+    let (dicts,key) = ... in
+      case dicts of
+        List.Cons ((~key,=dict),_) -> dict
+        List.Cons (_,=dicts')      -> getHash (dicts',key)
+      ;
     ;
   ;
 |]
@@ -61,6 +71,25 @@ ienum = [r|
   interface IEnum for a with
     toNat   :: (a -> Nat)
     fromNat :: (Nat -> a)
+  ;
+|]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+unit_ienum = [r|
+  implementation of IEnum for () with
+    toNat = func :: (() -> Nat) ->
+      case ... of
+        () -> Nat.Zero
+      ;
+    ;
+
+    fromNat = func :: (Nat -> ()) ->
+      case ... of
+        Nat.Zero -> ()
+      ;
+    ;
   ;
 |]
 

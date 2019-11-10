@@ -97,15 +97,14 @@ dixxx_xxx = f where
 
     it "f = func :: ((a -> Int) where a is IEq) -> eq (x,x)" $
       evalString ([r|
-main = (f (dget,vget)) one
-dget = func -> dIEqNat;
-vget = func -> ...;
+main = (f gets) one where
+  gets = func -> (dIEqNat,...);
+;
 f = func ->
-  let (dget,vget) = ... in
-    func {dget,vget} ->
+  let gets = ... in
+    func {gets} ->
       (eq' d') (v',v') where
-        d' = dget ...
-        v' = vget ...
+        (d',v') = gets ...
       ;
     ;
   ;
@@ -145,7 +144,7 @@ succ'2 = func ->
   let ds = ... in
     func {ds} ->
       let (k,v) = ... in
-        (fromNat' (getDict (ds,k))) (Nat.Succ ((toNat' (getDict (ds,k))) v))
+        (fromNat' (getHash (ds,k))) (Nat.Succ ((toNat' (getHash (ds,k))) v))
       ;
     ;
   ;
@@ -155,15 +154,11 @@ succ'2 = func ->
 
     it "[(),True]" $
       evalString ([r|
-main = (f' (dget,vget)) l
-dget = func ->
-  case ... of
-    (=k,_) -> getDict (ds_IEnum,k)
-  ;
-;
-vget = func ->
-  case ... of
-    (_,=x) -> x
+main = (f' gets) l where
+  gets = func ->
+    case ... of
+      (=k,=v) -> (getHash (ds_IEnum,k), v)
+    ;
   ;
 ;
 
@@ -182,14 +177,12 @@ l = List.Cons ((Key.YYY, Bool.True),
 
 f :: (List of a -> List of Nat) where a is IEnum  -- a is dynamic IEnum
 f' = func :: (List of a -> List of Nat) where a is IEnum ->
-  let (dget,vget) = ... in
-    func {dget,vget} ->
+  let gets = ... in
+    func {gets} ->
       case ... of
         List.Nil          -> List.Nil
-        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' (dget,vget)) l) where
-          d' = dget v
-          v' = vget v
-          key :: Key
+        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' gets) l) where
+          (d',v') = gets v
         ;
       ;
     ;
@@ -200,11 +193,17 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
 
     it "succ [(),False]" $
       evalString ([r|
-main = (f' dict) l
+main = (f' gets) l where
+  gets = func ->
+    case ... of
+      (=k,=v) -> (getHash (ds_IEnum,k), v)
+    ;
+  ;
+;
 
-dict = List.Cons ((Key.XXX, dIEnumUnit),
-       List.Cons ((Key.YYY, dIEnumBool),
-       List.Nil))
+ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
+           List.Cons ((Key.YYY, dIEnumBool),
+           List.Nil))
 
 --data List for a
 --data List.Nil
@@ -219,11 +218,9 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
   let dsa = ... in
     func {dsa} ->
       case ... of
-        List.Nil                 -> List.Nil
-        List.Cons ((=key,=x),=l) -> List.Cons ((succ' (getDict (dsa,key))) x, (f' dict) l) where
-          key :: Key
-          x   :: a
-          l   :: List of a
+        List.Nil          -> List.Nil
+        List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
+          (d',v') = gets v
         ;
       ;
     ;
@@ -238,11 +235,11 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
 prelude = unit_ienum ++ nat_ieq ++ bool_ienum ++ bool_iord ++ bool_ieq ++ iord ++ ieq ++ nat ++ bool ++ ienum ++ std
 
 std = [r|
-  getDict = func ->
+  getHash = func ->
     let (dicts,key) = ... in
       case dicts of
         List.Cons ((~key,=dict),_) -> dict
-        List.Cons (_,=dicts')      -> getDict (dicts',key)
+        List.Cons (_,=dicts')      -> getHash (dicts',key)
       ;
     ;
   ;

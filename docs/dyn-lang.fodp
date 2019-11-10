@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:smil="urn:oasis:names:tc:opendocument:xmlns:smil-compatible:1.0" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.presentation">
- <office:meta><meta:generator>LibreOffice/6.0.7.3$Linux_X86_64 LibreOffice_project/00m0$Build-3</meta:generator><meta:creation-date>2011-05-24T14:40:40</meta:creation-date><dc:language>fi-FI</dc:language><meta:editing-cycles>1416</meta:editing-cycles><meta:editing-duration>P62DT1H36M17S</meta:editing-duration><meta:initial-creator>chico </meta:initial-creator><dc:date>2019-11-10T10:02:17.877363862</dc:date><meta:document-statistic meta:object-count="117"/><meta:user-defined meta:name="Info 1"/><meta:user-defined meta:name="Info 2"/><meta:user-defined meta:name="Info 3"/><meta:user-defined meta:name="Info 4"/><meta:template xlink:type="simple" xlink:actuate="onRequest" xlink:title="" xlink:href="../../UERJ/EDL/usr/lib/openoffice/basis3.2/share/template/en-US/presnt/Orange.otp"/></office:meta>
+ <office:meta><meta:generator>LibreOffice/6.0.7.3$Linux_X86_64 LibreOffice_project/00m0$Build-3</meta:generator><meta:creation-date>2011-05-24T14:40:40</meta:creation-date><dc:language>fi-FI</dc:language><meta:editing-cycles>1417</meta:editing-cycles><meta:editing-duration>P62DT2H25M41S</meta:editing-duration><meta:initial-creator>chico </meta:initial-creator><dc:date>2019-11-10T10:51:41.945979617</dc:date><meta:document-statistic meta:object-count="117"/><meta:user-defined meta:name="Info 1"/><meta:user-defined meta:name="Info 2"/><meta:user-defined meta:name="Info 3"/><meta:user-defined meta:name="Info 4"/><meta:template xlink:type="simple" xlink:actuate="onRequest" xlink:title="" xlink:href="../../UERJ/EDL/usr/lib/openoffice/basis3.2/share/template/en-US/presnt/Orange.otp"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
    <config:config-item config:name="VisibleAreaTop" config:type="int">904</config:config-item>
@@ -35,7 +35,7 @@
      <config:config-item config:name="IsClickChangeRotation" config:type="boolean">true</config:config-item>
      <config:config-item config:name="SlidesPerRow" config:type="short">7</config:config-item>
      <config:config-item config:name="EditMode" config:type="int">0</config:config-item>
-     <config:config-item config:name="VisibleAreaTop" config:type="int">904</config:config-item>
+     <config:config-item config:name="VisibleAreaTop" config:type="int">-309</config:config-item>
      <config:config-item config:name="VisibleAreaLeft" config:type="int">-684</config:config-item>
      <config:config-item config:name="VisibleAreaWidth" config:type="int">29458</config:config-item>
      <config:config-item config:name="VisibleAreaHeight" config:type="int">21697</config:config-item>
@@ -2145,7 +2145,7 @@
    </draw:frame>
    <draw:frame draw:style-name="gr2" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="12.889cm" svg:height="1.048cm" svg:x="16.811cm" svg:y="19.94cm" presentation:class="page-number">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:page-number>10</text:page-number></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
     </draw:text-box>
    </draw:frame>
    <draw:page-thumbnail draw:layer="backgroundobjects" svg:width="6.616cm" svg:height="4.962cm" svg:x="1.975cm" svg:y="2.049cm"/>
@@ -2238,7 +2238,7 @@
    </draw:frame>
    <draw:frame presentation:style-name="pr4" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="6.523cm" svg:height="1.448cm" svg:x="20.075cm" svg:y="19.131cm" presentation:class="page-number">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:page-number>10</text:page-number></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
     </draw:text-box>
    </draw:frame>
    <presentation:notes style:page-layout-name="PM2">
@@ -2273,7 +2273,7 @@
     </draw:frame>
     <draw:frame presentation:style-name="pr6" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="9.108cm" svg:height="1.484cm" svg:x="11.88cm" svg:y="28.216cm" presentation:class="page-number">
      <draw:text-box>
-      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:page-number>10</text:page-number></text:p>
+      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
      </draw:text-box>
     </draw:frame>
    </presentation:notes>
@@ -2345,7 +2345,7 @@
    </draw:frame>
    <draw:frame presentation:style-name="pr9" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="6.523cm" svg:height="1.448cm" svg:x="20.075cm" svg:y="19.131cm" presentation:class="page-number">
     <draw:text-box>
-     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:page-number>10</text:page-number></text:p>
+     <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
     </draw:text-box>
    </draw:frame>
    <presentation:notes style:page-layout-name="PM2">
@@ -2370,7 +2370,7 @@
     </draw:frame>
     <draw:frame presentation:style-name="pr11" draw:text-style-name="P4" draw:layer="backgroundobjects" svg:width="9.107cm" svg:height="1.484cm" svg:x="11.88cm" svg:y="28.215cm" presentation:class="page-number">
      <draw:text-box>
-      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>10</text:page-number></text:span><text:page-number>10</text:page-number></text:p>
+      <text:p text:style-name="P3"><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:span text:style-name="T1"><text:page-number>&lt;number&gt;</text:page-number></text:span><text:page-number>&lt;number&gt;</text:page-number></text:p>
      </draw:text-box>
     </draw:frame>
    </presentation:notes>
@@ -2954,25 +2954,22 @@
     </draw:frame>
     <draw:frame presentation:style-name="pr35" draw:text-style-name="P28" draw:layer="layout" svg:width="14.442cm" svg:height="2.006cm" svg:x="13.008cm" svg:y="5.558cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T24">ds_IEnum = List.Cons ((Key.Unit, </text:span><text:span text:style-name="T24">d_IEnum_Unit),</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T24"><text:s text:c="11"/></text:span><text:span text:style-name="T24">List.Cons ((Key.Bool, </text:span><text:span text:style-name="T24">d_IEnum_Bool),</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T24">ds_IEnum = List.Cons ((Key.Unit, d_IEnum_Unit),</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T24"><text:s text:c="11"/></text:span><text:span text:style-name="T24">List.Cons ((Key.Bool, d_IEnum_Bool),</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T24"><text:s text:c="11"/></text:span><text:span text:style-name="T24">List.Nil))</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr36" draw:text-style-name="P28" draw:layer="layout" svg:width="12.431cm" svg:height="5.941cm" svg:x="14.248cm" svg:y="14.817cm">
+    <draw:frame presentation:style-name="pr36" draw:text-style-name="P28" draw:layer="layout" svg:width="12.431cm" svg:height="4.951cm" svg:x="14.248cm" svg:y="15.612cm">
      <draw:text-box>
       <text:p text:style-name="P27"><text:span text:style-name="T24">l2 :: </text:span><text:span text:style-name="T12">List </text:span><text:span text:style-name="T11">of</text:span><text:span text:style-name="T12"> IEnum</text:span><text:span text:style-name="T24"> <text:s/>-- [True,()]</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T24">l2 = </text:span><text:span text:style-name="T12">List.Cons </text:span><text:span text:style-name="T12">((</text:span><text:span text:style-name="T15">Key.Bool,</text:span><text:span text:style-name="T12">Bool.True),</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T24">l2 = </text:span><text:span text:style-name="T12">List.Cons ((</text:span><text:span text:style-name="T15">Key.Bool,</text:span><text:span text:style-name="T12">Bool.True),</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="5"/></text:span><text:span text:style-name="T12">List.Cons ((</text:span><text:span text:style-name="T15">Key.Unit,</text:span><text:span text:style-name="T12">()),</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="5"/></text:span><text:span text:style-name="T12">List.Nil))</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"/></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12">main = (f’ (dGet,vGet)) l2 </text:span><text:span text:style-name="T11">where</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">dGet = func -&gt;</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12">main = (f’ gets) l2 </text:span><text:span text:style-name="T11">where</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">gets = func -&gt;</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T12">case ... of</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">(k,_) -&gt; getHash (ds_IEnum,k)</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">vGet = func -&gt;</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="4"/></text:span><text:span text:style-name="T12">case ... of</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">(_,v) -&gt; v</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="6"/></text:span><text:span text:style-name="T12">(k,v) -&gt; (getHash (ds_IEnum,k), </text:span><text:span text:style-name="T12">v)</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:frame presentation:style-name="pr31" draw:text-style-name="P28" draw:layer="layout" svg:width="11.214cm" svg:height="2.769cm" svg:x="0.692cm" svg:y="17.595cm">
@@ -3000,15 +2997,14 @@
       <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="4"/></text:span><text:span text:style-name="T18">func</text:span><text:span text:style-name="T17"> :: (List </text:span><text:span text:style-name="T18">of</text:span><text:span text:style-name="T17"> a -&gt; List </text:span><text:span text:style-name="T18">of</text:span><text:span text:style-name="T17"> a) </text:span><text:span text:style-name="T25">{dGet,vGet}</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="6"/></text:span><text:span text:style-name="T18">case</text:span><text:span text:style-name="T17"> ... </text:span><text:span text:style-name="T18">of</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="8"/></text:span><text:span text:style-name="T17">List.Nil <text:s text:c="7"/>-&gt; List.Nil</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="8"/></text:span><text:span text:style-name="T17">List.Cons (v,l) -&gt; List.Cons ((toNat</text:span><text:span text:style-name="T25">’ (dGet v)</text:span><text:span text:style-name="T17">) (</text:span><text:span text:style-name="T25">vGet</text:span><text:span text:style-name="T17"> v),</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="8"/></text:span><text:span text:style-name="T17">List.Cons (v,l) -&gt; List.Cons </text:span><text:span text:style-name="T17">((toNat</text:span><text:span text:style-name="T25">’ (dGet v)</text:span><text:span text:style-name="T17">) (</text:span><text:span text:style-name="T25">vGet</text:span><text:span text:style-name="T17"> v),</text:span></text:p>
       <text:p text:style-name="P27"><text:span text:style-name="T17"><text:s text:c="38"/></text:span><text:span text:style-name="T17">(f’ </text:span><text:span text:style-name="T25">(dGet,vGet)</text:span><text:span text:style-name="T17">) l)</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame presentation:style-name="pr38" draw:text-style-name="P28" draw:layer="layout" svg:width="12.088cm" svg:height="1.486cm" svg:x="14.392cm" svg:y="13.024cm">
+    <draw:frame presentation:style-name="pr38" draw:text-style-name="P28" draw:layer="layout" svg:width="12.088cm" svg:height="1.411cm" svg:x="14.392cm" svg:y="13.961cm">
      <draw:text-box>
-      <text:p text:style-name="P27"><text:span text:style-name="T17">main = </text:span><text:span text:style-name="T12">(f’ (dGet,vGet) l1 </text:span><text:span text:style-name="T11">where</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">dGet = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> -&gt; d_IEnumBool</text:span></text:p>
-      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">vGet = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> -&gt; ...</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T17">main = </text:span><text:span text:style-name="T12">(f’ gets l1 </text:span><text:span text:style-name="T11">where</text:span></text:p>
+      <text:p text:style-name="P27"><text:span text:style-name="T12"><text:s text:c="2"/></text:span><text:span text:style-name="T12">gets = </text:span><text:span text:style-name="T11">func</text:span><text:span text:style-name="T12"> -&gt; (d_IEnumBool,...)</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <presentation:notes draw:style-name="dp3">

@@ -281,26 +281,3 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 ;
 |] ++ prelude)
         `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
-
-    it "XXX: f [(),True]" $
-      evalString ([r|
-main = f l
-
-data List for a
-data List.Nil
-data List.Cons with (a, List of a)
-
-l :: List of IEnum
-l = List.Cons (Bool.False,
-    List.Cons (Bool.True,
-    List.Nil))
-
-f :: (List of a -> List of Nat) where a is IEnum
-f = func :: (List of a -> List of Nat) where a is IEnum ->
-  case ... of
-    List.Nil          -> List.Nil
-    List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a l::List of a;
-  ;
-;
-|] ++ prelude)
-        `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
