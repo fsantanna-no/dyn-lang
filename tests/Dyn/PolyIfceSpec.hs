@@ -286,37 +286,94 @@ implementation of IEq for Maybe of a where (a is IEq) with
          `shouldBe` "(Char.Dd,Char.AA)"
 
   describe "dyn:" $ do
-    it "f (toEnum) True" $
+    it "f (toNat) True" $
       evalString ([r|
 main = (f' dIEnumBool) Bool.True
 
 f :: (a -> Nat) where a is IEnum
 f = func :: (a -> Nat) where a is IEnum ->
-  (toEnum' dIEnuma) ...
+  (toNat' dIEnuma) ...
 ;
 |] ++ prelude)
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
-    it "XXX: [(),1,True]" $
+{-
+    it "[(),True]" $
       evalString ([r|
-main = f l
-
-data List for a
-data List.Nil
-data List.Cons with (a, List of a)
-
-l :: List of a where a is IEnum
-l = List.Cons ((),
-    List.Cons (Nat.Succ Nat.Zero,
-    List.Cons (Bool.True,
-    List.Nil)))
-
-f :: (List of a -> List of Nat) where a is IEnum
-f = func :: (List of a -> List of Nat) where a is IEnum ->
+main = (f' (dget,vget)) l
+dget = func ->
   case ... of
-    List.Nil          -> List.Nil
-    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a l::List of a;
+    (=k,_) -> getDict (ds_IEnum,k)
   ;
 ;
-|] ++ prelude)
-        `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"
+vget = func ->
+  case ... of
+    (_,=x) -> x
+  ;
+;
+
+ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
+           List.Cons ((Key.YYY, dIEnumBool),
+           List.Nil))
+
+--data List for a
+--data List.Nil
+--data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum   -- a is dynamic IEnum
+l = List.Cons ((Key.YYY, Bool.True),
+    List.Cons ((Key.XXX, ()),
+    List.Nil))
+
+f :: (List of a -> List of Nat) where a is IEnum  -- a is dynamic IEnum
+f' = func :: (List of a -> List of Nat) where a is IEnum ->
+  let (dget,vget) = ... in
+    func {dget,vget} ->
+      case ... of
+        List.Nil          -> List.Nil
+        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' (dget,vget)) l) where
+          d' = dget v
+          v' = vget v
+          key :: Key
+        ;
+      ;
+    ;
+  ;
+;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
+
+    it "succ [(),False]" $
+      evalString ([r|
+main = (f' dict) l
+
+dict = List.Cons ((Key.XXX, dIEnumUnit),
+       List.Cons ((Key.YYY, dIEnumBool),
+       List.Nil))
+
+--data List for a
+--data List.Nil
+--data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum   -- a is dynamic IEnum
+l = List.Cons ((Key.YYY, Bool.False),
+    List.Nil)
+
+f :: (List of a -> List of Nat) where a is IEnum  -- a is dynamic IEnum
+f' = func :: (List of a -> List of Nat) where a is IEnum ->
+  let dsa = ... in
+    func {dsa} ->
+      case ... of
+        List.Nil                 -> List.Nil
+        List.Cons ((=key,=x),=l) -> List.Cons ((succ' (getDict (dsa,key))) x, (f' dict) l) where
+          key :: Key
+          x   :: a
+          l   :: List of a
+        ;
+      ;
+    ;
+  ;
+;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons (Bool.True,List.Nil))"
+-}

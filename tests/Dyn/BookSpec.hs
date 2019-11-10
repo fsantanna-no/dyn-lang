@@ -680,7 +680,7 @@ c2  = Char.BB
         evalString ([r|
 main = (xeq, xgt, matches (sum,ten), matches (dsat,Day.Sat), not wd1, wd2, aft)
 
-dsat :: Day = fromEnum (toEnum Day.Sat)
+dsat :: Day = fromNat (toNat Day.Sat)
 
 --data Day
 --data Day.Sun
@@ -696,7 +696,7 @@ xgt = lt  (d1, d2)
 wd1 = workday Day.Sun
 wd2 = workday Day.Fri
 aft = and (matches (dayAfter Day.Sun,Day.Mon), matches (dayAfter Day.Sat, Day.Sun))
-sum = add (add (add (toEnum d1,toEnum d2),toEnum Day.Sat), toEnum Day.Wed)
+sum = add (add (add (toNat d1,toNat d2),toNat Day.Sat), toNat Day.Wed)
 
 d1 = Day.Sun
 d2 = Day.Mon
@@ -709,12 +709,12 @@ workday = func ->
 
 dayAfter = func :: (Day -> Day) ->
   let day = ... in
-    fromEnum (rem (add (toEnum day,one), seven))
+    fromNat (rem (add (toNat day,one), seven))
   ;
 ;
 
 implementation of IEnum for Day with
-  toEnum = func ->
+  toNat = func ->
     case ... of
       Day.Sun -> zero
       Day.Mon -> one
@@ -726,7 +726,7 @@ implementation of IEnum for Day with
     ;
   ;
 
-  fromEnum = func ->
+  fromNat = func ->
     case ... of
       ~zero  -> Day.Sun
       ~one   -> Day.Mon
@@ -747,8 +747,8 @@ implementation of IOrd for Day with
       (x,y) = ...
     in
       lt (x', y') where
-        x' = toEnum x
-        y' = toEnum y
+        x' = toNat x
+        y' = toNat y
       ;
     ;
   ;
@@ -764,11 +764,11 @@ implementation of IEq for Day with
 
       it "direction" $         -- pg 41
         evalString ([r|
-main = (toEnum Dir.N, ses, matches (lel, Dir.L), matches (reverse Dir.O, Dir.L))
+main = (toNat Dir.N, ses, matches (lel, Dir.L), matches (reverse Dir.O, Dir.L))
 
-ses :: Dir = fromEnum one
+ses :: Dir = fromNat one
 
-lel :: Dir = fromEnum (toEnum l)
+lel :: Dir = fromNat (toNat l)
 l   = Dir.L
 
 --data Dir
@@ -778,7 +778,7 @@ l   = Dir.L
 --data Dir.O
 
 implementation of IEnum for Dir with
-  toEnum = func ->
+  toNat = func ->
     case ... of
       Dir.N -> zero
       Dir.S -> one
@@ -787,7 +787,7 @@ implementation of IEnum for Dir with
     ;
   ;
 
-  fromEnum = func ->
+  fromNat = func ->
     case ... of
       ~zero  -> Dir.N
       ~one   -> Dir.S
@@ -810,7 +810,7 @@ reverse = func ->
 
       it "bool enum" $         -- pg 41
         evalString ([r|
-main :: Bool = fromEnum (add (toEnum Bool.False, one))
+main :: Bool = fromNat (add (toNat Bool.False, one))
 |] ++ prelude)
         `shouldBe` "Bool.True"
 

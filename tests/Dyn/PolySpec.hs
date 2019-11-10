@@ -61,10 +61,10 @@ main = x where
 
   describe "IEnum" $ do
     it "()" $ do
-      evalString ("main :: () = fromEnum zero"++unit_ienum++ienum++nat)
+      evalString ("main :: () = fromNat zero"++unit_ienum++ienum++nat)
         `shouldBe` "()"
     it "()" $ do
-      evalString ("main = toEnum ()"++unit_ienum++ienum++nat)
+      evalString ("main = toNat ()"++unit_ienum++ienum++nat)
         `shouldBe` "Nat.Zero"
     it "succ" $ do
       evalString ("main = succ Bool.False"++bool_ienum++ienum++nat)
@@ -248,13 +248,13 @@ implementation of IAaa for Xxx with
          `shouldBe` "(Char.Dd,Char.AA)"
 
   describe "dyn:" $ do
-    it "f (toEnum) True" $
+    it "f (toNat) True" $
       evalString ([r|
 main = f Bool.True
 
 f :: (a -> Nat) where a is IEnum
 f = func :: (a -> Nat) where a is IEnum ->
-  toEnum ...
+  toNat ...
 ;
 |] ++ prelude)
         `shouldBe` "(Nat.Succ Nat.Zero)"
@@ -276,7 +276,7 @@ f :: (List of a -> List of Nat) where a is IEnum
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil
-    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a l::List of a;
+    List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a l::List of a;
   ;
 ;
 |] ++ prelude)
@@ -299,7 +299,7 @@ f :: (List of a -> List of Nat) where a is IEnum
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil
-    List.Cons (=x,=l) -> List.Cons (toEnum x, f l) where x::a l::List of a;
+    List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a l::List of a;
   ;
 ;
 |] ++ prelude)

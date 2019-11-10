@@ -59,8 +59,8 @@ iord = [r|
 
 ienum = [r|
   interface IEnum for a with
-    toEnum   :: (a -> Nat)
-    fromEnum :: (Nat -> a)
+    toNat   :: (a -> Nat)
+    fromNat :: (Nat -> a)
   ;
 |]
 
@@ -124,14 +124,14 @@ bool_iord = [r|
 
 bool_ienum = [r|
   implementation of IEnum for Bool with
-    toEnum = func :: (Bool -> Nat) ->
+    toNat = func :: (Bool -> Nat) ->
       case ... of
         Bool.False -> Nat.Zero
         Bool.True  -> Nat.Succ Nat.Zero
       ;
     ;
 
-    fromEnum = func :: (Nat -> Bool) ->
+    fromNat = func :: (Nat -> Bool) ->
       case ... of
         Nat.Zero          -> Bool.False
         Nat.Succ Nat.Zero -> Bool.True
