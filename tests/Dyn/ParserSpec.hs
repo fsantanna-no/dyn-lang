@@ -10,6 +10,7 @@ import Text.Parsec.String (Parser)
 
 import Dyn.Parser
 import Dyn.AST
+import Dyn.Classes
 
 fromRight (Right x) = x
 
@@ -114,7 +115,7 @@ spec = do
           `shouldBe` "case x of\n  Bool.True -> a\n  Bool.False -> b\n;"
     describe "prog:" $ do
       it "case" $
-        (toString $ fromRight $ parse' (prog) "main = case x of Bool.True -> a\nBool.False -> b;")
+        (progToString $ fromRight $ parse' (prog) "main = case x of Bool.True -> a\nBool.False -> b;")
           `shouldBe` "main = case x of\n  Bool.True -> a\n  Bool.False -> b\n;\n"
 
     describe "expr:" $ do
@@ -144,13 +145,13 @@ spec = do
           `shouldBe` "case x of\n  ~y -> t\n  _ -> f\n;"
     describe "prog:" $ do
       it "x where x :: () = ()" $
-        (toString $ fromRight $ parse "main :: () = ()")
+        (parseToString "main :: () = ()")
           `shouldBe` "main :: ()\nmain = ()\n"
       it "x where x :: ()" $
-        (toString $ fromRight $ parse "main :: ()")
+        (parseToString "main :: ()")
           `shouldBe` "main :: ()\n"
       it "x where x = ()" $
-        (toString $ fromRight $ parse "main = ()")
+        (parseToString "main = ()")
           `shouldBe` "main = ()\n"
       it "x where x,y" $
         (parseToString "main::()=y  y::()=()")
@@ -159,13 +160,13 @@ spec = do
         (parseToString "main::()=y\ny::()=()")
           `shouldBe` "main :: ()\nmain = y\ny :: ()\ny = ()\n"
       it "where-newline" $
-        (toString $ fromRight $ parse "main :: () = f ()\n")
+        (parseToString "main :: () = f ()\n")
           `shouldBe` "main :: ()\nmain = (f ())\n"
       it "Xx a = ()" $
-        (toString $ fromRight $ parse "Xx main = ()")
+        (parseToString "Xx main = ()")
           `shouldBe` "(Xx main) = ()\n"
       it "func" $
-        (toString $ fromRight $ parse
+        (parseToString
           [r|
 main :: () = f ()
 f :: () = func -> x where

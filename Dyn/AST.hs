@@ -119,7 +119,7 @@ newtype Ifce = Ifce (Pos, ID_Ifce, Ctrs, [Decl])
 newtype Impl = Impl (Pos, ID_Ifce, Ctrs, Type, [Decl])
   deriving (Eq, Show)
 
-newtype Prog = Prog [Glob]
+type Prog = [Glob]
 
 -- top-level global declarations
 data Glob = GDecl Decl | GData Data | GIfce Ifce | GImpl Impl
@@ -136,6 +136,8 @@ isDAtr _            = False
 
 isEError (EError _ _) = True
 isEError _            = False
+
+-------------------------------------------------------------------------------
 
 globsToIfces :: [Glob] -> [Ifce]
 globsToIfces globs = map g $ filter f globs where

@@ -132,8 +132,7 @@ evalExpWhere env (ExpWhere (z, dcls, e)) =
 
 evalProg :: Prog -> Expr
 evalProg prog =
-  evalExpWhere [] $ ExpWhere (pz, map globToDecl glbs', EVar pz "main") where
-    Prog glbs' = prog
+  evalExpWhere [] $ ExpWhere (pz, map globToDecl prog, EVar pz "main")
 
 evalString :: String -> String
 evalString input = evalStringF Prelude.id input

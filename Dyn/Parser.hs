@@ -479,7 +479,7 @@ prog = do
             (singleton <$> GImpl <$> impl) -- <|>
            )
   void <- eof
-  return $ Prog globs
+  return globs
 
 -------------------------------------------------------------------------------
 
@@ -496,7 +496,7 @@ parseToStringF :: (Prog->Prog) -> String -> String
 parseToStringF f input =
   case parse input of
     (Left  err)  -> err
-    (Right prog) -> toString $ f prog
+    (Right prog) -> progToString $ f prog
 
 parseToString :: String -> String
 parseToString input = parseToStringF Prelude.id input

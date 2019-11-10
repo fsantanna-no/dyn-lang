@@ -14,28 +14,21 @@ import qualified Dyn.Eval   as E
 
 evalString :: String -> String
 evalString input = E.evalStringF f input where
-                    f prog = apply prog
+                    f prog = map globFromDecl $ apply prog
 
 parseToString :: String -> String
 parseToString input = P.parseToStringF f input where
-                        f prog = apply prog
+                        f prog = map globFromDecl $ apply prog
 
 -------------------------------------------------------------------------------
 
-apply :: Prog -> Prog
-apply (Prog globs) = prog where
-  prog = Prog $
-          map globFromDecl   $
-          inline $  -- [Decl] w/o Ifce/Impl/Gens
-          globs
-
-  inline :: [Glob] -> [Decl]
-  inline globs = concatMap f globs where
-                  f :: Glob -> [Decl]
-                  f (GDecl dcl) = expandGen globs dcl
-                  f (GData dat) = []
-                  f (GIfce ifc) = ifceToDecls ifc
-                  f (GImpl imp) = implToDecls globs imp
+apply :: [Glob] -> [Decl]
+apply globs = concatMap f globs where
+                f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
+                f (GDecl dcl) = expandGen globs dcl
+                f (GData dat) = []
+                f (GIfce ifc) = ifceToDecls ifc
+                f (GImpl imp) = implToDecls globs imp
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
