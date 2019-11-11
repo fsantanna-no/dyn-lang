@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Dyn.PolyIfceSpec (main,spec) where
+module Dyn.IfceSpec (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ

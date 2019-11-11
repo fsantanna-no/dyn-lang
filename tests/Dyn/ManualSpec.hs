@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Dyn.PolyManualSpec (main,spec) where
+module Dyn.ManualSpec (main,spec) where
 
 import Test.Hspec
 import Text.RawString.QQ
