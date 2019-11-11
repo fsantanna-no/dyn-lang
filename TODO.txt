@@ -1,3 +1,14 @@
+globsToDatas :: [Glob] -> [Data]
+globsToDatas globs = map g $ filter f globs where
+                      f (GData dat) = True
+                      f _           = False
+                      g (GData dat) = dat
+
+dataFind :: [Glob] -> ID_Hier -> Data
+dataFind globs dat = fromJust $ L.find f (globsToDatas globs) where
+                      f :: Data -> Bool
+                      f (Data (_,_,id,_,_)) = (id == dat)
+
 - List of IEnum
     - Estou em PolyIfce.dynamic.XXX
         - diferenciar data of Bool/IEnum

@@ -298,9 +298,9 @@ f = func :: (a -> Nat) where a is IEnum ->
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
     it "XXX: [(),True]" $
-      parseToString ([r|
-main = (f'' gets) l where
-  gets = func ->
+      evalString ([r|
+main = (f' d) l where
+  d = func ->
     case ... of
       (=k,=v) -> (getHash (ds_IEnum,k), v)
     ;
@@ -321,12 +321,12 @@ l = List.Cons ((Key.YYY, Bool.True),
     List.Nil))
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
-  --let gets = ... in
-  --  func {gets} ->
+  --let dIEnuma = ... in
+  --  func {dIEnuma} ->
       case ... of
         List.Nil          -> List.Nil
-        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f'' gets) l) where
-          (d',v') = gets v
+        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
+          (d',v') = dIEnuma v
         ;
       ;
 ;

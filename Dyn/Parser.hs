@@ -2,7 +2,7 @@ module Dyn.Parser where
 
 import Debug.Trace
 import Control.Monad          (void, when, guard)
-import Data.Maybe             (isJust,fromJust)
+import Data.Maybe             (isNothing,isJust,fromJust)
 import Data.Bool              (bool)
 import Data.Char              (isLower, isUpper)
 import Data.List              (find)
@@ -433,6 +433,7 @@ data_ = do
             void <- try (tk_key "is")
             void <- tk_key "recursive"
             return ()
+  guard (length hr == 1 || isNothing rec) -- "is recursive" only for base class
   return $ Data (pos, isJust rec, hr, ofs, tp)
 
 ifce :: Parser Ifce
