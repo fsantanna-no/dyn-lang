@@ -135,10 +135,10 @@ evalProg prog =
   evalExpWhere [] $ ExpWhere (pz, map globToDecl prog, EVar pz "main")
 
 evalString :: String -> String
-evalString input = evalStringF Prelude.id input
+evalString input = evalStringF (\_ p->p) input
 
-evalStringF :: (Prog->Prog) -> String -> String
+evalStringF :: (Prog->Prog->Prog) -> String -> String
 evalStringF f input =
   case parse input of
     Left  err  -> err
-    Right prog -> toString $ evalProg $ f prog
+    Right prog -> toString $ evalProg $ f prog prog

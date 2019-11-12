@@ -1,4 +1,4 @@
-module Dyn.Ifce (apply,evalString,parseToString,ifceFind,ifceToDeclIds,ifcesSups) where
+module Dyn.Ifce (apply,ifceFind,ifceToDeclIds,ifcesSups) where
 
 import Debug.Trace
 import Data.Bool                (bool)
@@ -12,25 +12,15 @@ import qualified Dyn.Eval   as E
 
 -------------------------------------------------------------------------------
 
-evalString :: String -> String
-evalString input = E.evalStringF f input where
-                    f prog = map globFromDecl $ apply prog
+apply :: Prog -> Prog -> Prog
+apply _ globs = map globFromDecl $ dicts globs ++ concatMap f globs where
+                  f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
+                  f (GDecl dcl) = expandGen globs dcl
+                  f (GData dat) = []
+                  f (GIfce ifc) = ifceToDecls ifc
+                  f (GImpl imp) = implToDecls globs imp
 
-parseToString :: String -> String
-parseToString input = P.parseToStringF f input where
-                        f prog = map globFromDecl $ apply prog
-
--------------------------------------------------------------------------------
-
-apply :: [Glob] -> [Decl]
-apply globs = dicts globs ++ concatMap f globs where
-                f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
-                f (GDecl dcl) = expandGen globs dcl
-                f (GData dat) = []
-                f (GIfce ifc) = ifceToDecls ifc
-                f (GImpl imp) = implToDecls globs imp
-
-dicts globs = traceShowSS $
+dicts globs = --traceShowSS $
   map toDict        $   -- [ ds_IEnum=..., ... ]
   map toCons        $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
   L.groupBy sameIfc $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]

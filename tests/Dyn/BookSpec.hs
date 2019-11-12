@@ -6,8 +6,11 @@ import Test.Hspec
 import Text.RawString.QQ
 
 import Dyn.AST
-import Dyn.Analyse
 import Dyn.Prelude
+import qualified Dyn.Eval as E
+import qualified Dyn.Analyse as A
+
+evalString = E.evalStringF A.apply
 
 main :: IO ()
 main = hspec spec

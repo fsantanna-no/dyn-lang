@@ -8,6 +8,9 @@ import Text.RawString.QQ
 import Dyn.AST
 import Dyn.PreludeIfce
 import Dyn.Ifce
+import qualified Dyn.Eval as E
+
+evalString = E.evalStringF apply
 
 main :: IO ()
 main = hspec spec
@@ -307,9 +310,9 @@ main = (f' d) l where
   ;
 ;
 
-ds_IEnum = List.Cons ((Key.Unit, dIEnumUnit),
-           List.Cons ((Key.Bool, dIEnumBool),
-           List.Nil))
+--ds_IEnum = List.Cons ((Key.Unit, dIEnumUnit),
+--           List.Cons ((Key.Bool, dIEnumBool),
+--           List.Nil))
 
 data List for a is recursive
 data List.Nil

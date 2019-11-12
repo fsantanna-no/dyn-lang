@@ -11,8 +11,8 @@ import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
 
-apply :: [Glob] -> [Decl] -> [Decl]
-apply globs decls = mapDecls (fDz,fE,fPz) globs cz [] decls where
+apply :: [Glob] -> [Glob] -> [Glob]
+apply origs globs = mapGlobs (fSz,fDz,fE,fPz) origs globs where
 
 -------------------------------------------------------------------------
 

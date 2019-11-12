@@ -9,8 +9,8 @@ import Dyn.Map
 
 -------------------------------------------------------------------------------
 
-apply :: [Glob] -> [Decl] -> [Decl]
-apply x y = mapDecls (fD,fE,fPz) x cz [] y where
+apply :: Prog -> Prog -> Prog
+apply origs globs = mapGlobs (fSz,fD,fE,fPz) origs globs where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat

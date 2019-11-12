@@ -6,6 +6,7 @@ import Dyn.AST
 import Dyn.Parser
 import Dyn.Eval
 import Dyn.Prelude
+import qualified Dyn.Order as Order (apply)
 
 fromRight (Right x) = x
 
@@ -111,3 +112,11 @@ spec = do
       it "[(),1,True]" $
         evalString ("main = List.Cons ((), List.Cons (Nat.Succ Nat.Zero, List.Cons (Bool.True, List.Nil)))")
           `shouldBe` "(List.Cons ((),(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Bool.True,List.Nil))))))"
+
+  describe "order:" $ do
+    it "a second" $
+      evalStringF Order.apply ("main = a\na = X")
+        `shouldBe` "X"
+    it "a first" $
+      evalStringF Order.apply ("a = X\nmain = a")
+        `shouldBe` "X"
