@@ -10,10 +10,11 @@ import Dyn.PreludeIfce
 import Dyn.Ifce
 import qualified Dyn.Parser as P
 import qualified Dyn.Eval   as E
+import qualified Dyn.Decl   as D
 import qualified Dyn.Order  as O
 
-evalString    = E.evalStringF    (\x y -> O.apply x $ apply x y)
-parseToString = P.parseToStringF (\x y -> O.apply x $ apply x y)
+evalString    = E.evalStringF    (\x y -> O.apply x $ D.apply x $ apply x y)
+parseToString = P.parseToStringF (\x y -> O.apply x $ D.apply x $ apply x y)
 
 main :: IO ()
 main = hspec spec

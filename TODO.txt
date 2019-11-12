@@ -1,4 +1,3 @@
-- tentar fazer [Decl]->Decl
 - ordenar decls por usos/deps
 - List of IEnum
     - Estou em PolyIfce.dynamic.XXX

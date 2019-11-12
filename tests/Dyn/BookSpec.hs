@@ -32,7 +32,7 @@ spec = do
     it "Nat *" $
       evalString ("main = mul (two,three)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
-    it "XXX: Nat %" $
+    it "Nat %" $
       evalString ("main = rem (two,three)\n" ++ prelude)
         `shouldBe` "(Nat.Succ (Nat.Succ Nat.Zero))"
 

@@ -349,10 +349,11 @@ nat_iord = [r|
         (Nat.Zero,     Nat.Zero)     -> Bool.False
         (Nat.Zero,     _)            -> Bool.True
         (Nat.Succ _,   Nat.Zero)     -> Bool.False
-        (Nat.Succ =x', Nat.Succ =y') -> lt (x',y')    -- TODO: lt recursive call
+        (Nat.Succ =x', Nat.Succ =y') -> lt (x',y') where
+                                          x' :: Nat
+                                          y' :: Nat
+                                        ;
       ; where
-        x' :: Nat
-        y' :: Nat
         (x,y) = ...
       ;
     ;

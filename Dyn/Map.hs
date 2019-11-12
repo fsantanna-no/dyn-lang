@@ -95,6 +95,11 @@ cEz = const S.empty
 cPz = const S.empty
 cWz _ x = x
 
+cPWrite = CollectFs (cWz,cP,cEz) where
+            cP :: Patt -> S.Set ID_Var
+            cP (PWrite _ id) = S.singleton id
+            cP _             = S.empty
+
 collectGlobs :: Ord a => CollectFs a -> Prog -> S.Set a
 collectGlobs fs globs = collectDecls fs $ map globToDecl globs
 
