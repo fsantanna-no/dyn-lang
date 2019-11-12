@@ -72,6 +72,9 @@ ienum = [r|
     toNat   :: (a -> Nat)
     fromNat :: (Nat -> a)
   ;
+  succ = func :: (a -> a) where a is IEnum ->
+    (fromNat' dIEnuma) (Nat.Succ ((toNat' dIEnuma) ...))
+  ;
 |]
 
 -------------------------------------------------------------------------------

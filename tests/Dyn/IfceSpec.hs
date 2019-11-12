@@ -304,7 +304,7 @@ f = func :: (a -> Nat) where a is IEnum ->
 |] ++ prelude)
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
-    it "XXX: [(),True]" $
+    it "[(),True]" $
       evalString ([r|
 main = (f' d) l where
   d = func ->
@@ -336,9 +336,9 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
-    it "YYY: succ [(),False]" $
+    it "succ [(),False]" $
       evalString ([r|
-main = (f'' gets) l where
+main = (f' gets) l where
   gets = func ->
     case ... of
       (=k,=v) -> (getHash (ds_IEnum,k), v)
