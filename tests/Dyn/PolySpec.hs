@@ -284,3 +284,66 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 ;
 |] ++ prelude)
         `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
+
+  describe "dyn:" $ do
+
+    it "XXX: [(),True]" $
+      evalString ([r|
+main = f l where
+  dIEnumIEnum = func ->
+    case ... of
+      (=k,=v) -> (getHash (ds_IEnum,k), v)
+    ;
+  ;
+;
+
+--data List for a is recursive
+--data List.Nil
+--data List.Cons with (a, List of a)
+
+l :: List of IEnum
+l = List.Cons ((Key.Bool, Bool.True),
+    List.Cons ((Key.Unit, ()),
+    List.Nil))
+
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  --let dIEnuma = ... in
+  --  func {dIEnuma} ->
+      case ... of
+        List.Nil          -> List.Nil
+        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
+          (d',v') = dIEnuma v
+        ;
+      ;
+;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
+
+    it "succ [(),False]" $
+      evalString ([r|
+main = (f' gets) l where
+  gets = func ->
+    case ... of
+      (=k,=v) -> (getHash (ds_IEnum,k), v)
+    ;
+  ;
+;
+
+--data List for a
+--data List.Nil
+--data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum   -- a is dynamic IEnum
+l = List.Cons ((Key.Bool, Bool.False),
+    List.Nil)
+
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil
+    List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
+      (d',v') = gets v
+    ;
+  ;
+;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons (Bool.True,List.Nil))"

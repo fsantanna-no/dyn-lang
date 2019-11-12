@@ -25,6 +25,15 @@ std = [r|
       (x,y) = ...
     ;
   ;
+
+  getHash = func ->
+    let (dicts,key) = ... in
+      case dicts of
+        List.Cons ((~key,=dict),_) -> dict
+        List.Cons (_,=dicts')      -> getHash (dicts',key)
+      ;
+    ;
+  ;
 |]
 
 ibounded = [r|

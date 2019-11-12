@@ -34,7 +34,7 @@ mE globs _ dsigs xtp e@(EVar z id) = e' where
     otherwise        -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,toString e2') $-} ECall z1 e2' e3 where
+mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = traceShow ("CALL",id2,toString e2') $ ECall z1 e2' e3 where
 
   (cs2,tp2) = dsigsFind dsigs id2
   cs2'      = Ifce.ifcesSups globs (getCtrs cs2) where
@@ -48,7 +48,7 @@ mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,
         Right Nothing     -> xxx z2 cs2' "a"          id2 -- xtp is not concrete yet
     otherwise             -> e2      -- var is not function, ignore
 
-  xhr inp2 out2 = --traceShow (id2, toString e, toString e3, toType dsigs e3) $
+  xhr inp2 out2 = traceShow (id2, toString e, toString e3, toType dsigs e3) $
     case tpMatch (TTuple [inp2            , out2])
                  (TTuple [toType dsigs e3 , xtp ]) of
       [("a", TUnit)]       -> Right $ Just ["Unit"]
