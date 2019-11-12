@@ -13,11 +13,11 @@ type MapFs = ( ([Glob]->Ctrs->[Decl]->[Decl]->[Decl]),
                ([Glob]->Ctrs->[Decl]->Type->ExpWhere->ExpWhere),
                ([Glob]->Ctrs->[Decl]->Type->Expr->Expr),
                ([Glob]->Ctrs->[Decl]->Patt->Patt) )
-fSz _ _ _   ds = ds
-fDz _ _ _   d  = [d]
-fWz _ _ _ _ w  = w
-fEz _ _ _ _ e  = e
-fPz _ _ _   p  = p
+mSz _ _ _   ds = ds
+mDz _ _ _   d  = [d]
+mWz _ _ _ _ w  = w
+mEz _ _ _ _ e  = e
+mPz _ _ _   p  = p
 
 -------------------------------------------------------------------------------
 
