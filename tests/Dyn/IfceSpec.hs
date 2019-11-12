@@ -307,8 +307,8 @@ main = (f' d) l where
   ;
 ;
 
-ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
-           List.Cons ((Key.YYY, dIEnumBool),
+ds_IEnum = List.Cons ((Key.Unit, dIEnumUnit),
+           List.Cons ((Key.Bool, dIEnumBool),
            List.Nil))
 
 data List for a is recursive
@@ -316,8 +316,8 @@ data List.Nil
 data List.Cons with (a, List of a)
 
 l :: List of a where a is IEnum   -- a is dynamic IEnum
-l = List.Cons ((Key.YYY, Bool.True),
-    List.Cons ((Key.XXX, ()),
+l = List.Cons ((Key.Bool, Bool.True),
+    List.Cons ((Key.Unit, ()),
     List.Nil))
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
@@ -343,8 +343,8 @@ main = (f'' gets) l where
   ;
 ;
 
-ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
-           List.Cons ((Key.YYY, dIEnumBool),
+ds_IEnum = List.Cons ((Key.Unit, dIEnumUnit),
+           List.Cons ((Key.Bool, dIEnumBool),
            List.Nil))
 
 --data List for a
@@ -352,7 +352,7 @@ ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
 --data List.Cons with (a, List of a)
 
 l :: List of a where a is IEnum   -- a is dynamic IEnum
-l = List.Cons ((Key.YYY, Bool.False),
+l = List.Cons ((Key.Bool, Bool.False),
     List.Nil)
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->

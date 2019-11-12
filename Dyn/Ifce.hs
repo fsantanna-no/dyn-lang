@@ -3,7 +3,7 @@ module Dyn.Ifce (apply,evalString,parseToString,ifceFind,ifceToDeclIds,ifcesSups
 import Debug.Trace
 import Data.Bool                (bool)
 import Data.Maybe               (fromJust)
-import qualified Data.List as L (find, sort)
+import qualified Data.List as L (find, sort, groupBy)
 
 import Dyn.AST
 import Dyn.Classes
@@ -23,12 +23,38 @@ parseToString input = P.parseToStringF f input where
 -------------------------------------------------------------------------------
 
 apply :: [Glob] -> [Decl]
-apply globs = concatMap f globs where
+apply globs = dicts globs ++ concatMap f globs where
                 f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
                 f (GDecl dcl) = expandGen globs dcl
                 f (GData dat) = []
                 f (GIfce ifc) = ifceToDecls ifc
                 f (GImpl imp) = implToDecls globs imp
+
+dicts globs = traceShowSS $
+  map toDict        $   -- [ ds_IEnum=..., ... ]
+  map toCons        $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
+  L.groupBy sameIfc $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]
+  map toTuple       $   -- [ (IEnum, Cons(K.Unit,dIEnumUnit)), (IEnum, Cons(K.Bool,dIEnumBool), ...]
+  globsToImpls      $   -- [IEnum for Unit, IEq for XXX, IEnum for Bool, ...]
+  globs where
+
+  toDict :: (ID_Ifce,Expr) -> Decl
+  toDict (ifc,cons) = DAtr pz (PWrite pz ("ds_"++ifc))
+                       (ExpWhere (pz,[], cons))
+
+  toCons :: [(ID_Ifce,Expr)] -> (ID_Ifce,Expr)
+  toCons l = (fst $ head l,
+              foldr f (ECons pz ["List","Nil"]) $ map snd l)
+             where
+              f tup acc = ECall pz (ECons pz ["List","Cons"])
+                                   (ETuple pz [tup,acc])
+
+  toTuple (Impl (_,ifc,_,tp,_)) = (ifc,tup) where
+                                    tp' = tpToString' tp
+                                    tup = ETuple pz [c1,c2] where
+                                            c1 = ECons pz ["Key",tp']
+                                            c2 = EVar  pz ("d"++ifc++tp')
+  sameIfc (ifc1,_) (ifc2,_) = (ifc1 == ifc2)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -49,6 +75,12 @@ ifcesSups _     []  = []
 ifcesSups globs ids = L.sort $ ifcesSups globs ids' ++ ids where
                         ids' = concatMap (f . (ifceFind globs)) ids
                         f (Ifce (_,_,Ctrs l,_)) = l
+
+tpToString' (TData hr [])  = concat hr
+--tpToString' (TData hr tps) = concat hr ++ concatMap tpToString' tps
+--tpToString' (TVar _)       = concat cs
+tpToString' TUnit          = "Unit"
+tpToString' x = error $ show x
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -97,16 +129,10 @@ ifceToDecls me@(Ifce (z,ifc_id,ctrs,decls)) = wraps ++ decls' where
 
 implToDecls :: [Glob] -> Impl -> [Decl]
 implToDecls globs (Impl (z,ifc,Ctrs [],tp,decls)) =
-  [DAtr z (PWrite z ("d"++ifc++toString' tp))
+  [DAtr z (PWrite z ("d"++ifc++tpToString' tp))
           (ExpWhere (z,decls,
             ECall z (ECons z ["Dict",ifc])
                     (fromList $ map (EVar z) $ ifceToDeclIds $ ifceFind globs ifc)))]
-  where
-    toString' (TData hr [])  = concat hr
-    --toString' (TData hr tps) = concat hr ++ concatMap toString' tps
-    --toString' (TVar _)       = concat cs
-    toString' TUnit          = "Unit"
-    toString' x = error $ show x
 
 -------------------------------------------------------------------------------
 

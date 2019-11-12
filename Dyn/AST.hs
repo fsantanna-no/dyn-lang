@@ -139,6 +139,12 @@ isEError _            = False
 
 -------------------------------------------------------------------------------
 
+globsToDatas :: [Glob] -> [Data]
+globsToDatas globs = map g $ filter f globs where
+                      f (GData dat) = True
+                      f _           = False
+                      g (GData dat) = dat
+
 globsToIfces :: [Glob] -> [Ifce]
 globsToIfces globs = map g $ filter f globs where
                       f (GIfce ifc) = True
