@@ -12,13 +12,13 @@ import Dyn.Classes
 type MapFs = ( ([Glob]->Ctrs->[Decl]->[Decl]->[Decl]),
                ([Glob]->Ctrs->[Decl]->Decl->[Decl]),
                ([Glob]->Ctrs->[Decl]->Type->ExpWhere->ExpWhere),
-               ([Glob]->Ctrs->[Decl]->Type->Expr->Expr),
-               ([Glob]->Ctrs->[Decl]->Patt->Patt) )
+               ([Glob]->Ctrs->[Decl]->Patt->Patt),
+               ([Glob]->Ctrs->[Decl]->Type->Expr->Expr))
 mSz _ _ _   ds = ds
 mDz _ _ _   d  = [d]
 mWz _ _ _ _ w  = w
-mEz _ _ _ _ e  = e
 mPz _ _ _   p  = p
+mEz _ _ _ _ e  = e
 
 -------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ mapWhere fs@(_,_,fW,_,_) globs ctrs dsigs xtp (ExpWhere (z,ds,e)) = fW globs ctr
 -------------------------------------------------------------------------------
 
 mapPatt :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Type -> Patt -> ([Decl],Patt)
-mapPatt fs@(_,_,_,_,fP) globs ctrs dsigs xtp p = (ds', fP globs ctrs dsigs p') where
+mapPatt fs@(_,_,_,fP,_) globs ctrs dsigs xtp p = (ds', fP globs ctrs dsigs p') where
   (ds',p') = aux p
 
   -- TODO: TAny
@@ -68,7 +68,7 @@ mapPatt fs@(_,_,_,_,fP) globs ctrs dsigs xtp p = (ds', fP globs ctrs dsigs p') w
 -------------------------------------------------------------------------------
 
 mapExpr :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
-mapExpr fs@(_,_,_,fE,_) globs ctrs dsigs xtp e = fE globs ctrs dsigs xtp (aux e) where
+mapExpr fs@(_,_,_,_,fE) globs ctrs dsigs xtp e = fE globs ctrs dsigs xtp (aux e) where
   aux (EFunc  z cs tp ups whe) = EFunc  z cs tp ups $ mapWhere fs globs ctrs' (arg:dsigs) xtp whe where
                                   ctrs' = Ctrs $ getCtrs ctrs ++ getCtrs cs
                                   arg = DSig z "..." cz inp

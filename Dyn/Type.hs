@@ -10,7 +10,7 @@ import Dyn.Map
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mSz,fD,mWz,fE,mPz) origs globs where
+apply origs globs = mapGlobs (mSz,fD,mWz,mPz,fE) origs globs where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
