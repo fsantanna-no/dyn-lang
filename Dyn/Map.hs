@@ -10,13 +10,13 @@ import Dyn.Classes
 -------------------------------------------------------------------------------
 
 type MapFs = ( ([Glob]->Ctrs->[Decl]->[Decl]->[Decl]),
-               ([Glob]->Ctrs->[Decl]->Decl->[Decl]),
+               ([Glob]->Ctrs->[Decl]->Decl->Decl),
                ([Glob]->Ctrs->[Decl]->Type->ExpWhere->ExpWhere),
                ([Glob]->Ctrs->[Decl]->Patt->Patt),
                ([Glob]->Ctrs->[Decl]->Type->Expr->Expr))
 
 mSz _ _ _   ds = ds
-mDz _ _ _   d  = [d]
+mDz _ _ _   d  = d
 mWz _ _ _ _ w  = w
 mPz _ _ _   p  = p
 mEz _ _ _ _ e  = e
@@ -28,10 +28,10 @@ mapGlobs fs origs globs = map globFromDecl $ mapDecls fs origs cz [] (map globTo
 
 mapDecls :: MapFs -> [Glob] -> Ctrs -> [Decl] -> [Decl] -> [Decl]
 mapDecls fs@(fS,_,_,_,_) globs ctrs dsigs decls =
-  fS globs ctrs dsigs $ concatMap (mapDecl fs globs ctrs dsigs') decls where
+  fS globs ctrs dsigs $ map (mapDecl fs globs ctrs dsigs') decls where
     dsigs' = filter isDSig decls ++ dsigs
 
-mapDecl :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Decl -> [Decl]
+mapDecl :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Decl -> Decl
 mapDecl fs@(_,fD,_,_,_) globs ctrs dsigs decl@(DSig _ _ _ _) = fD globs ctrs dsigs decl
 mapDecl fs@(_,fD,_,_,_) globs ctrs dsigs (DAtr z pat whe)    = fD globs ctrs dsigs $ DAtr z pat' whe'
   where

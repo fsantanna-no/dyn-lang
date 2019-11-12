@@ -1,6 +1,7 @@
 module Dyn.Type where
 
 import Debug.Trace
+import Data.Maybe (isNothing)
 import qualified Data.List as L
 
 import Dyn.AST
@@ -10,7 +11,7 @@ import Dyn.Map
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mSz,mD,mWz,mPz,mE) origs globs where
+apply origs globs = mapGlobs (mS,mDz,mWz,mPz,mE) origs globs where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
@@ -18,30 +19,36 @@ apply origs globs = mapGlobs (mSz,mD,mWz,mPz,mE) origs globs where
   mE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
   mE _ _ _ _ e = e
 
-  -- removes TAny decls (prevents double decl)
-  mD :: [Glob] -> Ctrs -> [Decl] -> Decl -> [Decl]
-  mD _ _ dsigs d@(DSig _ _ _ TAny) = []
-  mD _ _ dsigs d@(DSig _ _ _ _)    = [d]
+  mS :: [Glob] -> Ctrs -> [Decl] -> [Decl] -> [Decl]
+  mS globs ctrs dsigs decls = dsigs' ++ inferreds' where
 
-  -- infer type of pat1 (add dsig) based on type of whe2
+    -- removes TAny decls that have been inferred
 
-  mD ifces ctrs dsigs datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
+    dsigs' = filter isAnyInferred decls where
+              isAnyInferred (DSig _ id _ TAny) =
+                isNothing $ L.find (\(DSig _ x _ _) -> x==id) inferreds'
+              isAnyInferred _ = True
 
-    aux pat1 (toType dsigs whe2) ++ [datr] where
+    -- infer type of pat1 (add dsig) based on type of whe2
 
-      aux _ TAny = []
+    inferreds' = concatMap f decls where
+      f datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
+        aux pat1 (toType dsigs whe2) where
+          aux _                 TAny = []
 
-      -- x :: ? = 10       --> x :: Nat = 10
-      aux pat@(PWrite z id) tp2 = case (toType dsigs pat, tp2) of
-        (TAny, tp2) -> [DSig z id cz tp2]               -- inferred from whe2
-        (tp1,  tp2) | (isSup ifces ctrs tp1 tp2) -> []  -- TODO: check types
-        (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
+          -- x :: ? = 10       --> x :: Nat = 10
+          aux pat@(PWrite z id) tp2  = case (toType dsigs pat, tp2) of
+              (TAny, tp2) -> [DSig z id cz tp2]               -- inferred from whe2
+              (tp1,  tp2) | (isSup globs ctrs tp1 tp2) -> []  -- TODO: check types
+              (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
 
-      aux pat@(PTuple z ps) tp2 = case (toType dsigs pat, tp2) of
-        (TTuple ts1, TTuple ts2) -> concatMap f $ zip ps ts2 where
-                                      f (p,t2) = aux p t2
+          aux pat@(PTuple z ps) tp2  = case (toType dsigs pat, tp2) of
+              (TTuple ts1, TTuple ts2) -> concatMap f $ zip ps ts2 where
+                                            f (p,t2) = aux p t2
 
-      aux pat _ = error $ toString pat
+          aux pat _ = error $ toString pat
+
+      f _ = []
 
 -------------------------------------------------------------------------------
 
