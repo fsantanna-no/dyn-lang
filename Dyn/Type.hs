@@ -10,22 +10,22 @@ import Dyn.Map
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mSz,fD,mWz,mPz,fE) origs globs where
+apply origs globs = mapGlobs (mSz,mD,mWz,mPz,mE) origs globs where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
-  fE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
-  fE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
-  fE _ _ _ _ e = e
+  mE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+  mE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
+  mE _ _ _ _ e = e
 
   -- removes TAny decls (prevents double decl)
-  fD :: [Glob] -> Ctrs -> [Decl] -> Decl -> [Decl]
-  fD _ _ dsigs d@(DSig _ _ _ TAny) = []
-  fD _ _ dsigs d@(DSig _ _ _ _)    = [d]
+  mD :: [Glob] -> Ctrs -> [Decl] -> Decl -> [Decl]
+  mD _ _ dsigs d@(DSig _ _ _ TAny) = []
+  mD _ _ dsigs d@(DSig _ _ _ _)    = [d]
 
   -- infer type of pat1 (add dsig) based on type of whe2
 
-  fD ifces ctrs dsigs datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
+  mD ifces ctrs dsigs datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
 
     aux pat1 (toType dsigs whe2) ++ [datr] where
 

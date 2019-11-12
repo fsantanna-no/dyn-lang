@@ -12,17 +12,17 @@ import qualified Dyn.Ifce as Ifce
 -------------------------------------------------------------------------------
 
 apply :: [Glob] -> [Glob] -> [Glob]
-apply origs globs = mapGlobs (mSz,mDz,mWz,mPz,fE) origs globs where
+apply origs globs = mapGlobs (mSz,mDz,mWz,mPz,mE) origs globs where
 
 -------------------------------------------------------------------------
 
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-fE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+mE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-fE globs _ dsigs xtp e@(EVar z id) = e' where
+mE globs _ dsigs xtp e@(EVar z id) = e' where
 
   (cs,_) = dsigsFind dsigs id
   cs'    = Ifce.ifcesSups globs (getCtrs cs) where
@@ -34,7 +34,7 @@ fE globs _ dsigs xtp e@(EVar z id) = e' where
     otherwise        -> e
 
 -- pat1::B = id2(neq) e2::(B,B)
-fE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,toString e2') $-} ECall z1 e2' e3 where
+mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,toString e2') $-} ECall z1 e2' e3 where
 
   (cs2,tp2) = dsigsFind dsigs id2
   cs2'      = Ifce.ifcesSups globs (getCtrs cs2) where
@@ -60,7 +60,7 @@ fE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = {-traceShow ("CALL",id2,
           [tvar2] = toVars tp2   -- [a]
           -- a is Bool
 
-fE _ _ _ _ e = e
+mE _ _ _ _ e = e
 
 -------------------------------------------------------------------------
 
