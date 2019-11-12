@@ -10,7 +10,7 @@ import qualified Dyn.Poly   as Poly
 
 apply :: Prog -> Prog -> Prog
 apply origs globs =
-  --Order.apply origs $
+  Order.apply origs $
   Poly.apply  origs $ --traceShowSS $ -- [Decl] w/ polys resolved
   Type.apply  origs $                 -- [Decl] with types applied/inferred
   Ifce.apply  origs $

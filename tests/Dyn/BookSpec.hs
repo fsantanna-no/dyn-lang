@@ -7,10 +7,12 @@ import Text.RawString.QQ
 
 import Dyn.AST
 import Dyn.Prelude
-import qualified Dyn.Eval as E
+import qualified Dyn.Parser  as P
+import qualified Dyn.Eval    as E
 import qualified Dyn.Analyse as A
 
-evalString = E.evalStringF A.apply
+evalString    = E.evalStringF    A.apply
+parseToString = P.parseToStringF A.apply
 
 main :: IO ()
 main = hspec spec
@@ -30,7 +32,7 @@ spec = do
     it "Nat *" $
       evalString ("main = mul (two,three)\n" ++ nat)
         `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))"
-    it "Nat %" $
+    it "XXX: Nat %" $
       evalString ("main = rem (two,three)\n" ++ prelude)
         `shouldBe` "(Nat.Succ (Nat.Succ Nat.Zero))"
 

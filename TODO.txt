@@ -1,3 +1,5 @@
+- fazer map para adicionar dsigs de PWrites no escopo certo, remover [Decl] de mapPatt
+- inverter fE/fP em map
 - ordenar decls por usos/deps
 - List of IEnum
     - Estou em PolyIfce.dynamic.XXX

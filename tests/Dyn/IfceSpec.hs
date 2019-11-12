@@ -8,9 +8,12 @@ import Text.RawString.QQ
 import Dyn.AST
 import Dyn.PreludeIfce
 import Dyn.Ifce
-import qualified Dyn.Eval as E
+import qualified Dyn.Parser as P
+import qualified Dyn.Eval   as E
+import qualified Dyn.Order  as O
 
-evalString = E.evalStringF apply
+evalString    = E.evalStringF    (\x y -> O.apply x $ apply x y)
+parseToString = P.parseToStringF (\x y -> O.apply x $ apply x y)
 
 main :: IO ()
 main = hspec spec
@@ -310,13 +313,9 @@ main = (f' d) l where
   ;
 ;
 
---ds_IEnum = List.Cons ((Key.Unit, dIEnumUnit),
---           List.Cons ((Key.Bool, dIEnumBool),
---           List.Nil))
-
-data List for a is recursive
-data List.Nil
-data List.Cons with (a, List of a)
+--data List for a is recursive
+--data List.Nil
+--data List.Cons with (a, List of a)
 
 l :: List of a where a is IEnum   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.True),
@@ -345,10 +344,6 @@ main = (f'' gets) l where
     ;
   ;
 ;
-
-ds_IEnum = List.Cons ((Key.Unit, dIEnumUnit),
-           List.Cons ((Key.Bool, dIEnumBool),
-           List.Nil))
 
 --data List for a
 --data List.Nil
