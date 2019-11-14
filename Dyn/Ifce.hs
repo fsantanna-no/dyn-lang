@@ -2,7 +2,6 @@ module Dyn.Ifce (apply,ifceFind,ifceToDeclIds,ifcesSups) where
 
 import Debug.Trace
 import Data.Bool                (bool)
-import Data.Maybe               (fromJust)
 import qualified Data.List as L (find, sort, groupBy)
 
 import Dyn.AST
@@ -48,11 +47,6 @@ dicts globs = --traceShowSS $
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-
-ifceFind :: [Glob] -> ID_Ifce -> Ifce
-ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
-                      f :: Ifce -> Bool
-                      f (Ifce (_,id,_,_)) = (id == ifc)
 
 -- IEq -> [eq,neq]
 ifceToDeclIds :: Ifce -> [ID_Var]

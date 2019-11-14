@@ -1,7 +1,7 @@
 module Dyn.AST where
 
 import Debug.Trace
-
+import Data.Maybe               (fromJust)
 import qualified Data.List as L
 --import qualified Data.Map  as M
 import qualified Data.Set  as S
@@ -164,6 +164,8 @@ globToDecl (GDecl decl) = decl
 globFromDecl :: Decl -> Glob
 globFromDecl decl = GDecl decl
 
+-------------------------------------------------------------------------------
+
 dsigsFind :: [Decl] -> ID_Var -> (Ctrs,Type)
 dsigsFind dsigs id = case L.find f dsigs of
                       Nothing               -> (cz,TAny)
@@ -171,3 +173,13 @@ dsigsFind dsigs id = case L.find f dsigs of
                      where
                       f :: Decl -> Bool
                       f (DSig _ x _ _) = (id == x)
+
+ifceFind :: [Glob] -> ID_Ifce -> Ifce
+ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
+                      f :: Ifce -> Bool
+                      f (Ifce (_,id,_,_)) = (id == ifc)
+
+dataFind :: [Glob] -> ID_Data -> Data
+dataFind globs dat = fromJust $ L.find f (globsToDatas globs) where
+                      f :: Data -> Bool
+                      f (Data (_,_,id:_,_,_)) = (id == dat)
