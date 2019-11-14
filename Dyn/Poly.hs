@@ -24,8 +24,9 @@ mE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
 -- pat::Bool = id(maximum)
 mE globs _ dsigs xtp e@(EVar z id) = e' where
 
-  (cs,_) = dsigsFind dsigs id
-  cs'    = Ifce.ifcesSups globs (getCtrs cs) where
+  --recs    = getRecDatas tp
+  (cs,tp) = dsigsFind dsigs id
+  cs'     = Ifce.ifcesSups globs (getCtrs cs) where
 
   e' = case (cs', xtp) of
     ([], _)          -> e              -- var is not poly, nothing to do
@@ -36,6 +37,18 @@ mE globs _ dsigs xtp e@(EVar z id) = e' where
       f suf = ECall z (EVar z $ id++"'")
                       (fromList $ map (EVar z) $ map toID $ cs') where
                         toID id = "d" ++ id ++ suf
+{-
+          g ifc = if elem suf recs2 then
+                    EFunc z2 cz TAny []
+                      (ExpWhere (z2, [],
+                        ECase z2 (EArg z2) [
+                          (PTuple z2 [PWrite z2 "k",PWrite z2 "v"],
+                            ExpWhere (z2, [],
+                              ETuple z2 [ECall z2 (EVar z2 "getHash")
+                                          (ETuple z2 [EVar z2 ("ds_"++ifc),EVar z2 "k"]),
+                                         EVar z2 "v"]))
+                        ]))
+-}
 
 -- pat1::B = id2(neq) e2::(B,B)
 mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
@@ -45,13 +58,13 @@ mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
   cs2'      = Ifce.ifcesSups globs (getCtrs cs2) where
 
   e2' = case (cs2', tp2) of
-    ([], _)               -> e2      -- var is not poly, nothing to do
+    ([], _)               -> e2       -- var is not poly, nothing to do
 
-    (_,  TFunc inp2 out2) ->
-      case xhr inp2 out2 of          --   ... and xtp is concrete -> resolve!
+    (_,  TFunc inp2 out2) ->          -- var is poly
+      case xhr inp2 out2 of           --   ... and xtp is concrete -> resolve!
         Left ()           -> e2
         Right (Just xhr)  -> f (concat xhr)
-        Right Nothing     -> f "a"          -- xtp is not concrete yet
+        Right Nothing     -> f "a"    --   ... but xtp is not concrete yet
       where
         f suf = ECall z2 (EVar z2 $ id2++"'")
                          (fromList $ map g $ cs2') where

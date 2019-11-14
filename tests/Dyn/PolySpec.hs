@@ -7,10 +7,12 @@ import Text.RawString.QQ
 
 import Dyn.AST
 import Dyn.Prelude
-import qualified Dyn.Eval as E
+import qualified Dyn.Parser  as P
+import qualified Dyn.Eval    as E
 import qualified Dyn.Analyse as A
 
-evalString = E.evalStringF A.apply
+parseToString = P.parseToStringF A.apply
+evalString    = E.evalStringF A.apply
 
 main :: IO ()
 main = hspec spec
@@ -290,17 +292,10 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
     it "XXX: [(),True]" $
       evalString ([r|
 main = f l
--- where
---  dIEnuma = func ->
---    case ... of
---      (=k,=v) -> (getHash (ds_IEnum,k), v)
---    ;
---  ;
---;
 
 data List for a is recursive
-data List.Nil
-data List.Cons with (a, List of a)
+--data List.Nil
+--data List.Cons with (a, List of a)
 
 l :: List of a where a is IEnum
 l = List.Cons ((Key.Bool, Bool.True),
@@ -310,9 +305,12 @@ l = List.Cons ((Key.Bool, Bool.True),
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil
-    List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
-      (d',v') = dIEnuma v
-    ;
+    List.Cons (=v,=l) -> List.Cons (toNat v, f l) where v::a l::List of a;
+    --List.Cons (=v,=l) -> List.Cons ((toNat' d') v', f l) where
+    --  l :: List of a
+    --  v :: a
+    --  (d',v') = dIEnuma v
+    --;
   ;
 ;
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
