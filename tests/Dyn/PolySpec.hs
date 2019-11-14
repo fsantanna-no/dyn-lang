@@ -305,12 +305,12 @@ l = List.Cons ((Key.Bool, Bool.True),
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil
-    List.Cons (=v,=l) -> List.Cons (toNat v, f l) where v::a l::List of a;
-    --List.Cons (=v,=l) -> List.Cons ((toNat' d') v', f l) where
-    --  l :: List of a
-    --  v :: a
-    --  (d',v') = dIEnuma v
-    --;
+    --List.Cons (=v,=l) -> List.Cons (toNat v, f l) where v::a l::List of a;
+    List.Cons (=v,=l) -> List.Cons ((toNat' d') v', f l) where
+      l :: List of a
+      v :: a
+      (d',v') = dIEnuma v
+    ;
   ;
 ;
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)

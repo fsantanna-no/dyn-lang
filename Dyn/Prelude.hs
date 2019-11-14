@@ -34,6 +34,17 @@ std = [r|
       ;
     ;
   ;
+
+  fst = func ->
+    case ... of
+      (=x,_) -> x
+    ;
+  ;
+  snd = func ->
+    case ... of
+      (_,=x) -> x
+    ;
+  ;
 |]
 
 ibounded = [r|
