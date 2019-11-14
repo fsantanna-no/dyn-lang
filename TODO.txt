@@ -1,4 +1,6 @@
 - List of IEnum
+    - chamada interna
+    - construcao da lista heterogenea
     - Estou em PolyIfce.dynamic.XXX
         - diferenciar data of Bool/IEnum
             - mas primeiro assumir Bool

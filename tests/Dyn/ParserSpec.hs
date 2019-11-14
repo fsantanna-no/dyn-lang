@@ -130,13 +130,13 @@ spec = do
           `shouldBe` "A.B"
       it "func" $
         (toString $ fromRight $ parse' expr "func :: () -> xxx;func")
-          `shouldBe` "func :: () ->\n  xxx\n;"
+          `shouldBe` "(func :: () ->\n  xxx\n;)"
       it "func" $
         (toString $ fromRight $ parse' expr "func :: () -> xxx where xxx=() where y=();\n  x=();;")
-          `shouldBe` "func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n    ;\n    x = ()\n  ;\n;"
+          `shouldBe` "(func :: () ->\n  xxx where\n    xxx = () where\n      y = ()\n    ;\n    x = ()\n  ;\n;)"
       it "func" $
         (toString $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=()\n    x=();where;where;func")
-          `shouldBe` "func :: ? ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;"
+          `shouldBe` "(func :: ? ->\n  xxx where\n    xxx = () where\n      y = ()\n      x = ()\n    ;\n  ;\n;)"
       it "call" $
         (toString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
@@ -173,7 +173,7 @@ f :: () = func -> x where
             x :: () = ...;
           ;
 |])
-          `shouldBe` "main :: ()\nmain = (f ())\nf :: ()\nf = func :: ? ->\n  x where\n    x :: ()\n    x = ...\n  ;\n;\n"
+          `shouldBe` "main :: ()\nmain = (f ())\nf :: ()\nf = (func :: ? ->\n  x where\n    x :: ()\n    x = ...\n  ;\n;)\n"
 
       it "where-where" $
         (parseToString
@@ -208,7 +208,7 @@ add =
     ;
   ;
 |]
-        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)))\nadd = func :: () ->\n  case y of\n    Nat.Zero -> x\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)))\n  ; where\n    (x,y) = ...\n  ;\n;\n"
+        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)))\nadd = (func :: () ->\n  case y of\n    Nat.Zero -> x\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)))\n  ; where\n    (x,y) = ...\n  ;\n;)\n"
 
 -------------------------------------------------------------------------------
 
