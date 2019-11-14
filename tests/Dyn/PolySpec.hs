@@ -289,32 +289,31 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 
     it "XXX: [(),True]" $
       evalString ([r|
-main = f l where
-  dIEnumIEnum = func ->
-    case ... of
-      (=k,=v) -> (getHash (ds_IEnum,k), v)
-    ;
-  ;
-;
+main = f l
+-- where
+--  dIEnuma = func ->
+--    case ... of
+--      (=k,=v) -> (getHash (ds_IEnum,k), v)
+--    ;
+--  ;
+--;
 
---data List for a is recursive
---data List.Nil
---data List.Cons with (a, List of a)
+data List for a is recursive
+data List.Nil
+data List.Cons with (a, List of a)
 
-l :: List of IEnum
+l :: List of a where a is IEnum
 l = List.Cons ((Key.Bool, Bool.True),
     List.Cons ((Key.Unit, ()),
     List.Nil))
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
-  --let dIEnuma = ... in
-  --  func {dIEnuma} ->
-      case ... of
-        List.Nil          -> List.Nil
-        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
-          (d',v') = dIEnuma v
-        ;
-      ;
+  case ... of
+    List.Nil          -> List.Nil
+    List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
+      (d',v') = dIEnuma v
+    ;
+  ;
 ;
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
