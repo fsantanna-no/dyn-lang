@@ -19,29 +19,33 @@ apply origs globs = mapGlobs (mSz,mDz,mWz,mPz,mE) origs globs where
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-mE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+mE :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-mE globs ctrs dsigs xtp e@(EVar z id) = e' where
+mE globs cts dsigs xtp e@(EVar z id) = e' where
 
   (dcs,dtp) = dsigsFind dsigs id
   dcs'      = Ifce.ifcesSups globs (getCtrs dcs) where
 
-  e' = case (xtp, dcs') of
+  e' = case (xtp, dcs',dtp) of
+
+    -- local poly var
+    --    v where v::a
+    (_, [], TVar "a")     -> e
 
     -- id is not poly, nothing to do, just keep it
     --    Bool.True
-    (_, [])           -> e
+    (_, [], _)            -> e
 
     -- xtp is concrete, instantiate e with it
     --    maximum :: Bool
-    (TData xhr2 _, _) -> f (concat xhr2)     -- TODO: TData ofs
+    (TData xhr2 _, _, _)  -> f (concat xhr2)     -- TODO: TData ofs
 
     -- xtp is not concrete yet
     -- .
     --(_, TVar "a", [])    -> error $ toString e --f "a"
 
-    otherwise         -> e
+    otherwise             -> e
 
     where
       f suf = ECall z (EVar z $ id++"'")

@@ -9,11 +9,13 @@ import Dyn.Classes
 
 -------------------------------------------------------------------------------
 
-type MapFs = ( ([Glob]->Ctrs->[Decl]->[Decl]->[Decl]),
-               ([Glob]->Ctrs->[Decl]->Decl->Decl),
-               ([Glob]->Ctrs->[Decl]->Type->ExpWhere->ExpWhere),
-               ([Glob]->Ctrs->[Decl]->Patt->Patt),
-               ([Glob]->Ctrs->[Decl]->Type->Expr->Expr))
+type CTs = [(Ctrs,Type)]
+
+type MapFs = ( ([Glob]->CTs->[Decl]->[Decl]->[Decl]),
+               ([Glob]->CTs->[Decl]->Decl->Decl),
+               ([Glob]->CTs->[Decl]->Type->ExpWhere->ExpWhere),
+               ([Glob]->CTs->[Decl]->Patt->Patt),
+               ([Glob]->CTs->[Decl]->Type->Expr->Expr))
 
 mSz _ _ _   ds = ds
 mDz _ _ _   d  = d
@@ -24,66 +26,65 @@ mEz _ _ _ _ e  = e
 -------------------------------------------------------------------------------
 
 mapGlobs :: MapFs -> [Glob] -> [Glob] -> [Glob]
-mapGlobs fs origs globs = map globFromDecl $ mapDecls fs origs cz [] (map globToDecl globs)
+mapGlobs fs origs globs = map globFromDecl $ mapDecls fs origs [] [] (map globToDecl globs)
 
-mapDecls :: MapFs -> [Glob] -> Ctrs -> [Decl] -> [Decl] -> [Decl]
-mapDecls fs@(fS,_,_,_,_) globs ctrs dsigs decls =
-  fS globs ctrs dsigs $ map (mapDecl fs globs ctrs dsigs') decls where
+mapDecls :: MapFs -> [Glob] -> CTs -> [Decl] -> [Decl] -> [Decl]
+mapDecls fs@(fS,_,_,_,_) globs cts dsigs decls =
+  fS globs cts dsigs $ map (mapDecl fs globs cts dsigs') decls where
     dsigs' = filter isDSig decls ++ dsigs
 
-mapDecl :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Decl -> Decl
-mapDecl fs@(_,fD,_,_,_) globs ctrs dsigs decl@(DSig _ _ _ _) = fD globs ctrs dsigs decl
-mapDecl fs@(_,fD,_,_,_) globs ctrs dsigs (DAtr z pat whe)    = fD globs ctrs dsigs $ DAtr z pat' whe'
+mapDecl :: MapFs -> [Glob] -> CTs -> [Decl] -> Decl -> Decl
+mapDecl fs@(_,fD,_,_,_) globs cts dsigs decl@(DSig _ _ _ _) = fD globs cts dsigs decl
+mapDecl fs@(_,fD,_,_,_) globs cts dsigs (DAtr z pat whe)    = fD globs cts dsigs $ DAtr z pat' whe'
   where
-    pat' = mapPatt  fs globs ctrs dsigs TAny pat
-    whe' = mapWhere fs globs ctrs dsigs (toType dsigs pat) whe
+    pat' = mapPatt  fs globs cts dsigs TAny pat
+    whe' = mapWhere fs globs cts dsigs (toType dsigs pat) whe
 
 -------------------------------------------------------------------------------
 
-mapWhere :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Type -> ExpWhere -> ExpWhere
-mapWhere fs@(_,_,fW,_,_) globs ctrs dsigs xtp (ExpWhere (z,ds,e)) = fW globs ctrs dsigs xtp $ ExpWhere (z, ds', e')
+mapWhere :: MapFs -> [Glob] -> CTs -> [Decl] -> Type -> ExpWhere -> ExpWhere
+mapWhere fs@(_,_,fW,_,_) globs cts dsigs xtp (ExpWhere (z,ds,e)) = fW globs cts dsigs xtp $ ExpWhere (z, ds', e')
   where
-    e'  = mapExpr  fs globs ctrs dsigs'' xtp e
-    ds' = mapDecls fs globs ctrs dsigs'  ds
+    e'  = mapExpr  fs globs cts dsigs'' xtp e
+    ds' = mapDecls fs globs cts dsigs'  ds
 
     dsigs'' = filter isDSig ds' ++ dsigs
     dsigs'  = filter isDSig ds  ++ dsigs
 
 -------------------------------------------------------------------------------
 
-mapPatt :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Type -> Patt -> Patt
-mapPatt fs@(_,_,_,fP,_) globs ctrs dsigs xtp p = fP globs ctrs dsigs (rec p) where
+mapPatt :: MapFs -> [Glob] -> CTs -> [Decl] -> Type -> Patt -> Patt
+mapPatt fs@(_,_,_,fP,_) globs cts dsigs xtp p = fP globs cts dsigs (rec p) where
 
   -- TODO: TAny
-  rec (PRead  z e)     = PRead z $ mapExpr fs globs ctrs dsigs TAny e -- TODO: xtp
-  rec (PTuple z ps)    = PTuple z $ map (mapPatt fs globs ctrs dsigs TAny) ps
+  rec (PRead  z e)     = PRead z $ mapExpr fs globs cts dsigs TAny e -- TODO: xtp
+  rec (PTuple z ps)    = PTuple z $ map (mapPatt fs globs cts dsigs TAny) ps
   rec (PCall  z p1 p2) = PCall z p1' p2' where
-                          p1' = mapPatt fs globs ctrs dsigs TAny p1
-                          p2' = mapPatt fs globs ctrs dsigs TAny p2
+                          p1' = mapPatt fs globs cts dsigs TAny p1
+                          p2' = mapPatt fs globs cts dsigs TAny p2
   rec p                = p
 
 -------------------------------------------------------------------------------
 
-mapExpr :: MapFs -> [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
-mapExpr fs@(_,_,_,_,fE) globs ctrs dsigs xtp e = fE globs ctrs dsigs xtp (rec e) where
-  rec (EFunc  z cs tp ups whe) = EFunc  z cs tp ups $ mapWhere fs globs ctrs' (arg:dsigs) xtp whe where
-                                  ctrs' = Ctrs $ getCtrs ctrs ++ getCtrs cs
+mapExpr :: MapFs -> [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
+mapExpr fs@(_,_,_,_,fE) globs cts dsigs xtp e = fE globs cts dsigs xtp (rec e) where
+  rec (EFunc  z cs tp ups whe) = EFunc  z cs tp ups $ mapWhere fs globs ((cs,tp):cts) (arg:dsigs) xtp whe where
                                   arg = DSig z "..." cz inp
                                   (inp,xtp) = case tp of
                                                 TFunc inp out -> (inp,out)
                                                 otherwise     -> (TAny,TAny)
   -- TODO: TAny
-  rec (EData  z hr e)          = EData  z hr $ mapExpr fs globs ctrs dsigs TAny e
-  rec (ETuple z es)            = ETuple z $ map (mapExpr fs globs ctrs dsigs TAny) es
+  rec (EData  z hr e)          = EData  z hr $ mapExpr fs globs cts dsigs TAny e
+  rec (ETuple z es)            = ETuple z $ map (mapExpr fs globs cts dsigs TAny) es
   rec (ECall  z e1 e2)         = ECall  z e1' e2' where
-                                  e1' = mapExpr fs globs ctrs dsigs TAny e1
-                                  e2' = mapExpr fs globs ctrs dsigs TAny e2
+                                  e1' = mapExpr fs globs cts dsigs TAny e1
+                                  e2' = mapExpr fs globs cts dsigs TAny e2
   rec (ECase  z e l)           = ECase  z e' l' where
-    e' = mapExpr fs globs ctrs dsigs TAny e
+    e' = mapExpr fs globs cts dsigs TAny e
     l' = map f l where
           f (pat,whe) = (pat',whe') where
-            pat' = mapPatt  fs globs ctrs dsigs xtp pat
-            whe' = mapWhere fs globs ctrs dsigs xtp whe
+            pat' = mapPatt  fs globs cts dsigs xtp pat
+            whe' = mapWhere fs globs cts dsigs xtp whe
   rec e      = e
 
 -------------------------------------------------------------------------------
