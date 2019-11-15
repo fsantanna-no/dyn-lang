@@ -29,43 +29,42 @@ mE globs cts dsigs xtp e@(EVar z id) = e' where
   (dcs,dtp) = dsigsFind dsigs id
   dcs'      = Ifce.ifcesSups globs (getCtrs dcs) where
 
-  e' = case (cts, xtp, dcs',dtp) of
+  e' = case (isVarInRec "a" cts, xtp, dcs',dtp) of
 
     -- local poly var with enclosing recursive declaration
     --    f :: (List of a -> ...) where a is IEnum
     --      v where v::a
-    (l, _, [], TVar "a")
-      | isVarInRec "a" l     -> e --traceShow (id) $ toV "a" e
-    (l, _, [], TVar "a")     -> e
+    (Just cs, _, [], TVar "a")  -> toV "a" (getCtrs cs) e
+    (Nothing, _, [], TVar "a")  -> e
 
     -- id is not poly, nothing to do, just keep it
     --    Bool.True
-    (_, _, [], _)            -> e
+    (_, _, [], _)               -> e
 
     -- xtp is concrete, instantiate e with it
     --    maximum :: Bool
     --    maximum' dIBoundedBool
-    (_, TData xhr2 _, _, _)  -> toID' (concat xhr2)     -- TODO: TData ofs
+    (_, TData xhr2 _, _, _)     -> toID' (concat xhr2)     -- TODO: TData ofs
 
     -- xtp is not concrete yet
     -- .
     --(_, TVar "a", [])    -> error $ toString e --f "a"
 
-    otherwise             -> e
+    otherwise                   -> e
 
     where
       toID' suf = ECall z (EVar z $ id++"'")
                         (fromList $ map (EVar z) $ map toID $ dcs') where
                         toID ifc = "d" ++ ifc ++ suf -- dIEqa / dIEqBool
 
-      toV "a" e = ECall z (EVar z "snd")
-                          (ECall z (EVar z $ "d"++"TODO"++"a") e)
+      toV "a" [ifc] e = ECall z (EVar z "snd")
+                              (ECall z (EVar z $ "d"++ifc++"a") e)
 
-      isVarInRec :: ID_Var -> CTs -> Bool
-      isVarInRec "a" l =
-        case L.find (has "a") $ map snd l of
-          Nothing -> False
-          Just tp -> any isRec $ datasWithVar "a" tp
+      isVarInRec :: ID_Var -> CTs -> Maybe Ctrs
+      isVarInRec "a" cts =
+        case L.find ((has "a") . snd) cts of
+          Nothing      -> Nothing
+          Just (cs,tp) -> bool Nothing (Just cs) $ any isRec $ datasWithVar "a" tp
         where
           isRec tp = elem "a" (getRecDatas globs tp)
 
