@@ -32,6 +32,15 @@ spec = do
       evalString ("main=Type (x,y) where (x,y)=(Bool.True,()) ;")
         `shouldBe` "(Type (Bool.True,()))"
 
+    it "XXX: case x::()" $
+      evalString ([r|
+main = Type x
+x = case () of
+  =x -> ()
+;
+|])
+        `shouldBe` "(Type ())"
+
     it "case x::()" $
       evalString ([r|
 main = Type x

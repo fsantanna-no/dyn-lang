@@ -30,10 +30,22 @@ apply origs globs =
   mE2 globs ctrs dsigs xtp (ECase z e l) = ECase z e (map f l) where
 
     f :: (Patt,ExpWhere) -> (Patt,ExpWhere)
+    f (p@(PError _ _), w) = (p,w)
+    f (p@(PArg   _),   w) = (p,w)
+    f (p@(PAny   _),   w) = (p,w)
+    f (p@(PUnit  _),   w) = (p,w)
+    f (p@(PCons  _ _), w) = (p,w)
+    f (p@(PRead  _ _), w) = (p,w)
+
+    f (pat1@(PWrite z1 id1),
+       ExpWhere (z2,ds2,e2)) =
+        (pat1, ExpWhere (z2,union ds2 [DSig z1 id1 cz (toType dsigs e)],e2))
+
     f (pat1@(PCall _ (PCons _ hr1) (PWrite z2 id2)),
-       ExpWhere (z3,ds3,e3)) = (pat1, ExpWhere (z3,union ds3 [DSig z2 id2 cz tp],e3)) where
-        Data (_,_,_,_,tp) = dataFind globs hr1
-    f x@(_,_) = x
+       ExpWhere (z3,ds3,e3)) =
+        (pat1, ExpWhere (z3,union ds3 [DSig z2 id2 cz tp],e3)) where
+          Data (_,_,_,_,tp) = dataFind globs hr1
+    f (p,e) = error $ show $ (toString p, toString e)
 
   mE2 _ _ _ _ e = e
 

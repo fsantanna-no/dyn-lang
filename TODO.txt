@@ -1,3 +1,5 @@
+- confusao pattern
+    - sintaxe de case vs datr
 - List of IEnum
     - chamada interna
     - construcao da lista heterogenea
