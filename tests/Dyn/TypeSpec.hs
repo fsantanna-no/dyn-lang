@@ -31,3 +31,34 @@ spec = do
     it "main=Type (x,y)=(Bool.True,())" $
       evalString ("main=Type (x,y) where (x,y)=(Bool.True,()) ;")
         `shouldBe` "(Type (Bool.True,()))"
+
+    it "XXX: case x::()" $
+      evalString ([r|
+main = Type x
+x = case () of
+  =x -> ()
+;
+|])
+        `shouldBe` "(Type ())"
+
+    it "case x::()" $
+      evalString ([r|
+main = Type x
+x = case () of
+  () -> ()
+  _  -> ()
+;
+|])
+        `shouldBe` "(Type ())"
+
+    it "case x::Nat" $
+      evalString ([r|
+data Nat
+data Nat.Zero
+data Nat.Succ with Nat
+main = Type x
+x = case Nat.Succ Nat.Zero of
+  Nat.Succ =x -> x where x::? ;
+;
+|])
+        `shouldBe` "(Type Nat)"

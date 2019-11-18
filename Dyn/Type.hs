@@ -11,46 +11,78 @@ import Dyn.Map
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mS,mDz,mWz,mPz,mE) origs globs where
+apply origs globs =
+  mapGlobs (mSz,mDz,mWz,mPz,mE1) origs $
+  mapGlobs (mS,mDz,mWz,mPz,mE2) origs $
+  globs where
+
+-------------------------------------------------------------------------------
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
-  mE :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
-  mE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
-  mE _ _ _ _ e = e
+  mE1 :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
+  mE1 _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
+  mE1 _ _ _ _ e = e
+
+-------------------------------------------------------------------------------
+
+  mE2 :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
+  mE2 globs ctrs dsigs xtp (ECase z ee l) = ECase z ee (map f l) where
+
+    f :: (Patt,ExpWhere) -> (Patt,ExpWhere)
+    f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z, union ds ds', e)) where
+                                  ds' :: [Decl]
+                                  ds' = aux globs ctrs dsigs pat (toType dsigs ee)
+
+  mE2 _ _ _ _ e = e
 
   mS :: [Glob] -> CTs -> [Decl] -> [Decl] -> [Decl]
-  mS globs cts dsigs decls = dsigs' ++ inferreds' where
-
-    -- removes TAny decls that have been inferred
-
-    dsigs' = filter isAnyInferred decls where
-              isAnyInferred (DSig _ id _ TAny) =
-                isNothing $ L.find (\(DSig _ x _ _) -> x==id) inferreds'
-              isAnyInferred _ = True
+  mS globs ctrs dsigs decls = union decls inferreds where
 
     -- infer type of pat1 (add dsig) based on type of whe2
 
-    inferreds' = concatMap f decls where
+    inferreds = concatMap f decls where
       f datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
-        aux pat1 (toType dsigs whe2) where
-          aux _                 TAny = []
-
-          -- x :: ? = 10       --> x :: Nat = 10
-          aux pat@(PWrite z id) tp2  = case (toType dsigs pat, tp2) of
-              (TAny, tp2) -> [DSig z id cz tp2]               -- inferred from whe2
-              (tp1,  tp2) | (isSup globs cts tp1 tp2) -> []  -- TODO: check types
-              (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
-
-          aux pat@(PTuple z ps) tp2  = case (toType dsigs pat, tp2) of
-              (TTuple ts1, TTuple ts2) -> concatMap f $ zip ps ts2 where
-                                            f (p,t2) = aux p t2
-
-          aux pat _ = error $ toString pat
+        aux globs ctrs dsigs pat1 (toType dsigs whe2) where
 
       f _ = []
 
 -------------------------------------------------------------------------------
+
+aux :: [Glob] -> CTs -> [Decl] -> Patt -> Type -> [Decl]
+aux _ _ _ (PError _ _) _ = []
+aux _ _ _ (PArg   _)   _ = []
+aux _ _ _ (PAny   _)   _ = []
+aux _ _ _ (PUnit  _)   _ = []
+aux _ _ _ (PCons  _ _) _ = []
+aux _ _ _ (PRead  _ _) _ = []
+
+aux globs ctrs dsigs (PCall _ (PCons _ hr) pat) _ = aux globs ctrs dsigs pat tp
+  where
+    Data (_,_,_,_,tp) = dataFind globs hr
+
+aux _ _ _ _ TAny = []
+
+-- x :: ? = 10        --> x :: Nat = 10
+aux globs ctrs dsigs pat@(PWrite z id) tp2  = case (toType dsigs pat, tp2) of
+    (TAny, tp2) -> [DSig z id cz tp2]               -- inferred from whe2
+    (tp1,  tp2) | (isSup globs ctrs tp1 tp2) -> []  -- TODO: check types
+    (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
+
+-- (x,y) = (True,())  --> x::Bool, y::()
+aux globs ctrs dsigs pat@(PTuple z ps) tp2  = concatMap f $ zip ps ts2 where
+  f (p,t2) = aux globs ctrs dsigs p t2
+  TTuple ts2 = tp2
+
+aux _ _ _ pat _ = error $ toString pat
+
+-------------------------------------------------------------------------------
+
+-- removes TAny decls that have been inferred
+union decls inferreds = filter isAnyInferred decls ++ inferreds where
+  isAnyInferred (DSig _ id _ TAny) =
+    isNothing $ L.find (\(DSig _ x _ _) -> x==id) inferreds
+  isAnyInferred _ = True
 
 isSup :: [Glob] -> CTs -> Type -> Type -> Bool
 isSup _ _ tp1 tp2 = isSup' tp1 tp2

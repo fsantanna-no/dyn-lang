@@ -179,7 +179,7 @@ ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
                       f :: Ifce -> Bool
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
-dataFind :: [Glob] -> ID_Data -> Data
-dataFind globs dat = fromJust $ L.find f (globsToDatas globs) where
+dataFind :: [Glob] -> ID_Hier -> Data
+dataFind globs hr' = fromJust $ L.find f (globsToDatas globs) where
                       f :: Data -> Bool
-                      f (Data (_,_,id:_,_,_)) = (id == dat)
+                      f (Data (_,_,hr,_,_)) = (hr == hr')

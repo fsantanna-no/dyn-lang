@@ -23,7 +23,7 @@ spec :: Spec
 spec = do
 
   describe "PRE" $ do
-    it "Nat +" $
+    it "XXX: Nat +" $
       evalString ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat -" $

@@ -143,7 +143,7 @@ tpMatch tp1 tp2 = {-traceShow ("MATCH",toString tp1,toString tp2) $-} M.toAscLis
                 f tp1 tp2 = error $ show (toString tp1, toString tp2)
 
 getRecDatas :: [Glob] -> Type -> [ID_Var]
-getRecDatas globs (TData (hr:_) [(TVar "a")]) = case dataFind globs hr of
+getRecDatas globs (TData (hr:_) [(TVar "a")]) = case dataFind globs [hr] of
                                                   Data (_,True,_,_,_) -> ["a"]
                                                   otherwise           -> []
 getRecDatas globs (TTuple ts)                 = concatMap (getRecDatas globs) ts
