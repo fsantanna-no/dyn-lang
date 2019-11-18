@@ -27,25 +27,12 @@ apply origs globs =
 -------------------------------------------------------------------------------
 
   mE2 :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
-  mE2 globs ctrs dsigs xtp (ECase z e l) = ECase z e (map f l) where
+  mE2 globs ctrs dsigs xtp (ECase z ee l) = ECase z ee (map f l) where
 
     f :: (Patt,ExpWhere) -> (Patt,ExpWhere)
-    f (p@(PError _ _), w) = (p,w)
-    f (p@(PArg   _),   w) = (p,w)
-    f (p@(PAny   _),   w) = (p,w)
-    f (p@(PUnit  _),   w) = (p,w)
-    f (p@(PCons  _ _), w) = (p,w)
-    f (p@(PRead  _ _), w) = (p,w)
-
-    f (pat1@(PWrite z1 id1),
-       ExpWhere (z2,ds2,e2)) =
-        (pat1, ExpWhere (z2,union ds2 [DSig z1 id1 cz (toType dsigs e)],e2))
-
-    f (pat1@(PCall _ (PCons _ hr1) (PWrite z2 id2)),
-       ExpWhere (z3,ds3,e3)) =
-        (pat1, ExpWhere (z3,union ds3 [DSig z2 id2 cz tp],e3)) where
-          Data (_,_,_,_,tp) = dataFind globs hr1
-    f (p,e) = error $ show $ (toString p, toString e)
+    f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z, union ds ds', e)) where
+                                  ds' :: [Decl]
+                                  ds' = aux globs ctrs dsigs pat (toType dsigs ee)
 
   mE2 _ _ _ _ e = e
 
@@ -65,6 +52,17 @@ apply origs globs =
 -------------------------------------------------------------------------------
 
 aux :: [Glob] -> Ctrs -> [Decl] -> Patt -> Type -> [Decl]
+aux _ _ _ (PError _ _) _ = []
+aux _ _ _ (PArg   _)   _ = []
+aux _ _ _ (PAny   _)   _ = []
+aux _ _ _ (PUnit  _)   _ = []
+aux _ _ _ (PCons  _ _) _ = []
+aux _ _ _ (PRead  _ _) _ = []
+
+aux globs ctrs dsigs (PCall _ (PCons _ hr) pat) _ = aux globs ctrs dsigs pat tp
+  where
+    Data (_,_,_,_,tp) = dataFind globs hr
+
 aux _ _ _ _ TAny = []
 
 -- x :: ? = 10        --> x :: Nat = 10
@@ -74,9 +72,9 @@ aux globs ctrs dsigs pat@(PWrite z id) tp2  = case (toType dsigs pat, tp2) of
     (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
 
 -- (x,y) = (True,())  --> x::Bool, y::()
-aux globs ctrs dsigs pat@(PTuple z ps) tp2  = case (toType dsigs pat, tp2) of
-    (TTuple ts1, TTuple ts2) -> concatMap f $ zip ps ts2 where
-                                  f (p,t2) = aux globs ctrs dsigs p t2
+aux globs ctrs dsigs pat@(PTuple z ps) tp2  = concatMap f $ zip ps ts2 where
+  f (p,t2) = aux globs ctrs dsigs p t2
+  TTuple ts2 = tp2
 
 aux _ _ _ pat _ = error $ toString pat
 
