@@ -11,7 +11,10 @@ import Dyn.Map
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mS,mDz,mWz,mPz,mE) origs globs where
+apply origs globs =
+  mapGlobs (mSz,mDz,mWz,mPz,mE) origs $
+  mapGlobs (mS,mDz,mWz,mPz,mEz) origs $
+  globs where
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
@@ -36,12 +39,13 @@ apply origs globs = mapGlobs (mS,mDz,mWz,mPz,mE) origs globs where
         aux pat1 (toType dsigs whe2) where
           aux _                 TAny = []
 
-          -- x :: ? = 10       --> x :: Nat = 10
+          -- x :: ? = 10        --> x :: Nat = 10
           aux pat@(PWrite z id) tp2  = case (toType dsigs pat, tp2) of
               (TAny, tp2) -> [DSig z id cz tp2]               -- inferred from whe2
               (tp1,  tp2) | (isSup globs ctrs tp1 tp2) -> []  -- TODO: check types
               (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
 
+          -- (x,y) = (True,())  --> x::Bool, y::()
           aux pat@(PTuple z ps) tp2  = case (toType dsigs pat, tp2) of
               (TTuple ts1, TTuple ts2) -> concatMap f $ zip ps ts2 where
                                             f (p,t2) = aux p t2
