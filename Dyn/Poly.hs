@@ -29,7 +29,7 @@ mE globs cts dsigs xtp e@(EVar z id) = e' where
   (dcs,dtp) = dsigsFind dsigs id
   dcs'      = Ifce.ifcesSups globs (getCtrs dcs) where
 
-  e' = case (isVarInRec "a" cts, xtp, dcs',dtp) of
+  e' = case (isVarInRec globs "a" cts, xtp, dcs',dtp) of
 
     -- local poly var with enclosing recursive declaration
     --    f :: (List of a -> ...) where a is IEnum
@@ -60,32 +60,8 @@ mE globs cts dsigs xtp e@(EVar z id) = e' where
       toV "a" [ifc] e = ECall z (EVar z "snd")
                               (ECall z (EVar z $ "d"++ifc++"a") e)
 
-      isVarInRec :: ID_Var -> CTs -> Maybe Ctrs
-      isVarInRec "a" cts =
-        case L.find ((has "a") . snd) cts of
-          Nothing      -> Nothing
-          Just (cs,tp) -> bool Nothing (Just cs) $ any isRec $ datasWithVar "a" tp
-        where
-          isRec tp = elem "a" (getRecDatas globs tp)
-
-      datasWithVar :: ID_Var -> Type -> [Type]
-      datasWithVar  _  TAny             = []
-      datasWithVar  _  TUnit            = []
-      datasWithVar  _  (TVar _)         = []
-      datasWithVar "a" tp@(TData _ ofs) = bool [] [tp] (any (has "a") ofs)
-      datasWithVar "a" (TTuple tps)     = concatMap (datasWithVar "a") tps
-      datasWithVar "a" (TFunc inp out)  = datasWithVar "a" inp ++ datasWithVar "a" out
-
-      has :: ID_Var -> Type -> Bool
-      has "a" TAny            = False
-      has "a" TUnit           = False
-      has "a" (TVar x)        = ("a" == x)
-      has "a" (TData _ ofs)   = or $ map (has "a") ofs
-      has "a" (TTuple tps)    = any (has "a") tps
-      has "a" (TFunc inp out) = has "a" inp || has "a" out
-
 -- pat1::B = id2(neq) e2::(B,B)
-mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
+mE globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
   TFunc inp2 out2 = tp2
   (cs2,tp2)       = dsigsFind dsigs id2
@@ -101,7 +77,7 @@ mE globs _ dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
     otherwise -> case tpMatch (TTuple [inp2            , out2]) -- TODO: variance
                               (TTuple [toType dsigs e3 , xtp ])
                  of
-
+--TODO: isVarInRec globs "a" cts
       -- ... and xtp is concrete -> resolve!
       --    eq (Bool.True,Bool.False)
       --    (eq' dIEqBool) (Bool.True,Bool.False)
@@ -173,3 +149,29 @@ getRecDatas globs (TData (hr:_) [(TVar "a")]) = case dataFind globs hr of
 getRecDatas globs (TTuple ts)                 = concatMap (getRecDatas globs) ts
 getRecDatas globs (TFunc inp out)             = getRecDatas globs inp ++ getRecDatas globs out
 getRecDatas _ _                               = []
+
+-------------------------------------------------------------------------------
+
+isVarInRec :: [Glob] -> ID_Var -> CTs -> Maybe Ctrs
+isVarInRec globs "a" cts =
+  case L.find ((has "a") . snd) cts of
+    Nothing      -> Nothing
+    Just (cs,tp) -> bool Nothing (Just cs) $ any isRec $ datasWithVar "a" tp
+  where
+    isRec tp = elem "a" (getRecDatas globs tp)
+
+datasWithVar :: ID_Var -> Type -> [Type]
+datasWithVar  _  TAny             = []
+datasWithVar  _  TUnit            = []
+datasWithVar  _  (TVar _)         = []
+datasWithVar "a" tp@(TData _ ofs) = bool [] [tp] (any (has "a") ofs)
+datasWithVar "a" (TTuple tps)     = concatMap (datasWithVar "a") tps
+datasWithVar "a" (TFunc inp out)  = datasWithVar "a" inp ++ datasWithVar "a" out
+
+has :: ID_Var -> Type -> Bool
+has "a" TAny            = False
+has "a" TUnit           = False
+has "a" (TVar x)        = ("a" == x)
+has "a" (TData _ ofs)   = or $ map (has "a") ofs
+has "a" (TTuple tps)    = any (has "a") tps
+has "a" (TFunc inp out) = has "a" inp || has "a" out
