@@ -42,11 +42,14 @@ x = case () of
 |])
         `shouldBe` "(Type ())"
 
-    it "XXX: case x::Nat" $
+    it "case x::Nat" $
       evalString ([r|
+data Nat
+data Nat.Zero
+data Nat.Succ with Nat
 main = Type x
 x = case Nat.Succ Nat.Zero of
-  Nat.Succ =x -> x
+  Nat.Succ =x -> x where x::? ;
 ;
 |])
-        `shouldBe` "(Type (Bool.True,()))"
+        `shouldBe` "(Type Nat)"

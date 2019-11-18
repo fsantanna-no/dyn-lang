@@ -12,29 +12,39 @@ import Dyn.Map
 
 apply :: Prog -> Prog -> Prog
 apply origs globs =
-  mapGlobs (mSz,mDz,mWz,mPz,mE) origs $
-  mapGlobs (mS,mDz,mWz,mPz,mEz) origs $
+  mapGlobs (mSz,mDz,mWz,mPz,mE1) origs $
+  mapGlobs (mS,mDz,mWz,mPz,mE2) origs $
   globs where
+
+-------------------------------------------------------------------------------
 
   -- apply Type expressions
   -- Type (1+1)  --> Type Nat
-  mE :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
-  mE _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
-  mE _ _ _ _ e = e
+  mE1 :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+  mE1 _ _ dsigs _ (ECall z (ECons z1 ["Type"]) e2) = EType z $ toType dsigs e2
+  mE1 _ _ _ _ e = e
+
+-------------------------------------------------------------------------------
+
+  mE2 :: [Glob] -> Ctrs -> [Decl] -> Type -> Expr -> Expr
+  mE2 globs ctrs dsigs xtp (ECase z e l) = ECase z e (map f l) where
+
+    f :: (Patt,ExpWhere) -> (Patt,ExpWhere)
+    f (pat1@(PCall _ (PCons _ hr1) (PWrite z2 id2)),
+       ExpWhere (z3,ds3,e3)) = (pat1, ExpWhere (z3,union ds3 [DSig z2 id2 cz tp],e3)) where
+        Data (_,_,_,_,tp) = dataFind globs hr1
+    f x@(_,_) = x
+
+  mE2 _ _ _ _ e = e
+
+-------------------------------------------------------------------------------
 
   mS :: [Glob] -> Ctrs -> [Decl] -> [Decl] -> [Decl]
-  mS globs ctrs dsigs decls = dsigs' ++ inferreds' where
-
-    -- removes TAny decls that have been inferred
-
-    dsigs' = filter isAnyInferred decls where
-              isAnyInferred (DSig _ id _ TAny) =
-                isNothing $ L.find (\(DSig _ x _ _) -> x==id) inferreds'
-              isAnyInferred _ = True
+  mS globs ctrs dsigs decls = union decls inferreds where
 
     -- infer type of pat1 (add dsig) based on type of whe2
 
-    inferreds' = concatMap f decls where
+    inferreds = concatMap f decls where
       f datr@(DAtr z pat1 whe2@(ExpWhere (z2,ds2,e2))) =
         aux pat1 (toType dsigs whe2) where
           aux _                 TAny = []
@@ -55,6 +65,12 @@ apply origs globs =
       f _ = []
 
 -------------------------------------------------------------------------------
+
+-- removes TAny decls that have been inferred
+union decls inferreds = filter isAnyInferred decls ++ inferreds where
+  isAnyInferred (DSig _ id _ TAny) =
+    isNothing $ L.find (\(DSig _ x _ _) -> x==id) inferreds
+  isAnyInferred _ = True
 
 isSup :: [Glob] -> Ctrs -> Type -> Type -> Bool
 isSup _ _ tp1 tp2 = isSup' tp1 tp2
