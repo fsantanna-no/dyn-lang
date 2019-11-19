@@ -25,8 +25,8 @@ mEz _ _ _ _ e  = e
 
 -------------------------------------------------------------------------------
 
-mapGlobs :: MapFs -> [Glob] -> [Glob] -> [Glob]
-mapGlobs fs origs globs = map globFromDecl $ mapDecls fs origs [] [] (map globToDecl globs)
+mapGlobs :: MapFs -> [Glob] -> [Glob]
+mapGlobs fs globs = map globFromDecl $ mapDecls fs globs [] [] (map globToDecl globs)
 
 mapDecls :: MapFs -> [Glob] -> CTs -> [Decl] -> [Decl] -> [Decl]
 mapDecls fs@(fS,_,_,_,_) globs cts dsigs decls =

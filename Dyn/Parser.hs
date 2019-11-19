@@ -493,11 +493,11 @@ parse' rule input =
     (Right v) -> Right v
     (Left  v) -> Left (show v)
 
-parseToStringF :: (Prog->Prog->Prog) -> String -> String
+parseToStringF :: (Prog->Prog) -> String -> String
 parseToStringF f input =
   case parse input of
     (Left  err)  -> err
-    (Right prog) -> progToString $ f prog prog
+    (Right prog) -> progToString $ f prog
 
 parseToString :: String -> String
-parseToString input = parseToStringF (\_ p->p) input
+parseToString input = parseToStringF Prelude.id input

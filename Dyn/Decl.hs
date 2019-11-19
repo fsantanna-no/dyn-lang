@@ -10,8 +10,8 @@ import Dyn.Map
 
 -- declare undeclared variables
 
-apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mS,mDz,mWz,mPz,mE) origs globs where
+apply :: Prog -> Prog
+apply globs = mapGlobs (mS,mDz,mWz,mPz,mE) globs where
   mE _ _ _ _ (ECase z e l) = ECase z e $ map f l where
     f (pat, ExpWhere (z,ds,e)) = (pat, ExpWhere (z,ds++ds',e)) where
 

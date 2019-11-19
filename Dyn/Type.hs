@@ -10,10 +10,10 @@ import Dyn.Map
 
 -------------------------------------------------------------------------------
 
-apply :: Prog -> Prog -> Prog
-apply origs globs =
-  mapGlobs (mSz,mDz,mWz,mPz,mE1) origs $
-  mapGlobs (mS,mDz,mWz,mPz,mE2) origs $
+apply :: Prog -> Prog
+apply globs =
+  mapGlobs (mSz,mDz,mWz,mPz,mE1) $
+  mapGlobs (mS,mDz,mWz,mPz,mE2)  $
   globs where
 
 -------------------------------------------------------------------------------

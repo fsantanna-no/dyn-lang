@@ -9,11 +9,11 @@ import qualified Dyn.Order  as Order
 import qualified Dyn.Ifce   as Ifce
 import qualified Dyn.Poly   as Poly
 
-apply :: Prog -> Prog -> Prog
-apply origs globs =
-  Order.apply origs $
-  Decl.apply  origs $
-  Poly.apply  origs $ --traceShowSS $ -- [Decl] w/ polys resolved
-  Type.apply  origs $                 -- [Decl] with types applied/inferred
-  Ifce.apply  origs $
+apply :: Prog -> Prog
+apply globs =
+  Order.apply $
+  Decl.apply  $
+  Poly.apply  $ --traceShowSS $ -- [Decl] w/ polys resolved
+  Type.apply  $                 -- [Decl] with types applied/inferred
+  Ifce.apply  $
   globs

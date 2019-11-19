@@ -11,13 +11,13 @@ import qualified Dyn.Eval   as E
 
 -------------------------------------------------------------------------------
 
-apply :: Prog -> Prog -> Prog
-apply _ globs = map globFromDecl $ dicts globs ++ concatMap f globs where
-                  f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
-                  f (GDecl dcl) = expandGen globs dcl
-                  f (GData dat) = []
-                  f (GIfce ifc) = ifceToDecls ifc
-                  f (GImpl imp) = implToDecls globs imp
+apply :: Prog -> Prog
+apply globs = map globFromDecl $ dicts globs ++ concatMap f globs where
+                f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
+                f (GDecl dcl) = expandGen globs dcl
+                f (GData dat) = []
+                f (GIfce ifc) = ifceToDecls ifc
+                f (GImpl imp) = implToDecls globs imp
 
 dicts globs = --traceShowSS $
   map toDict        $   -- [ ds_IEnum=..., ... ]

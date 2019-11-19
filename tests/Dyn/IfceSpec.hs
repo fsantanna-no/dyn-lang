@@ -13,8 +13,8 @@ import qualified Dyn.Eval   as E
 import qualified Dyn.Decl   as D
 import qualified Dyn.Order  as O
 
-evalString    = E.evalStringF    (\x y -> O.apply x $ D.apply x $ apply x y)
-parseToString = P.parseToStringF (\x y -> O.apply x $ D.apply x $ apply x y)
+evalString    = E.evalStringF    (O.apply . D.apply . apply)
+parseToString = P.parseToStringF (O.apply . D.apply . apply)
 
 main :: IO ()
 main = hspec spec

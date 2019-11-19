@@ -13,8 +13,8 @@ import qualified Dyn.Ifce as Ifce
 
 -------------------------------------------------------------------------------
 
-apply :: [Glob] -> [Glob] -> [Glob]
-apply origs globs = mapGlobs (mSz,mDz,mWz,mPz,mE) origs globs where
+apply :: [Glob] -> [Glob]
+apply globs = mapGlobs (mSz,mDz,mWz,mPz,mE) globs where
 
 -------------------------------------------------------------------------
 

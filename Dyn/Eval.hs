@@ -132,13 +132,13 @@ evalExpWhere env (ExpWhere (z, dcls, e)) =
 
 evalProg :: Prog -> Expr
 evalProg prog =
-  evalExpWhere [] $ ExpWhere (pz, map globToDecl prog, EVar pz "main")
+  evalExpWhere [] $ ExpWhere (pz, map globToDecl $ filter isGDecl prog, EVar pz "main")
 
 evalString :: String -> String
-evalString input = evalStringF (\_ p->p) input
+evalString input = evalStringF Prelude.id input
 
-evalStringF :: (Prog->Prog->Prog) -> String -> String
+evalStringF :: (Prog->Prog) -> String -> String
 evalStringF f input =
   case parse input of
     Left  err  -> err
-    Right prog -> toString $ evalProg $ f prog prog
+    Right prog -> toString $ evalProg $ f prog

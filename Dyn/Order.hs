@@ -10,8 +10,8 @@ import Dyn.Map
 
 -------------------------------------------------------------------------------
 
-apply :: Prog -> Prog -> Prog
-apply origs globs = mapGlobs (mS,mDz,mWz,mPz,mEz) origs globs where
+apply :: Prog -> Prog
+apply globs = mapGlobs (mS,mDz,mWz,mPz,mEz) globs where
   mS _ _ dsigs ds = map fst $ L.sortBy fsort $ zip ds (map getAccs ds)
 
   fsort :: (Decl, (S.Set ID_Var,S.Set ID_Var)) -> (Decl, (S.Set ID_Var,S.Set ID_Var)) -> Ordering

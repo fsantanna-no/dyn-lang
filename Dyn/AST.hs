@@ -139,6 +139,12 @@ isEError _            = False
 
 -------------------------------------------------------------------------------
 
+isGDecl :: Glob -> Bool
+isGDecl (GDecl _) = True
+isGDecl _         = False
+
+-------------------------------------------------------------------------------
+
 globsToDatas :: [Glob] -> [Data]
 globsToDatas globs = map g $ filter f globs where
                       f (GData dat) = True
@@ -180,6 +186,6 @@ ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
 dataFind :: [Glob] -> ID_Hier -> Data
-dataFind globs hr' = fromJust $ L.find f (globsToDatas globs) where
+dataFind globs hr' = fromJust $ traceShowX hr' $ L.find f (globsToDatas globs) where
                       f :: Data -> Bool
                       f (Data (_,_,hr,_,_)) = (hr == hr')
