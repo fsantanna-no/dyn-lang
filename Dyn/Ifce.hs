@@ -12,14 +12,25 @@ import qualified Dyn.Eval   as E
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog
-apply globs = map globFromDecl $ dicts globs ++ concatMap f globs where
+apply globs = datas globs ++ dicts globs ++ expand globs
+
+expand :: [Glob] -> [Glob]
+expand globs = filter (not.isGDecl) globs ++ (map globFromDecl $ concatMap f globs) where
                 f :: Glob -> [Decl]  -- [Decl] w/o Ifce/Impl/Gens
                 f (GDecl dcl) = expandGen globs dcl
                 f (GData dat) = []
                 f (GIfce ifc) = ifceToDecls ifc
                 f (GImpl imp) = implToDecls globs imp
 
+datas :: [Glob] -> [Glob]
+datas globs = map globFromData $ (dict : (map f $ globsToIfces globs)) where
+                f :: Ifce -> Data
+                f (Ifce (z,id,_,_)) = Data (z, False, ["Dict",id], [], TAny)
+                dict = Data (pz, False, ["Dict"], [], TAny)
+
+dicts :: [Glob] -> [Glob]
 dicts globs = --traceShowSS $
+  map globFromDecl  $
   map toDict        $   -- [ ds_IEnum=..., ... ]
   map toCons        $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
   L.groupBy sameIfc $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]

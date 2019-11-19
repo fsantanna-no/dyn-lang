@@ -26,7 +26,9 @@ mEz _ _ _ _ e  = e
 -------------------------------------------------------------------------------
 
 mapGlobs :: MapFs -> [Glob] -> [Glob]
-mapGlobs fs globs = map globFromDecl $ mapDecls fs globs [] [] (map globToDecl globs)
+mapGlobs fs globs = filter (not.isGDecl) globs ++
+                    (map globFromDecl $ mapDecls fs globs [] [] $
+                      map globToDecl $ filter isGDecl globs)
 
 mapDecls :: MapFs -> [Glob] -> CTs -> [Decl] -> [Decl] -> [Decl]
 mapDecls fs@(fS,_,_,_,_) globs cts dsigs decls =

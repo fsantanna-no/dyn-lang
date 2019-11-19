@@ -145,6 +145,9 @@ isGDecl _         = False
 
 -------------------------------------------------------------------------------
 
+globsToDecls :: [Glob] -> [Decl]
+globsToDecls globs = map globToDecl $ filter isGDecl globs
+
 globsToDatas :: [Glob] -> [Data]
 globsToDatas globs = map g $ filter f globs where
                       f (GData dat) = True
@@ -167,6 +170,9 @@ globToDecl :: Glob -> Decl
 globToDecl (GDecl decl) = decl
   -- refuse GIfce/GImpl
 
+globFromData :: Data -> Glob
+globFromData data_ = GData data_
+
 globFromDecl :: Decl -> Glob
 globFromDecl decl = GDecl decl
 
@@ -186,6 +192,6 @@ ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
 dataFind :: [Glob] -> ID_Hier -> Data
-dataFind globs hr' = fromJust $ traceShowX hr' $ L.find f (globsToDatas globs) where
+dataFind globs hr' = fromJust $ L.find f (globsToDatas globs) where
                       f :: Data -> Bool
                       f (Data (_,_,hr,_,_)) = (hr == hr')

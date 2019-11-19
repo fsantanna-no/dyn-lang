@@ -112,7 +112,7 @@ implementation of IRec for Nat with
 interface IRec for a with
   rec :: (a -> ())
 ;
-|])
+|] ++ nat)
         `shouldBe` "()"
 
     it "IRec-ind" $
@@ -132,7 +132,7 @@ interface IRec for a with
   rec :: (a -> ())
 ;
 f :: (a -> ()) where a is IRec = func :: (a -> ()) where a is IRec -> rec x where x::a = ... ;;
-|])
+|] ++ nat)
         `shouldBe` "()"
 
   describe "IOrd" $ do
