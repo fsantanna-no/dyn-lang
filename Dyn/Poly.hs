@@ -79,48 +79,41 @@ mE2 globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
     -- call id2 is not poly, nothing to do, just keep it
     --    isTrue Bool.True
-    ([], _)                 -> e2
+    ([], _)                         -> e2
 
     -- call id2 is poly
-    otherwise -> case tpMatch (TTuple [inp2            , out2]) -- TODO: variance
-                              (TTuple [toType dsigs e3 , xtp ])
+    otherwise -> case (isVarInRec globs "a" cts,
+                       tpMatch (TTuple [inp2            , out2]) -- TODO: variance
+                               (TTuple [toType dsigs e3 , xtp ]))
                  of
       -- ... and xtp is concrete -> resolve!
       --    eq (Bool.True,Bool.False)
       --    (eq' dIEqBool) (Bool.True,Bool.False)
-      [("a", TUnit)]        -> toSimpleF' $ concat ["Unit"]
-      [("a", TData xhr _)]  -> toSimpleF' $ concat xhr   -- TODO: _
+      (_, [("a", TUnit)])           -> toSimpleF' $ concat ["Unit"]
+      (_, [("a", TData xhr _)])     -> toSimpleF' $ concat xhr   -- TODO: _
 
       -- ... but xtp is not concrete yet
-      [("a", TVar  "a")]
+      (_, [("a", TVar  "a")])
 
         -- function id2 receives recursive generic
         --    f :: (List of a -> ...) where a is IEnum
         --    (f' hash) l
-        | elem "a" recs2    -> toComplexF' "a"
+        | elem "a" recs2            -> toComplexF' "a"
+
+      -- toNat v
+      -- (toNat' (fst (dIEnum v))) (snd (dIEnum v))
+      (Just cs, [("a", TVar  "a")]) -> ECall z2 (EVar z2 $ id2++"'") (toD "a" (getCtrs cs) e3)
 
         -- function id2 receives non-recursive generic
         --    eq (x,y) where x::a, y::a
         --    (eq' dIEqa) (x,y)
-      [("a", TVar  "a")]    -> toSimpleF'  "a"
-
-      -- toNat v
-      -- toNat (snd (dIEnum v))
-      -- (toNat' (fst (dIEnum v))) (snd (dIEnum v))
-      -- TODO: probably this TAny comes from "toNat v" where "v" is expansion
-      --        of "snd (dIEnuma v)"
-{-
-      [("a", TAny)]         -> toSimpleF'  "a"
-      toV "a" [ifc] e = ECall z (EVar z "fst")
-                                (ECall z (EVar z $ "d"++ifc++"a") e)
-      x -> error $ show x
--}
+      (Nothing, [("a", TVar  "a")]) -> toSimpleF'  "a"
 
   recs2 = getRecDatas globs tp2
 
   toSimpleF' suf = ECall z2 (EVar z2 $ id2++"'")
-                    (fromList $ map (EVar z2) $ map toID $ cs2') where
-                    toID ifc = "d" ++ ifc ++ suf -- dIEqa / dIEqBool
+                            (fromList $ map (EVar z2) $ map toID $ cs2') where
+                              toID ifc = "d" ++ ifc ++ suf -- dIEqa / dIEqBool
 
   toComplexF' suf = ECall z2 (EVar z2 $ id2++"'")
                       (fromList $ map f $ cs2') where
@@ -133,6 +126,9 @@ mE2 globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
                                   (ETuple z2 [EVar z2 ("ds_"++ifc),EVar z2 "k"]),
                                  EVar z2 "v"]))
                 ]))
+
+  toD "a" [ifc] e = ECall z2 (EVar z2 "fst")
+                             (ECall z2 (EVar z2 $ "d"++ifc++"a") e)
 
 mE2 _ _ _ _ e = e
 

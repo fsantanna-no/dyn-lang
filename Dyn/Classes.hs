@@ -164,8 +164,8 @@ instance IString ExpWhere where
 instance IString Data where
   toString (Data (_,rec,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ is_rec rec ++ with st where
                                         of_ []  = ""
-                                        of_ [v] = " of " ++ v
-                                        of_ l   = " of (" ++ intercalate "," l ++ ")"
+                                        of_ [v] = " for " ++ v
+                                        of_ l   = " for (" ++ intercalate "," l ++ ")"
                                         is_rec False = ""
                                         is_rec True  = " is recursive"
                                         with TUnit = ""
@@ -177,8 +177,8 @@ instance IString Data where
 progToString glbs = concatMap f glbs where
                       f (GDecl decl) = toString decl ++ "\n"
                       f (GData dat_) = toString dat_ ++ "\n"
-                      f (GIfce ifce) = error "TODO"
-                      f (GImpl impl) = error "TODO"
+                      f (GIfce ifce) = "-- ifce\n" --error "TODO"
+                      f (GImpl impl) = "-- impl\n" --error "TODO"
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
