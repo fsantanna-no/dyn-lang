@@ -16,6 +16,10 @@ prelude = nat_iord   ++ nat_ieq
 -------------------------------------------------------------------------------
 
 std = [r|
+  data List for a
+  data List.Nil
+  data List.Cons with (a, List of a)
+
   matches :: ((a,a) -> Bool)
   matches = func ->
     case (x,y) of
@@ -122,6 +126,10 @@ unit_ienum = [r|
 
 -- Bool type: not, and, or
 bool = [r|
+  --data Bool
+  --data Bool.False
+  --data Bool.True
+
   not = func ->
     case ... of
       Bool.False -> Bool.True
@@ -289,6 +297,10 @@ char_iord = [r|
 -------------------------------------------------------------------------------
 
 nat = [r|
+  data Nat
+  data Nat.Zero
+  data Nat.Succ with Nat
+
   thousand = mul (ten,ten)
   hundred  = mul (ten,ten)
   ten      = Nat.Succ nine

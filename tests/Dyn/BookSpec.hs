@@ -23,7 +23,7 @@ spec :: Spec
 spec = do
 
   describe "PRE" $ do
-    it "XXX: Nat +" $
+    it "Nat +" $
       evalString ("main = add (Nat.Zero, Nat.Succ Nat.Zero)\n" ++ nat)
         `shouldBe` "(Nat.Succ Nat.Zero)"
     it "Nat -" $
@@ -1857,9 +1857,9 @@ return (neg ((((mkRat (10,2)) -- (mkRat (0,1))) ++ (mkRat (1,-5))) ** (mkRat (-5
 
       it "List" $                   -- pg 92
         evalString ([r|
---data List for a
---data List.Nil
---data List.Cons with (a, List of a)
+data List for a
+data List.Nil
+data List.Cons with (a, List of a)
 main = List.Cons (Nat.Succ Nat.Zero, List.Nil)
 |] ++ nat)
           `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),List.Nil))"

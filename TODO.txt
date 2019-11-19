@@ -1,4 +1,7 @@
-(*) TODO: declare data in all examples
+  data Dict
+  data Dict.IEq with ?
+  data Dict.IEnum with ?
+  data Dict.IBounded with ?
 
 - confusao pattern
     - sintaxe de case vs datr

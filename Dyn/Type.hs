@@ -64,15 +64,17 @@ aux globs ctrs dsigs (PCall _ (PCons _ hr) pat) _ = aux globs ctrs dsigs pat tp
 aux _ _ _ _ TAny = []
 
 -- x :: ? = 10        --> x :: Nat = 10
-aux globs ctrs dsigs pat@(PWrite z id) tp2  = case (toType dsigs pat, tp2) of
+aux globs ctrs dsigs pat@(PWrite z id) tp2 = case (toType dsigs pat, tp2) of
     (TAny, tp2) -> [DSig z id cz tp2]               -- inferred from whe2
     (tp1,  tp2) | (isSup globs ctrs tp1 tp2) -> []  -- TODO: check types
     (tp1,  tp2) -> error $ show $ (toString tp1, toString tp2)
 
 -- (x,y) = (True,())  --> x::Bool, y::()
-aux globs ctrs dsigs pat@(PTuple z ps) tp2  = concatMap f $ zip ps ts2 where
-  f (p,t2) = aux globs ctrs dsigs p t2
-  TTuple ts2 = tp2
+aux globs ctrs dsigs pat@(PTuple z ps) tp2 =
+  case tp2 of
+    TTuple ts2 -> concatMap f $ zip ps ts2 where
+                    f (p,t2) = aux globs ctrs dsigs p t2
+    otherwise  -> []
 
 aux _ _ _ pat _ = error $ toString pat
 
