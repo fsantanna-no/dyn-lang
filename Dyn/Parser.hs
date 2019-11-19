@@ -250,9 +250,7 @@ expr_func = do
               list (tk_sym ",") tk_var    -- {x}, {x,y}
   void <- tk_sym "->"
   body <- where_let
-  void <- string "."
-  void <- optional $ try $ tk_key "func"
-  spc
+  void <- tk_sym "."
   return $ EFunc pos cs tp (map (\id -> (id,EUnit pos)) ups) body
 
 expr_case :: Parser Expr
@@ -266,9 +264,7 @@ expr_case = do
             void <- tk_sym "->"
             w    <- where_let
             return (p,w)
-  void <- string "."
-  void <- optional $ try $ tk_key "case"
-  spc
+  void <- tk_sym "."
   return $ ECase pos e cs
 
 expr_parens :: Parser Expr
@@ -397,9 +393,7 @@ let_ = do
   ds   <- decls
   void <- tk_key "in"
   whe  <- where_
-  void <- string "."
-  void <- optional $ try $ tk_key "let"
-  spc
+  void <- tk_sym "."
   let ExpWhere (_,ds',e') = whe
   return $ ExpWhere (pos, ds'++reverse ds, e')
 
@@ -410,9 +404,7 @@ where_ = do
   ds  <- option [] $ do
           void <- try $ tk_key "where"
           ds   <- decls
-          void <- string "."
-          void <- optional $ try $ tk_key "where"
-          spc
+          void <- tk_sym "."
           return ds
   return $ ExpWhere (pos, ds, e)
 
@@ -436,9 +428,7 @@ data_ = do
             void <- tk_key "recursive"
             return ()
   guard (length hr == 1 || isNothing rec) -- "is recursive" only for base class
-  void <- string ";"
-  void <- optional $ try $ tk_key "data"
-  spc
+  void <- tk_sym ";"
   return $ Data (pos, isJust rec, hr, ofs, tp)
 
 ifce :: Parser Ifce
@@ -452,9 +442,7 @@ ifce = do
   cs   <- option (Ctrs []) ctrs
   void <- tk_key "with"
   ds   <- decls
-  void <- string "."
-  void <- optional $ try $ tk_key "interface"
-  spc
+  void <- tk_sym "."
   return $ Ifce (pos, cls, cs, ds)
 
 impl :: Parser Impl
@@ -467,9 +455,7 @@ impl = do
   (tp,cs) <- type_ctrs
   void <- tk_key "with"
   ds   <- decls
-  void <- string "."
-  void <- optional $ try $ tk_key "implementation"
-  spc
+  void <- tk_sym "."
   return $ Impl (pos, cls, cs, tp, ds)
 
 -------------------------------------------------------------------------------

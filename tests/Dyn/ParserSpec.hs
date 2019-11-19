@@ -111,7 +111,7 @@ spec = do
           `shouldBe` "main = case x of\n  Bool.True -> a;\n  Bool.False -> b;\n.;"
     describe "where:" $ do
       it "case" $
-        (toString $ fromRight $ parse' where_ "case x of Bool.True -> a;\nBool.False -> b;.case")
+        (toString $ fromRight $ parse' where_ "case x of Bool.True -> a;\nBool.False -> b;.")
           `shouldBe` "case x of\n  Bool.True -> a;\n  Bool.False -> b;\n."
     describe "prog:" $ do
       it "case" $
@@ -129,13 +129,13 @@ spec = do
         (toString $ fromRight $ parse' expr "A.B")
           `shouldBe` "A.B"
       it "func" $
-        (toString $ fromRight $ parse' expr "func :: () -> xxx.func")
+        (toString $ fromRight $ parse' expr "func :: () -> xxx.")
           `shouldBe` "(func :: () ->\n  xxx\n.)"
       it "func" $
         (toString $ fromRight $ parse' expr "func :: () -> xxx where xxx=() where y=();.;\n  x=();..")
           `shouldBe` "(func :: () ->\n  xxx where\n    xxx = () where\n      y = ();\n    .;\n    x = ();\n  .\n.)"
       it "func" $
-        (toString $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=();\n    x=();.where;.where.func")
+        (toString $ fromRight $ parse' expr "func -> xxx where\n  xxx=() where\n    y=();\n    x=();.;..")
           `shouldBe` "(func :: ? ->\n  xxx where\n    xxx = () where\n      y = ();\n      x = ();\n    .;\n  .\n.)"
       it "call" $
         (toString $ fromRight $ parse' expr "(a (b c)) d")
@@ -143,7 +143,7 @@ spec = do
       it "case x of ~y->t\n_->f" $
         (toString $ fromRight $ parse' expr "case x of ~y->t; \n _->f;.")
           `shouldBe` "case x of\n  ~y -> t;\n  _ -> f;\n."
-    describe "XXX: prog:" $ do
+    describe "prog:" $ do
       it "x where x :: () = ()" $
         (parseToString "main :: () = ();")
           `shouldBe` "main :: ();\nmain = ();\n"
