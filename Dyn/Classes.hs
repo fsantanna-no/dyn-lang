@@ -108,17 +108,17 @@ instance IString Expr where
   toStringI spc (EArg   _)             = "..."
   toStringI spc (ETuple _ es)          = "(" ++ intercalate "," (map toString es) ++ ")"
   toStringI spc (EFunc  _ cs tp ups bd)  = "(func :: " ++ toString tp ++ toString cs ++ " " ++ upsToString ups ++"->\n" ++ rep (spc+2) ++
-                                              toStringI (spc+2) bd ++ "\n" ++ rep spc ++ ";)"
+                                              toStringI (spc+2) bd ++ "\n" ++ rep spc ++ ".)"
                                              where
                                               upsToString []  = ""
                                               upsToString ups = "{" ++ (intercalate "," $ map fst ups) ++ "} "
   toStringI spc (ECall  _ e1 e2)       = "(" ++ toString e1 ++ " " ++ toString e2 ++ ")"
 
   toStringI spc (ECase  _ e cases)     =
-    "case " ++ toString e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ ";"
+    "case " ++ toString e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ "."
     where
       f :: (Patt,ExpWhere) -> String
-      f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString True pat ++ " -> " ++ toStringI (spc+2) whe
+      f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString True pat ++ " -> " ++ toStringI (spc+2) whe ++ ";"
   toStringI spc (EData  _ h (EUnit _)) = intercalate "." h
   toStringI spc (EData  _ h st)        = "(" ++ intercalate "." h ++ " " ++ toString st ++ ")"
   toStringI spc (EType  _ ttp)         = "(Type " ++ toString ttp ++ ")"
@@ -146,8 +146,8 @@ instance IString Patt where
 instance IString Decl where
   toString decl = toStringI 0 decl
 
-  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp ++ toString cs
-  toStringI spc (DAtr _ pat wh)    = pattToString False pat ++ " = " ++ toStringI spc wh
+  toStringI spc (DSig _ var cs tp) = var ++ " :: " ++ toString tp ++ toString cs ++ ";"
+  toStringI spc (DAtr _ pat wh)    = pattToString False pat ++ " = " ++ toStringI spc wh ++ ";"
 
 -------------------------------------------------------------------------------
 
@@ -157,12 +157,12 @@ instance IString ExpWhere where
   toStringI spc (ExpWhere (_,[],e))   = toStringI spc e
   toStringI spc (ExpWhere (_,dcls,e)) = toStringI spc e ++ " where"
                                         ++ (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (toStringI (spc+2)) dcls))
-                                        ++ "\n" ++ rep spc ++ ";"
+                                        ++ "\n" ++ rep spc ++ "."
 
 -------------------------------------------------------------------------------
 
 instance IString Data where
-  toString (Data (_,rec,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ is_rec rec ++ with st where
+  toString (Data (_,rec,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ is_rec rec ++ with st ++ ";" where
                                         of_ []  = ""
                                         of_ [v] = " for " ++ v
                                         of_ l   = " for (" ++ intercalate "," l ++ ")"

@@ -250,7 +250,7 @@ expr_func = do
               list (tk_sym ",") tk_var    -- {x}, {x,y}
   void <- tk_sym "->"
   body <- where_let
-  void <- string ";"
+  void <- string "."
   void <- optional $ try $ tk_key "func"
   spc
   return $ EFunc pos cs tp (map (\id -> (id,EUnit pos)) ups) body
@@ -261,12 +261,12 @@ expr_case = do
   void <- tk_key "case"
   e    <- expr
   void <- tk_key "of"
-  cs   <- list (tk_sym "") $ do
+  cs   <- list (tk_sym ";") $ do
             p    <- pat False
             void <- tk_sym "->"
             w    <- where_let
             return (p,w)
-  void <- string ";"
+  void <- string "."
   void <- optional $ try $ tk_key "case"
   spc
   return $ ECase pos e cs
@@ -365,6 +365,7 @@ decl_sig = do
             void <- tk_sym "="
             w    <- where_let
             return $ singleton $ DAtr pos (PWrite pos id) w
+  void <- tk_sym ";"
   return $ (DSig pos id cs tp) : atr
 
 decl_atr :: Parser [Decl]
@@ -375,6 +376,7 @@ decl_atr = do
           void <- tk_sym "="
           w    <- where_let
           return w
+  void <- tk_sym ";"
   return $ singleton $ DAtr pos pat whe
 
 decl :: Parser [Decl]
@@ -395,7 +397,7 @@ let_ = do
   ds   <- decls
   void <- tk_key "in"
   whe  <- where_
-  void <- string ";"
+  void <- string "."
   void <- optional $ try $ tk_key "let"
   spc
   let ExpWhere (_,ds',e') = whe
@@ -408,7 +410,7 @@ where_ = do
   ds  <- option [] $ do
           void <- try $ tk_key "where"
           ds   <- decls
-          void <- string ";"
+          void <- string "."
           void <- optional $ try $ tk_key "where"
           spc
           return ds
@@ -434,6 +436,9 @@ data_ = do
             void <- tk_key "recursive"
             return ()
   guard (length hr == 1 || isNothing rec) -- "is recursive" only for base class
+  void <- string ";"
+  void <- optional $ try $ tk_key "data"
+  spc
   return $ Data (pos, isJust rec, hr, ofs, tp)
 
 ifce :: Parser Ifce
@@ -447,7 +452,7 @@ ifce = do
   cs   <- option (Ctrs []) ctrs
   void <- tk_key "with"
   ds   <- decls
-  void <- string ";"
+  void <- string "."
   void <- optional $ try $ tk_key "interface"
   spc
   return $ Ifce (pos, cls, cs, ds)
@@ -462,7 +467,7 @@ impl = do
   (tp,cs) <- type_ctrs
   void <- tk_key "with"
   ds   <- decls
-  void <- string ";"
+  void <- string "."
   void <- optional $ try $ tk_key "implementation"
   spc
   return $ Impl (pos, cls, cs, tp, ds)

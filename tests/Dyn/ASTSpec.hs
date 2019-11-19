@@ -17,18 +17,18 @@ spec = do
   describe "declToString:" $ do
     it "x :: ?" $
       toString (DSig pz "x" cz TAny)
-        `shouldBe` "x :: ?"
+        `shouldBe` "x :: ?;"
     it "x :: a where a is IEq" $
       toString (DSig pz "x" (Ctrs ["IEq"]) (TVar "a"))
-        `shouldBe` "x :: a where (a is IEq)"
+        `shouldBe` "x :: a where (a is IEq);"
     it "x = b" $
       toString (DAtr pz (PWrite pz "x") (ExpWhere (pz, [], EVar pz "b")))
-        `shouldBe` "x = b"
+        `shouldBe` "x = b;"
     it "x = b where\n  b=()" $
       toString
         (DAtr pz (PWrite pz "x")
           (ExpWhere (pz, [DSig pz "b" cz TAny], EVar pz "b")))
-        `shouldBe` "x = b where\n  b :: ?\n;"
+        `shouldBe` "x = b where\n  b :: ?;\n.;"
 
   describe "declToString:" $ do
     it "b where b=x, x=()" $
@@ -37,7 +37,7 @@ spec = do
           DAtr pz (PWrite pz "b") (ExpWhere (pz,[],EVar pz "x")),
           DAtr pz (PWrite pz "x") (ExpWhere (pz,[],EUnit pz))
         ], EVar pz "b"))
-        `shouldBe` "b where\n  b = x\n  x = ()\n;"
+        `shouldBe` "b where\n  b = x;\n  x = ();\n."
 
   describe "progToString:" $ do
     it "v" $

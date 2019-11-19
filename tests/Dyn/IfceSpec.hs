@@ -24,15 +24,15 @@ spec = do
   describe "IBounded" $ do
 
     it "main :: Bool = maximum;" $
-      evalString ("main :: Bool = maximum' dIBoundedBool" ++ bool_ibounded ++ bool ++ ibounded)
+      evalString ("main :: Bool = maximum' dIBoundedBool;" ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "Bool.True"
 
     it "(maximum,minimum)" $
       evalString ([r|
 main = (x,y) where
-  x :: Bool = maximum' dIBoundedBool
-  y :: Bool = minimum' dIBoundedBool
-;
+  x :: Bool = maximum' dIBoundedBool;
+  y :: Bool = minimum' dIBoundedBool;
+.;
 |] ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -41,24 +41,24 @@ main = (x,y) where
     it "IEq: eq" $
       evalString ([r|  -- neq (eq(T,T), F)
 main = x where
-  x :: Bool = (eq' dIEqBool) (Bool.False,Bool.False)
-;
+  x :: Bool = (eq' dIEqBool) (Bool.False,Bool.False);
+.;
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: neq" $
       evalString ([r|  -- neq (eq(T,T), F)
 main = x where
-  x :: Bool = (neq' dIEqBool) (Bool.True,Bool.False)
-;
+  x :: Bool = (neq' dIEqBool) (Bool.True,Bool.False);
+.;
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: default eq" $
       evalString ([r|  -- neq (eq(T,T), F)
 main = x where
-  x :: Bool = (neq' dIEqBool) ((eq' dIEqBool) (Bool.True,Bool.True), Bool.False)
-;
+  x :: Bool = (neq' dIEqBool) ((eq' dIEqBool) (Bool.True,Bool.True), Bool.False);
+.;
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
@@ -66,64 +66,65 @@ main = x where
 
     it "IInd" $
       evalString ([r|
-main = (f' dIIndBool) Bool.True
+main = (f' dIIndBool) Bool.True;
 
 implementation of IInd for Bool with
-  g :: (Bool -> ()) = func :: (Bool -> ()) -> () ;
-;
+  g :: (Bool -> ()) = func :: (Bool -> ()) -> () .;
+.
 
 interface IInd for a with
-  g :: (a -> ())
-;
+  g :: (a -> ());
+.
 
-f =
-  func :: (a -> ()) where a is IInd ->
-    (g' dIInda) ...
-  ;
+f = func :: (a -> ()) where a is IInd ->
+      (g' dIInda) ...
+    .
+;
 |])
         `shouldBe` "()"
 
     it "IRec-rec" $
       evalString ([r|
-main = (rec' dIRecNat) (Nat.Succ Nat.Zero)
+main = (rec' dIRecNat) (Nat.Succ Nat.Zero);
 
 implementation of IRec for Nat with
-  rec :: (Nat -> ())
+  rec :: (Nat -> ());
   rec = func :: (Nat -> ()) ->
     case ... of
-      Nat.Zero    -> ()
-      Nat.Succ =x -> (rec' dIRecNat) x
-    ;
-  ;
-;
+      Nat.Zero    -> ();
+      Nat.Succ =x -> (rec' dIRecNat) x;
+    .
+  .;
+.
 
 interface IRec for a with
-  rec :: (a -> ())
-;
+  rec :: (a -> ());
+.
 |])
         `shouldBe` "()"
 
     it "IRec-ind" $
       evalString ([r|
-main = (f' dIRecNat) (Nat.Succ Nat.Zero)
+main = (f' dIRecNat) (Nat.Succ Nat.Zero);
 
 implementation of IRec for Nat with
-  rec :: (Nat -> ())
+  rec :: (Nat -> ());
   rec = func :: (Nat -> ()) ->
     case ... of
-      Nat.Zero    -> ()
-      Nat.Succ =x -> (rec' dIRecNat) x
-    ;
-  ;
-;
+      Nat.Zero    -> ();
+      Nat.Succ =x -> (rec' dIRecNat) x;
+    .
+  .;
+.
 
 interface IRec for a with
-  rec :: (a -> ())
-;
+  rec :: (a -> ());
+.
 
 f :: (a -> ()) where a is IRec =
   func :: (a -> ()) where a is IRec ->
-  (rec' dIReca) ...
+    (rec' dIReca) ...
+  .
 ;
 |])
         `shouldBe` "()"
@@ -132,7 +133,7 @@ f :: (a -> ()) where a is IRec =
 
     it "IEq/IOrd" $
       evalString ([r|
-main = (gt' (dIEqBool,dIOrdBool)) (Bool.False,Bool.True)
+main = (gt' (dIEqBool,dIOrdBool)) (Bool.False,Bool.True);
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
@@ -142,37 +143,37 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
   v = ( (lte' (dIEqBool,dIOrdBool)) (Bool.True,  Bool.False),
         (gte' (dIEqBool,dIOrdBool)) (Bool.True,  Bool.True ),
         (gt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.False),
-        (lt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.True ) )
-;
+        (lt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.True ) );
+.;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
     it "IEq/IOrd/IAaa" $
       evalString ([r|
-main = (f' (dIAaaBool,dIEqBool,dIOrdBool)) (Bool.True,Bool.False)
+main = (f' (dIAaaBool,dIEqBool,dIOrdBool)) (Bool.True,Bool.False);
 
 implementation of IAaa for Bool with
   f :: ((Bool,Bool) -> Bool) = func ->
     (g' (dIAaaBool,dIEqBool,dIOrdBool)) ...
-  ;
-;
+  .;
+.
 
 interface IAaa for a where a is IOrd with
-  f :: ((a,a) -> Bool)
-;
+  f :: ((a,a) -> Bool);
+.
 g = func :: ((a,a) -> Bool) where a is IAaa ->
   (lt' (dIEqa,dIOrda)) ...
-;
+.;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
     it "f a where a is IOrd" $
       evalString ([r|
 main = ((f' (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
-        (f' (dIEqBool,dIOrdBool)) (Bool.False,Bool.False))
+        (f' (dIEqBool,dIOrdBool)) (Bool.False,Bool.False));
 f = func :: ((a,a) -> Bool) where a is IOrd ->
   (gt' (dIEqa,dIOrda)) ...
-;
+.;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -271,36 +272,36 @@ implementation of IEq for Maybe of a where (a is IEq) with
   describe "Misc" $ do
 
     it "eq" $
-      evalString ("main = (eq' dIEqChar) (Char.AA,Char.AA)"++char_ieq++char++nat++ieq++std)
+      evalString ("main = (eq' dIEqChar) (Char.AA,Char.AA);"++char_ieq++char++nat++ieq++std)
         `shouldBe` "Bool.True"
     it "eq" $
-      evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa)"++char_ieq++char++nat++ieq++std)
+      evalString ("main = (eq' dIEqChar) (Char.AA,Char.Aa);"++char_ieq++char++nat++ieq++std)
          `shouldBe` "Bool.False"
     it "gte" $
-      evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
+      evalString ("main = (gte' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa);"++prelude)
          `shouldBe` "Bool.False"
     it "gte" $
-      evalString ("main = (gte' (dIEqNat,dIOrdNat)) (one,two)"++prelude)
+      evalString ("main = (gte' (dIEqNat,dIOrdNat)) (one,two);"++prelude)
          `shouldBe` "Bool.False"
     it "lt" $
-      evalString ("main = (lt' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa)"++prelude)
+      evalString ("main = (lt' (dIEqChar,dIOrdChar)) (Char.AA,Char.Aa);"++prelude)
          `shouldBe` "Bool.True"
     it "isLower" $
-      evalString ("main = (isLower Char.BB, isLower Char.Bb)"++prelude)
+      evalString ("main = (isLower Char.BB, isLower Char.Bb);"++prelude)
          `shouldBe` "(Bool.False,Bool.True)"
     it "nextlet" $
-      evalString ("main = (nextlet Char.Cc, nextlet Char.DD)"++prelude)
+      evalString ("main = (nextlet Char.Cc, nextlet Char.DD);"++prelude)
          `shouldBe` "(Char.Dd,Char.AA)"
 
-  describe "dyn:" $ do
+  describe "XXX: dyn:" $ do
     it "f (toNat) True" $
       evalString ([r|
-main = (f' dIEnumBool) Bool.True
+main = (f' dIEnumBool) Bool.True;
 
-f :: (a -> Nat) where a is IEnum
+f :: (a -> Nat) where a is IEnum;
 f = func :: (a -> Nat) where a is IEnum ->
   (toNat' dIEnuma) ...
-;
+.;
 |] ++ prelude)
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
@@ -309,30 +310,30 @@ f = func :: (a -> Nat) where a is IEnum ->
 main = (f' d) l where
   d = func ->
     case ... of
-      (=k,=v) -> (getHash (ds_IEnum,k), v)
-    ;
-  ;
-;
+      (=k,=v) -> (getHash (ds_IEnum,k), v);
+    .
+  .;
+.;
 
 --data List for a is recursive
 --data List.Nil
 --data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum   -- a is dynamic IEnum
+l :: List of a where a is IEnum;   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.True),
     List.Cons ((Key.Unit, ()),
-    List.Nil))
+    List.Nil));
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   --let dIEnuma = ... in
   --  func {dIEnuma} ->
       case ... of
-        List.Nil          -> List.Nil
+        List.Nil          -> List.Nil;
         List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
-          (d',v') = dIEnuma v
-        ;
-      ;
-;
+          (d',v') = dIEnuma v;
+        .;
+      .
+.;
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
@@ -341,26 +342,26 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 main = (f' gets) l where
   gets = func ->
     case ... of
-      (=k,=v) -> (getHash (ds_IEnum,k), v)
-    ;
-  ;
-;
+      (=k,=v) -> (getHash (ds_IEnum,k), v);
+    .
+  .;
+.;
 
 --data List for a
 --data List.Nil
 --data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum   -- a is dynamic IEnum
+l :: List of a where a is IEnum;   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.False),
-    List.Nil)
+    List.Nil);
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
-    List.Nil          -> List.Nil
+    List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
-      (d',v') = gets v
-    ;
-  ;
-;
+      (d',v') = gets v;
+    .;
+  .
+.;
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
