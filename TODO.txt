@@ -1,5 +1,8 @@
 - confusao pattern
     - sintaxe de case vs datr
+        - o certo é ter dois casos especiais em que o =x nao é necessario
+            - x = ...
+            - (x,y) = ...
 - List of IEnum
     - chamada interna
     - construcao da lista heterogenea

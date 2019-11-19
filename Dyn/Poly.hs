@@ -14,17 +14,21 @@ import qualified Dyn.Ifce as Ifce
 -------------------------------------------------------------------------------
 
 apply :: [Glob] -> [Glob]
-apply globs = mapGlobs (mSz,mDz,mWz,mPz,mE) globs where
+apply globs = mapGlobs (mSz,mDz,mWz,mPz,mE1) $
+              mapGlobs (mSz,mDz,mWz,mPz,mE2) globs
 
--------------------------------------------------------------------------
+              -- first map calls because they may depend on arguments that
+              -- should not be mapped yet
+
+-------------------------------------------------------------------------------
 
 -- EVar:  pat::B = id(maximum)
 -- ECall: pat::B = id2(neq) $ e2::(B,B)
 
-mE :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
+mE1 :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-mE globs cts dsigs xtp e@(EVar z id) = e' where
+mE1 globs cts dsigs xtp e@(EVar z id) = e' where
 
   (dcs,dtp) = dsigsFind dsigs id
   dcs'      = Ifce.ifcesSups globs (getCtrs dcs) where
@@ -54,14 +58,18 @@ mE globs cts dsigs xtp e@(EVar z id) = e' where
 
     where
       toID' suf = ECall z (EVar z $ id++"'")
-                        (fromList $ map (EVar z) $ map toID $ dcs') where
-                        toID ifc = "d" ++ ifc ++ suf -- dIEqa / dIEqBool
+                          (fromList $ map (EVar z) $ map toID $ dcs') where
+                            toID ifc = "d" ++ ifc ++ suf -- dIEqa / dIEqBool
 
       toV "a" [ifc] e = ECall z (EVar z "snd")
-                              (ECall z (EVar z $ "d"++ifc++"a") e)
+                                (ECall z (EVar z $ "d"++ifc++"a") e)
+
+mE1 _ _ _ _ e = e
+
+-------------------------------------------------------------------------------
 
 -- pat1::B = id2(neq) e2::(B,B)
-mE globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
+mE2 globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
   TFunc inp2 out2 = tp2
   (cs2,tp2)       = dsigsFind dsigs id2
@@ -77,7 +85,6 @@ mE globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
     otherwise -> case tpMatch (TTuple [inp2            , out2]) -- TODO: variance
                               (TTuple [toType dsigs e3 , xtp ])
                  of
---TODO: isVarInRec globs "a" cts
       -- ... and xtp is concrete -> resolve!
       --    eq (Bool.True,Bool.False)
       --    (eq' dIEqBool) (Bool.True,Bool.False)
@@ -97,6 +104,18 @@ mE globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
         --    (eq' dIEqa) (x,y)
       [("a", TVar  "a")]    -> toSimpleF'  "a"
 
+      -- toNat v
+      -- toNat (snd (dIEnum v))
+      -- (toNat' (fst (dIEnum v))) (snd (dIEnum v))
+      -- TODO: probably this TAny comes from "toNat v" where "v" is expansion
+      --        of "snd (dIEnuma v)"
+{-
+      [("a", TAny)]         -> toSimpleF'  "a"
+      toV "a" [ifc] e = ECall z (EVar z "fst")
+                                (ECall z (EVar z $ "d"++ifc++"a") e)
+      x -> error $ show x
+-}
+
   recs2 = getRecDatas globs tp2
 
   toSimpleF' suf = ECall z2 (EVar z2 $ id2++"'")
@@ -115,7 +134,7 @@ mE globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
                                  EVar z2 "v"]))
                 ]))
 
-mE _ _ _ _ e = e
+mE2 _ _ _ _ e = e
 
 -------------------------------------------------------------------------
 
