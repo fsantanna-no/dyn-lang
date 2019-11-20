@@ -40,13 +40,14 @@ std = [r|
   .;
 
   fst = func ->
-    case ... of
-      (=x,_) -> x;
+    x where
+      (x,_) = ...;
     .
   .;
+
   snd = func ->
-    case ... of
-      (_,=x) -> x;
+    x where
+      (_,x) = ...;
     .
   .;
 |]
@@ -387,10 +388,7 @@ nat_iord = [r|
         (Nat.Zero,     Nat.Zero)     -> Bool.False;
         (Nat.Zero,     _)            -> Bool.True;
         (Nat.Succ _,   Nat.Zero)     -> Bool.False;
-        (Nat.Succ =x', Nat.Succ =y') -> lt (x',y') where
-                                          x' :: Nat;
-                                          y' :: Nat;
-                                        .;
+        (Nat.Succ =x', Nat.Succ =y') -> lt (x',y') ;
       . where
         (x,y) = ...;
       .

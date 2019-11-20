@@ -107,7 +107,7 @@ implementation of IRec for Nat with
   rec = func ->
     case ... of
       Nat.Zero    -> ();
-      Nat.Succ =x -> rec x where x::Nat; .;  -- TODO: needs to know (Nat.Succ Nat)
+      Nat.Succ =x -> rec x;
     .
   .;
 .
@@ -126,7 +126,7 @@ implementation of IRec for Nat with
   rec = func ->
     case ... of
       Nat.Zero    -> ();
-      Nat.Succ =x -> rec x where x::Nat; .;
+      Nat.Succ =x -> rec x;
     .
   .;
 .
@@ -136,9 +136,7 @@ interface IRec for a with
 .
 f :: (a -> ()) where a is IRec =
   func :: (a -> ()) where a is IRec ->
-    rec x where
-      x::a = ...;
-    .
+    rec ...
   .
 ;
 |] ++ nat)
@@ -318,7 +316,7 @@ l = List.Cons ((Key.Bool, Bool.True),
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil;
-    List.Cons (=v,=l) -> List.Cons (toNat v, f l) where v::a; l::List of a; . ;
+    List.Cons (=v,=l) -> List.Cons (toNat v, f l);
     --List.Cons (=v,=l) -> List.Cons ((toNat' d') v', f l) where
     --  l :: List of a
     --  v :: a

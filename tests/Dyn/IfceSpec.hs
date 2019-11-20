@@ -340,11 +340,13 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
     it "succ [(),False]" $
       evalString ([r|
 main = (f' gets) l where
-  gets = func ->
-    case ... of
-      (=k,=v) -> (getHash (ds_IEnum,k), v);
+  gets =
+    func ->
+      (getHash (ds_IEnum,k), v) where
+        (k,v) = ...;
+      .
     .
-  .;
+  ;
 .;
 
 --data List for a
