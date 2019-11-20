@@ -182,7 +182,7 @@ expr_call = do
   pos <- toPos <$> getPosition
   e1  <- expr_one
   e2  <- expr_one
-  guard $ (fst $ getPos e1) == (fst $ getPos e2)  -- must be at the same line
+  --guard $ (fst $ getPos e1) == (fst $ getPos e2)  -- must be at the same line
   return $ ECall pos e1 e2
 
 expr_one :: Parser Expr
