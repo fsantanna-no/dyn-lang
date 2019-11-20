@@ -28,7 +28,8 @@ apply globs = mapGlobs (mSz,mDz,mWz,mPz,mE1) $
 mE1 :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
-mE1 globs cts dsigs xtp e@(EVar z id) = e' where
+mE1 globs cts dsigs xtp   (EVar z ('$':id)) = EVar z id
+mE1 globs cts dsigs xtp e@(EVar z id)       = e' where
 
   (dcs,dtp) = dsigsFind dsigs id
   dcs'      = Ifce.ifcesSups globs (getCtrs dcs) where
@@ -117,18 +118,19 @@ mE2 globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
   toComplexF' suf = ECall z2 (EVar z2 $ id2++"'")
                       (fromList $ map f $ cs2') where
-    f ifc = EFunc z2 cz TAny [] -- f' (func -> (k,v) -> (hash (ds_IEnum k), v)
+    f ifc = EFunc z2 cz TAny [] -- f' (func -> (hash (ds_IEnum k), v) where (k,v)=...
               (ExpWhere (z2, [],
-                ECase z2 (EArg z2) [
-                  (PTuple z2 [PWrite z2 "k",PWrite z2 "v"],
-                    ExpWhere (z2, [],
-                      ETuple z2 [ECall z2 (EVar z2 "getHash")
-                                  (ETuple z2 [EVar z2 ("ds_"++ifc),EVar z2 "k"]),
-                                 EVar z2 "v"]))
-                ]))
+                ETuple z2 [ECall z2 (EVar z2 "getHash")
+                                    (ETuple z2 [EVar z2 ("ds_"++ifc),key]),
+                           val])) where
+              key = ECall z2 (EVar z2 "fst") (EArg z2)
+              val = ECall z2 (EVar z2 "snd") (EArg z2)
 
   toD "a" [ifc] e = ECall z2 (EVar z2 "fst")
-                             (ECall z2 (EVar z2 $ "d"++ifc++"a") e)
+                             (ECall z2 (EVar z2 $ "d"++ifc++"a") e') where
+                      e' = mapExpr (mSz,mDz,mWz,mPz,mE) globs cts dsigs TAny e where
+                            mE _ _ _ _ (EVar z id) = (EVar z ("$"++id))   -- TODO
+                            mE _ _ _ _ e           = e
 
 mE2 _ _ _ _ e = e
 

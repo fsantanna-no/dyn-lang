@@ -308,7 +308,7 @@ data List for a is recursive;
 --data List.Nil
 --data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum;
+l :: List of a where a is IEnum;        -- TODO: transparent insert
 l = List.Cons ((Key.Bool, Bool.True),
     List.Cons ((Key.Unit, ()),
     List.Nil));
