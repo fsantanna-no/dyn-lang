@@ -883,39 +883,48 @@ compose = func ->
 |] ++ prelude)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero)))"
 
-{-
       it "cross" $         -- pg 42
-        (run True $
-          pre ++ unlines [
-            "func fst (x,y) : ((a,b) -> a) do",
-            "   return x",
-            "end",
-            "func snd (_,y) : ((a,b) -> a) do",
-            "   return y",
-            "end",
-            "func cross ((f,g), p) : ((((a->b),(c->d)),(a,c)) -> (b,d)) do",
-            "   return (f (fst p), g (snd p))",
-            "end",
-            "func f x : (Nat -> Bool) do",
-            "   return (x rem 2) === 1",
-            "end",
-            "func g x : (Nat -> Nat) do",
-            "   return x * 2",
-            "end",
-            "return cross ((f,g), (3,4))"
-           ])
-        `shouldBe` Right (ETuple [EData ["Bool","True"] EUnit,EData ["Nat","8"] EUnit])
+        evalString ([r|
+main = cross ((f,g), (three,four));
+
+fst = func :: ((a,b) -> a) ->
+  let (x,_) = ...; in
+    x
+  .
+.;
+
+snd = func ->
+  x where
+    (_,x) = ...;
+  .
+.;
+
+cross = func :: ((((a->b),(c->d)),(a,c)) -> (b,d)) ->
+  let ((f,g), p) = ... ; in
+    (f (fst p), g (snd p))
+  .
+.;
+
+f = func :: (Nat -> Bool) ->
+  let x = ...; in
+    matches (rem (x,two), one)
+  .
+.;
+
+g = func :: (Nat -> Nat) ->
+  let x = ...; in
+    add (x,x)
+  .
+.;
+|] ++ prelude)
+          `shouldBe` "(Bool.True,(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero)))))))))"
 
       it "pi" $         -- pg 44
-        (run True $
-          pre ++ unlines [
-            "func pifun : (() -> Nat) do",
-            "   return 314",
-            "end",
-            "return pifun ()"
-           ])
-        `shouldBe` Right (EData ["Nat","314"] EUnit)
+        evalString ("main = pifun () ; pifun = func -> Pi.;")
+          `shouldBe` "Pi"
 
+{-
+      -- TODO: too much work
       it "roots" $         -- pg 44
         (run True $
           pre ++ unlines [
@@ -953,15 +962,15 @@ compose = func ->
             ""
            ])
         `shouldBe` Right (EData ["Bool","True"] EUnit)
+-}
 
       it "tuples / eq" $         -- pg 45
-        (run True $
-          pre ++ unlines [
-            "implementation of IEqualable for (a,b) with end",
-            "return (((1,1)===(1,1)) and ((1,2)=/=(1,1)))"
-           ])
-        `shouldBe` Right (EData ["Bool","True"] EUnit)
+        evalString ([r|
+main = (matches ((one,one),(one,one)), matches ((one,two),(one,one)));
+|] ++ prelude)
+          `shouldBe` "(Bool.True,Bool.False)"
 
+{-
       it "tuples / ord" $         -- pg 45
         (run True $
           pre ++ unlines [
