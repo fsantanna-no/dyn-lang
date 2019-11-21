@@ -300,31 +300,49 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 
   describe "dyn:" $ do
 
-    it "XXX: [(),True]" $
+    it "[(),True]" $
+      evalString ([r|
+main = f l1;
+
+data List for a is recursive;
+--data List.Nil
+data List.Cons with (a, List of a);
+
+l1 :: List of a where a is IEnum;
+l1 = List.Cons (Bool.True, l2);
+
+l2 :: List of a where a is IEnum;
+l2 = List.Cons ((), List.Nil);
+
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil;
+    List.Cons (=v,=l) -> List.Cons (toNat v, f l);
+  .
+.;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
+
+    it "[(),True]" $
       evalString ([r|
 main = f l;
 
 data List for a is recursive;
 --data List.Nil
---data List.Cons with (a, List of a)
+data List.Cons with (a, List of a);
 
-l :: List of a where a is IEnum;        -- TODO: transparent insert
-l = List.Cons ((Key.Bool, Bool.True),
-    List.Cons ((Key.Unit, ()),
+l :: List of a where a is IEnum;
+l = List.Cons (Bool.True,
+    List.Cons ((),
     List.Nil));
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
-    --List.Cons (=v,=l) -> List.Cons ((toNat' d') v', f l) where
-    --  l :: List of a
-    --  v :: a
-    --  (d',v') = dIEnuma v
-    --;
   .
 .;
-|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
     it "succ [(),False]" $

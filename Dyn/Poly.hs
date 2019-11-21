@@ -29,7 +29,7 @@ mE1 :: [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
 
 -- pat::Bool = id(maximum)
 mE1 globs cts dsigs xtp   (EVar z ('$':id)) = EVar z id
-mE1 globs cts dsigs xtp e@(EVar z id)       = e' where
+mE1 globs cts dsigs xtp e@(EVar z id) = e' where
 
   (dcs,dtp) = dsigsFind dsigs id
   dcs'      = Ifce.ifcesSups globs (getCtrs dcs) where
@@ -49,7 +49,8 @@ mE1 globs cts dsigs xtp e@(EVar z id)       = e' where
     -- xtp is concrete, instantiate e with it
     --    maximum :: Bool
     --    maximum' dIBoundedBool
-    (_, TData xhr2 _, _, _)     -> toID' (concat xhr2)     -- TODO: TData ofs
+    (_, TData xhr2 _, _, _)
+      | not (has "a" xtp)       -> toID' (concat xhr2)     -- TODO: TData ofs
 
     -- xtp is not concrete yet
     -- .
@@ -70,7 +71,7 @@ mE1 _ _ _ _ e = e
 -------------------------------------------------------------------------------
 
 -- pat1::B = id2(neq) e2::(B,B)
-mE2 globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
+mE2 globs cts dsigs xtp (ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
 
   TFunc inp2 out2 = tp2
   (cs2,tp2)       = dsigsFind dsigs id2
@@ -131,6 +132,35 @@ mE2 globs cts dsigs xtp e@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 where
                       e' = mapExpr (mSz,mDz,mWz,mPz,mE) globs cts dsigs TAny e where
                             mE _ _ _ _ (EVar z id) = (EVar z ("$"++id))   -- TODO
                             mE _ _ _ _ e           = e
+
+--    l :: List of a where a is IEnum;
+--    l = List.Cons (Bool.True,
+--        List.Cons ((),
+--        List.Nil));
+--
+--    l :: List of a where a is IEnum;
+--    l = List.Cons ((Key.Bool, Bool.True),
+--        List.Cons ((Key.Unit, ()),
+--        List.Nil));
+mE2 globs cts dsigs xtp e@(ECall z1 e2@(ECons z2 (hr2:_)) e3)
+  | isRecGen = {-traceShowS $-} ECall z1 e2 e3'
+  where
+    ETuple _ es3 = e3
+    e3' = ETuple z2 $ map f $ zip tps es3 where
+            TData hr _ = toType dsigs e2
+            Data (_,_,_,_,TTuple tps) = dataFind globs hr
+
+    f (TVar "a", e) = ETuple z2 [key,e] where
+                        key = ECons z2 ["Key", tpToString' $ toType dsigs e]
+    f (_,        e) = e
+
+    isRecGen = (getRecDatas globs xtp == ["a"])
+
+    tpToString' (TData hr []) = head hr
+    tpToString' TUnit         = "Unit"
+    tpToString' x = error $ show (toString e, cts,xtp, x)
+
+--mE2 globs cts dsigs xtp e@(ECall z1 e2@(ECons z2 (hr2:_)) e3) = traceShowS e
 
 mE2 _ _ _ _ e = e
 

@@ -190,10 +190,10 @@ instance IType Expr where
   toType _  (ECons  _ hr)  = TData hr []
   toType _  (EFunc  _ _ tp _ _) = tp
   toType ds (ETuple _ es)  = TTuple $ map (toType ds) es
-  toType ds (ECall  _ f _) = case toType ds f of
-                                TAny         -> TAny
-                                TFunc _ out  -> out
-                                TData hr ofs -> TData hr ofs
+  toType ds (ECall  _ f e) = case toType ds f of
+                                TAny        -> TAny
+                                TFunc _ out -> out
+                                TData hr [] -> TData hr [] --(toList $ toType ds e)
   toType ds (ECase  _ _ cs) = foldr f TAny $ map ((toType ds).snd) cs where
                                 f tp1 TAny               = tp1
                                 f tp1 tp2 | (tp1 == tp2) = tp1

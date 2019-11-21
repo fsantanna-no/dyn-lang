@@ -70,24 +70,46 @@ mapPatt fs@(_,_,_,fP,_) globs cts dsigs xtp p = fP globs cts dsigs (rec p) where
 
 mapExpr :: MapFs -> [Glob] -> CTs -> [Decl] -> Type -> Expr -> Expr
 mapExpr fs@(_,_,_,_,fE) globs cts dsigs xtp e = fE globs cts dsigs xtp (rec e) where
-  rec (EFunc  z cs tp ups whe) = EFunc  z cs tp ups $ mapWhere fs globs ((cs,tp):cts) (arg:dsigs) xtp whe where
-                                  arg = DSig z "..." cz inp
-                                  (inp,xtp) = case tp of
-                                                TFunc inp out -> (inp,out)
-                                                otherwise     -> (TAny,TAny)
+  rec (EFunc  z cs tp ups whe)
+                       = EFunc  z cs tp ups $ mapWhere fs globs ((cs,tp):cts) (arg:dsigs) xtp whe where
+                          arg = DSig z "..." cz inp
+                          (inp,xtp) = case tp of
+                                        TFunc inp out -> (inp,out)
+                                        otherwise     -> (TAny,TAny)
   -- TODO: TAny
-  rec (EData  z hr e)          = EData  z hr $ mapExpr fs globs cts dsigs TAny e
-  rec (ETuple z es)            = ETuple z $ map (mapExpr fs globs cts dsigs TAny) es
-  rec (ECall  z e1 e2)         = ECall  z e1' e2' where
-                                  e1' = mapExpr fs globs cts dsigs TAny e1
-                                  e2' = mapExpr fs globs cts dsigs TAny e2
-  rec (ECase  z e l)           = ECase  z e' l' where
+
+  rec (EData  z hr e)  = EData  z hr $ mapExpr fs globs cts dsigs TAny e
+
+  rec (ETuple z es)    = ETuple z $ map f $ zip tps es where
+                          f (tp,e) = mapExpr fs globs cts dsigs tp e
+                          tps = case xtp of
+                                  TTuple tps -> tps
+                                  otherwise  -> repeat TAny
+
+  rec e@(ECall  z e1 e2) = ECall  z e1' e2' where
+    e1' = mapExpr fs globs cts dsigs TAny e1
+    e2' = mapExpr fs globs cts dsigs tp2 e2 where
+            tp2 = case (xtp, toType dsigs e1') of
+                    (_,TAny)        -> TAny
+                    (TAny,_)        -> TAny
+                    (_,TFunc inp _) -> inp
+
+                    -- Cons X ps (tp is type of ps taken from data X)
+                    (TData xhr [xof], TData hr []) -> tp where
+                      Data (_,_,_,_,tp) = dataFind globs hr
+
+                    (TData _ _, TData _ _) -> TAny
+
+                    x -> error $ show x
+
+  rec (ECase  z e l)   = ECase  z e' l' where
     e' = mapExpr fs globs cts dsigs TAny e
     l' = map f l where
           f (pat,whe) = (pat',whe') where
             pat' = mapPatt  fs globs cts dsigs xtp pat
             whe' = mapWhere fs globs cts dsigs xtp whe
-  rec e      = e
+
+  rec e = e
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

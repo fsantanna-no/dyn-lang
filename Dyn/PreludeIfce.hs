@@ -16,6 +16,10 @@ prelude = nat_iord   ++ nat_ieq
 -------------------------------------------------------------------------------
 
 std = [r|
+  data List for a;
+  data List.Nil;
+  data List.Cons with (a, List of a);
+
   matches :: ((a,a) -> Bool);
   matches = func ->
     case (x,y) of
