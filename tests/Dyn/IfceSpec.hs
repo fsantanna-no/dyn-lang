@@ -237,7 +237,7 @@ main = (eq (m1,m1), neq(m1,m2))
 m1 :: Maybe of () = Maybe.Nothing
 m2 :: Maybe of () = Maybe.Just ()
 
---data Maybe for a
+--data Maybe of a
 --data Maybe.Nothing
 --data Maybe.Just with a
 
@@ -315,7 +315,7 @@ main = (f' d) l where
   .;
 .;
 
---data List for a is recursive
+--data List of a is recursive
 --data List.Nil
 --data List.Cons with (a, List of a)
 
@@ -349,7 +349,7 @@ main = (f' gets) l where
   ;
 .;
 
---data List for a
+--data List of a
 --data List.Nil
 --data List.Cons with (a, List of a)
 

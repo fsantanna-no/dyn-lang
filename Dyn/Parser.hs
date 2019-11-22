@@ -416,7 +416,7 @@ data_ = do
   void <- try $ tk_key "data"
   hr   <- tk_hier
   ofs  <- option [] $ do
-            void <- try $ tk_key "for"
+            void <- try $ tk_key "of"
             ofs  <- (singleton <$> tk_var) <|> (parens $ list (tk_sym ",") tk_var)
             return ofs
   tp   <- option TUnit $ do

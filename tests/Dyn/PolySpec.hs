@@ -279,7 +279,7 @@ f = func :: (a -> Nat) where a is IEnum ->
       evalString ([r|
 main = f l;
 
-data List for a;
+data List of a;
 data List.Nil;
 data List.Cons with (a, List of a);
 
@@ -304,7 +304,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
       evalString ([r|
 main = f l1;
 
-data List for a is recursive;
+data List of a is recursive;
 --data List.Nil
 data List.Cons with (a, List of a);
 
@@ -327,7 +327,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
       evalString ([r|
 main = f l;
 
-data List for a is recursive;
+data List of a is recursive;
 --data List.Nil
 data List.Cons with (a, List of a);
 
@@ -355,7 +355,58 @@ main = (f' gets) l where
   .;
 .;
 
---data List for a
+--data List of a
+--data List.Nil
+--data List.Cons with (a, List of a)
+
+l :: List of a where a is IEnum;   -- a is dynamic IEnum
+l = List.Cons ((Key.Bool, Bool.False),
+    List.Nil);
+
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil;
+    List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
+      (d',v') = gets v;
+    .;
+  .
+.;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+        `shouldBe` "(List.Cons (Bool.True,List.Nil))"
+
+    it "[(),True]" $
+      evalString ([r|
+main = f l;
+
+data List of a is recursive;
+--data List.Nil
+data List.Cons with (a, List of a);
+
+l :: List of a where a is IEnum;
+l = List.Cons (Bool.True,
+    List.Cons ((),
+    List.Nil));
+
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil;
+    List.Cons (=v,=l) -> List.Cons (toNat v, f l);
+  .
+.;
+|] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
+
+    it "succ [(),False]" $
+      evalString ([r|
+main = (f' gets) l where
+  gets = func ->
+    case ... of
+      (=k,=v) -> (getHash (ds_IEnum,k), v);
+    .
+  .;
+.;
+
+--data List of a
 --data List.Nil
 --data List.Cons with (a, List of a)
 

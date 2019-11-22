@@ -250,14 +250,14 @@ add =
       parseToString "data Xxx with Int; main = case Xxx Int of Xxx Int -> Int;.;"
         `shouldBe` "data Xxx with Int;\nmain = case (Xxx Int) of\n  (Xxx Int) -> Int;\n.;\n"
     it "Pair (a,a)" $
-      parseToString "data Pair for a with (a,a);"
-        `shouldBe` "data Pair for a with (a,a);\n"
+      parseToString "data Pair of a with (a,a);"
+        `shouldBe` "data Pair of a with (a,a);\n"
     it "Pair (a,b)" $
-      parseToString "data Pair for (a,b) with (a,b);"
-        `shouldBe` "data Pair for (a,b) with (a,b);\n"
+      parseToString "data Pair of (a,b) with (a,b);"
+        `shouldBe` "data Pair of (a,b) with (a,b);\n"
     it "Pair (a,a) ; p1:Pair(Int,Int)" $
-      parseToString "data Pair for a with (a,a); p1 :: Pair of Int;"
-        `shouldBe` "data Pair for a with (a,a);\np1 :: Pair of Int;\n"
+      parseToString "data Pair of a with (a,a); p1 :: Pair of Int;"
+        `shouldBe` "data Pair of a with (a,a);\np1 :: Pair of Int;\n"
     it "Either" $
-      parseToString "data Either for (a,b); data Either.Left with a; data Either.Right with b;"
-        `shouldBe` "data Either for (a,b);\ndata Either.Left with a;\ndata Either.Right with b;\n"
+      parseToString "data Either of (a,b); data Either.Left with a; data Either.Right with b;"
+        `shouldBe` "data Either of (a,b);\ndata Either.Left with a;\ndata Either.Right with b;\n"

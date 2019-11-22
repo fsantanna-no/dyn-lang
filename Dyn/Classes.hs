@@ -164,8 +164,8 @@ instance IString ExpWhere where
 instance IString Data where
   toString (Data (_,rec,hr,ofs,st)) = "data " ++ intercalate "." hr ++ of_ ofs ++ is_rec rec ++ with st ++ ";" where
                                         of_ []  = ""
-                                        of_ [v] = " for " ++ v
-                                        of_ l   = " for (" ++ intercalate "," l ++ ")"
+                                        of_ [v] = " of " ++ v
+                                        of_ l   = " of (" ++ intercalate "," l ++ ")"
                                         is_rec False = ""
                                         is_rec True  = " is recursive"
                                         with TUnit = ""

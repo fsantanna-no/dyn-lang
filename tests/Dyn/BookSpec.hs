@@ -842,7 +842,7 @@ main :: Bool = fromNat (add (toNat Bool.False, one));
       it "mkpair" $         -- pg 41
         (run True $
           unlines [
-            "data Pair for (a,b) with (a,b)",
+            "data Pair of (a,b) with (a,b)",
             "var mkPair : ((a,b) -> Pair of (a,b)) = Pair",
             "var p1 : Pair of (Nat,Nat) = mkPair (1,2)",
             "return p1"
@@ -987,7 +987,7 @@ main = (matches ((one,one),(one,one)), matches ((one,two),(one,one)));
       it "Triple" $         -- pg 45
         (run True $
           pre ++ unlines [
-            "data Triple for (a,b,c) with (a,b,c)",
+            "data Triple of (a,b,c) with (a,b,c)",
             "implementation of IEqualable for Triple of (a,b,c) with end",
             "var t0 : Triple of (Nat,Nat,Nat) = Triple (1,0,3)",
             "var t1 : Triple of (Nat,Nat,Nat) = Triple (1,2,3)",
@@ -999,7 +999,7 @@ main = (matches ((one,one),(one,one)), matches ((one,two),(one,one)));
       it "Triple" $         -- pg 45
         (run True $
           pre ++ unlines [
-            "data Triple for (a,b,c) with (a,b,c)",
+            "data Triple of (a,b,c) with (a,b,c)",
             "implementation of IEqualable for Triple with end",
             "var t1 : Triple of (Nat,Nat,Nat)    = Triple (1,2,3)",
             "var t2 : Triple of (Bool,Bool,Bool) = Triple (Bool.True,Bool.False,Bool.True)",
@@ -1054,7 +1054,7 @@ return (l,r)
       it "Either a b" $         -- pg 46
         (run True $
           pre ++ [r|
-data Either for (a,b)
+data Either of (a,b)
 data Either.Left  with a
 data Either.Right with b
 var l : Either.Left  of (Bool,Nat) = Either.Left  Bool.True
@@ -1066,7 +1066,7 @@ return (l,r)
       it "case" $         -- pg 46
         (run True $
           pre ++ [r|
-data Either for (a,b) is abstract
+data Either of (a,b) is abstract
 data Either.Left  with a
 data Either.Right with b
 
@@ -1097,7 +1097,7 @@ return (case_ ((f,g),l)) + (case_ ((f,g),r))
       it "Either / IEq" $         -- pg 47
         (run True $
           pre ++ [r|
-data Either for (a,b)
+data Either of (a,b)
 data Either.Left  with a
 data Either.Right with b
 
@@ -1115,7 +1115,7 @@ return (l_ === l) and (l_ =/= r)
       it "Either / IOrd" $         -- pg 47
         (run True $
           pre ++ [r|
-data Either for (a,b) is abstract
+data Either of (a,b) is abstract
 data Either.Left  with a
 data Either.Right with b
 
@@ -1217,8 +1217,8 @@ return move(Distance 10,Angle 2,Position(0,0))
       it "OneTwo" $         -- pg 49
         (run True $
           [r|
-data Pair   for a with (a,a)
-data OneTwo for a
+data Pair   of a with (a,a)
+data OneTwo of a
 data OneTwo.One with a
 data OneTwo.Two with Pair of a
 return (OneTwo.One 10, OneTwo.Two (Pair (10,20)))
@@ -1228,8 +1228,8 @@ return (OneTwo.One 10, OneTwo.Two (Pair (10,20)))
       it "OneTwo" $         -- pg 49
         (run True $
           [r|
-data Pair   for a with (a,a)
-data OneTwo for a
+data Pair   of a with (a,a)
+data OneTwo of a
 data OneTwo.One with a
 data OneTwo.Two with Pair of a
 return (OneTwo.One 10, OneTwo.Two (Pair (10,())))
@@ -1876,7 +1876,7 @@ return (neg ((((mkRat (10,2)) -- (mkRat (0,1))) ++ (mkRat (1,-5))) ** (mkRat (-5
 
       it "List" $                   -- pg 92
         evalString ([r|
-data List for a;
+data List of a;
 data List.Nil;
 data List.Cons with (a, List of a);
 main = List.Cons (Nat.Succ Nat.Zero, List.Nil);
@@ -1887,7 +1887,7 @@ main = List.Cons (Nat.Succ Nat.Zero, List.Nil);
       it "TODO: List `:´" $                   -- pg 92
         (run True $
           [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 func :: : (a -> List of a)
@@ -1903,7 +1903,7 @@ main = (neq (List.Cons (ten,List.Nil), List.Cons (ten,List.Nil)),
          eq (List.Cons (ten,List.Nil), List.Cons (ten,List.Nil)),
          eq (List.Cons (two,List.Nil), List.Cons (ten,List.Nil)))
 
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -1929,7 +1929,7 @@ eq = func :: ((List of a, List of a) -> Bool) ->
       it "List: null" $                   -- pg 93
         (run True $
           [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -1948,7 +1948,7 @@ return (null (List.Cons (10, List.Nil)), null (List.Nil))
       it "List: IOrderable" $                   -- pg 94
         (run True $
           pre ++ [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -1983,7 +1983,7 @@ return (null (List.Cons (10, List.Nil)), null (List.Nil))
       it "List: last1/last2" $                   -- pg 94
         (run True $
           pre ++ [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2026,7 +2026,7 @@ return (last2 (List.Cons (X, List.Nil)), last1 (List.Cons (10, List.Nil)))
       it "List: last2" $                   -- pg 94
         (run True $
           pre ++ [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2048,7 +2048,7 @@ return 1
       it "List: Snoc" $                   -- pg 94
         (run True $
           pre ++ [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2059,7 +2059,7 @@ func head xs : (List of a -> a) do
   return x
 end
 
-data Liste for a
+data Liste of a
 data Liste.Nil
 data Liste.Snoc with (Liste of a, a)
 
@@ -2097,7 +2097,7 @@ return (head l, heade le, (convert (le, List.Nil)) === l)
       it "List: ++" $                   -- pg 95
         (run True $
           [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2117,7 +2117,7 @@ return cat (List.Cons (10, List.Cons (20, List.Nil)), List.Nil)
       it "List: concat" $                   -- pg 98
         (run True $
           [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2148,7 +2148,7 @@ return concat (List.Cons (List.Cons(10,List.Nil), List.Cons (List.Cons(20,List.N
       it "List: reverse" $                   -- pg 99
         (run True $
           [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2172,7 +2172,7 @@ return (reverse (l, List.Nil))
       it "List: length" $                   -- pg 102
         (run True $
           [r|
-data List for a is abstract
+data List of a is abstract
 data List.Nil
 data List.Cons with (a, List of a)
 
@@ -2194,7 +2194,7 @@ return length l
       it "List: head/tail" $                   -- pg 102
         (run True $
           [r|
-data List for a
+data List of a
 data List.Nil
 data List.Cons with (a, List of a)
 

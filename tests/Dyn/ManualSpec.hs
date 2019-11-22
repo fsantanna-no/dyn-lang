@@ -165,7 +165,7 @@ ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
            List.Cons ((Key.YYY, dIEnumBool),
            List.Nil));
 
---data List for a
+--data List of a
 --data List.Nil
 --data List.Cons with (a, List of a)
 
@@ -204,7 +204,7 @@ ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
            List.Cons ((Key.YYY, dIEnumBool),
            List.Nil));
 
---data List for a
+--data List of a
 --data List.Nil
 --data List.Cons with (a, List of a)
 
