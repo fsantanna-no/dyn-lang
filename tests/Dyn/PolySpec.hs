@@ -74,6 +74,9 @@ main = x where
     it "succ" $ do
       evalString ("main = succ Bool.False;"++bool_ienum++ienum++nat)
         `shouldBe` "Bool.True"
+    it "succ one" $ do
+      evalString ("main = succ one;"++nat_ienum++ienum++nat++std)
+        `shouldBe` "(Nat.Succ (Nat.Succ Nat.Zero))"
 
   describe "IRec-IInd" $ do
 
@@ -295,6 +298,25 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ prelude)
         `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
 
+    it "f [one,zero]" $
+      evalString ([r|
+main = f l;
+
+l :: List of Nat;
+l = List.Cons (one,
+    List.Cons (zero,
+    List.Nil));
+
+f :: (List of a -> List of Nat) where a is IEnum;
+f = func :: (List of a -> List of Nat) where a is IEnum ->
+  case ... of
+    List.Nil          -> List.Nil;
+    List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a; l::List of a; .;
+  .
+.;
+|] ++ prelude)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
+
     it "[(),True]" $
       evalString ([r|
 main = f l1;
@@ -314,14 +336,15 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
-    it "[(),True]" $
+    it "XXX: [(),True,one]" $
       evalString ([r|
 main = f l;
 
 l :: List of IEnum;
 l = List.Cons (Bool.True,
     List.Cons ((),
-    List.Nil));
+    List.Cons (one,
+    List.Nil)));
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
@@ -329,73 +352,22 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
   .
 .;
-|] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
-        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
-
-    it "XXX: succ [(),False]" $
-      evalString ([r|
-main = (f' gets) l where
-  gets = func ->
-    case ... of
-      (=k,=v) -> (getHash (ds_IEnum,k), v);
-    .
-  .;
-.;
-
-l :: List of IEnum;   -- a is dynamic IEnum
-l = List.Cons ((Key.Bool, Bool.False),
-    List.Nil);
-
-f = func :: (List of a -> List of Nat) where a is IEnum ->
-  case ... of
-    List.Nil          -> List.Nil;
-    List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
-      (d',v') = gets v;
-    .;
-  .
-.;
-|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
-        `shouldBe` "(List.Cons (Bool.True,List.Nil))"
-
-    it "[(),True]" $
-      evalString ([r|
-main = f l;
-
-l :: List of IEnum;
-l = List.Cons (Bool.True,
-    List.Cons ((),
-    List.Nil));
-
-f = func :: (List of a -> List of Nat) where a is IEnum ->
-  case ... of
-    List.Nil          -> List.Nil;
-    List.Cons (=v,=l) -> List.Cons (toNat v, f l);
-  .
-.;
-|] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
-        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
+|] ++ nat_ienum ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
+        `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))))"
 
     it "succ [(),False]" $
       evalString ([r|
-main = (f' gets) l where
-  gets = func ->
-    case ... of
-      (=k,=v) -> (getHash (ds_IEnum,k), v);
-    .
-  .;
-.;
+main = f l;
 
 l :: List of IEnum;   -- a is dynamic IEnum
-l = List.Cons ((Key.Bool, Bool.False),
+l = List.Cons (Bool.False,
     List.Nil);
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
   case ... of
     List.Nil          -> List.Nil;
-    List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
-      (d',v') = gets v;
-    .;
+    List.Cons (=v,=l) -> List.Cons (succ v, f l);
   .
 .;
-|] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
+|] ++ prelude)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"

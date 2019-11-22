@@ -1,3 +1,4 @@
+- fix impls dicts separated
 - dynamic?
     - Listas em Book
     - primeiro ver se da erro tentando lista de tipos heterogeneos

@@ -4,7 +4,7 @@ module Dyn.Prelude where
 
 import Text.RawString.QQ
 
-prelude = nat_iord   ++ nat_ieq
+prelude = nat_ienum  ++ nat_iord  ++ nat_ieq
        ++ bool_ienum ++ bool_iord ++ bool_ieq ++ bool_ibounded
        ++ char_iord  ++ char_ieq
        ++ unit_ienum
@@ -50,6 +50,8 @@ std = [r|
       (_,x) = ...;
     .
   .;
+
+  identity = func -> ... .;
 |]
 
 ibounded = [r|
@@ -393,5 +395,12 @@ nat_iord = [r|
         (x,y) = ...;
       .
     .;
+  .
+|]
+
+nat_ienum = [r|
+  implementation of IEnum for Nat with
+    toNat   = identity;
+    fromNat = identity;
   .
 |]
