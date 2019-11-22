@@ -263,7 +263,8 @@ implementation of IAaa for Xxx with
       evalString ("main = (nextlet Char.Cc, nextlet Char.DD);"++prelude)
          `shouldBe` "(Char.Dd,Char.AA)"
 
-  describe "dyn:" $ do
+  describe "YYY: dyn:" $ do
+
     it "f (toNat) True" $
       evalString ([r|
 main = f Bool.True;
@@ -278,10 +279,6 @@ f = func :: (a -> Nat) where a is IEnum ->
     it "f [False,True]" $
       evalString ([r|
 main = f l;
-
-data List of a;
-data List.Nil;
-data List.Cons with (a, List of a);
 
 l :: List of Bool;
 l = List.Cons (Bool.False,
@@ -298,20 +295,14 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ prelude)
         `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
 
-  describe "dyn:" $ do
-
     it "[(),True]" $
       evalString ([r|
 main = f l1;
 
-data List of a is recursive;
---data List.Nil
-data List.Cons with (a, List of a);
-
-l1 :: List of a where a is IEnum;
+l1 :: List of IEnum;
 l1 = List.Cons (Bool.True, l2);
 
-l2 :: List of a where a is IEnum;
+l2 :: List of IEnum;
 l2 = List.Cons ((), List.Nil);
 
 f = func :: (List of a -> List of Nat) where a is IEnum ->
@@ -327,11 +318,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
       evalString ([r|
 main = f l;
 
-data List of a is recursive;
---data List.Nil
-data List.Cons with (a, List of a);
-
-l :: List of a where a is IEnum;
+l :: List of IEnum;
 l = List.Cons (Bool.True,
     List.Cons ((),
     List.Nil));
@@ -345,7 +332,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
-    it "succ [(),False]" $
+    it "XXX: succ [(),False]" $
       evalString ([r|
 main = (f' gets) l where
   gets = func ->
@@ -355,11 +342,7 @@ main = (f' gets) l where
   .;
 .;
 
---data List of a
---data List.Nil
---data List.Cons with (a, List of a)
-
-l :: List of a where a is IEnum;   -- a is dynamic IEnum
+l :: List of IEnum;   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.False),
     List.Nil);
 
@@ -378,11 +361,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
       evalString ([r|
 main = f l;
 
-data List of a is recursive;
---data List.Nil
-data List.Cons with (a, List of a);
-
-l :: List of a where a is IEnum;
+l :: List of IEnum;
 l = List.Cons (Bool.True,
     List.Cons ((),
     List.Nil));
@@ -406,11 +385,7 @@ main = (f' gets) l where
   .;
 .;
 
---data List of a
---data List.Nil
---data List.Cons with (a, List of a)
-
-l :: List of a where a is IEnum;   -- a is dynamic IEnum
+l :: List of IEnum;   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.False),
     List.Nil);
 

@@ -293,7 +293,7 @@ implementation of IEq for Maybe of a where (a is IEq) with
       evalString ("main = (nextlet Char.Cc, nextlet Char.DD);"++prelude)
          `shouldBe` "(Char.Dd,Char.AA)"
 
-  describe "XXX: dyn:" $ do
+  describe "dyn:" $ do
     it "f (toNat) True" $
       evalString ([r|
 main = (f' dIEnumBool) Bool.True;
@@ -319,7 +319,7 @@ main = (f' d) l where
 --data List.Nil
 --data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum;   -- a is dynamic IEnum
+l :: List of IEnum;   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.True),
     List.Cons ((Key.Unit, ()),
     List.Nil));
@@ -353,7 +353,7 @@ main = (f' gets) l where
 --data List.Nil
 --data List.Cons with (a, List of a)
 
-l :: List of a where a is IEnum;   -- a is dynamic IEnum
+l :: List of IEnum;   -- a is dynamic IEnum
 l = List.Cons ((Key.Bool, Bool.False),
     List.Nil);
 

@@ -51,6 +51,7 @@ data Type = TAny
           | TUnit
           | TVar   ID_Var
           | TData  ID_Hier [Type]       -- X.Y of (Int,Bool) // data X.Y of (a,b) with (a,b)
+          | TIfce  [ID_Ifce]            -- x :: (IEnum,IShow)
           | TTuple [Type]               -- (len >= 2)
           | TFunc  {-FuncType-} Type Type  -- inp out
   deriving (Eq,Show)
@@ -68,6 +69,12 @@ ctrsToMap (Ctrs cs) = M.map S.fromAscList $ M.fromAscList cs
 ctrsFromMap :: M.Map ID_Var (S.Set ID_Ifce) -> Ctrs
 ctrsFromMap csmap = Ctrs $ map (\(k,v)->(k,S.toAscList v)) $ M.toAscList csmap
 -}
+
+instantiate :: (ID_Var, Type) -> Type -> Type
+instantiate ("a",itp) (TVar "a")     = itp
+instantiate ipair     (TData hr ofs) = TData hr $ map (instantiate ipair) ofs
+instantiate ipair     (TTuple ts)    = TTuple $ map (instantiate ipair) ts
+instantiate _ tp = error $ show tp
 
 -------------------------------------------------------------------------------
 

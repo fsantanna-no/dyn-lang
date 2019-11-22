@@ -298,8 +298,8 @@ type_ctrs = do
 
 type_ :: Parser Type
 type_ = do
-  tp <- try type_A <|> try type_D <|> try type_V <|> try type_0 <|>
-        try type_parens <|> try type_N <|> type_F <?> "type"
+  tp <- try type_A <|> try type_I      <|> try type_D <|> try type_V <|>
+        try type_0 <|> try type_parens <|> try type_N <|> type_F <?> "type"
   return tp
 
 type_A :: Parser Type
@@ -318,6 +318,11 @@ type_D = do
   hier <- tk_hier
   ofs  <- option TUnit $ try (tk_key "of" *> type_)
   return $ TData hier $ toList ofs
+
+type_I :: Parser Type
+type_I = do
+  ifcs <- list (tk_sym ",") tk_ifce
+  return $ TIfce ifcs
 
 type_N :: Parser Type
 type_N = do

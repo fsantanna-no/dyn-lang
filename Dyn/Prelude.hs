@@ -16,7 +16,7 @@ prelude = nat_iord   ++ nat_ieq
 -------------------------------------------------------------------------------
 
 std = [r|
-  data List of a;
+  data List of a is recursive;
   data List.Nil;
   data List.Cons with (a, List of a);
 

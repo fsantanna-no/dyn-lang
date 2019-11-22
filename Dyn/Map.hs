@@ -95,7 +95,7 @@ mapExpr fs@(_,_,_,_,fE) globs cts dsigs xtp e = fE globs cts dsigs xtp (rec e) w
                     (_,TFunc inp _) -> inp
 
                     -- Cons X ps (tp is type of ps taken from data X)
-                    (TData xhr [xof], TData hr []) -> tp where
+                    (TData xhr [xof], TData hr []) -> instantiate ("a",xof) tp where
                       Data (_,_,_,_,tp) = dataFind globs hr
 
                     (TData _ _, TData _ _) -> TAny

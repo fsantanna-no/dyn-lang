@@ -75,6 +75,7 @@ instance IString Type where
                                 of_ []  = ""
                                 of_ [v] = " of " ++ toString v
                                 of_ l   = " of (" ++ intercalate "," (map toString l) ++ ")"
+  toString (TIfce  ifcs)    = intercalate "." ifcs
   toString (TTuple ttps)    = "(" ++ intercalate "," (map toString ttps) ++ ")"
   toString (TFunc  inp out) = "(" ++ toString inp ++ " -> " ++ toString out ++ ")"
   --toString (TData ids [x]) = intercalate "." ids ++ " of " ++ toString x
