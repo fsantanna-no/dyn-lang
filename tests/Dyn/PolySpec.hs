@@ -336,7 +336,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
-    it "XXX: [(),True,one]" $
+    it "[(),True,one]" $
       evalString ([r|
 main = f l;
 
@@ -352,10 +352,10 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
   .
 .;
-|] ++ nat_ienum ++ unit_ienum ++ bool_ienum ++ ienum ++ nat ++ std)
+|] ++ nat_ienum ++ char_ieq ++ unit_ienum ++ bool_ienum ++ ienum ++ ieq ++ nat ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))))"
 
-    it "succ [(),False]" $
+    it "XXX: succ [(),False]" $
       evalString ([r|
 main = f l;
 
