@@ -2,7 +2,7 @@ module Dyn.Ifce (apply,ifceFind,ifceToDeclIds,ifcesSups) where
 
 import Debug.Trace
 import Data.Bool                (bool)
-import qualified Data.List as L (find, sort, groupBy)
+import qualified Data.List as L (find, sort, sortBy, groupBy)
 
 import Dyn.AST
 import Dyn.Classes
@@ -34,6 +34,7 @@ dicts globs = --traceShowSS $
   map toDict        $   -- [ ds_IEnum=..., ... ]
   map toCons        $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
   L.groupBy sameIfc $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]
+  L.sortBy  cmpIfc  $
   map toTuple       $   -- [ (IEnum, Cons(K.Unit,dIEnumUnit)), (IEnum, Cons(K.Bool,dIEnumBool), ...]
   globsToImpls      $   -- [IEnum for Unit, IEq for XXX, IEnum for Bool, ...]
   globs where
@@ -54,6 +55,7 @@ dicts globs = --traceShowSS $
                                     tup = ETuple pz [c1,c2] where
                                             c1 = ECons pz ["Key",tp']
                                             c2 = EVar  pz ("d"++ifc++tp')
+  cmpIfc  (ifc1,_) (ifc2,_) = compare ifc1 ifc2
   sameIfc (ifc1,_) (ifc2,_) = (ifc1 == ifc2)
 
 -------------------------------------------------------------------------------
