@@ -266,7 +266,7 @@ implementation of IAaa for Xxx with
       evalString ("main = (nextlet Char.Cc, nextlet Char.DD);"++prelude)
          `shouldBe` "(Char.Dd,Char.AA)"
 
-  describe "YYY: dyn:" $ do
+  describe "dyn:" $ do
 
     it "f (toNat) True" $
       evalString ([r|

@@ -1,4 +1,4 @@
-- fix impls dicts separated
+- partir pra Subtyping poly
 - dynamic?
     - Listas em Book
     - primeiro ver se da erro tentando lista de tipos heterogeneos

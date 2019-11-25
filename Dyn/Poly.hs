@@ -115,7 +115,7 @@ mE2 globs cts dsigs xtp xxx@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 whe
     --    (toNat' dIEnumUnit) ()
     --    (eq' dIEqBool) (Bool.True,Bool.False)
     (_, _, [("a", TUnit)], _)        -> call' $ direct $ concat ["Unit"]
-    (_, _, [("a", TData xhr _)], _)  -> call' $ direct $ concat xhr   -- TODO: _
+    (_, _, [("a", TData xhr _)], _)  -> traceShow (id2,xhr,out2,xtp) $ call' $ direct $ concat xhr   -- TODO: _
 
     -- A
     -- toNat v  where v::a
@@ -125,10 +125,10 @@ mE2 globs cts dsigs xtp xxx@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 whe
     (_, _, [("a", TVar  "a")], Nothing) -> call' $ direct "a"
 
     -- B
-    -- inside recusrive generic with constraint
+    -- inside recursive generic with constraint
     -- toNat v where v::a
     -- (toNat' (fst (dIEnum v))) (snd (dIEnum v))
-    (_, _, [("a", TVar  "a")], Just cs) -> ECall z2 (EVar z2 $ id2++"'") (toD "a" (getCtrs cs) e3)
+    (_, _, [("a", TVar  "a")], Just cs) -> traceShow id2 $ ECall z2 (EVar z2 $ id2++"'") (toD "a" (getCtrs cs) e3)
 
 {-
     -- ... but xtp is not concrete yet
