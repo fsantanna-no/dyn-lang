@@ -373,24 +373,24 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
 
   describe "Lang" $ do
-    it "toString" $
+    it "XXX: toString" $
       evalString ([r|
 main = (toString (Expr.Unit one), toString (Expr.Var (zero,zero)));
 data Expr with Nat;
 data Expr.Unit;
 data Expr.Var with Nat;
 
-interface IString with
+interface IString for a with
   toString :: (a -> String);
-;
+.
 
 implementation of IString for Expr.Unit with
-  toString :: (Expr.Unit -> String)
+  toString :: (Expr.Unit -> String);
   toString = func -> (toStringExpr ..., String.Unit) . ;
 .
 
 implementation of IString for Expr.Var with
-  toString :: (Expr.Unit -> String)
+  toString :: (Expr.Unit -> String);
   toString =
     func ->
       (toStringExpr ..., var) where

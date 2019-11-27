@@ -12,7 +12,7 @@ import qualified Dyn.Eval   as E
 -------------------------------------------------------------------------------
 
 apply :: Prog -> Prog
-apply globs = datas globs ++ dicts globs ++ expand globs
+apply globs = datas globs ++ impls globs ++ expand globs
 
 expand :: [Glob] -> [Glob]
 expand globs = filter (not.isGDecl) globs ++ (map globFromDecl $ concatMap f globs) where
@@ -20,7 +20,7 @@ expand globs = filter (not.isGDecl) globs ++ (map globFromDecl $ concatMap f glo
                 f (GDecl dcl) = expandGen globs dcl
                 f (GData dat) = []
                 f (GIfce ifc) = ifceToDecls ifc
-                f (GImpl imp) = implToDecls globs imp
+                f (GImpl imp) = []
 
 datas :: [Glob] -> [Glob]
 datas globs = map globFromData $ (dict : (map f $ globsToIfces globs)) where
@@ -28,35 +28,60 @@ datas globs = map globFromData $ (dict : (map f $ globsToIfces globs)) where
                 f (Ifce (z,id,_,_)) = Data (z, False, ["Dict",id], [], TAny)
                 dict = Data (pz, False, ["Dict"], [], TAny)
 
-dicts :: [Glob] -> [Glob]
-dicts globs = --traceShowSS $
-  map globFromDecl  $
-  map toDict        $   -- [ ds_IEnum=..., ... ]
-  map toCons        $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
-  L.groupBy sameIfc $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]
-  L.sortBy  cmpIfc  $
-  map toTuple       $   -- [ (IEnum, Cons(K.Unit,dIEnumUnit)), (IEnum, Cons(K.Bool,dIEnumBool), ...]
-  globsToImpls      $   -- [IEnum for Unit, IEq for XXX, IEnum for Bool, ...]
-  globs where
+impls :: [Glob] -> [Glob]
+impls globs = map globFromDecl $ dicts is ++ impls is where
+  is = globsToImpls globs
 
-  toDict :: (ID_Ifce,Expr) -> Decl
-  toDict (ifc,cons) = DAtr pz (PWrite pz ("ds_"++ifc))
-                       (ExpWhere (pz,[], cons))
+  impls :: [Impl] -> [Decl]
+  impls is = concatMap (implToDecls globs) (supers is)
 
-  toCons :: [(ID_Ifce,Expr)] -> (ID_Ifce,Expr)
-  toCons l = (fst $ head l,
-              foldr f (ECons pz ["List","Nil"]) $ map snd l)
-             where
-              f tup acc = ECall pz (ECons pz ["List","Cons"])
-                                   (ETuple pz [tup,acc])
+  -- group subtypes to create supertype fs:
+  --  toStringExpr = toStringExprUnit + toStringExprVar + ...
+  supers :: [Impl] -> [Impl]
+  supers is =
+    map ((\(_,_,x)->x) . head) $
+    --map (map (\(x,y,_) -> (x,y))) $
+    L.groupBy same $ -- [ [(IString,Expr.Unit),(IString,Expr.Var)], [(IString,Bool)] ]
+    L.sortBy  cmp  $
+    map toTriple   $ -- [ (IString,Expr.Unit), (IString,Bool), (IString,Expr.Var) ]
+    is where
+      toTriple impl@(Impl (_,ifc,_,tp,_)) = (ifc,tp,impl)
 
-  toTuple (Impl (_,ifc,_,tp,_)) = (ifc,tup) where
-                                    tp' = tpToString' tp
-                                    tup = ETuple pz [c1,c2] where
-                                            c1 = ECons pz ["Key",tp']
-                                            c2 = EVar  pz ("d"++ifc++tp')
-  cmpIfc  (ifc1,_) (ifc2,_) = compare ifc1 ifc2
-  sameIfc (ifc1,_) (ifc2,_) = (ifc1 == ifc2)
+      cmp  (ifc1,tp1,_) (ifc2,tp2,_) = case compare ifc1 ifc2 of
+                                        EQ -> compare (toString tp1) (toString tp2)
+                                        x  -> x
+
+      same (ifc1,tp1,_) (ifc2,tp2,_) = (ifc1 == ifc2) && (tp1 `f` tp2) where
+        f (TData hr1 _) (TData hr2 _) = (head hr1 == head hr2)
+        f tp1           tp2           = (tp1      == tp2)
+
+  dicts :: [Impl] -> [Decl]
+  dicts is = --traceShowSS $
+    map toDict     $   -- [ ds_IEnum=..., ... ]
+    map toCons     $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
+    L.groupBy same $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]
+    L.sortBy  comp $
+    map toPair     $   -- [ (IEnum, Cons(K.Unit,dIEnumUnit)), (IEnum, Cons(K.Bool,dIEnumBool), ...]
+    is where
+
+      toDict :: (ID_Ifce,Expr) -> Decl
+      toDict (ifc,cons) = DAtr pz (PWrite pz ("ds_"++ifc))
+                           (ExpWhere (pz,[], cons))
+
+      toCons :: [(ID_Ifce,Expr)] -> (ID_Ifce,Expr)
+      toCons l = (fst $ head l,
+                  foldr f (ECons pz ["List","Nil"]) $ map snd l)
+                 where
+                  f tup acc = ECall pz (ECons pz ["List","Cons"])
+                                       (ETuple pz [tup,acc])
+
+      toPair (Impl (_,ifc,_,tp,_)) = (ifc,tup) where
+                                        tp' = tpToString' tp
+                                        tup = ETuple pz [c1,c2] where
+                                                c1 = ECons pz ["Key",tp']
+                                                c2 = EVar  pz ("d"++ifc++tp')
+      comp (ifc1,_) (ifc2,_) = compare ifc1 ifc2
+      same (ifc1,_) (ifc2,_) = (ifc1 == ifc2)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
