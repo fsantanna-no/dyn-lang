@@ -100,35 +100,35 @@ mE2 globs cts dsigs xtp xxx@(ECall z1 e2@(EVar z2 id2) e3) = ECall z1 e2' e3 whe
 
     -- (X)
     -- f [(),T,1]
-    (_, Just _, [("a", TIfce _)],     Nothing)  -> call' indirectHash
+    (_, Just _, [("a", TIfce _)],     Nothing) -> call' indirectHash
     -- (Y)
     -- f [T,F,T]
-    (_, Just _, [("a", TData xhr _)], Nothing)  -> call' $ indirectConst $ concat xhr
+    (_, Just _, [("a", TData xhr _)], Nothing) -> call' $ indirectConst $ concat xhr
 
     -- (C)
     -- f l where l::List of a (inside f)
-    (_, Just _, _, Just _) -> call' $ direct "a"
+    (_, Just _, _,                    Just _)  -> call' $ direct "a"
 
     -- toNat ()
     -- eq (Bool.True,Bool.False)
     --    xtp is concrete -> resolve!
     --    (toNat' dIEnumUnit) ()
     --    (eq' dIEqBool) (Bool.True,Bool.False)
-    (_, _, [("a", TUnit)], _)             -> call' $ direct $ concat ["Unit"]
-    (_, _, [("a", TData xhr _)], Nothing) -> call' $ direct $ concat xhr   -- TODO: _
+    (_, _,      [("a", TUnit)],       Nothing) -> call' $ direct $ concat ["Unit"]
+    (_, _,      [("a", TData xhr _)], Nothing) -> call' $ direct $ concat xhr   -- TODO: _
 
     -- A
     -- toNat v  where v::a
     -- eq (x,y) where x::a, y::a
     --    function id2 receives generic
     --    (eq' dIEqa) (x,y)
-    (_, _, [("a", TVar  "a")], Nothing)   -> call' $ direct "a"
+    (_, _,      [("a", TVar  "a")],   Nothing) -> call' $ direct "a"
 
     -- B
     -- inside recursive generic with constraint
     -- toNat v where v::a
     -- (toNat' (fst (dIEnum v))) (snd (dIEnum v))
-    (_, _, [("a", TVar  "a")], Just cs)   -> ECall z2 (EVar z2 $ id2++"'") (toD "a" (getCtrs cs) e3)
+    (_, _,      [("a", _)],           Just cs) -> ECall z2 (EVar z2 $ id2++"'") (toD "a" (getCtrs cs) e3)
 
     --(x,y) -> error $ show (toString xxx, x,y, (inp2,out2), (toType dsigs e3,xtp))
 
