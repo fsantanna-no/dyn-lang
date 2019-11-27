@@ -355,7 +355,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ nat_ienum ++ char_ieq ++ unit_ienum ++ bool_ienum ++ ienum ++ ieq ++ nat ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))))"
 
-    it "XXX: succ [(),False]" $
+    it "succ [(),False]" $
       evalString ([r|
 main = f l;
 
@@ -371,3 +371,44 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
 .;
 |] ++ prelude)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
+
+  describe "Lang" $ do
+    it "toString" $
+      evalString ([r|
+main = (toString (Expr.Unit one), toString (Expr.Var (zero,zero)));
+data Expr with Nat;
+data Expr.Unit;
+data Expr.Var with Nat;
+
+interface IString with
+  toString :: (a -> String);
+;
+
+implementation of IString for Expr.Unit with
+  toString :: (Expr.Unit -> String)
+  toString = func -> (toStringExpr ..., String.Unit) . ;
+.
+
+implementation of IString for Expr.Var with
+  toString :: (Expr.Unit -> String)
+  toString =
+    func ->
+      (toStringExpr ..., var) where
+        Expr.Unit (_, var) = ...;
+      .
+    .
+  ;
+.
+
+toStringExpr :: Expr -> String
+toStringExpr =
+  func -> 
+    let Expr n = ...; in
+      n
+    .
+  .
+;
+|] ++ nat ++ std)
+        `shouldBe` "((Expr.Unit (Nat.Succ Nat.Zero)),(Expr.Var (Nat.Zero,Nat.Zero)))"
+
+

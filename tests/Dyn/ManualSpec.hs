@@ -228,6 +228,24 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
 
+  describe "Lang" $ do
+    it "expr-0" $
+      evalString ([r|
+main = Expr one;
+data Expr with Nat;
+|] ++ nat ++ std)
+        `shouldBe` "(Expr (Nat.Succ Nat.Zero))"
+    it "expr-1" $
+      evalString ([r|
+main = (Expr.Unit one, Expr.Var (zero,zero));
+data Expr with Nat;
+data Expr.Unit;
+data Expr.Var with Nat;
+
+toString :: (Expr -> String)
+|] ++ nat ++ std)
+        `shouldBe` "((Expr.Unit (Nat.Succ Nat.Zero)),(Expr.Var (Nat.Zero,Nat.Zero)))"
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
