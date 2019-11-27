@@ -81,6 +81,8 @@ spec = do
       evalString "main = f () where f = func :: () -> ... .;.;" `shouldBe` "()"
     it "Xx a = ()" $
       evalString "main = a where Xx a = Xx ();.;" `shouldBe` "()"
+    it "sub" $
+      evalString "main = a where Xx a = Xx.Yy ();.;" `shouldBe` "()"
     it "patt - (x)" $
       evalString "main = x where (x) = ();.;" `shouldBe` "()"
     it "patt - read - fail" $

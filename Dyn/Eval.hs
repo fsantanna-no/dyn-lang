@@ -2,7 +2,7 @@ module Dyn.Eval where
 
 import Debug.Trace
 import Data.Bool    (bool)
-import Data.List    (find)
+import Data.List    (find, isPrefixOf)
 
 import Dyn.AST
 import Dyn.Parser
@@ -97,10 +97,10 @@ match env (PTuple _ ps) (ETuple _ es) = foldr f (env, Right True) (zip ps es)
     f (pat,e) (env, Right True) = match env pat e
     f _       (env, ret)        = (env, ret)
 
-match env (PCons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp == hre)
+match env (PCons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp `isPrefixOf` hre)
 
 match env (PCall _ (PCons _ hrp) pat) (EData _ hre e) =
-  if hrp == hre then
+  if hrp `isPrefixOf` hre then
     match env pat e
   else
     (env, Right False)
