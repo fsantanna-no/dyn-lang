@@ -229,31 +229,71 @@ f' = func :: (List of a -> List of Nat) where a is IEnum ->
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
 
   describe "Lang" $ do
-    it "expr-0" $
+    it "expr" $
       evalString ([r|
 main = Expr one;
 data Expr with Nat;
 |] ++ nat ++ std)
         `shouldBe` "(Expr (Nat.Succ Nat.Zero))"
-    it "expr-1" $
+    it "toString" $
       evalString ([r|
 main = (toStringExprUnit (Expr.Unit ((),one)), toStringExprVar (Expr.Var (zero,zero)));
 data Expr with Nat;
 data Expr.Unit;
 data Expr.Var with Nat;
 
-toStringExprUnit = func -> String.Unit (toStringExpr ...) . ;
+toStringExprUnit = func -> String.Unit (toStringExpr_ ...) . ;
 
 toStringExprVar =
   func ->
-    String.Var (toStringExpr ..., var) where
+    String.Var (toStringExpr_ ..., var) where
       Expr.Var (_, var) = ...;
     .
   .
 ;
 
-toStringExpr :: (Expr -> String);
+toStringExpr_ :: (Expr -> String);
+toStringExpr_ =
+  func ->
+    let Expr n = ...; in
+      n
+    .
+  .
+;
+|] ++ nat ++ std)
+        `shouldBe` "((String.Unit (Nat.Succ Nat.Zero)),(String.Var (Nat.Zero,Nat.Zero)))"
+
+    it "f-toString" $
+      evalString ([r|
+main = (f (Expr.Unit ((),one)), f (Expr.Var (zero,zero)));
+data Expr with Nat;
+data Expr.Unit;
+data Expr.Var with Nat;
+
+f :: (Expr -> String);
+f = func -> toStringExpr ... .;
+
 toStringExpr =
+  func ->
+    case ... of
+      Expr.Unit _ -> toStringExprUnit ...;
+      Expr.Var  _ -> toStringExprVar  ...;
+    .
+  .
+;
+
+toStringExprUnit = func -> String.Unit (toStringExpr_ ...) . ;
+
+toStringExprVar =
+  func ->
+    String.Var (toStringExpr_ ..., var) where
+      Expr.Var (_, var) = ...;
+    .
+  .
+;
+
+toStringExpr_ :: (Expr -> String);
+toStringExpr_ =
   func ->
     let Expr n = ...; in
       n
