@@ -237,14 +237,31 @@ data Expr with Nat;
         `shouldBe` "(Expr (Nat.Succ Nat.Zero))"
     it "expr-1" $
       evalString ([r|
-main = (Expr.Unit one, Expr.Var (zero,zero));
+main = (toStringExprUnit (Expr.Unit ((),one)), toStringExprVar (Expr.Var (zero,zero)));
 data Expr with Nat;
 data Expr.Unit;
 data Expr.Var with Nat;
 
-toString :: (Expr -> String)
+toStringExprUnit = func -> String.Unit (toStringExpr ...) . ;
+
+toStringExprVar =
+  func ->
+    String.Var (toStringExpr ..., var) where
+      Expr.Var (_, var) = ...;
+    .
+  .
+;
+
+toStringExpr :: (Expr -> String);
+toStringExpr =
+  func ->
+    let Expr n = ...; in
+      n
+    .
+  .
+;
 |] ++ nat ++ std)
-        `shouldBe` "((Expr.Unit (Nat.Succ Nat.Zero)),(Expr.Var (Nat.Zero,Nat.Zero)))"
+        `shouldBe` "((String.Unit (Nat.Succ Nat.Zero)),(String.Var (Nat.Zero,Nat.Zero)))"
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

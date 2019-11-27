@@ -2,7 +2,7 @@ module Dyn.Eval where
 
 import Debug.Trace
 import Data.Bool    (bool)
-import Data.List    (find, isPrefixOf)
+import Data.List    (find, isPrefixOf, length)
 
 import Dyn.AST
 import Dyn.Parser
@@ -101,9 +101,12 @@ match env (PCons _ hrp) (EData _ hre (EUnit _)) = (env, Right $ hrp `isPrefixOf`
 
 match env (PCall _ (PCons _ hrp) pat) (EData _ hre e) =
   if hrp `isPrefixOf` hre then
-    match env pat e
+    match env pat $ f (length hre - length hrp) e
   else
     (env, Right False)
+  where
+    f 0 e = e
+    f n (ETuple z [_,sup]) = f (n-1) sup    -- sup payload comes last
 
 --match env pat e = traceShow (pat,e) (env, Right False)
 match env _ _ = (env, Right False)

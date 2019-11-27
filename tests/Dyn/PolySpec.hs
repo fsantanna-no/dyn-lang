@@ -394,17 +394,17 @@ implementation of IString for Expr.Var with
   toString =
     func ->
       (toStringExpr ..., var) where
-        Expr.Unit (_, var) = ...;
+        Expr.Var (_, var) = ...;
       .
     .
   ;
 .
 
-toStringExpr :: Expr -> String
+toStringExpr :: (Expr -> String);
 toStringExpr =
-  func -> 
+  func ->
     let Expr n = ...; in
-      n
+      String.Pos n
     .
   .
 ;
