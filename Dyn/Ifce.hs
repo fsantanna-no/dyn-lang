@@ -39,7 +39,7 @@ impls globs = map globFromDecl $ dicts is ++ impls is where
   --  toStringExpr = toStringExprUnit + toStringExprVar + ...
   supers :: [Impl] -> [Impl]
   supers is =
-    map ((\(_,_,x)->x) . head) $
+    map join       $
     --map (map (\(x,y,_) -> (x,y))) $
     L.groupBy same $ -- [ [(IString,Expr.Unit),(IString,Expr.Var)], [(IString,Bool)] ]
     L.sortBy  cmp  $
@@ -54,6 +54,39 @@ impls globs = map globFromDecl $ dicts is ++ impls is where
       same (ifc1,tp1,_) (ifc2,tp2,_) = (ifc1 == ifc2) && (tp1 `f` tp2) where
         f (TData hr1 _) (TData hr2 _) = (head hr1 == head hr2)
         f tp1           tp2           = (tp1      == tp2)
+
+  join :: [(ID_Ifce,Type,Impl)] -> Impl
+  join [(_,_,x)] = x
+  join l@((ifc, TData (hr:_) [], Impl (z,_,Ctrs [],_,ds)) : _) =
+    Impl (z, ifc, Ctrs [], TData [hr] [], fs' ++ dss') where
+
+      -- function to declare and wrap dss'
+      fs' :: [Decl]
+      fs' = map f $ filter isDAtr ds where
+              f :: Decl -> Decl
+              f (DAtr z pat@(PWrite _ id) _) = DAtr z pat $
+                                  ExpWhere (z, [],
+                                    EFunc z cz TAny ups $
+                                      ExpWhere (z,[],wrap)) where
+                ups  = map f dss where
+                        f :: (ID_Hier,[Decl]) -> (ID_Var,Expr)
+                        f (hr2,_) = (id ++ concat hr2, EUnit z)
+                wrap = ECase z (EArg z) (map f dss) where
+                        f :: (ID_Hier,[Decl]) -> (Patt,ExpWhere)
+                        f (hr2,_) = (PCall z (PCons z (hr:hr2)) (PAny z),
+                                     ExpWhere (z, [],
+                                      ECall z (EVar z (id ++ concat hr2)) (EArg z)))
+
+      dss :: [(ID_Hier,[Decl])]
+      dss = map f l where
+              f (_,_,Impl (_,_,_,TData (_:hr) _,ds)) = (hr,ds)
+
+      dss' :: [Decl]
+      dss' = concatMap f dss where
+              f :: (ID_Hier,[Decl]) -> [Decl]
+              f (hr,ds) = map rename $ filter isDAtr ds where
+                            rename :: Decl -> Decl
+                            rename (DAtr z1 (PWrite z2 id2) e) = DAtr z1 (PWrite z2 (id2++concat hr)) e
 
   dicts :: [Impl] -> [Decl]
   dicts is = --traceShowSS $

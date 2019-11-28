@@ -371,7 +371,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
   describe "Lang" $ do
     it "XXX: toString" $
       evalString ([r|
-main = ((toString' dIStringExpr) (Expr.Unit one), (toString' dIStringBool) Bool.True);
+main = ((toString' dIStringExpr) (Expr.Unit one), (toString' dIStringBool) Bool.True, (toString' dIStringExpr) (Expr.Var (one,zero)));
 
 data Expr with Nat;
 data Expr.Unit;
@@ -383,7 +383,7 @@ interface IString for a with
 
 implementation of IString for Expr.Unit with
   toString :: (Expr.Unit -> String);
-  toString = func -> (toStringExpr ..., String.Unit) . ;
+  toString = func -> String.Unit (toStringExpr (Show ...)) . ;
 .
 
 implementation of IString for Bool with
@@ -392,10 +392,10 @@ implementation of IString for Bool with
 .
 
 implementation of IString for Expr.Var with
-  toString :: (Expr.Unit -> String);
+  toString :: (Expr.Var -> String);
   toString =
     func ->
-      (toStringExpr ..., var) where
+      String.Var (toStringExpr ..., var) where
         Expr.Var (_, var) = ...;
       .
     .
