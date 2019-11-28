@@ -29,10 +29,10 @@ spec = do
 
     it "(maximum,minimum)" $
       evalString ([r|
-main = (x,y) where
+main = (x,y) where {
   x :: Bool = maximum' dIBoundedBool;
   y :: Bool = minimum' dIBoundedBool;
-.;
+};
 |] ++ bool_ibounded ++ bool ++ ibounded)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -40,25 +40,25 @@ main = (x,y) where
 
     it "IEq: eq" $
       evalString ([r|  -- neq (eq(T,T), F)
-main = x where
+main = x where {
   x :: Bool = (eq' dIEqBool) (Bool.False,Bool.False);
-.;
+};
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: neq" $
       evalString ([r|  -- neq (eq(T,T), F)
-main = x where
+main = x where {
   x :: Bool = (neq' dIEqBool) (Bool.True,Bool.False);
-.;
+};
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "IEq: default eq" $
       evalString ([r|  -- neq (eq(T,T), F)
-main = x where
+main = x where {
   x :: Bool = (neq' dIEqBool) ((eq' dIEqBool) (Bool.True,Bool.True), Bool.False);
-.;
+};
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
@@ -139,12 +139,12 @@ main = (gt' (dIEqBool,dIOrdBool)) (Bool.False,Bool.True);
 
     it "IEq/IOrd" $
       evalString ([r|
-main = v where  -- (T<=F, T>=T, F>F, F<T)
+main = v where {  -- (T<=F, T>=T, F>F, F<T)
   v = ( (lte' (dIEqBool,dIOrdBool)) (Bool.True,  Bool.False),
         (gte' (dIEqBool,dIOrdBool)) (Bool.True,  Bool.True ),
         (gt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.False),
         (lt'  (dIEqBool,dIOrdBool)) (Bool.False, Bool.True ) );
-.;
+};
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
@@ -180,12 +180,12 @@ f = func :: ((a,a) -> Bool) where a is IOrd {
     it "TODO-dict-closure: ff1/ff2" $
       evalString ([r|
 main = (ff1 (lte, (Bool.True,Bool.False)),
-        ff2 (gte, (Bool.True,Bool.True )) ) where           -- gte must become closure
+        ff2 (gte, (Bool.True,Bool.True )) ) where {           -- gte must become closure
   ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
-  ff1 = func -> f (x,y) where x::a y::a (f,(x,y))=... ;;
+  ff1 = func -> f (x,y) where { x::a y::a (f,(x,y))=... ;;
 
   ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closure to hold actual dict
-  ff2 = func -> f ps where (f,ps)=... ;;
+  ff2 = func -> f ps where { (f,ps)=... ;;
 ;
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
@@ -206,7 +206,7 @@ implementation of IEq for a where a is IAaa with
 implementation of IOrd for a where a is IAaa with
   lt :: ((a,a) -> Bool)
   lt = func :: ((a,a) -> Bool) ->
-    lt (f x, f y) where
+    lt (f x, f y) where {
       x :: a
       y :: a
       (x,y) = ...
@@ -307,13 +307,13 @@ f = func :: (a -> Nat) where a is IEnum {
 
     it "[(),True]" $
       evalString ([r|
-main = (f' d) l where
+main = (f' d) l where {
   d = func {
     case ... {
       (=k,=v) -> (getHash (ds_IEnum,k), v);
     }
   };
-.;
+};
 
 --data List of a is recursive
 --data List.Nil
@@ -329,9 +329,9 @@ f = func :: (List of a -> List of Nat) where a is IEnum {
   --  func {dIEnuma} ->
       case ... {
         List.Nil          -> List.Nil;
-        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where
+        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' dIEnuma) l) where {
           (d',v') = dIEnuma v;
-        .;
+        };
       }
 };
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
@@ -339,15 +339,15 @@ f = func :: (List of a -> List of Nat) where a is IEnum {
 
     it "succ [(),False]" $
       evalString ([r|
-main = (f' gets) l where
+main = (f' gets) l where {
   gets =
     func {
-      (getHash (ds_IEnum,k), v) where
+      (getHash (ds_IEnum,k), v) where {
         (k,v) = ...;
-      .
+      }
     }
   ;
-.;
+};
 
 --data List of a
 --data List.Nil
@@ -360,9 +360,9 @@ l = List.Cons ((Key.Bool, Bool.False),
 f = func :: (List of a -> List of Nat) where a is IEnum {
   case ... {
     List.Nil          -> List.Nil;
-    List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
+    List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where {
       (d',v') = gets v;
-    .;
+    };
   }
 };
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
@@ -395,9 +395,9 @@ implementation of IString for Expr.Var with
   toString :: (Expr.Var -> String);
   toString =
     func {
-      String.Var (toStringExpr ..., var) where
+      String.Var (toStringExpr ..., var) where {
         Expr.Var (_, var) = ...;
-      .
+      }
     }
   ;
 .

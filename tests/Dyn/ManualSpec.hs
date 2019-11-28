@@ -37,18 +37,18 @@ main = (neq' dIEq) ((eq' dIEq)(Bool.True,Bool.True), Bool.False);
 
     it "IEq: (eq ((T,F),(F,T)), eq ((T,F),(T,F))" $
       evalString ([r|
-main = (x,y) where
+main = (x,y) where {
   x = (eq' dIEq) ((Bool.True,Bool.False), (Bool.False,Bool.True));
   y = (eq' dIEq) ((Bool.True,Bool.False), (Bool.True,Bool.False));
-.;
+};
 |] ++ bool ++ ieq)
         `shouldBe` "(Bool.False,Bool.True)"
 
     it "IEq: overrides eq (ieq_Bool)" $
       evalString ([r|
-main = v where  -- neq (eq(T,T), F)
+main = v where {  -- neq (eq(T,T), F)
   v = (neq' dIEqBool) ((eq' dIEqBool) (Bool.True,Bool.True), Bool.False);
-.;
+};
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
@@ -56,12 +56,12 @@ main = v where  -- neq (eq(T,T), F)
 
     it "IEq/IOrd" $
       evalString ([r|
-main = v where  -- (T<=F, T>=T, F>F, F<T)
+main = v where {  -- (T<=F, T>=T, F>F, F<T)
   v = ( (lte' (dIEqBool,dIOrdBool)) (Bool.True, Bool.False),
         (gte' (dIEqBool,dIOrdBool)) (Bool.True, Bool.True),
         (gt'  (dIEqBool,dIOrdBool)) (Bool.False,Bool.False),
         (lt'  (dIEqBool,dIOrdBool)) (Bool.False,Bool.True) );
-.;
+};
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.False,Bool.True,Bool.False,Bool.True)"
 
@@ -71,40 +71,40 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
       evalString ([r|
 main = (eq' (dIEqIXxx dIXxxXxx)) (Xxx,Xxx);
 
-dIEqIXxx = Dict.IEq (eq) where
+dIEqIXxx = Dict.IEq (eq) where {
   eq = func [f] {  -- :: (ieq_xxx,a,a) -> Bool where a is IXxx
-    eq (Dict.IEq (eq), f ((f),x), f ((f),y)) where
+    eq (Dict.IEq (eq), f ((f),x), f ((f),y)) where {
       Dict.IEq (eq) = dIEqBool;
       (_,x,y) = ...;
-    .
-  . where
+    }
+  } where {
     (f) = ...;
   };
-.;
+};
 
-dixxx_xxx = f where
+dixxx_xxx = f where {
   f = func { -- :: (dixxx_xxx,X) -> Bool
     case x {
       Xxx -> Bool.True;
-    } where
+    } where {
       (_,x) = ...;
-    .
+    }
   };
-.;
+};
 |] ++ bool_ieq ++ bool ++ ieq)
         `shouldBe` "Bool.True"
 
     it "f = func :: ((a -> Int) where a is IEq) -> eq (x,x)" $
       evalString ([r|
-main = (f gets) one where
+main = (f gets) one where {
   gets = func { (dIEqNat,...) } ;
-.;
+};
 f = func {
   let gets = ...; {
     func [gets] {
-      (eq' d') (v',v') where
+      (eq' d') (v',v') where {
         (d',v') = gets ...;
-      .
+      }
     }
   }
 };
@@ -153,13 +153,13 @@ succ'2 = func {
 
     it "[(),True]" $
       evalString ([r|
-main = (f' gets) l where
+main = (f' gets) l where {
   gets = func {
     case ... {
       (=k,=v) -> (getHash (ds_IEnum,k), v);
     }
   };
-.;
+};
 
 ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
            List.Cons ((Key.YYY, dIEnumBool),
@@ -180,9 +180,9 @@ f' = func :: (List of a -> List of Nat) where a is IEnum {
     func [gets] {
       case ... {
         List.Nil          -> List.Nil;
-        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' gets) l) where
+        List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' gets) l) where {
           (d',v') = gets v;
-        .;
+        };
       }
     }
   }
@@ -192,13 +192,13 @@ f' = func :: (List of a -> List of Nat) where a is IEnum {
 
     it "succ [(),False]" $
       evalString ([r|
-main = (f' gets) l where
+main = (f' gets) l where {
   gets = func {
     case ... {
       (=k,=v) -> (getHash (ds_IEnum,k), v);
     }
   };
-.;
+};
 
 ds_IEnum = List.Cons ((Key.XXX, dIEnumUnit),
            List.Cons ((Key.YYY, dIEnumBool),
@@ -218,9 +218,9 @@ f' = func :: (List of a -> List of Nat) where a is IEnum {
     func [dsa] {
       case ... {
         List.Nil          -> List.Nil;
-        List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
+        List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where {
           (d',v') = gets v;
-        .;
+        };
       }
     }
   }
@@ -246,9 +246,9 @@ toStringExprUnit = func { String.Unit (toStringExpr_ ...) } ;
 
 toStringExprVar =
   func {
-    String.Var (toStringExpr_ ..., var) where
+    String.Var (toStringExpr_ ..., var) where {
       Expr.Var (_, var) = ...;
-    .
+    }
   }
 ;
 
@@ -286,9 +286,9 @@ toStringExprUnit = func { String.Unit (toStringExpr_ ...) } ;
 
 toStringExprVar =
   func {
-    String.Var (toStringExpr_ ..., var) where
+    String.Var (toStringExpr_ ..., var) where {
       Expr.Var (_, var) = ...;
-    .
+    }
   }
 ;
 
@@ -322,27 +322,27 @@ std = [r|
 -- interface IBounded(minimum,maximum)
 ibounded = [r|
   minimum' = func {
-    minimum ... where
+    minimum ... where {
       Dict.IBounded (minimum,_) = ...;
-    .
+    }
   };
   maximum' = func {
-    maximum ... where
+    maximum ... where {
       Dict.IBounded (_,maximum) = ...;
-    .
+    }
   };
 |]
 
 ienum = [r|
   toNat' = func {
-    toNat where
+    toNat where {
       Dict.IEq (toNat,_) = ...;
-    .
+    }
   };
   fromNat' = func {
-    fromNat where
+    fromNat where {
       Dict.IEq (_,fromNat) = ...;
-    .
+    }
   };
   succ' = func {
     let dict = ... ; {
@@ -355,9 +355,9 @@ ienum = [r|
 
 ieq = [r|
   eq' = func {
-    eq ... where
+    eq ... where {
       Dict.IEq (eq) = ...;
-    .
+    }
   };
   neq' = func {
     neq_IEq ...
@@ -415,24 +415,24 @@ iord = [r|
 
   -- lt,lte,gt,gte
   lt' = func {
-    lt ... where
+    lt ... where {
       (_, Dict.IOrd (lt,_,_,_)) = ...;
-    .
+    }
   };
   lte' = func {
-    lte ... where
+    lte ... where {
       (_, Dict.IOrd (_,lte,_,_)) = ...;
-    .
+    }
   };
   gt' = func {
-    gt ... where
+    gt ... where {
       (_, Dict.IOrd (_,_,gt,_)) = ...;
-    .
+    }
   };
   gte' = func {
-    gte ... where
+    gte ... where {
       (_, Dict.IOrd (_,_,_,gte)) = ...;
-    .
+    }
   };
 |]
 
@@ -441,7 +441,7 @@ iord = [r|
 
 -- instance IBounded (Bool)
 bool_ibounded = [r|
-  dIBoundedBool = Dict.IBounded (minimum,maximum) where
+  dIBoundedBool = Dict.IBounded (minimum,maximum) where {
     minimum = func {
       let dIBoundeda = ...; {
         -- >> body
@@ -454,11 +454,11 @@ bool_ibounded = [r|
         Bool.True
       }
     };
-  .;
+  };
 |]
 
 bool_ieq = [r|
-  dIEqBool = Dict.IEq (eq_Bool) where
+  dIEqBool = Dict.IEq (eq_Bool) where {
     eq_Bool = func {
       let dIEqa = ... ; {
         func [dIEqa] {
@@ -468,11 +468,11 @@ bool_ieq = [r|
         }
       }
     };
-  .;
+  };
 |]
 
 bool_ienum = [r|
-  dIEnumBool = Dict.IEq (toNat,fromNat) where
+  dIEnumBool = Dict.IEq (toNat,fromNat) where {
     toNat = func {
       case ... {
         Bool.False -> Nat.Zero;
@@ -485,13 +485,13 @@ bool_ienum = [r|
         Nat.Succ Nat.Zero -> Bool.True;
       }
     };
-  .;
+  };
 |]
 
 -- implementation IOrd for Bool
 bool_iord = [r|
   -- dict
-  dIOrdBool = Dict.IOrd (lt_Bool,lte_IOrd,gt_IOrd,gte_IOrd) where
+  dIOrdBool = Dict.IOrd (lt_Bool,lte_IOrd,gt_IOrd,gte_IOrd) where {
     lt_Bool = func {
       let dIEqa = ...; {
         func [dIEqa] {
@@ -504,11 +504,11 @@ bool_iord = [r|
         }
       }
     };
-  .;
+  };
 |]
 
 unit_ienum = [r|
-  dIEnumUnit = Dict.IEq (toNat,fromNat) where
+  dIEnumUnit = Dict.IEq (toNat,fromNat) where {
     toNat = func {
       case ... {
         () -> Nat.Zero;
@@ -519,7 +519,7 @@ unit_ienum = [r|
         Nat.Zero -> ();
       }
     };
-  .;
+  };
 |]
 
 -------------------------------------------------------------------------------

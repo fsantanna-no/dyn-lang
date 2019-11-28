@@ -156,9 +156,9 @@ instance IString ExpWhere where
   toString whe = toStringI 0 whe
 
   toStringI spc (ExpWhere (_,[],e))   = toStringI spc e
-  toStringI spc (ExpWhere (_,dcls,e)) = toStringI spc e ++ " where"
+  toStringI spc (ExpWhere (_,dcls,e)) = toStringI spc e ++ " where {"
                                         ++ (concat $ map (\s -> "\n"++rep (spc+2)++s) (map (toStringI (spc+2)) dcls))
-                                        ++ "\n" ++ rep spc ++ "."
+                                        ++ "\n" ++ rep spc ++ "}"
 
 -------------------------------------------------------------------------------
 

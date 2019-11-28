@@ -408,8 +408,9 @@ where_ = do
   e   <- expr
   ds  <- option [] $ do
           void <- try $ tk_key "where"
+          void <- tk_sym "{"
           ds   <- decls
-          void <- tk_sym "."
+          void <- tk_sym "}"
           return ds
   return $ ExpWhere (pos, ds, e)
 

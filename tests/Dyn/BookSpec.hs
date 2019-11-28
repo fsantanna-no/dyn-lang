@@ -94,9 +94,9 @@ smaller =
       Bool.True  -> x;
       Bool.False -> y;
     }
-      where
+      where {
         (x,y) = ...;
-      .
+      }
   }
 ;
 |] ++ nat)
@@ -193,13 +193,13 @@ main = (smallerc two) four;
 smallerc =
   func :: (Nat -> (Nat -> Nat)) {
     func :: (Nat -> Nat) [x] {
-      lt (x',y) where
+      lt (x',y) where {
         x' = x;
         y  = ...;
-      .
-    } where
+      }
+    } where {
       x = ...;
-    .
+    }
   }
 ;
 |] ++ prelude)
@@ -225,9 +225,9 @@ square = func { mul (...,...) };
 twicec = func {
   func [f] {
     f (f ...)
-  } where
+  } where {
     f = ...;
-  .
+  }
 };
 |] ++ nat ++ std)
           `shouldBe` "Bool.True"
@@ -240,9 +240,9 @@ square = func { mul (...,...)};
 twicec = func {
   func [f] {
     f (f ...)
-  } where
+  } where {
     f = ...;
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "Bool.True"
@@ -261,12 +261,12 @@ curry  = func {
   func [f] {
     func [f,x] {
       f (x,...)
-    } where
+    } where {
       x = ...;
-    .
-  } where
+    }
+  } where {
     f = ...;
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "Bool.True"
@@ -288,22 +288,22 @@ curry  = func {
 main = (uncurry smallerc) (two,ten);
 smallerc = func {
   func :: (Nat->Nat) [x] {
-    lt (x',y) where
+    lt (x',y) where {
       x' = x;
       y  = ...;
-    .
-  } where
+    }
+  } where {
     x = ...;
-  .
+  }
 };
 uncurry = func {
   func [f] {
-    (f i) j where
+    (f i) j where {
       (i,j) = ...;
-    .
-  } where
+    }
+  } where {
     f = ...;
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "Bool.True"
@@ -318,9 +318,9 @@ square  = func { mul (...,...) };
 compose = func {
   func [f,g] {
     f (g ...)
-  } where
+  } where {
     (f,g) = ...;
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "Bool.True"
@@ -386,10 +386,10 @@ fact =
 main = f (zero,one);
 f =
   func {
-    mul (add(a,one), add(a,two)) where
+    mul (add(a,one), add(a,two)) where {
       a = add (x,y);
       (x,y) = ...;
-    .
+    }
   }
 ;
 |] ++ nat)
@@ -400,11 +400,11 @@ f =
 main = f (zero,one);
 f =
   func {
-    mul (add(a,one), add(b,two)) where
+    mul (add(a,one), add(b,two)) where {
       a = add (x,y);
       b = mul (x,y);
       (x,y) = ...;
-    .
+    }
   }
 ;
 |] ++ nat)
@@ -498,14 +498,14 @@ or = func {
         evalString ([r|
 main = neq (eq (Bool.True,Bool.True), Bool.False);
 eq = func {
-  or (and (x,y), (and (not x, not y))) where
+  or (and (x,y), (and (not x, not y))) where {
     (x,y) = ...;
-  .
+  }
 };
 neq = func {
-  not (eq (x,y)) where
+  not (eq (x,y)) where {
     (x,y) = ...;
-  .
+  }
 };
 |] ++ bool)
           `shouldBe` "Bool.True"
@@ -526,9 +526,9 @@ leapyear :: (Nat->Bool) = func {
   case rem (y,hundred) {
     Nat.Zero -> eq(rem (y, mul(four,hundred)), Nat.Zero);
     _        -> eq(rem (y, four),              Nat.Zero);
-  } where
+  } where {
     y = ...;
-  .
+  }
 };
 y1979 = sub (y1980, one);
 y1980 = add (thousand, add (mul(five,hundred), mul(eight,ten)));
@@ -551,9 +551,9 @@ analyse = func {
       (_,_,~y) -> Tri.Isos;
       _        -> Tri.Scal;
     }
-  } where
+  } where {
     (x,y,z) = ...;
-  .
+  }
 };
 |] ++ nat)
           `shouldBe` "(Tri.Fail,Tri.Scal,Tri.Isos,Tri.Equi)"
@@ -566,9 +566,9 @@ main = (impl (Bool.False,Bool.True),
         not (impl (Bool.True,Bool.False)));
 
 impl = func {
-  or (not x, y) where
+  or (not x, y) where {
     (x,y) = ...;
-  .
+  }
 };
 |] ++ bool)
           `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True)"
@@ -596,9 +596,9 @@ analyse2 = func :: ((Nat,Nat,Nat) -> Triangle) {
        (_,         Bool.False,Bool.True, Bool.True)  -> analyse (y,z,x);
        (Bool.True, _,         _,         _)          -> analyse (z,x,y);
        _                                             -> analyse (z,y,x);
-  } where
+  } where {
     (x,y,z) = ...;
-  .
+  }
 };
 
 analyse = func :: ((Nat,Nat,Nat) -> Triangle) {
@@ -610,9 +610,9 @@ analyse = func :: ((Nat,Nat,Nat) -> Triangle) {
       (_,~z,_) -> Triangle.Isosceles;
       _        -> Triangle.Scalene;
     }
-  } where
+  } where {
     (x,y,z) = ...;
-  .
+  }
 };
 |] ++ prelude)
         `shouldBe` "(Triangle.Failure,Triangle.Scalene,Triangle.Isosceles,Triangle.Equilateral)"
@@ -640,9 +640,9 @@ sort3 = func :: ((Nat,Nat,Nat) -> (Nat,Nat,Nat)) {
     (_, Bool.False, Bool.True, Bool.True) -> (y,z,x);
     (Bool.True,  _, _, _)                 -> (z,x,y);
     (Bool.False, _, _, _)                 -> (z,y,x);
-  } where
+  } where {
     (x,y,z) = ...;
-  .
+  }
 };
 
 analyse = func :: ((Nat,Nat,Nat) -> Triangle) {
@@ -654,9 +654,9 @@ analyse = func :: ((Nat,Nat,Nat) -> Triangle) {
       (_,~z,_) -> Triangle.Isosceles;
       _        -> Triangle.Scalene;
     }
-  } where
+  } where {
     (x,y,z) = ...;
-  .
+  }
 };
 |] ++ prelude)
         `shouldBe` "(Triangle.Failure,Triangle.Scalene,Triangle.Isosceles,Triangle.Equilateral)"
@@ -761,10 +761,10 @@ implementation of IOrd for Day with
       y :: Day;
       (x,y) = ...;
     {
-      lt (x', y') where
+      lt (x', y') where {
         x' = toNat x;
         y' = toNat y;
-      .
+      }
     }
   };
 .
@@ -853,8 +853,8 @@ main :: Bool = fromNat (add (toNat Bool.False, one));
       it "fst/snd" $         -- pg 41
         evalString ([r|
 main = and (matches (add (fst(one,zero),snd(zero,two)), three), snd (Bool.False,Bool.True));
-fst = func { x where (x,_)=...; .};
-snd = func { y where (_,y)=...; .};
+fst = func { x where { (x,_)=...; }};
+snd = func { y where { (_,y)=...; }};
 |] ++ prelude)
         `shouldBe` "Bool.True"
 
@@ -863,9 +863,9 @@ snd = func { y where (_,y)=...; .};
 main = pair ((f,g), one);
 f = func { matches (add (zero,...), ...) } ;
 g = func { mul (two, ...) } ;
-pair = func { (f x, g x) where
+pair = func { (f x, g x) where {
   ((f,g),x) = ... ;
-.};
+}};
 |] ++ prelude)
         `shouldBe` "(Bool.True,(Nat.Succ (Nat.Succ Nat.Zero)))"
 
@@ -876,9 +876,9 @@ dup     = func { mul (two,...) } ;
 compose = func {
   func [f,g] {
     f (g ...)
-  } where
+  } where {
     (f,g) = ...;
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero)))"
@@ -894,9 +894,9 @@ fst = func :: ((a,b) -> a) {
 };
 
 snd = func {
-  x where
+  x where {
     (_,x) = ...;
-  .
+  }
 };
 
 cross = func :: ((((a->b),(c->d)),(a,c)) -> (b,d)) {

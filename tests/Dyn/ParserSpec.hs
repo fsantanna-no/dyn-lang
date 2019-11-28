@@ -77,7 +77,7 @@ spec = do
       parse' where_let "let x=(); {  x}"
         `shouldBe` Right (ExpWhere ((1,1),[DAtr (1,5) (PWrite (1,5) "x") (ExpWhere ((1,7),[],EUnit (1,7)))],EVar (1,14) "x"))
     it "let x=() in y where y=x" $
-      parse' where_let "let x=(); {  y where y=x;.}"
+      parse' where_let "let x=(); {  y where{y=x;}}"
         `shouldBe` Right (ExpWhere ((1,1),[DAtr (1,22) (PWrite (1,22) "y") (ExpWhere ((1,24),[],EVar (1,24) "x")),DAtr (1,5) (PWrite (1,5) "x") (ExpWhere ((1,7),[],EUnit (1,7)))],EVar (1,14) "y"))
 
   describe "decl:" $ do
@@ -132,11 +132,11 @@ spec = do
         (toString $ fromRight $ parse' expr "func :: () { xxx}")
           `shouldBe` "(func :: () {\n  xxx\n})"
       it "func" $
-        (toString $ fromRight $ parse' expr "func :: () { xxx where xxx=() where y=();.;\n  x=();.}")
-          `shouldBe` "(func :: () {\n  xxx where\n    xxx = () where\n      y = ();\n    .;\n    x = ();\n  .\n})"
+        (toString $ fromRight $ parse' expr "func :: () { xxx where { xxx=() where { y=();};\n  x=();}}")
+          `shouldBe` "(func :: () {\n  xxx where {\n    xxx = () where {\n      y = ();\n    };\n    x = ();\n  }\n})"
       it "func" $
-        (toString $ fromRight $ parse' expr "func { xxx where\n  xxx=() where\n    y=();\n    x=();.;.}")
-          `shouldBe` "(func :: ? {\n  xxx where\n    xxx = () where\n      y = ();\n      x = ();\n    .;\n  .\n})"
+        (toString $ fromRight $ parse' expr "func { xxx where {\n  xxx=() where {\n    y=();\n    x=();};}}")
+          `shouldBe` "(func :: ? {\n  xxx where {\n    xxx = () where {\n      y = ();\n      x = ();\n    };\n  }\n})"
       it "call" $
         (toString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
@@ -170,25 +170,25 @@ spec = do
         (parseToString
           [r|
 main :: () = f ();
-f :: () = func { x where
+f :: () = func { x where {
             x :: () = ...;
-            .
+            }
           }
 ;
 |])
-          `shouldBe` "main :: ();\nmain = (f ());\nf :: ();\nf = (func :: ? {\n  x where\n    x :: ();\n    x = ...;\n  .\n});\n"
+          `shouldBe` "main :: ();\nmain = (f ());\nf :: ();\nf = (func :: ? {\n  x where {\n    x :: ();\n    x = ...;\n  }\n});\n"
 
       it "where-where" $
         (parseToString
           [r|
-main :: () = b d where
+main :: () = b d where {
     b :: () = c;
     c :: () = ();
-  .
+  }
 ;
 d :: () = ();
 |])
-          `shouldBe` "main :: ();\nmain = (b d) where\n  b :: ();\n  b = c;\n  c :: ();\n  c = ();\n.;\nd :: ();\nd = ();\n"
+          `shouldBe` "main :: ();\nmain = (b d) where {\n  b :: ();\n  b = c;\n  c :: ();\n  c = ();\n};\nd :: ();\nd = ();\n"
 
     describe "parseToString:" $ do
 
@@ -207,13 +207,13 @@ add =
     case y {
       Nat.Zero    -> x;
       Nat.Succ =z -> Nat.Succ (add (x,z));
-    } where
+    } where {
       (x,y) = ...;
-    .
+    }
   }
 ;
 |]
-        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)));\nadd = (func :: () {\n  case y {\n    Nat.Zero -> x;\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)));\n  } where\n    (x,y) = ...;\n  .\n});\n"
+        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)));\nadd = (func :: () {\n  case y {\n    Nat.Zero -> x;\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)));\n  } where {\n    (x,y) = ...;\n  }\n});\n"
 
 -------------------------------------------------------------------------------
 

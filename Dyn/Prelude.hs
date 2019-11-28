@@ -25,9 +25,9 @@ std = [r|
     case (x,y) {
       (~y,_) -> Bool.True;
       _      -> Bool.False;
-    } where
+    } where {
       (x,y) = ...;
-    .
+    }
   };
 
   getHash = func {
@@ -40,15 +40,15 @@ std = [r|
   };
 
   fst = func {
-    x where
+    x where {
       (x,_) = ...;
-    .
+    }
   };
 
   snd = func {
-    x where
+    x where {
       (_,x) = ...;
-    .
+    }
   };
 
   identity = func { ... };
@@ -66,9 +66,9 @@ ieq = [r|
     eq  :: ((a,a) -> Bool);
   .
   neq = func :: ((a,a) -> Bool) where a is IEq {
-    not (eq (x,y)) where
+    not (eq (x,y)) where {
       (x,y) = ...;
-    .
+    }
   };
 |]
 
@@ -81,19 +81,19 @@ iord = [r|
   --gte :: ((a,a) -> Bool) where a is IOrd
 
   lte = func :: ((a,a) -> Bool) where a is IOrd {
-    or (lt (x,y), eq (x,y)) where
+    or (lt (x,y), eq (x,y)) where {
       (x,y) = ...;
-    .
+    }
   };
   gt = func :: ((a,a) -> Bool) where a is IOrd {
-    not (lte (x,y)) where
+    not (lte (x,y)) where {
       (x,y) = ...;
-    .
+    }
   };
   gte = func :: ((a,a) -> Bool) where a is IOrd {
-    or (gt (x,y), eq (x,y)) where
+    or (gt (x,y), eq (x,y)) where {
       (x,y) = ...;
-    .
+    }
   };
 |]
 
@@ -166,9 +166,9 @@ bool_ibounded = [r|
 bool_ieq = [r|
   implementation of IEq for Bool with
     eq :: ((Bool,Bool)->Bool) = func {
-      or (and (x,y), (and (not x, not y))) where
+      or (and (x,y), (and (not x, not y))) where {
         (x,y) = ...;
-      .
+      }
     };
   .
 |]
@@ -181,9 +181,9 @@ bool_iord = [r|
         (Bool.False, Bool.True)  -> Bool.True;
         (Bool.True,  Bool.False) -> Bool.False;
         (Bool.True,  Bool.True)  -> Bool.False;
-      } where
+      } where {
         (x,y) = ...;
-      .
+      }
     };
   .
 |]
@@ -247,19 +247,19 @@ char = [r|
   };
 
   isLower :: (Char -> Bool) = func {
-    and (gte (c,Char.Aa), lte (c,Char.Dd)) where
+    and (gte (c,Char.Aa), lte (c,Char.Dd)) where {
       c = ...;
-    .
+    }
   };
 
   capitalize :: (Char -> Char) = func {
     case isLower c {
       Bool.True  -> chr (sub (ord c, off));
       Bool.False -> c;
-    } where
+    } where {
       c   = ...;
       off = sub (ord Char.Aa, ord Char.AA);
-    .
+    }
   };
 
   nextlet :: (Char -> Char) = func {
@@ -268,12 +268,12 @@ char = [r|
                      add (sub (max,min), one)),
            min))
        --return chr (((((ord c) - min) + 1) rem ((max-min)+1)) + min)
-      where
+      where {
         (min,max) = case isLower c {
           Bool.True  -> (ord Char.Aa, ord Char.Dd);
           Bool.False -> (ord Char.AA, ord Char.DD);
         };
-      .
+      }
     }
   };
 |]
@@ -289,9 +289,9 @@ char_ieq = [r|
 char_iord = [r|
   implementation of IOrd for Char with
     lt = func {
-      lt (ord x, ord y) where
+      lt (ord x, ord y) where {
         (x,y) = ...;
-      .
+      }
     };
   .
 |]
@@ -358,9 +358,9 @@ nat = [r|
       case lt (x,y) {
         Bool.True  -> x;
         Bool.False -> rem (sub (x,y), y);
-      } where
+      } where {
         (x,y) = ...;
-      .
+      }
     }
   ;
 
@@ -391,9 +391,9 @@ nat_iord = [r|
         (Nat.Zero,     _)            -> Bool.True;
         (Nat.Succ _,   Nat.Zero)     -> Bool.False;
         (Nat.Succ =x', Nat.Succ =y') -> lt (x',y') ;
-      } where
+      } where {
         (x,y) = ...;
-      .
+      }
     };
   .
 |]

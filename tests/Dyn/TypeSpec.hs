@@ -25,11 +25,11 @@ spec = do
   describe "Infer" $ do
 
     it "main=Type x=Bool.True" $
-      evalString ("main=Type x where x=Bool.True; . ;")
+      evalString ("main=Type x where { x=Bool.True; } ;")
         `shouldBe` "(Type Bool.True)"
 
     it "main=Type (x,y)=(Bool.True,())" $
-      evalString ("main=Type (x,y) where (x,y)=(Bool.True,()); . ;")
+      evalString ("main=Type (x,y) where { (x,y)=(Bool.True,()); } ;")
         `shouldBe` "(Type (Bool.True,()))"
 
     it "case x::()" $
@@ -58,7 +58,7 @@ data Nat.Zero;
 data Nat.Succ with Nat;
 main = Type x;
 x = case Nat.Succ Nat.Zero {
-  Nat.Succ =x -> x where x::?; . ;
+  Nat.Succ =x -> x where { x::?; } ;
 };
 |])
         `shouldBe` "(Type Nat)"

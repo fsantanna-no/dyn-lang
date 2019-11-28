@@ -63,13 +63,13 @@ spec = do
       (evalProg $ fromRight $ parse "main = case () { A->();};")
         `shouldBe` EError (1,8) "non-exhaustive patterns"
     it "assign-var" $
-      (evalProg $ fromRight $ parse "main = a where a = A;.;")
+      (evalProg $ fromRight $ parse "main = a where{a = A;};")
         `shouldBe` EData (1,20) ["A"] (EUnit (1,20))
     it "assign-var" $
       (evalProg $ fromRight $ parse "main = let a=A; {  a};")
         `shouldBe` EData (1,14) ["A"] (EUnit (1,14))
     it "assign-tuple" $
-      (evalProg $ fromRight $ parse "main = (a,b) where (a,b) = (A,B);.;")
+      (evalProg $ fromRight $ parse "main = (a,b) where{(a,b) = (A,B);};")
         `shouldBe` ETuple (1,8) [EData (1,29) ["A"] (EUnit (1,29)),EData (1,31) ["B"] (EUnit (1,31))]
 
   describe "evalString:" $ do
@@ -78,19 +78,19 @@ spec = do
     it "()" $
       evalString "main = ();" `shouldBe` "()"
     it "f ()" $
-      evalString "main = f () where f = func :: () { ... };.;" `shouldBe` "()"
+      evalString "main = f () where { f = func :: () { ... };};" `shouldBe` "()"
     it "Xx a = ()" $
-      evalString "main = a where Xx a = Xx ();.;" `shouldBe` "()"
+      evalString "main = a where { Xx a = Xx ();};" `shouldBe` "()"
     it "sub" $
-      evalString "main = a where Xx a = Xx.Yy ((),());.;" `shouldBe` "()"
+      evalString "main = a where { Xx a = Xx.Yy ((),());};" `shouldBe` "()"
     it "patt - (x)" $
-      evalString "main = x where (x) = ();.;" `shouldBe` "()"
+      evalString "main = x where { (x) = ();};" `shouldBe` "()"
     it "patt - read - fail" $
       evalString "main = case () { ~func{()} -> ();};" `shouldBe` "(line=1, col=18) ERROR : invalid pattern : \"(func :: ? {\\n  ()\\n})\""
     it "patt - read - ok" $
       evalString "main = case () { ~() -> ();};" `shouldBe` "()"
     it "patt - fail" $
-      evalString "main = x where Xxx = Yyy;.;" `shouldBe` "(line=1, col=16) ERROR : invalid assignment"
+      evalString "main = x where { Xxx = Yyy;};" `shouldBe` "(line=1, col=18) ERROR : invalid assignment"
     it "patt - fail" $
       evalString "main = case Xxx { Yyy->Xxx;};" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
     it "patt - read - ok" $
@@ -101,7 +101,7 @@ spec = do
       evalString "main = Nat.Succ Nat.Zero;"
         `shouldBe` "(Nat.Succ Nat.Zero)"
     it "..." $
-      evalString "main = ... where ... = Nat.Zero;.;"
+      evalString "main = ... where { ... = Nat.Zero;};"
         `shouldBe` "Nat.Zero"
 
   describe "misc:" $ do
