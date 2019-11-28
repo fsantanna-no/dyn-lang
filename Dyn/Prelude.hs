@@ -21,37 +21,37 @@ std = [r|
   data List.Cons with (a, List of a);
 
   matches :: ((a,a) -> Bool);
-  matches = func ->
+  matches = func {
     case (x,y) of
       (~y,_) -> Bool.True;
       _      -> Bool.False;
     . where
       (x,y) = ...;
     .
-  .;
+  };
 
-  getHash = func ->
+  getHash = func {
     let (dicts,key) = ... ; in
       case dicts of
         List.Cons ((~key,=dict),_) -> dict;
         List.Cons (_,=dicts')      -> getHash (dicts',key);
       .
     .
-  .;
+  };
 
-  fst = func ->
+  fst = func {
     x where
       (x,_) = ...;
     .
-  .;
+  };
 
-  snd = func ->
+  snd = func {
     x where
       (_,x) = ...;
     .
-  .;
+  };
 
-  identity = func -> ... .;
+  identity = func { ... };
 |]
 
 ibounded = [r|
@@ -65,11 +65,11 @@ ieq = [r|
   interface IEq for a with
     eq  :: ((a,a) -> Bool);
   .
-  neq = func :: ((a,a) -> Bool) where a is IEq ->
+  neq = func :: ((a,a) -> Bool) where a is IEq {
     not (eq (x,y)) where
       (x,y) = ...;
     .
-  .;
+  };
 |]
 
 iord = [r|
@@ -80,21 +80,21 @@ iord = [r|
   --gt  :: ((a,a) -> Bool) where a is IOrd
   --gte :: ((a,a) -> Bool) where a is IOrd
 
-  lte = func :: ((a,a) -> Bool) where a is IOrd ->
+  lte = func :: ((a,a) -> Bool) where a is IOrd {
     or (lt (x,y), eq (x,y)) where
       (x,y) = ...;
     .
-  .;
-  gt = func :: ((a,a) -> Bool) where a is IOrd ->
+  };
+  gt = func :: ((a,a) -> Bool) where a is IOrd {
     not (lte (x,y)) where
       (x,y) = ...;
     .
-  .;
-  gte = func :: ((a,a) -> Bool) where a is IOrd ->
+  };
+  gte = func :: ((a,a) -> Bool) where a is IOrd {
     or (gt (x,y), eq (x,y)) where
       (x,y) = ...;
     .
-  .;
+  };
 |]
 
 ienum = [r|
@@ -102,9 +102,9 @@ ienum = [r|
     toNat   :: (a -> Nat);
     fromNat :: (Nat -> a);
   .
-  succ = func :: (a -> a) where a is IEnum ->
+  succ = func :: (a -> a) where a is IEnum {
     fromNat (Nat.Succ (toNat ...))
-  .;
+  };
 |]
 
 -------------------------------------------------------------------------------
@@ -112,15 +112,15 @@ ienum = [r|
 
 unit_ienum = [r|
   implementation of IEnum for () with
-    toNat = func ->
+    toNat = func {
       Nat.Zero
-    .;
+    };
 
-    fromNat = func ->
+    fromNat = func {
       case ... of
         Nat.Zero -> ();
       .
-    .;
+    };
   .
 |]
 
@@ -133,27 +133,27 @@ bool = [r|
   --data Bool.False
   --data Bool.True
 
-  not = func ->
+  not = func {
     case ... of
       Bool.False -> Bool.True;
       Bool.True  -> Bool.False;
     .
-  .;
+  };
 
-  and = func ->
+  and = func {
     case ... of
       (Bool.False, _) -> Bool.False;
       (_, Bool.False) -> Bool.False;
       _               -> Bool.True;
     .
-  .;
+  };
 
-  or = func ->
+  or = func {
     case ... of
       (Bool.True, _)  -> Bool.True;
       (_,         =y) -> y;
     .
-  .;
+  };
 |]
 
 bool_ibounded = [r|
@@ -165,17 +165,17 @@ bool_ibounded = [r|
 
 bool_ieq = [r|
   implementation of IEq for Bool with
-    eq :: ((Bool,Bool)->Bool) = func ->
+    eq :: ((Bool,Bool)->Bool) = func {
       or (and (x,y), (and (not x, not y))) where
         (x,y) = ...;
       .
-    .;
+    };
   .
 |]
 
 bool_iord = [r|
   implementation of IOrd for Bool with
-    lt = func ->
+    lt = func {
       case (x,y) of
         (Bool.False, Bool.False) -> Bool.False;
         (Bool.False, Bool.True)  -> Bool.True;
@@ -184,25 +184,25 @@ bool_iord = [r|
       . where
         (x,y) = ...;
       .
-    .;
+    };
   .
 |]
 
 bool_ienum = [r|
   implementation of IEnum for Bool with
-    toNat = func ->
+    toNat = func {
       case ... of
         Bool.False -> Nat.Zero;
         Bool.True  -> Nat.Succ Nat.Zero;
       .
-    .;
+    };
 
-    fromNat = func ->
+    fromNat = func {
       case ... of
         Nat.Zero          -> Bool.False;
         Nat.Succ Nat.Zero -> Bool.True;
       .
-    .;
+    };
   .
 |]
 
@@ -220,7 +220,7 @@ char = [r|
   --data Char.Cc
   --data Char.Dd
 
-  ord :: (Char -> Nat) = func ->
+  ord :: (Char -> Nat) = func {
     case ... of
       Char.AA -> one;
       Char.BB -> two;
@@ -231,9 +231,9 @@ char = [r|
       Char.Cc -> add (ten, three);
       Char.Dd -> add (ten, four);
     .
-  .;
+  };
 
-  chr :: (Nat -> Char) = func ->
+  chr :: (Nat -> Char) = func {
     case ... of
       ~ one                -> Char.AA;
       ~ two                -> Char.BB;
@@ -244,15 +244,15 @@ char = [r|
       ~ (add (ten, three)) -> Char.Cc;
       ~ (add (ten, four))  -> Char.Dd;
     .
-  .;
+  };
 
-  isLower :: (Char -> Bool) = func ->
+  isLower :: (Char -> Bool) = func {
     and (gte (c,Char.Aa), lte (c,Char.Dd)) where
       c = ...;
     .
-  .;
+  };
 
-  capitalize :: (Char -> Char) = func ->
+  capitalize :: (Char -> Char) = func {
     case isLower c of
       Bool.True  -> chr (sub (ord c, off));
       Bool.False -> c;
@@ -260,9 +260,9 @@ char = [r|
       c   = ...;
       off = sub (ord Char.Aa, ord Char.AA);
     .
-  .;
+  };
 
-  nextlet :: (Char -> Char) = func ->
+  nextlet :: (Char -> Char) = func {
     let c = ...; in
       chr (add (rem (add (sub (ord c,min), one),
                      add (sub (max,min), one)),
@@ -275,24 +275,24 @@ char = [r|
         .;
       .
     .
-  .;
+  };
 |]
 
 char_ieq = [r|
   implementation of IEq for Char with
-    eq = func ->
+    eq = func {
       matches ...
-    .;
+    };
   .
 |]
 
 char_iord = [r|
   implementation of IOrd for Char with
-    lt = func ->
+    lt = func {
       lt (ord x, ord y) where
         (x,y) = ...;
       .
-    .;
+    };
   .
 |]
 
@@ -319,73 +319,73 @@ nat = [r|
   zero     = Nat.Zero;
 
   mul =
-    func ->
+    func {
       case ... of
         (_,  Nat.Zero)    -> Nat.Zero;
         (=x, Nat.Succ =y) -> add (mul (x,y), x);
       .
-    .
+    }
   ;
 
   add =
-    func ->
+    func {
       case ... of
         (=x, Nat.Zero)    -> x;
         (=x, Nat.Succ =y) -> Nat.Succ (add (x,y));
       .
-    .
+    }
   ;
 
   sub =
-    func ->
+    func {
       case ... of
         (=x, Nat.Zero)             -> x;
         (Nat.Succ =x, Nat.Succ =y) -> sub (x,y);
       .
-    .
+    }
   ;
 
   dec =
-    func ->
+    func {
       case ... of
         Nat.Succ =x -> x;
       .
-    .
+    }
   ;
 
   rem =
-    func :: ((Nat,Nat)->Nat) ->
+    func :: ((Nat,Nat)->Nat) {
       case lt (x,y) of
         Bool.True  -> x;
         Bool.False -> rem (sub (x,y), y);
       . where
         (x,y) = ...;
       .
-    .
+    }
   ;
 
   nlte =
-    func ->
+    func {
       case ... of
         (Nat.Zero,_) -> Bool.True;
         (_,Nat.Zero) -> Bool.False;
         (Nat.Succ =x, Nat.Succ =y) -> nlte (x,y);
       .
-    .
+    }
   ;
 |]
 
 nat_ieq = [r|
   implementation of IEq for Nat with
-    eq = func ->
+    eq = func {
       matches ...
-    .;
+    };
   .
 |]
 
 nat_iord = [r|
   implementation of IOrd for Nat with
-    lt = func ->
+    lt = func {
       case (x,y) of
         (Nat.Zero,     Nat.Zero)     -> Bool.False;
         (Nat.Zero,     _)            -> Bool.True;
@@ -394,7 +394,7 @@ nat_iord = [r|
       . where
         (x,y) = ...;
       .
-    .;
+    };
   .
 |]
 

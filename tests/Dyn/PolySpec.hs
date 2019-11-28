@@ -85,7 +85,7 @@ main = x where
 main = f Bool.True;
 
 implementation of IInd for Bool with
-  g = func -> () . ;
+  g = func { () } ;
 .
 
 interface IInd for a with
@@ -93,11 +93,11 @@ interface IInd for a with
 .
 
 f :: (a -> ()) where a is IInd =
-  func :: (a -> ()) where a is IInd ->
+  func :: (a -> ()) where a is IInd {
     g x where
       x = ...;
     .
-  .
+  }
 ;
 |])
         `shouldBe` "()"
@@ -107,12 +107,12 @@ f :: (a -> ()) where a is IInd =
 main = rec (Nat.Succ Nat.Zero);
 
 implementation of IRec for Nat with
-  rec = func ->
+  rec = func {
     case ... of
       Nat.Zero    -> ();
       Nat.Succ =x -> rec x;
     .
-  .;
+  };
 .
 
 interface IRec for a with
@@ -126,21 +126,21 @@ interface IRec for a with
 main = f (Nat.Succ Nat.Zero);
 
 implementation of IRec for Nat with
-  rec = func ->
+  rec = func {
     case ... of
       Nat.Zero    -> ();
       Nat.Succ =x -> rec x;
     .
-  .;
+  };
 .
 
 interface IRec for a with
   rec :: (a -> ());
 .
 f :: (a -> ()) where a is IRec =
-  func :: (a -> ()) where a is IRec ->
+  func :: (a -> ()) where a is IRec {
     rec ...
-  .
+  }
 ;
 |] ++ nat)
         `shouldBe` "()"
@@ -169,14 +169,14 @@ main = v where  -- (T<=F, T>=T, F>F, F<T)
 main = f (Bool.True,Bool.False);
 
 implementation of IAaa for Bool with
-  f = func -> g (x,y) where x::Bool; y::Bool; (x,y)=...; . . ;
+  f = func { g (x,y) where x::Bool; y::Bool; (x,y)=...; . } ;
 .
 
 interface IAaa for a where a is IOrd with
   f :: ((a,a) -> Bool);
 .
 g :: ((a,a) -> Bool) where a is IAaa;
-g = func :: ((a,a) -> Bool) where a is IAaa -> lt ... .;
+g = func :: ((a,a) -> Bool) where a is IAaa { lt ... };
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "Bool.False"
 
@@ -185,11 +185,11 @@ g = func :: ((a,a) -> Bool) where a is IAaa -> lt ... .;
 main = (f (Bool.True, Bool.False),
         f (Bool.False,Bool.False));
 f :: ((a,a) -> Bool) where a is IOrd;
-f = func :: ((a,a) -> Bool) where a is IOrd ->
+f = func :: ((a,a) -> Bool) where a is IOrd {
   gt (x,y) where
     (x,y)=...;
   .
-.;
+};
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
         `shouldBe` "(Bool.True,Bool.False)"
 
@@ -198,10 +198,10 @@ f = func :: ((a,a) -> Bool) where a is IOrd ->
 main = (ff1 (lte, (Bool.True,Bool.False)),
         ff2 (gte, (Bool.True,Bool.True )) ) where           -- gte must become closure
   ff1 :: ((((a,a)->Bool),(a,a)) -> Bool)
-  ff1 = func -> f (x,y) where (f,(x,y))=... ;;
+  ff1 = func { f (x,y) where (f,(x,y))=... ;;
 
   ff2 :: ((((Bool,Bool)->Bool),(Bool,Bool)) -> Bool)        -- TODO: needs closure to hold actual dict
-  ff2 = func -> f ps where (f,ps)=... ;;
+  ff2 = func { f ps where (f,ps)=... ;;
 ;
 |] ++ prelude)
         `shouldBe` "(Bool.False,Bool.True)"
@@ -212,14 +212,14 @@ main = (ff1 (lte, (Bool.True,Bool.False)),
 main = (lt (Xxx.True,Xxx.False), gt (Xxx.True,Xxx.False))
 
 implementation of IEq for a where a is IAaa with
-  eq = func :: ((a,a) -> Bool) ->
+  eq = func :: ((a,a) -> Bool) {
     matches ...
   ;
 ;
 
 implementation of IOrd for a where a is IAaa with
   lt :: ((a,a) -> Bool)
-  lt = func :: ((a,a) -> Bool) ->
+  lt = func :: ((a,a) -> Bool) {
     lt (f x, f y) where
       (x,y) = ...
     ;
@@ -232,7 +232,7 @@ interface IAaa for a with
 
 implementation of IAaa for Xxx with
   f :: (Xxx -> Bool)
-  f = func :: (Xxx -> Bool) ->
+  f = func :: (Xxx -> Bool) {
     case ... of
       Xxx.True  -> Bool.True
       Xxx.False -> Bool.False
@@ -273,9 +273,9 @@ implementation of IAaa for Xxx with
 main = f Bool.True;
 
 f :: (a -> Nat) where a is IEnum;
-f = func :: (a -> Nat) where a is IEnum ->
+f = func :: (a -> Nat) where a is IEnum {
   toNat ...
-.;
+};
 |] ++ prelude)
         `shouldBe` "(Nat.Succ Nat.Zero)"
 
@@ -289,12 +289,12 @@ l = List.Cons (Bool.False,
     List.Nil));
 
 f :: (List of a -> List of Nat) where a is IEnum;
-f = func :: (List of a -> List of Nat) where a is IEnum ->
+f = func :: (List of a -> List of Nat) where a is IEnum {
   case ... of
     List.Nil          -> List.Nil;
     List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a; l::List of a; .;
   .
-.;
+};
 |] ++ prelude)
         `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
 
@@ -308,12 +308,12 @@ l = List.Cons (one,
     List.Nil));
 
 f :: (List of a -> List of Nat) where a is IEnum;
-f = func :: (List of a -> List of Nat) where a is IEnum ->
+f = func :: (List of a -> List of Nat) where a is IEnum {
   case ... of
     List.Nil          -> List.Nil;
     List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a; l::List of a; .;
   .
-.;
+};
 |] ++ prelude)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
@@ -327,12 +327,12 @@ l1 = List.Cons (Bool.True, l2);
 l2 :: List of IEnum;
 l2 = List.Cons ((), List.Nil);
 
-f = func :: (List of a -> List of Nat) where a is IEnum ->
+f = func :: (List of a -> List of Nat) where a is IEnum {
   case ... of
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
   .
-.;
+};
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
@@ -346,12 +346,12 @@ l = List.Cons (Bool.True,
     List.Cons (one,
     List.Nil)));
 
-f = func :: (List of a -> List of Nat) where a is IEnum ->
+f = func :: (List of a -> List of Nat) where a is IEnum {
   case ... of
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
   .
-.;
+};
 |] ++ nat_ienum ++ char_ieq ++ unit_ienum ++ bool_ienum ++ ienum ++ ieq ++ nat ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))))"
 
@@ -363,12 +363,12 @@ l :: List of IEnum;   -- a is dynamic IEnum
 l = List.Cons (Bool.False,
     List.Nil);
 
-f = func :: (List of a -> List of Nat) where a is IEnum ->
+f = func :: (List of a -> List of Nat) where a is IEnum {
   case ... of
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (succ v, f l);
   .
-.;
+};
 |] ++ prelude)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
 
@@ -387,32 +387,32 @@ interface IString for a with
 
 implementation of IString for Expr.Unit with
   toString :: (Expr.Unit -> String);
-  toString = func -> String.Unit (toStringExpr ...) . ;
+  toString = func { String.Unit (toStringExpr ...) } ;
 .
 
 implementation of IString for Bool with
   toString :: (Bool -> String);
-  toString = func -> String.Bool . ;
+  toString = func { String.Bool } ;
 .
 
 implementation of IString for Expr.Var with
   toString :: (Expr.Var -> String);
   toString =
-    func ->
+    func {
       String.Var (toStringExpr ..., var) where
         Expr.Var (_, var) = ...;
       .
-    .
+    }
   ;
 .
 
 toStringExpr :: (Expr -> String);
 toStringExpr =
-  func ->
+  func {
     let Expr n = ...; in
       String.Pos n
     .
-  .
+  }
 ;
 |] ++ nat ++ std)
         `shouldBe` "((String.Unit (String.Pos (Nat.Succ Nat.Zero))),String.Bool,(String.Var ((String.Pos Nat.Zero),Nat.Zero)))"

@@ -246,11 +246,11 @@ expr_func = do
   (tp,cs) <- option (TAny,Ctrs [])
                     (tk_sym "::" *> type_ctrs)
   ups  <- option [] $
-            parensWith (tk_sym "{", tk_sym "}") $
+            parensWith (tk_sym "[", tk_sym "]") $
               list (tk_sym ",") tk_var    -- {x}, {x,y}
-  void <- tk_sym "->"
+  void <- tk_sym "{"
   body <- where_let
-  void <- tk_sym "."
+  void <- tk_sym "}"
   return $ EFunc pos cs tp (map (\id -> (id,EUnit pos)) ups) body
 
 expr_case :: Parser Expr

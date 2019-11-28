@@ -78,7 +78,7 @@ spec = do
     it "()" $
       evalString "main = ();" `shouldBe` "()"
     it "f ()" $
-      evalString "main = f () where f = func :: () -> ... .;.;" `shouldBe` "()"
+      evalString "main = f () where f = func :: () { ... };.;" `shouldBe` "()"
     it "Xx a = ()" $
       evalString "main = a where Xx a = Xx ();.;" `shouldBe` "()"
     it "sub" $
@@ -86,7 +86,7 @@ spec = do
     it "patt - (x)" $
       evalString "main = x where (x) = ();.;" `shouldBe` "()"
     it "patt - read - fail" $
-      evalString "main = case () of ~func->(). -> ();.;" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"(func :: ? ->\\n  ()\\n.)\""
+      evalString "main = case () of ~func{()} -> ();.;" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"(func :: ? {\\n  ()\\n})\""
     it "patt - read - ok" $
       evalString "main = case () of ~() -> ();.;" `shouldBe` "()"
     it "patt - fail" $
@@ -96,7 +96,7 @@ spec = do
     it "patt - read - ok" $
       evalString "main = case ((),()) of ~((),()) -> ();.;" `shouldBe` "()"
     it "f ()" $
-      evalString "main = f (); \n f = func :: ()-> ... .;" `shouldBe` "()"
+      evalString "main = f (); \n f = func :: (){ ... };" `shouldBe` "()"
     it "Nat" $
       evalString "main = Nat.Succ Nat.Zero;"
         `shouldBe` "(Nat.Succ Nat.Zero)"
