@@ -411,4 +411,4 @@ toStringExpr =
   .
 ;
 |] ++ nat ++ std)
-        `shouldBe` "((Expr.Unit (Nat.Succ Nat.Zero)),(Expr.Var (Nat.Zero,Nat.Zero)))"
+        `shouldBe` "((String.Unit (String.Pos (Nat.Succ Nat.Zero))),String.Bool,(String.Var ((String.Pos Nat.Zero),Nat.Zero)))"

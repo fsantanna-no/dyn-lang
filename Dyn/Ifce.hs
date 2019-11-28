@@ -29,16 +29,16 @@ datas globs = map globFromData $ (dict : (map f $ globsToIfces globs)) where
                 dict = Data (pz, False, ["Dict"], [], TAny)
 
 impls :: [Glob] -> [Glob]
-impls globs = map globFromDecl $ dicts is ++ impls is where
+impls globs = map globFromDecl $ dicts ++ decls where
   is = globsToImpls globs
 
-  impls :: [Impl] -> [Decl]
-  impls is = concatMap (implToDecls globs) (supers is)
+  decls :: [Decl]
+  decls = concatMap (implToDecls globs) supers
 
   -- group subtypes to create supertype fs:
   --  toStringExpr = toStringExprUnit + toStringExprVar + ...
-  supers :: [Impl] -> [Impl]
-  supers is =
+  supers :: [Impl]
+  supers =
     map join       $
     --map (map (\(x,y,_) -> (x,y))) $
     L.groupBy same $ -- [ [(IString,Expr.Unit),(IString,Expr.Var)], [(IString,Bool)] ]
@@ -88,14 +88,14 @@ impls globs = map globFromDecl $ dicts is ++ impls is where
                             rename :: Decl -> Decl
                             rename (DAtr z1 (PWrite z2 id2) e) = DAtr z1 (PWrite z2 (id2++concat hr)) e
 
-  dicts :: [Impl] -> [Decl]
-  dicts is = --traceShowSS $
+  dicts :: [Decl]
+  dicts = --traceShowSS $
     map toDict     $   -- [ ds_IEnum=..., ... ]
     map toCons     $   -- [ (IEnum, Cons((K.Unit,dIEnumUnit), Cons(..., Nil))) ]
     L.groupBy same $   -- [ [(IEnum,...),(IEnum,...)], [(IEq,...)] ]
     L.sortBy  comp $
     map toPair     $   -- [ (IEnum, Cons(K.Unit,dIEnumUnit)), (IEnum, Cons(K.Bool,dIEnumBool), ...]
-    is where
+    supers where
 
       toDict :: (ID_Ifce,Expr) -> Decl
       toDict (ifc,cons) = DAtr pz (PWrite pz ("ds_"++ifc))

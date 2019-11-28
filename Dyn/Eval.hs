@@ -107,6 +107,7 @@ match env (PCall _ (PCons _ hrp) pat) (EData _ hre e) =
   where
     f 0 e = e
     f n (ETuple z [_,sup]) = f (n-1) sup    -- sup payload comes last
+    f n e = e
 
 --match env pat e = traceShow (pat,e) (env, Right False)
 match env _ _ = (env, Right False)
