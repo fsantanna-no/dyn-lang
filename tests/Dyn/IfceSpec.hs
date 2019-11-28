@@ -369,7 +369,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
 
   describe "Lang" $ do
-    it "XXX: toString" $
+    it "toString" $
       evalString ([r|
 main = ((toString' dIStringExpr) (Expr.Unit one), (toString' dIStringBool) Bool.True, (toString' dIStringExpr) (Expr.Var (one,zero)));
 
@@ -383,7 +383,7 @@ interface IString for a with
 
 implementation of IString for Expr.Unit with
   toString :: (Expr.Unit -> String);
-  toString = func -> String.Unit (toStringExpr (Show ...)) . ;
+  toString = func -> String.Unit (toStringExpr ...) . ;
 .
 
 implementation of IString for Bool with

@@ -373,9 +373,10 @@ f = func :: (List of a -> List of Nat) where a is IEnum ->
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
 
   describe "Lang" $ do
-    it "XXX: toString" $
+    it "toString" $
       evalString ([r|
-main = (toString (Expr.Unit one), toString (Expr.Var (zero,zero)));
+main = (toString (Expr.Unit one), toString Bool.True, toString (Expr.Var (one,zero)));
+
 data Expr with Nat;
 data Expr.Unit;
 data Expr.Var with Nat;
@@ -386,14 +387,19 @@ interface IString for a with
 
 implementation of IString for Expr.Unit with
   toString :: (Expr.Unit -> String);
-  toString = func -> (toStringExpr ..., String.Unit) . ;
+  toString = func -> String.Unit (toStringExpr ...) . ;
+.
+
+implementation of IString for Bool with
+  toString :: (Bool -> String);
+  toString = func -> String.Bool . ;
 .
 
 implementation of IString for Expr.Var with
-  toString :: (Expr.Unit -> String);
+  toString :: (Expr.Var -> String);
   toString =
     func ->
-      (toStringExpr ..., var) where
+      String.Var (toStringExpr ..., var) where
         Expr.Var (_, var) = ...;
       .
     .
@@ -409,6 +415,4 @@ toStringExpr =
   .
 ;
 |] ++ nat ++ std)
-        `shouldBe` "((Expr.Unit (Nat.Succ Nat.Zero)),(Expr.Var (Nat.Zero,Nat.Zero)))"
-
-
+        `shouldBe` "((String.Unit (String.Pos (Nat.Succ Nat.Zero))),String.Bool,(String.Var ((String.Pos Nat.Zero),Nat.Zero)))"
