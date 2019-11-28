@@ -107,16 +107,16 @@ spec = do
           `shouldBe` "(xxx,yyy)"
     describe "decl:" $ do
       it "case" $
-        (toString $ head $ fromRight $ parse' decl "main = case x of Bool.True -> a;\nBool.False -> b;.;")
-          `shouldBe` "main = case x of\n  Bool.True -> a;\n  Bool.False -> b;\n.;"
+        (toString $ head $ fromRight $ parse' decl "main = case x { Bool.True -> a;\nBool.False -> b;};")
+          `shouldBe` "main = case x {\n  Bool.True -> a;\n  Bool.False -> b;\n};"
     describe "where:" $ do
       it "case" $
-        (toString $ fromRight $ parse' where_ "case x of Bool.True -> a;\nBool.False -> b;.")
-          `shouldBe` "case x of\n  Bool.True -> a;\n  Bool.False -> b;\n."
+        (toString $ fromRight $ parse' where_ "case x { Bool.True -> a;\nBool.False -> b;}")
+          `shouldBe` "case x {\n  Bool.True -> a;\n  Bool.False -> b;\n}"
     describe "prog:" $ do
       it "case" $
-        (progToString $ fromRight $ parse' (prog) "main = case x of Bool.True -> a;\nBool.False -> b;.;")
-          `shouldBe` "main = case x of\n  Bool.True -> a;\n  Bool.False -> b;\n.;\n"
+        (progToString $ fromRight $ parse' (prog) "main = case x { Bool.True -> a;\nBool.False -> b;};")
+          `shouldBe` "main = case x {\n  Bool.True -> a;\n  Bool.False -> b;\n};\n"
 
     describe "expr:" $ do
       it "()" $
@@ -140,9 +140,9 @@ spec = do
       it "call" $
         (toString $ fromRight $ parse' expr "(a (b c)) d")
           `shouldBe` "((a (b c)) d)"
-      it "case x of ~y->t\n_->f" $
-        (toString $ fromRight $ parse' expr "case x of ~y->t; \n _->f;.")
-          `shouldBe` "case x of\n  ~y -> t;\n  _ -> f;\n."
+      it "case x { ~y->t\n_->f" $
+        (toString $ fromRight $ parse' expr "case x { ~y->t; \n _->f;}")
+          `shouldBe` "case x {\n  ~y -> t;\n  _ -> f;\n}"
     describe "prog:" $ do
       it "x where x :: () = ()" $
         (parseToString "main :: () = ();")
@@ -193,27 +193,27 @@ d :: () = ();
     describe "parseToString:" $ do
 
       it "case" $
-        parseToString "main = case x of Bool.True -> a;\nBool.False -> b;.;"
-          `shouldBe` "main = case x of\n  Bool.True -> a;\n  Bool.False -> b;\n.;\n"
+        parseToString "main = case x { Bool.True -> a;\nBool.False -> b;};"
+          `shouldBe` "main = case x {\n  Bool.True -> a;\n  Bool.False -> b;\n};\n"
       it "case" $
-        parseToString "main = case x of _ -> a;.;"
-          `shouldBe` "main = case x of\n  _ -> a;\n.;\n"
+        parseToString "main = case x { _ -> a;};"
+          `shouldBe` "main = case x {\n  _ -> a;\n};\n"
 
       it "Nat +" $
         parseToString [r|
 main = add (Nat.Zero, Nat.Succ Nat.Zero);
 add =
   func :: () {
-    case y of
+    case y {
       Nat.Zero    -> x;
       Nat.Succ =z -> Nat.Succ (add (x,z));
-    . where
+    } where
       (x,y) = ...;
     .
   }
 ;
 |]
-        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)));\nadd = (func :: () {\n  case y of\n    Nat.Zero -> x;\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)));\n  . where\n    (x,y) = ...;\n  .\n});\n"
+        `shouldBe` "main = (add (Nat.Zero,(Nat.Succ Nat.Zero)));\nadd = (func :: () {\n  case y {\n    Nat.Zero -> x;\n    (Nat.Succ =z) -> (Nat.Succ (add (x,z)));\n  } where\n    (x,y) = ...;\n  .\n});\n"
 
 -------------------------------------------------------------------------------
 
@@ -244,11 +244,11 @@ add =
       parseToString "data Int; data Xxx with Int; data Xxx.Yyy with Int; y::Xxx.Yyy = Xxx.Yyy (Int,Int);"
         `shouldBe` "data Int;\ndata Xxx with Int;\ndata Xxx.Yyy with Int;\ny :: Xxx.Yyy;\ny = (Xxx.Yyy (Int,Int));\n"
     it "data X with Int ; x:Int ; X x <- X 1 ; ret x" $
-      parseToString "data Xxx with Int; x::Int; main = case Xxx Int of Xxx =x -> x;.;"
-        `shouldBe` "data Xxx with Int;\nx :: Int;\nmain = case (Xxx Int) of\n  (Xxx =x) -> x;\n.;\n"
+      parseToString "data Xxx with Int; x::Int; main = case Xxx Int { Xxx =x -> x;};"
+        `shouldBe` "data Xxx with Int;\nx :: Int;\nmain = case (Xxx Int) {\n  (Xxx =x) -> x;\n};\n"
     it "data X with Int ; X 1 <- X 1 ; return 1" $
-      parseToString "data Xxx with Int; main = case Xxx Int of Xxx Int -> Int;.;"
-        `shouldBe` "data Xxx with Int;\nmain = case (Xxx Int) of\n  (Xxx Int) -> Int;\n.;\n"
+      parseToString "data Xxx with Int; main = case Xxx Int { Xxx Int -> Int;};"
+        `shouldBe` "data Xxx with Int;\nmain = case (Xxx Int) {\n  (Xxx Int) -> Int;\n};\n"
     it "Pair (a,a)" $
       parseToString "data Pair of a with (a,a);"
         `shouldBe` "data Pair of a with (a,a);\n"

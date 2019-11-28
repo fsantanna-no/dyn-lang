@@ -116,7 +116,7 @@ instance IString Expr where
   toStringI spc (ECall  _ e1 e2)       = "(" ++ toString e1 ++ " " ++ toString e2 ++ ")"
 
   toStringI spc (ECase  _ e cases)     =
-    "case " ++ toString e ++ " of" ++ concat (map f cases) ++ "\n" ++ rep spc ++ "."
+    "case " ++ toString e ++ " {" ++ concat (map f cases) ++ "\n" ++ rep spc ++ "}"
     where
       f :: (Patt,ExpWhere) -> String
       f (pat,whe) = "\n" ++ rep (spc+2) ++ pattToString True pat ++ " -> " ++ toStringI (spc+2) whe ++ ";"

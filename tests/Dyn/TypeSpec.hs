@@ -35,19 +35,19 @@ spec = do
     it "case x::()" $
       evalString ([r|
 main = Type x;
-x = case () of
+x = case () {
   =x -> ();
-.;
+};
 |])
         `shouldBe` "(Type ())"
 
     it "case x::()" $
       evalString ([r|
 main = Type x;
-x = case () of
+x = case () {
   () -> ();
   _  -> ();
-.;
+};
 |])
         `shouldBe` "(Type ())"
 
@@ -57,8 +57,8 @@ data Nat;
 data Nat.Zero;
 data Nat.Succ with Nat;
 main = Type x;
-x = case Nat.Succ Nat.Zero of
+x = case Nat.Succ Nat.Zero {
   Nat.Succ =x -> x where x::?; . ;
-.;
+};
 |])
         `shouldBe` "(Type Nat)"

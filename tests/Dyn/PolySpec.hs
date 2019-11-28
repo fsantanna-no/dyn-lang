@@ -108,10 +108,10 @@ main = rec (Nat.Succ Nat.Zero);
 
 implementation of IRec for Nat with
   rec = func {
-    case ... of
+    case ... {
       Nat.Zero    -> ();
       Nat.Succ =x -> rec x;
-    .
+    }
   };
 .
 
@@ -127,10 +127,10 @@ main = f (Nat.Succ Nat.Zero);
 
 implementation of IRec for Nat with
   rec = func {
-    case ... of
+    case ... {
       Nat.Zero    -> ();
       Nat.Succ =x -> rec x;
-    .
+    }
   };
 .
 
@@ -233,10 +233,10 @@ interface IAaa for a with
 implementation of IAaa for Xxx with
   f :: (Xxx -> Bool)
   f = func :: (Xxx -> Bool) {
-    case ... of
+    case ... {
       Xxx.True  -> Bool.True
       Xxx.False -> Bool.False
-    ;
+    }
   ;
 ;
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq ++ std)
@@ -290,10 +290,10 @@ l = List.Cons (Bool.False,
 
 f :: (List of a -> List of Nat) where a is IEnum;
 f = func :: (List of a -> List of Nat) where a is IEnum {
-  case ... of
+  case ... {
     List.Nil          -> List.Nil;
     List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a; l::List of a; .;
-  .
+  }
 };
 |] ++ prelude)
         `shouldBe` "(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))"
@@ -309,10 +309,10 @@ l = List.Cons (one,
 
 f :: (List of a -> List of Nat) where a is IEnum;
 f = func :: (List of a -> List of Nat) where a is IEnum {
-  case ... of
+  case ... {
     List.Nil          -> List.Nil;
     List.Cons (=x,=l) -> List.Cons (toNat x, f l) where x::a; l::List of a; .;
-  .
+  }
 };
 |] ++ prelude)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
@@ -328,10 +328,10 @@ l2 :: List of IEnum;
 l2 = List.Cons ((), List.Nil);
 
 f = func :: (List of a -> List of Nat) where a is IEnum {
-  case ... of
+  case ... {
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
-  .
+  }
 };
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
@@ -347,10 +347,10 @@ l = List.Cons (Bool.True,
     List.Nil)));
 
 f = func :: (List of a -> List of Nat) where a is IEnum {
-  case ... of
+  case ... {
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (toNat v, f l);
-  .
+  }
 };
 |] ++ nat_ienum ++ char_ieq ++ unit_ienum ++ bool_ienum ++ ienum ++ ieq ++ nat ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,(List.Cons ((Nat.Succ Nat.Zero),List.Nil))))))"
@@ -364,10 +364,10 @@ l = List.Cons (Bool.False,
     List.Nil);
 
 f = func :: (List of a -> List of Nat) where a is IEnum {
-  case ... of
+  case ... {
     List.Nil          -> List.Nil;
     List.Cons (=v,=l) -> List.Cons (succ v, f l);
-  .
+  }
 };
 |] ++ prelude)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"

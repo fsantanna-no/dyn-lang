@@ -84,9 +84,9 @@ dIEqIXxx = Dict.IEq (eq) where
 
 dixxx_xxx = f where
   f = func { -- :: (dixxx_xxx,X) -> Bool
-    case x of
+    case x {
       Xxx -> Bool.True;
-    . where
+    } where
       (_,x) = ...;
     .
   };
@@ -155,9 +155,9 @@ succ'2 = func {
       evalString ([r|
 main = (f' gets) l where
   gets = func {
-    case ... of
+    case ... {
       (=k,=v) -> (getHash (ds_IEnum,k), v);
-    .
+    }
   };
 .;
 
@@ -178,12 +178,12 @@ f :: (List of a -> List of Nat) where a is IEnum;  -- a is dynamic IEnum
 f' = func :: (List of a -> List of Nat) where a is IEnum {
   let gets = ...; in
     func [gets] {
-      case ... of
+      case ... {
         List.Nil          -> List.Nil;
         List.Cons (=v,=l) -> List.Cons ((toNat' d') v', (f' gets) l) where
           (d',v') = gets v;
         .;
-      .
+      }
     }
   .
 };
@@ -194,9 +194,9 @@ f' = func :: (List of a -> List of Nat) where a is IEnum {
       evalString ([r|
 main = (f' gets) l where
   gets = func {
-    case ... of
+    case ... {
       (=k,=v) -> (getHash (ds_IEnum,k), v);
-    .
+    }
   };
 .;
 
@@ -216,12 +216,12 @@ f :: (List of a -> List of Nat) where a is IEnum;  -- a is dynamic IEnum
 f' = func :: (List of a -> List of Nat) where a is IEnum {
   let dsa = ...; in
     func [dsa] {
-      case ... of
+      case ... {
         List.Nil          -> List.Nil;
         List.Cons (=v,=l) -> List.Cons ((succ' d') v', (f' gets) l) where
           (d',v') = gets v;
         .;
-      .
+      }
     }
   .
 };
@@ -275,10 +275,10 @@ f = func { toStringExpr ... };
 
 toStringExpr =
   func {
-    case ... of
+    case ... {
       Expr.Unit _ -> toStringExprUnit ...;
       Expr.Var  _ -> toStringExprVar  ...;
-    .
+    }
   }
 ;
 
@@ -311,10 +311,10 @@ prelude = unit_ienum ++ nat_ieq ++ bool_ienum ++ bool_iord ++ bool_ieq ++ iord +
 std = [r|
   getHash = func {
     let (dicts,key) = ... ; in
-      case dicts of
+      case dicts {
         List.Cons ((~key,=dict),_) -> dict;
         List.Cons (_,=dicts')      -> getHash (dicts',key);
-      .
+      }
     .
   };
 |]
@@ -377,10 +377,10 @@ ieq = [r|
     let dIEqa = ... ; in
       func [dIEqa] {
         let (x,y) = ... ; in
-          case (x,y) of
+          case (x,y) {
             (~y,_) -> Bool.True;
             _      -> Bool.False;
-          .
+          }
         .
       }
     .
@@ -474,16 +474,16 @@ bool_ieq = [r|
 bool_ienum = [r|
   dIEnumBool = Dict.IEq (toNat,fromNat) where
     toNat = func {
-      case ... of
+      case ... {
         Bool.False -> Nat.Zero;
         Bool.True  -> Nat.Succ Nat.Zero;
-      .
+      }
     };
     fromNat = func {
-      case ... of
+      case ... {
         Nat.Zero          -> Bool.False;
         Nat.Succ Nat.Zero -> Bool.True;
-      .
+      }
     };
   .;
 |]
@@ -495,12 +495,12 @@ bool_iord = [r|
     lt_Bool = func {
       let dIEqa = ...; in
         func [dIEqa] {
-          case ... of
+          case ... {
             (Bool.False, Bool.False) -> Bool.False;
             (Bool.False, Bool.True)  -> Bool.True;
             (Bool.True,  Bool.False) -> Bool.False;
             (Bool.True,  Bool.True)  -> Bool.False;
-          .
+          }
         }
       .
     };
@@ -510,14 +510,14 @@ bool_iord = [r|
 unit_ienum = [r|
   dIEnumUnit = Dict.IEq (toNat,fromNat) where
     toNat = func {
-      case ... of
+      case ... {
         () -> Nat.Zero;
-      .
+      }
     };
     fromNat = func {
-      case ... of
+      case ... {
         Nat.Zero -> ();
-      .
+      }
     };
   .;
 |]

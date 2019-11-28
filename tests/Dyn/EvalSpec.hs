@@ -51,16 +51,16 @@ spec = do
       (evalProg $ fromRight $ parse "main = error;")
         `shouldBe` (EError (1,8) "<user>")
     it "match-true" $
-      (evalProg $ fromRight $ parse "main = case () of () -> ();\n_ -> error;.;")
-        `shouldBe` (EUnit (1,25))
+      (evalProg $ fromRight $ parse "main = case () { () -> ();\n_ -> error;};")
+        `shouldBe` (EUnit (1,24))
     it "match-false" $
-      (evalProg $ fromRight $ parse "main = case () of A -> error;\n_ -> ();.;")
+      (evalProg $ fromRight $ parse "main = case () { A -> error;\n_ -> ();};")
         `shouldBe` (EUnit (2,6))
     it "match-error" $
-      (evalProg $ fromRight $ parse "main = case error of ()->(); \n _->error;.;")
+      (evalProg $ fromRight $ parse "main = case error { ()->(); \n _->error;};")
         `shouldBe` (EError (1,13) "<user>")
     it "match-error" $
-      (evalProg $ fromRight $ parse "main = case () of A->();.;")
+      (evalProg $ fromRight $ parse "main = case () { A->();};")
         `shouldBe` EError (1,8) "non-exhaustive patterns"
     it "assign-var" $
       (evalProg $ fromRight $ parse "main = a where a = A;.;")
@@ -86,15 +86,15 @@ spec = do
     it "patt - (x)" $
       evalString "main = x where (x) = ();.;" `shouldBe` "()"
     it "patt - read - fail" $
-      evalString "main = case () of ~func{()} -> ();.;" `shouldBe` "(line=1, col=19) ERROR : invalid pattern : \"(func :: ? {\\n  ()\\n})\""
+      evalString "main = case () { ~func{()} -> ();};" `shouldBe` "(line=1, col=18) ERROR : invalid pattern : \"(func :: ? {\\n  ()\\n})\""
     it "patt - read - ok" $
-      evalString "main = case () of ~() -> ();.;" `shouldBe` "()"
+      evalString "main = case () { ~() -> ();};" `shouldBe` "()"
     it "patt - fail" $
       evalString "main = x where Xxx = Yyy;.;" `shouldBe` "(line=1, col=16) ERROR : invalid assignment"
     it "patt - fail" $
-      evalString "main = case Xxx of Yyy->Xxx;.;" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
+      evalString "main = case Xxx { Yyy->Xxx;};" `shouldBe` "(line=1, col=8) ERROR : non-exhaustive patterns"
     it "patt - read - ok" $
-      evalString "main = case ((),()) of ~((),()) -> ();.;" `shouldBe` "()"
+      evalString "main = case ((),()) { ~((),()) -> ();};" `shouldBe` "()"
     it "f ()" $
       evalString "main = f (); \n f = func :: (){ ... };" `shouldBe` "()"
     it "Nat" $

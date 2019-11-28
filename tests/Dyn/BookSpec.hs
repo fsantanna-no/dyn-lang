@@ -69,10 +69,10 @@ main = add (smaller (ten,five) , smaller (one,four));
 smaller =
   func {
     let (x,y) = ... ; in
-      case nlte (x,y) of
+      case nlte (x,y) {
         Bool.True  -> x;
         Bool.False -> y;
-      .
+      }
     .
   }
 ;
@@ -90,10 +90,10 @@ square =
 ;
 smaller =
   func {
-    case nlte (x,y) of
+    case nlte (x,y) {
       Bool.True  -> x;
       Bool.False -> y;
-    .
+    }
       where
         (x,y) = ...;
       .
@@ -153,10 +153,10 @@ fthree =
 main = multiply (two,three);
 multiply =
   func {
-    case ... of
+    case ... {
       (~zero, _)  -> zero;
       (=x,    =y) -> mul (x,y);
-    .
+    }
   }
 ;
 |] ++ nat)
@@ -211,9 +211,9 @@ smallerc =
 main = twice (square,two);
 square = func { mul (...,...) };
 twice = func {
-  case ... of
+  case ... {
     (=f,=x) -> f (f x);
-  .}
+  }}
 ;
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))))))))))))))"
@@ -253,9 +253,9 @@ main   = matches ((twicec square) two, mul(four,four));
 square = func { mul (...,...) };
 twicec = curry twice;
 twice  = func {
-  case ... of
+  case ... {
     (=f,=x) -> f (f x);
-  .
+  }
 };
 curry  = func {
   func [f] {
@@ -353,10 +353,10 @@ compose = func {
 main = fact three;
 fact =
   func {
-    case ... of
+    case ... {
       Nat.Zero -> one;
       =n       -> mul (n, fact (dec n));
-    .
+    }
   }
 ;
 |] ++ nat)
@@ -443,10 +443,10 @@ f =
         evalString ([r|
 main = not Bool.False;
 not = func {
-  case ... of
+  case ... {
     Bool.False -> Bool.True;
     Bool.True  -> Bool.False;
-  .
+  }
 };
 |])
           `shouldBe` "Bool.True"
@@ -455,11 +455,11 @@ not = func {
         evalString ([r|
 main = and (Bool.True, Bool.False);
 and = func {
-  case ... of
+  case ... {
     (Bool.False, _) -> Bool.False;
     (_, Bool.False) -> Bool.False;
     _               -> Bool.True;
-  .
+  }
 };
 |])
           `shouldBe` "Bool.False"
@@ -474,10 +474,10 @@ main = and (Bool.True, Bool.True);
         evalString ([r|
 main = or (Bool.True, Bool.False);
 or = func {
-  case ... of
+  case ... {
     (Bool.True, _)  -> Bool.True;
     (_,         =y) -> y;
-  .
+  }
 };
 |])
           `shouldBe` "Bool.True"
@@ -486,10 +486,10 @@ or = func {
         evalString ([r|
 main = or (Bool.False, Bool.False);
 or = func {
-  case ... of
+  case ... {
     (Bool.True, _)  -> Bool.True;
     (_,         =y) -> y
-  .
+  }
 };
 |])
           `shouldBe` "Bool.False"
@@ -523,10 +523,10 @@ main = lte (Xx.Aa,Xx.Bb);
         evalString ([r|
 main = and (not (leapyear y1979), and (leapyear y1980, and (not (leapyear hundred), leapyear (mul (four,hundred)))));
 leapyear :: (Nat->Bool) = func {
-  case rem (y,hundred) of
+  case rem (y,hundred) {
     Nat.Zero -> eq(rem (y, mul(four,hundred)), Nat.Zero);
     _        -> eq(rem (y, four),              Nat.Zero);
-  . where
+  } where
     y = ...;
   .
 };
@@ -543,15 +543,15 @@ main = (analyse (ten, twenty, mul(ten,three)),
         analyse (ten, ten,    ten));
 twenty = add (ten,ten);
 analyse = func {
-  case nlte (add (x,y), z) of
+  case nlte (add (x,y), z) {
     Bool.True -> Tri.Fail;
-    _ -> case (x,y,z) of
+    _ -> case (x,y,z) {
       (~z,_,_) -> Tri.Equi;
       (~y,_,_) -> Tri.Isos;
       (_,_,~y) -> Tri.Isos;
       _        -> Tri.Scal;
-    .
-  . where
+    }
+  } where
     (x,y,z) = ...;
   .
 };
@@ -589,28 +589,28 @@ twenty = mul (two,ten);
 --data Triangle.Scalene
 
 analyse2 = func :: ((Nat,Nat,Nat) -> Triangle) {
-  case (lte(x,y),  lte(x,z),  lte(y,x),  lte(y,z) ) of
+  case (lte(x,y),  lte(x,z),  lte(y,x),  lte(y,z) ) {
        (Bool.True, Bool.True, _,         Bool.True)  -> analyse (x,y,z);
        (Bool.True, Bool.True, _,         Bool.False) -> analyse (x,z,y);
        (_,         Bool.True, Bool.True, Bool.True)  -> analyse (y,x,z);
        (_,         Bool.False,Bool.True, Bool.True)  -> analyse (y,z,x);
        (Bool.True, _,         _,         _)          -> analyse (z,x,y);
        _                                             -> analyse (z,y,x);
-  . where
+  } where
     (x,y,z) = ...;
   .
 };
 
 analyse = func :: ((Nat,Nat,Nat) -> Triangle) {
-  case lte (add (x,y), z) of
+  case lte (add (x,y), z) {
     Bool.True  -> Triangle.Failure;
-    Bool.False -> case (x,y,z) of
+    Bool.False -> case (x,y,z) {
       (~z,_,_) -> Triangle.Equilateral;
       (~y,_,_) -> Triangle.Isosceles;
       (_,~z,_) -> Triangle.Isosceles;
       _        -> Triangle.Scalene;
-    .
-  . where
+    }
+  } where
     (x,y,z) = ...;
   .
 };
@@ -633,28 +633,28 @@ twenty = mul (two,ten);
 --data Triangle.Scalene
 
 sort3 = func :: ((Nat,Nat,Nat) -> (Nat,Nat,Nat)) {
-  case ( lt(x,y) , lt(x,z) , lt(y,x) , lt(y,z) ) of
+  case ( lt(x,y) , lt(x,z) , lt(y,x) , lt(y,z) ) {
     (Bool.True, Bool.True, _, Bool.True)  -> (x,y,z);
     (Bool.True, Bool.True, _, Bool.False) -> (x,z,y);
     (_, Bool.True,  Bool.True, Bool.True) -> (y,x,z);
     (_, Bool.False, Bool.True, Bool.True) -> (y,z,x);
     (Bool.True,  _, _, _)                 -> (z,x,y);
     (Bool.False, _, _, _)                 -> (z,y,x);
-  . where
+  } where
     (x,y,z) = ...;
   .
 };
 
 analyse = func :: ((Nat,Nat,Nat) -> Triangle) {
-  case lte (add (x,y), z) of
+  case lte (add (x,y), z) {
     Bool.True  -> Triangle.Failure;
-    Bool.False -> case (x,y,z) of
+    Bool.False -> case (x,y,z) {
       (~z,_,_) -> Triangle.Equilateral;
       (~y,_,_) -> Triangle.Isosceles;
       (_,~z,_) -> Triangle.Isosceles;
       _        -> Triangle.Scalene;
-    .
-  . where
+    }
+  } where
     (x,y,z) = ...;
   .
 };
@@ -730,7 +730,7 @@ dayAfter = func :: (Day -> Day) {
 
 implementation of IEnum for Day with
   toNat = func {
-    case ... of
+    case ... {
       Day.Sun -> zero;
       Day.Mon -> one;
       Day.Tue -> two;
@@ -738,11 +738,11 @@ implementation of IEnum for Day with
       Day.Thu -> four;
       Day.Fri -> five;
       Day.Sat -> six;
-    .
+    }
   };
 
   fromNat = func {
-    case ... of
+    case ... {
       ~zero  -> Day.Sun;
       ~one   -> Day.Mon;
       ~two   -> Day.Tue;
@@ -750,7 +750,7 @@ implementation of IEnum for Day with
       ~four  -> Day.Thu;
       ~five  -> Day.Fri;
       ~six   -> Day.Sat;
-    .
+    }
   };
 .
 
@@ -794,31 +794,31 @@ l   = Dir.L;
 
 implementation of IEnum for Dir with
   toNat = func {
-    case ... of
+    case ... {
       Dir.N -> zero;
       Dir.S -> one;
       Dir.L -> two;
       Dir.O -> three;
-    .
+    }
   };
 
   fromNat = func {
-    case ... of
+    case ... {
       ~zero  -> Dir.N;
       ~one   -> Dir.S;
       ~two   -> Dir.L;
       ~three -> Dir.O;
-    .
+    }
   };
 .
 
 reverse = func {
-   case ... of
+  case ... {
     Dir.N -> Dir.S;
     Dir.S -> Dir.N;
     Dir.L -> Dir.O;
     Dir.O -> Dir.L;
-  .
+  }
 };
 |] ++ prelude)
         `shouldBe` "(Nat.Zero,Dir.S,Bool.True,Bool.True)"

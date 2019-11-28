@@ -258,13 +258,13 @@ expr_case = do
   pos  <- toPos <$> getPosition
   void <- tk_key "case"
   e    <- expr
-  void <- tk_key "of"
+  void <- tk_sym "{"
   cs   <- list (tk_sym ";") $ do
             p    <- pat False
             void <- tk_sym "->"
             w    <- where_let
             return (p,w)
-  void <- tk_sym "."
+  void <- tk_sym "}"
   return $ ECase pos e cs
 
 expr_parens :: Parser Expr
