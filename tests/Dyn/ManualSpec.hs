@@ -100,13 +100,13 @@ main = (f gets) one where
   gets = func { (dIEqNat,...) } ;
 .;
 f = func {
-  let gets = ...; in
+  let gets = ...; {
     func [gets] {
       (eq' d') (v',v') where
         (d',v') = gets ...;
       .
     }
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "Bool.True"
@@ -140,13 +140,13 @@ dynv :: Bool = (Key.Bool,Bool.False);  -- :: IEnum::Bool
 dicts = List.Cons ((Key.Bool,dIEnumBool), List.Nil);
 
 succ'2 = func {
-  let ds = ...; in
+  let ds = ...; {
     func [ds] {
-      let (k,v) = ...; in
+      let (k,v) = ...; {
         (fromNat' (getHash (ds,k))) (Nat.Succ ((toNat' (getHash (ds,k))) v))
-      .
+      }
     }
-  .
+  }
 };
 |] ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "Bool.True"
@@ -176,7 +176,7 @@ l = List.Cons ((Key.YYY, Bool.True),
 
 f :: (List of a -> List of Nat) where a is IEnum;  -- a is dynamic IEnum
 f' = func :: (List of a -> List of Nat) where a is IEnum {
-  let gets = ...; in
+  let gets = ...; {
     func [gets] {
       case ... {
         List.Nil          -> List.Nil;
@@ -185,7 +185,7 @@ f' = func :: (List of a -> List of Nat) where a is IEnum {
         .;
       }
     }
-  .
+  }
 };
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
@@ -214,7 +214,7 @@ l = List.Cons ((Key.YYY, Bool.False),
 
 f :: (List of a -> List of Nat) where a is IEnum;  -- a is dynamic IEnum
 f' = func :: (List of a -> List of Nat) where a is IEnum {
-  let dsa = ...; in
+  let dsa = ...; {
     func [dsa] {
       case ... {
         List.Nil          -> List.Nil;
@@ -223,7 +223,7 @@ f' = func :: (List of a -> List of Nat) where a is IEnum {
         .;
       }
     }
-  .
+  }
 };
 |] ++ unit_ienum ++ bool_ienum ++ ienum ++ std)
         `shouldBe` "(List.Cons (Bool.True,List.Nil))"
@@ -255,9 +255,9 @@ toStringExprVar =
 toStringExpr_ :: (Expr -> String);
 toStringExpr_ =
   func {
-    let Expr n = ...; in
+    let Expr n = ...; {
       n
-    .
+    }
   }
 ;
 |] ++ nat ++ std)
@@ -295,9 +295,9 @@ toStringExprVar =
 toStringExpr_ :: (Expr -> String);
 toStringExpr_ =
   func {
-    let Expr n = ...; in
+    let Expr n = ...; {
       n
-    .
+    }
   }
 ;
 |] ++ nat ++ std)
@@ -310,12 +310,12 @@ prelude = unit_ienum ++ nat_ieq ++ bool_ienum ++ bool_iord ++ bool_ieq ++ iord +
 
 std = [r|
   getHash = func {
-    let (dicts,key) = ... ; in
+    let (dicts,key) = ... ; {
       case dicts {
         List.Cons ((~key,=dict),_) -> dict;
         List.Cons (_,=dicts')      -> getHash (dicts',key);
       }
-    .
+    }
   };
 |]
 
@@ -345,11 +345,11 @@ ienum = [r|
     .
   };
   succ' = func {
-    let dict = ... ; in
+    let dict = ... ; {
       func [dict] {
         (fromNat' dict) (Nat.Succ ((toNat' dict) ...))
       }
-    .
+    }
   };
 |]
 
@@ -366,51 +366,51 @@ ieq = [r|
   dIEq = Dict.IEq (eq_IEq);
 
   neq_IEq = func {
-    let dIEqa = ... ; in
+    let dIEqa = ... ; {
       func [dIEqa] {
         not ((eq' dIEqa) ...)
       }
-    .
+    }
   };
 
   eq_IEq = func {
-    let dIEqa = ... ; in
+    let dIEqa = ... ; {
       func [dIEqa] {
-        let (x,y) = ... ; in
+        let (x,y) = ... ; {
           case (x,y) {
             (~y,_) -> Bool.True;
             _      -> Bool.False;
           }
-        .
+        }
       }
-    .
+    }
   };
 |]
 
 -- interface IOrd(lt,lte,gt,gte)
 iord = [r|
   lte_IOrd = func {
-    let (dIEqa,dIOrda) = ... ; in
+    let (dIEqa,dIOrda) = ... ; {
       func [dIEqa,dIOrda] {
         or ( (lt' (dIEqa,dIOrda)) ...,
              (eq' dIEqa)          ... )
       }
-    .
+    }
   };
   gt_IOrd = func {
-    let (dIEqa,dIOrda) = ... ; in
+    let (dIEqa,dIOrda) = ... ; {
       func [dIEqa,dIOrda] {
         not ((lte' (dIEqa,dIOrda)) ...)
       }
-    .
+    }
   };
   gte_IOrd = func {
-    let (dIEqa,dIOrda) = ... ; in
+    let (dIEqa,dIOrda) = ... ; {
       func [dIEqa,dIOrda] {
         or ( (gt' (dIEqa,dIOrda)) ...,
              (eq' dIEqa)          ... )
       }
-    .
+    }
   };
 
   -- lt,lte,gt,gte
@@ -443,16 +443,16 @@ iord = [r|
 bool_ibounded = [r|
   dIBoundedBool = Dict.IBounded (minimum,maximum) where
     minimum = func {
-      let dIBoundeda = ...; in
+      let dIBoundeda = ...; {
         -- >> body
         Bool.False
         -- << body
-      .
+      }
     };
     maximum = func {
-      let dIBoundedq = ...; in
+      let dIBoundedq = ...; {
         Bool.True
-      .
+      }
     };
   .;
 |]
@@ -460,13 +460,13 @@ bool_ibounded = [r|
 bool_ieq = [r|
   dIEqBool = Dict.IEq (eq_Bool) where
     eq_Bool = func {
-      let dIEqa = ... ; in
+      let dIEqa = ... ; {
         func [dIEqa] {
-          let (x,y) = ...; in
+          let (x,y) = ...; {
             or (and (x,y), (and (not x, not y)))
-          .
+          }
         }
-      .
+      }
     };
   .;
 |]
@@ -493,7 +493,7 @@ bool_iord = [r|
   -- dict
   dIOrdBool = Dict.IOrd (lt_Bool,lte_IOrd,gt_IOrd,gte_IOrd) where
     lt_Bool = func {
-      let dIEqa = ...; in
+      let dIEqa = ...; {
         func [dIEqa] {
           case ... {
             (Bool.False, Bool.False) -> Bool.False;
@@ -502,7 +502,7 @@ bool_iord = [r|
             (Bool.True,  Bool.True)  -> Bool.False;
           }
         }
-      .
+      }
     };
   .;
 |]

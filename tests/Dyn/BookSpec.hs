@@ -50,9 +50,9 @@ spec = do
         evalString ([r|
 main = square two;
 square =
-  func { let x = ... ; in
+  func { let x = ... ; {
     mul (x,x)
-  .}
+  }}
 ;
 |] ++ nat)
           `shouldBe` "(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero))))"
@@ -68,12 +68,12 @@ main = (nlte (three,two), nlte (three,three));
 main = add (smaller (ten,five) , smaller (one,four));
 smaller =
   func {
-    let (x,y) = ... ; in
+    let (x,y) = ... ; {
       case nlte (x,y) {
         Bool.True  -> x;
         Bool.False -> y;
       }
-    .
+    }
   }
 ;
 |] ++ nat)
@@ -84,9 +84,9 @@ smaller =
         evalString ([r|
 main = square (smaller (four, two));
 square =
-  func { let x=... ; in
+  func { let x=... ; {
     mul (x,x)
-  .}
+  }}
 ;
 smaller =
   func {
@@ -717,15 +717,15 @@ d1 = Day.Sun;
 d2 = Day.Mon;
 
 workday = func {
-  let day = ... ; in
+  let day = ... ; {
     and (gte (day,Day.Mon), lte(day,Day.Fri))
-  .
+  }
 };
 
 dayAfter = func :: (Day -> Day) {
-  let day = ... ; in
+  let day = ... ; {
     fromNat (rem (add (toNat day,one), seven))
-  .
+  }
 };
 
 implementation of IEnum for Day with
@@ -760,12 +760,12 @@ implementation of IOrd for Day with
       x :: Day;
       y :: Day;
       (x,y) = ...;
-    in
+    {
       lt (x', y') where
         x' = toNat x;
         y' = toNat y;
       .
-    .
+    }
   };
 .
 
@@ -888,9 +888,9 @@ compose = func {
 main = cross ((f,g), (three,four));
 
 fst = func :: ((a,b) -> a) {
-  let (x,_) = ...; in
+  let (x,_) = ...; {
     x
-  .
+  }
 };
 
 snd = func {
@@ -900,21 +900,21 @@ snd = func {
 };
 
 cross = func :: ((((a->b),(c->d)),(a,c)) -> (b,d)) {
-  let ((f,g), p) = ... ; in
+  let ((f,g), p) = ... ; {
     (f (fst p), g (snd p))
-  .
+  }
 };
 
 f = func :: (Nat -> Bool) {
-  let x = ...; in
+  let x = ...; {
     matches (rem (x,two), one)
-  .
+  }
 };
 
 g = func :: (Nat -> Nat) {
-  let x = ...; in
+  let x = ...; {
     add (x,x)
-  .
+  }
 };
 |] ++ prelude)
           `shouldBe` "(Bool.True,(Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ (Nat.Succ Nat.Zero)))))))))"

@@ -31,12 +31,12 @@ std = [r|
   };
 
   getHash = func {
-    let (dicts,key) = ... ; in
+    let (dicts,key) = ... ; {
       case dicts {
         List.Cons ((~key,=dict),_) -> dict;
         List.Cons (_,=dicts')      -> getHash (dicts',key);
       }
-    .
+    }
   };
 
   fst = func {
@@ -263,7 +263,7 @@ char = [r|
   };
 
   nextlet :: (Char -> Char) = func {
-    let c = ...; in
+    let c = ...; {
       chr (add (rem (add (sub (ord c,min), one),
                      add (sub (max,min), one)),
            min))
@@ -274,7 +274,7 @@ char = [r|
           Bool.False -> (ord Char.AA, ord Char.DD);
         };
       .
-    .
+    }
   };
 |]
 

@@ -396,9 +396,9 @@ let_ = do
   pos  <- toPos <$> getPosition
   void <- tk_key "let"
   ds   <- decls
-  void <- tk_key "in"
+  void <- tk_sym "{"
   whe  <- where_
-  void <- tk_sym "."
+  void <- tk_sym "}"
   let ExpWhere (_,ds',e') = whe
   return $ ExpWhere (pos, ds'++reverse ds, e')
 

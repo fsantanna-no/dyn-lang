@@ -409,9 +409,9 @@ implementation of IString for Expr.Var with
 toStringExpr :: (Expr -> String);
 toStringExpr =
   func {
-    let Expr n = ...; in
+    let Expr n = ...; {
       String.Pos n
-    .
+    }
   }
 ;
 |] ++ nat ++ std)
