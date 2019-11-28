@@ -728,7 +728,7 @@ dayAfter = func :: (Day -> Day) {
   }
 };
 
-implementation of IEnum for Day with
+implementation of IEnum for Day {
   toNat = func {
     case ... {
       Day.Sun -> zero;
@@ -752,9 +752,9 @@ implementation of IEnum for Day with
       ~six   -> Day.Sat;
     }
   };
-.
+}
 
-implementation of IOrd for Day with
+implementation of IOrd for Day {
   lt = func {
     let
       x :: Day;
@@ -767,13 +767,13 @@ implementation of IOrd for Day with
       }
     }
   };
-.
+}
 
-implementation of IEq for Day with
+implementation of IEq for Day {
   eq = func {
     matches ...
   };
-.
+}
 |] ++ prelude)
         `shouldBe` "(Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True,Bool.True)"
 
@@ -792,7 +792,7 @@ l   = Dir.L;
 --data Dir.L
 --data Dir.O
 
-implementation of IEnum for Dir with
+implementation of IEnum for Dir {
   toNat = func {
     case ... {
       Dir.N -> zero;
@@ -810,7 +810,7 @@ implementation of IEnum for Dir with
       ~three -> Dir.O;
     }
   };
-.
+}
 
 reverse = func {
   case ... {

@@ -446,9 +446,9 @@ ifce = do
   var  <- tk_var
   guard (var == "a")
   cs   <- option (Ctrs []) ctrs
-  void <- tk_key "with"
+  void <- tk_sym "{"
   ds   <- decls
-  void <- tk_sym "."
+  void <- tk_sym "}"
   return $ Ifce (pos, cls, cs, ds)
 
 impl :: Parser Impl
@@ -459,9 +459,9 @@ impl = do
   cls  <- tk_ifce
   void <- tk_key "for"
   (tp,cs) <- type_ctrs
-  void <- tk_key "with"
+  void <- tk_sym "{"
   ds   <- decls
-  void <- tk_sym "."
+  void <- tk_sym "}"
   return $ Impl (pos, cls, cs, tp, ds)
 
 -------------------------------------------------------------------------------

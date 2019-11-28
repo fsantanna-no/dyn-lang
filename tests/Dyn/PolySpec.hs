@@ -84,13 +84,13 @@ main = x where {
       evalString ([r|
 main = f Bool.True;
 
-implementation of IInd for Bool with
+implementation of IInd for Bool {
   g = func { () } ;
-.
+}
 
-interface IInd for a with
+interface IInd for a {
   g :: (a -> ());
-.
+}
 
 f :: (a -> ()) where a is IInd =
   func :: (a -> ()) where a is IInd {
@@ -106,18 +106,18 @@ f :: (a -> ()) where a is IInd =
       evalString ([r|
 main = rec (Nat.Succ Nat.Zero);
 
-implementation of IRec for Nat with
+implementation of IRec for Nat {
   rec = func {
     case ... {
       Nat.Zero    -> ();
       Nat.Succ =x -> rec x;
     }
   };
-.
+}
 
-interface IRec for a with
+interface IRec for a {
   rec :: (a -> ());
-.
+}
 |] ++ nat)
         `shouldBe` "()"
 
@@ -125,18 +125,18 @@ interface IRec for a with
       evalString ([r|
 main = f (Nat.Succ Nat.Zero);
 
-implementation of IRec for Nat with
+implementation of IRec for Nat {
   rec = func {
     case ... {
       Nat.Zero    -> ();
       Nat.Succ =x -> rec x;
     }
   };
-.
+}
 
-interface IRec for a with
+interface IRec for a {
   rec :: (a -> ());
-.
+}
 f :: (a -> ()) where a is IRec =
   func :: (a -> ()) where a is IRec {
     rec ...
@@ -168,13 +168,13 @@ main = v where {  -- (T<=F, T>=T, F>F, F<T)
       evalString ([r|
 main = f (Bool.True,Bool.False);
 
-implementation of IAaa for Bool with
+implementation of IAaa for Bool {
   f = func { g (x,y) where { x::Bool; y::Bool; (x,y)=...; } } ;
-.
+}
 
-interface IAaa for a where a is IOrd with
+interface IAaa for a where a is IOrd {
   f :: ((a,a) -> Bool);
-.
+}
 g :: ((a,a) -> Bool) where a is IAaa;
 g = func :: ((a,a) -> Bool) where a is IAaa { lt ... };
 |] ++ bool_iord ++ bool_ieq ++ bool ++ iord ++ ieq)
@@ -381,21 +381,21 @@ data Expr with Nat;
 data Expr.Unit;
 data Expr.Var with Nat;
 
-interface IString for a with
+interface IString for a {
   toString :: (a -> String);
-.
+}
 
-implementation of IString for Expr.Unit with
+implementation of IString for Expr.Unit {
   toString :: (Expr.Unit -> String);
   toString = func { String.Unit (toStringExpr ...) } ;
-.
+}
 
-implementation of IString for Bool with
+implementation of IString for Bool {
   toString :: (Bool -> String);
   toString = func { String.Bool } ;
-.
+}
 
-implementation of IString for Expr.Var with
+implementation of IString for Expr.Var {
   toString :: (Expr.Var -> String);
   toString =
     func {
@@ -404,7 +404,7 @@ implementation of IString for Expr.Var with
       }
     }
   ;
-.
+}
 
 toStringExpr :: (Expr -> String);
 toStringExpr =

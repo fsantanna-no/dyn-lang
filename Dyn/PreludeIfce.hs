@@ -41,25 +41,25 @@ std = [r|
 |]
 
 ibounded = [r|
-  interface IBounded for a with
+  interface IBounded for a {
     minimum :: a;
     maximum :: a;
-  .
+  }
 |]
 
 ieq = [r|
-  interface IEq for a with
+  interface IEq for a {
     eq  :: ((a,a) -> Bool);
-  .
+  }
   neq = func :: ((a,a) -> Bool) where a is IEq {
     not ((eq' dIEqa) ...)
   };
 |]
 
 iord = [r|
-  interface IOrd for a where a is IEq with
+  interface IOrd for a where a is IEq {
     lt  :: ((a,a) -> Bool);
-  .
+  }
   lte = func :: ((a,a) -> Bool) where a is IOrd {
     or ((lt' (dIEqa,dIOrda)) ..., (eq' dIEqa) ...)
   };
@@ -72,10 +72,10 @@ iord = [r|
 |]
 
 ienum = [r|
-  interface IEnum for a with
+  interface IEnum for a {
     toNat   :: (a -> Nat);
     fromNat :: (Nat -> a);
-  .
+  }
   succ = func :: (a -> a) where a is IEnum {
     (fromNat' dIEnuma) (Nat.Succ ((toNat' dIEnuma) ...))
   };
@@ -85,7 +85,7 @@ ienum = [r|
 -------------------------------------------------------------------------------
 
 unit_ienum = [r|
-  implementation of IEnum for () with
+  implementation of IEnum for () {
     toNat = func :: (() -> Nat) {
       case ... {
         () -> Nat.Zero;
@@ -97,7 +97,7 @@ unit_ienum = [r|
         Nat.Zero -> ();
       }
     };
-  .
+  }
 |]
 
 -------------------------------------------------------------------------------
@@ -129,24 +129,24 @@ bool = [r|
 |]
 
 bool_ibounded = [r|
-  implementation of IBounded for Bool with
+  implementation of IBounded for Bool {
     minimum :: Bool = Bool.False;
     maximum :: Bool = Bool.True;
-  .
+  }
 |]
 
 bool_ieq = [r|
-  implementation of IEq for Bool with
+  implementation of IEq for Bool {
     eq = func :: ((Bool,Bool) -> Bool) {
       or (and (x,y), (and (not x, not y))) where {
         (x,y) = ...;
       }
     };
-  .
+  }
 |]
 
 bool_iord = [r|
-  implementation of IOrd for Bool with
+  implementation of IOrd for Bool {
     lt = func :: ((Bool,Bool) -> Bool) {
       case ... {
         (Bool.False, Bool.False) -> Bool.False;
@@ -155,11 +155,11 @@ bool_iord = [r|
         (Bool.True,  Bool.True)  -> Bool.False;
       }
     };
-  .
+  }
 |]
 
 bool_ienum = [r|
-  implementation of IEnum for Bool with
+  implementation of IEnum for Bool {
     toNat = func :: (Bool -> Nat) {
       case ... {
         Bool.False -> Nat.Zero;
@@ -173,7 +173,7 @@ bool_ienum = [r|
         Nat.Succ Nat.Zero -> Bool.True;
       }
     };
-  .
+  }
 |]
 
 -------------------------------------------------------------------------------
@@ -251,21 +251,21 @@ char = [r|
 |]
 
 char_ieq = [r|
-  implementation of IEq for Char with
+  implementation of IEq for Char {
     eq = func :: ((Char,Char) -> Bool) {
       matches ...
     };
-  .
+  }
 |]
 
 char_iord = [r|
-  implementation of IOrd for Char with
+  implementation of IOrd for Char {
     lt = func :: ((Char,Char) -> Bool) {
       (lt' (dIEqNat,dIOrdNat)) (ord x, ord y) where {
         (x,y) = ...;
       }
     };
-  .
+  }
 |]
 
 -------------------------------------------------------------------------------
@@ -344,15 +344,15 @@ nat = [r|
 |]
 
 nat_ieq = [r|
-  implementation of IEq for Nat with
+  implementation of IEq for Nat {
     eq = func :: ((Nat,Nat) -> Bool) {
       matches ...
     };
-  .
+  }
 |]
 
 nat_iord = [r|
-  implementation of IOrd for Nat with
+  implementation of IOrd for Nat {
     lt = func :: ((Nat,Nat) -> Bool) {
       case ... {
         (Nat.Zero,     Nat.Zero)     -> Bool.False;
@@ -361,5 +361,5 @@ nat_iord = [r|
         (Nat.Succ =x', Nat.Succ =y') -> (lt' (dIEqNat,dIOrdNat)) (x',y');
       }
     };
-  .
+  }
 |]
