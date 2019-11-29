@@ -55,7 +55,9 @@ instance IList Type where
   toList (TTuple tps) = tps
   toList tp           = [tp]
 
-  fromList x = error "TODO"
+  fromList []  = TUnit
+  fromList [x] = x
+  fromList xs  = TTuple xs
 
 instance IList Patt where
   toList x = error "TODO"
@@ -63,6 +65,14 @@ instance IList Patt where
   fromList []     = PUnit $ error "TODO: fromList"
   fromList [x]    = x
   fromList (x:xs) = PTuple (getPos x) (x:xs)
+
+-- concatenate/expand Sup.Sub fields
+
+dataFindFullSt :: [Glob] -> ID_Hier -> Type
+dataFindFullSt globs hr =
+  fromList $ concatMap (toList . getSt . dataFind globs) hrs where
+    getSt (Data (_,_,_,_,st)) = st
+    hrs = tail $ scanl (\l v->l++[v]) [] hr
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

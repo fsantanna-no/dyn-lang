@@ -150,32 +150,47 @@ isGDecl :: Glob -> Bool
 isGDecl (GDecl _) = True
 isGDecl _         = False
 
+isGData :: Glob -> Bool
+isGData (GData _) = True
+isGData _         = False
+
+isGIfce :: Glob -> Bool
+isGIfce (GIfce _) = True
+isGIfce _         = False
+
+isGImpl :: Glob -> Bool
+isGImpl (GImpl _) = True
+isGImpl _         = False
+
 -------------------------------------------------------------------------------
 
 globsToDecls :: [Glob] -> [Decl]
 globsToDecls globs = map globToDecl $ filter isGDecl globs
 
 globsToDatas :: [Glob] -> [Data]
-globsToDatas globs = map g $ filter f globs where
-                      f (GData dat) = True
-                      f _           = False
-                      g (GData dat) = dat
+globsToDatas globs = map globToData $ filter isGData globs where
 
 globsToIfces :: [Glob] -> [Ifce]
-globsToIfces globs = map g $ filter f globs where
-                      f (GIfce ifc) = True
-                      f _           = False
-                      g (GIfce ifc) = ifc
+globsToIfces globs = map globToIfce $ filter isGIfce globs where
 
 globsToImpls :: [Glob] -> [Impl]
-globsToImpls globs = map g $ filter f globs where
-                      f (GImpl ifc) = True
-                      f _           = False
-                      g (GImpl ifc) = ifc
+globsToImpls globs = map globToImpl $ filter isGImpl globs where
+
+-------------------------------------------------------------------------------
 
 globToDecl :: Glob -> Decl
 globToDecl (GDecl decl) = decl
-  -- refuse GIfce/GImpl
+
+globToData :: Glob -> Data
+globToData (GData dat_) = dat_
+
+globToIfce :: Glob -> Ifce
+globToIfce (GIfce ifce) = ifce
+
+globToImpl :: Glob -> Impl
+globToImpl (GImpl impl) = impl
+
+-------------------------------------------------------------------------------
 
 globFromData :: Data -> Glob
 globFromData data_ = GData data_
@@ -199,6 +214,6 @@ ifceFind globs ifc = fromJust $ L.find f (globsToIfces globs) where
                       f (Ifce (_,id,_,_)) = (id == ifc)
 
 dataFind :: [Glob] -> ID_Hier -> Data
-dataFind globs hr' = fromJust $ {-traceShowX hr' $-} L.find f (globsToDatas globs) where
+dataFind globs hr = fromJust $ {-traceShowX hr $-} L.find f (globsToDatas globs) where
                       f :: Data -> Bool
-                      f (Data (_,_,hr,_,_)) = (hr == hr')
+                      f (Data (_,_,hr',_,_)) = (hr' == hr)

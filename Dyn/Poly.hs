@@ -174,7 +174,7 @@ mE2 globs cts dsigs xtp e@(ECall z1 e2@(ECons z2 (hr2:_)) e3)
     ETuple _ es3 = e3
     e3' = ETuple z2 $ map f $ zip tps es3 where
             TData hr _ = toType dsigs e2
-            Data (_,_,_,_,TTuple tps) = dataFind globs hr
+            TTuple tps = dataFindFullSt globs hr
 
     f (TVar "a", e) = ETuple z2 [key,e] where
                         key = ECons z2 ["Key", tpToString' $ toType dsigs e]
