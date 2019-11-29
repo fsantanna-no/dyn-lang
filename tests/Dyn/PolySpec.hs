@@ -375,7 +375,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum {
   describe "Lang" $ do
     it "toString" $
       evalString ([r|
-main = (toString (Expr.Unit one), toString Bool.True, toString (Expr.Var (String.X,zero)));
+main = (toString (Expr.Unit one), toString Bool.True, toString (Expr.Var (zero,String.X)));
 
 data Expr with Nat;
 data Expr.Unit;
@@ -389,8 +389,7 @@ implementation of IString for Expr.Unit {
   toString :: (Expr.Unit -> String);
   toString = func {
     String.Unit (toString pos) where {
-      pos :: Nat;
-      Expr.Unit (_,pos) = ...;
+      Expr.Unit pos = ...;
     }
   };
 }
@@ -404,9 +403,9 @@ implementation of IString for Expr.Var {
   toString :: (Expr.Var -> String);
   toString =
     func {
-      String.Var (toString xxx, var) where {
-        xxx :: Nat;
-        Expr.Var (var,xxx) = ...;
+      String.Var (toString pos, var) where {
+        pos :: Nat;
+        Expr.Var (pos,var) = ...;
       }
     }
   ;
@@ -417,4 +416,4 @@ implementation of IString for Nat {
   toString = func { String.Nat ... };
 }
 |] ++ nat ++ std)
-        `shouldBe` "((String.Unit (String.Pos (Nat.Succ Nat.Zero))),String.Bool,(String.Var ((String.Pos Nat.Zero),String.X)))"
+        `shouldBe` "((String.Unit (String.Nat (Nat.Succ Nat.Zero))),String.Bool,(String.Var ((String.Nat Nat.Zero),String.X)))"
