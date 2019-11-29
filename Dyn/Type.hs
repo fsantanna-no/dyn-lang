@@ -57,9 +57,7 @@ aux _ _ _ (PUnit  _)   _ = []
 aux _ _ _ (PCons  _ _) _ = []
 aux _ _ _ (PRead  _ _) _ = []
 
-aux globs ctrs dsigs (PCall _ (PCons _ hr) pat) _ = aux globs ctrs dsigs pat tp
-  where
-    Data (_,_,_,_,tp) = dataFind globs hr
+aux globs ctrs dsigs (PCall _ (PCons _ hr) pat) _ = aux globs ctrs dsigs pat (dataFindFullSt globs hr)
 
 aux _ _ _ _ TAny = []
 

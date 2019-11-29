@@ -317,7 +317,7 @@ f = func :: (List of a -> List of Nat) where a is IEnum {
 |] ++ prelude)
         `shouldBe` "(List.Cons ((Nat.Succ Nat.Zero),(List.Cons (Nat.Zero,List.Nil))))"
 
-    it "XXX: [(),True]" $
+    it "[(),True]" $
       evalString ([r|
 main = f l1;
 

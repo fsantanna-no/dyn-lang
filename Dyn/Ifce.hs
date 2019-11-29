@@ -26,7 +26,7 @@ datas :: [Glob] -> [Glob]
 datas globs = map globFromData $ (dict : (map f $ globsToIfces globs)) where
                 f :: Ifce -> Data
                 f (Ifce (z,id,_,_)) = Data (z, False, ["Dict",id], [], TAny)
-                dict = Data (pz, False, ["Dict"], [], TAny)
+                dict = Data (pz, False, ["Dict"], [], TUnit)
 
 impls :: [Glob] -> [Glob]
 impls globs = map globFromDecl $ dicts ++ decls where
