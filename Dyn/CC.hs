@@ -7,13 +7,23 @@ import Dyn.Parser
 
 -------------------------------------------------------------------------------
 
-ccExpr :: Expr -> String
-ccExpr (EError (ln,_) msg) = "error_at_line(0,0,NULL," ++ show ln ++ ",\"%s\"," ++
-                              "\"" ++ msg ++ "\")"
-ccExpr (EVar _ id) = id
+ccExpr :: String -> Expr -> String
+ccExpr _  (EError (ln,_) msg) = "error_at_line(0,0,NULL," ++ show ln ++ ",\"%s\"," ++
+                                  "\"" ++ msg ++ "\");\n"
+ccExpr to (EVar   _ id) = to ++ " = " ++ id ++ ";\n"
+ccExpr to (EUnit  _)    = ""
 
+ccExpr to (ECase (ln,_) e cs) = e' ++ cs' where
+  e'  = ccExpr "__dyn_e" e
+  cs' = "if (0) {}\n" ++
+        concatMap f cs ++
+        "else { error_at_line(0,0,NULL," ++ show ln ++ ", \"non-exhaustive patterns\"); }\n"
+        where
+          f :: (Patt, ExpWhere) -> String
+          f (pat,whe) = "else if (" ++ match pat "__dyn_e" ++ ") { " ++ ccExpWhere to whe ++ "; }\n"
+
+ccExpr _ x = error $ show x
 {-
-evalExpr env (EUnit  z)     = EUnit  z
 evalExpr env (EArg   z)     = envRead env z "..."
 evalExpr env (ECons  z hr)  = EData z hr (EUnit z)
 
@@ -25,22 +35,6 @@ evalExpr env (ETuple z es) = toError $ map (evalExpr env) es
     toError es = case find isEError es of
       Nothing  -> ETuple z es
       Just err -> err
-
-evalExpr env (ECase z e cs) =
-  case filter f $ map g cs of
-    []                  -> EError z "non-exhaustive patterns"
-    ((Left e,     _):_) -> e
-    ((Right True, e):_) -> e
-  where
-    e' = evalExpr env e
-
-    g :: (Patt, ExpWhere) -> (Either Expr Bool, Expr)
-    g (pat,whe) = (ret, evalExpWhere env' whe) where
-                    (env',ret) = match env pat e'
-
-    f :: (Either Expr Bool, Expr) -> Bool
-    f (Right False, _) = False  -- skip unmatched
-    f _                = True   -- keep matched/errros
 
 evalExpr env (ECall _ (EError z msg)  _)   = EError z msg
 evalExpr env (ECall z f arg) =
@@ -68,7 +62,8 @@ type Match = Either Expr Bool
 match :: Patt -> String -> String
 
 match (PAny   _)    _  = "true"
-match (PArg   z)    e  = "(_ceu_arg = " ++ e ++ " , true)"
+match (PUnit  _)    _  = "true"
+match (PArg   z)    e  = "(_dyn_arg = " ++ e ++ " , true)"
 match (PWrite z id) e  = "(" ++ id ++ " = " ++ e ++ " , true)"
 
 {-
@@ -103,22 +98,21 @@ match env _ _ = (env, Right False)
 -------------------------------------------------------------------------------
 
 ccDecl :: Decl -> String
-ccDecl (DAtr _ p w)   = concatMap ccDecl ds ++ match p e where
-                          (ds,e) = ccExpWhere w
+ccDecl (DAtr _ p w)   = ccExpWhere "_dyn_atr" w ++ match p "_dyn_atr" ++ ";\n" where
 ccDecl (DSig _ _ _ _) = error "TODO"
 
 -------------------------------------------------------------------------------
 
-ccExpWhere :: ExpWhere -> ([Decl],String)
-ccExpWhere (ExpWhere (_, dcls, e)) = (dcls, ccExpr e)
+ccExpWhere :: String -> ExpWhere -> String
+ccExpWhere to (ExpWhere (_, dcls, e)) = concatMap ccDecl dcls ++ ccExpr to e
 
-{-
 -------------------------------------------------------------------------------
 
-evalProg :: Prog -> Expr
-evalProg prog =
-  evalExpWhere [] $ ExpWhere (pz, map globToDecl $ filter isGDecl prog, EVar pz "main")
+ccProg :: Prog -> String
+ccProg prog = e' ++ "print(_dyn_p);\n" where
+    e' = ccExpWhere "_dyn_p" $ ExpWhere (pz, map globToDecl $ filter isGDecl prog, EVar pz "main")
 
+{-
 evalString :: String -> String
 evalString input = evalStringF Prelude.id input
 
