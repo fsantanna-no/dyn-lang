@@ -17,24 +17,24 @@ spec = do
 
   describe "ccExpr:" $ do
     it "error" $
-      ccExpr "" (EError pz "xxx") `shouldBe` "error_at_line(0,0,NULL,0,\"%s\",\"xxx\");\n"
+      ccExpr "" "" (EError pz "xxx") `shouldBe` "error_at_line(0,0,NULL,0,\"%s\",\"xxx\");\n"
     it "a" $
-      ccExpr "ret" (EVar pz "a") `shouldBe` "ret = a;\n"
+      ccExpr "" "ret" (EVar pz "a") `shouldBe` "ret = a;\n"
 
   describe "ccExpWhere:" $ do
     it "a" $
-      ccExpWhere "ret"
+      ccExpWhere "" "ret"
         (ExpWhere (pz, [], (EVar pz "a")))
         `shouldBe` "ret = a;\n"
     it "b where b=a, a=()" $
-      ccExpWhere "ret"
+      ccExpWhere "" "ret"
         (ExpWhere (pz, [
           DAtr pz (PWrite pz "b") (ExpWhere (pz, [], EVar pz "a")),
           DAtr pz (PWrite pz "a") (ExpWhere (pz, [], EUnit pz))
         ], EVar pz "b"))
         `shouldBe` "_dyn_atr = a;\n(b = _dyn_atr , true);\n(a = _dyn_atr , true);\nret = b;\n"
     it "b where b::() b=()" $
-      ccExpWhere "x"
+      ccExpWhere "" "x"
         (ExpWhere (pz, [
           DSig pz "b" cz TAny,
           DAtr pz (PWrite pz "b") (ExpWhere (pz,[], EUnit pz))
@@ -51,7 +51,7 @@ spec = do
 
   describe "ccDecl:" $ do
     it "a=b" $
-      ccDecl (DAtr pz (PWrite pz "a") (ExpWhere (pz,[], EVar pz "b")))
+      ccDecl "" (DAtr pz (PWrite pz "a") (ExpWhere (pz,[], EVar pz "b")))
         `shouldBe` "_dyn_atr = b;\n(a = _dyn_atr , true);\n"
 
   describe "parser:" $ do
@@ -60,7 +60,7 @@ spec = do
         `shouldBe` "error_at_line(0,0,NULL,1,\"%s\",\"<user>\");\n(main = _dyn_atr , true);\n_dyn_p = main;\nprint(_dyn_p);\n"
     it "match-true" $
       (ccProg $ fromRight $ parse "main = case () { () -> ();\n_ -> error;};")
-        `shouldBe` "if (0) {}\nelse if (true) { ; }\nelse if (true) { error_at_line(0,0,NULL,2,\"%s\",\"<user>\");\n; }\nelse { error_at_line(0,0,NULL,1, \"non-exhaustive patterns\"); }\n(main = _dyn_atr , true);\n_dyn_p = main;\nprint(_dyn_p);\n"
+        `shouldBe` "if (0) {\n} else if (true) {\n} else if (true) {\n  error_at_line(0,0,NULL,2,\"%s\",\"<user>\");\n} else {\n  error_at_line(0,0,NULL,1, \"non-exhaustive patterns\");\n}\n(main = _dyn_atr , true);\n_dyn_p = main;\nprint(_dyn_p);\n"
 {-
     it "match-false" $
       (evalProg $ fromRight $ parse "main = case () { A -> error;\n_ -> ();};")

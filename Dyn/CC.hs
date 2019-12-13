@@ -7,22 +7,23 @@ import Dyn.Parser
 
 -------------------------------------------------------------------------------
 
-ccExpr :: String -> Expr -> String
-ccExpr _  (EError (ln,_) msg) = "error_at_line(0,0,NULL," ++ show ln ++ ",\"%s\"," ++
-                                  "\"" ++ msg ++ "\");\n"
-ccExpr to (EVar   _ id) = to ++ " = " ++ id ++ ";\n"
-ccExpr to (EUnit  _)    = ""
+ccExpr :: String -> String -> Expr -> String
+ccExpr spc _  (EError (ln,_) msg) = spc ++ "error_at_line(0,0,NULL," ++ show ln ++ ",\"%s\"," ++
+                                      "\"" ++ msg ++ "\");\n"
+ccExpr spc to (EVar   _ id) = spc ++ to ++ " = " ++ id ++ ";\n"
+ccExpr spc to (EUnit  _)    = ""
 
-ccExpr to (ECase (ln,_) e cs) = e' ++ cs' where
-  e'  = ccExpr "__dyn_e" e
-  cs' = "if (0) {}\n" ++
-        concatMap f cs ++
-        "else { error_at_line(0,0,NULL," ++ show ln ++ ", \"non-exhaustive patterns\"); }\n"
+ccExpr spc to (ECase (ln,_) e cs) = e' ++ cs' where
+  e'  = ccExpr spc "__dyn_e" e
+  cs' = spc ++ "if (0) {\n" ++ spc ++ "} " ++
+        concatMap (f spc) cs ++
+        "else {\n" ++ spc ++ "  error_at_line(0,0,NULL," ++ show ln ++ ", \"non-exhaustive patterns\");\n" ++ spc ++ "}\n"
         where
-          f :: (Patt, ExpWhere) -> String
-          f (pat,whe) = "else if (" ++ match pat "__dyn_e" ++ ") { " ++ ccExpWhere to whe ++ "; }\n"
+          f :: String -> (Patt, ExpWhere) -> String
+          f spc (pat,whe) = "else if (" ++ match pat "__dyn_e" ++ ") {\n"
+                              ++ ccExpWhere (spc++"  ") to whe ++ spc ++ "} "
 
-ccExpr _ x = error $ show x
+ccExpr _ _ x = error $ show x
 {-
 evalExpr env (EArg   z)     = envRead env z "..."
 evalExpr env (ECons  z hr)  = EData z hr (EUnit z)
@@ -97,20 +98,20 @@ match env _ _ = (env, Right False)
 
 -------------------------------------------------------------------------------
 
-ccDecl :: Decl -> String
-ccDecl (DAtr _ p w)   = ccExpWhere "_dyn_atr" w ++ match p "_dyn_atr" ++ ";\n" where
-ccDecl (DSig _ _ _ _) = error "TODO"
+ccDecl :: String -> Decl -> String
+ccDecl spc (DAtr _ p w)   = ccExpWhere spc "_dyn_atr" w ++ match p "_dyn_atr" ++ ";\n"
+ccDecl _   (DSig _ _ _ _) = error "TODO"
 
 -------------------------------------------------------------------------------
 
-ccExpWhere :: String -> ExpWhere -> String
-ccExpWhere to (ExpWhere (_, dcls, e)) = concatMap ccDecl dcls ++ ccExpr to e
+ccExpWhere :: String -> String -> ExpWhere -> String
+ccExpWhere spc to (ExpWhere (_, dcls, e)) = concatMap (ccDecl spc) dcls ++ ccExpr spc to e
 
 -------------------------------------------------------------------------------
 
 ccProg :: Prog -> String
 ccProg prog = e' ++ "print(_dyn_p);\n" where
-    e' = ccExpWhere "_dyn_p" $ ExpWhere (pz, map globToDecl $ filter isGDecl prog, EVar pz "main")
+    e' = ccExpWhere "" "_dyn_p" $ ExpWhere (pz, map globToDecl $ filter isGDecl prog, EVar pz "main")
 
 {-
 evalString :: String -> String
